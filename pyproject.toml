@@ -1,0 +1,3 @@
+[tool.jupytext.formats]
+"notebooks/" = "ipynb"
+"src/" = "py"
