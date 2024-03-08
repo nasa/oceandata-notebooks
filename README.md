@@ -6,8 +6,8 @@ A repository for notebooks delivered as [oceandata tutorials and data recipes][1
 
 TL;DR
 
+1. Initialize notebooks found in the `src/` folder using **Open With** -> **Notebook**.
 1. Create new notebooks in the `notebooks/` folder.
-2. Initialize notebooks found in the `src/` folder, but missing from your `notebooks/` folder, using "Open With" -> "Notebook".
 
 Keeping notebooks, which can get very large, become full of binary outputs, and have
 constantly changing metadata, in a code repository presents challenges for collaboration
