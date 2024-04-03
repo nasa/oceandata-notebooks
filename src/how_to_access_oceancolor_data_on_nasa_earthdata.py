@@ -14,9 +14,6 @@
 
 # + [markdown] id="thB-pNE2YUT7"
 # # Accessing OBDAAC Ocean Color Data With Earthaccess
-# -
-
-# testing git push
 
 # + [markdown] id="EMTS0oIRY3dj"
 # ### Overview
@@ -123,7 +120,7 @@ granules[0].cloud_hosted
 # ## **4. Download, and visulize data**
 #
 # This section demonstrates the downloading and visualization of *Chlorophyll a* map.
-# To find the cloud-free granules, the [L1/L2 browser](https://oceancolor.gsfc.nasa.gov/cgi/browse.pl?sen=amod) on [oceancolor website](https://oceancolor.gsfc.nasa.gov/) were used to take a quick look of the RGB image.
+# To find the cloud-free granules, the [L1/L2 browser](https://oceancolor.gsfc.nasa.gov/cgi/browse.pl?sen=amod) on [oceancolor website](https://oceancolor.gsfc.nasa.gov/) were used to take a quick look of the RGB imagery.
 
 # download the cloud-free file
 files = earthaccess.download(granules[3], "data")
