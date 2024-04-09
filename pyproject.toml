@@ -1,3 +1,40 @@
+[project]
+name = "oceandata-notebooks"
+version = "0.1.0"
+description = "Oceandata Jupyter Notebook Tutorials"
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+dependencies = [
+    "earthaccess>=0.9.0",
+    "xarray>=2024.3.0",
+    "netCDF4>=1.6.5",
+    "numpy>=1.26.4",
+    "cartopy>=0.22.0",
+    "matplotlib>=3.8.4",
+]
+
+[[project.authors]]
+name = "Anna Windle DiPaola"
+email = "anna.windledipaola@nasa.gov"
+
+[[project.authors]]
+name = "Ian Carroll"
+email = "ian.t.carroll@nasa.gov"
+
+[[project.authors]]
+name = "Guoqing Wang"
+email = "guoqing.wang@nasa.gov"
+
+[[project.authors]]
+name = "Carina Poulin"
+email = "carina.poulin@nasa.gov"
+
+[project.urls]
+Homepage = "https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/"
+Repository = "https://github.com/gsfc-oel/oceandata-notebooks"
+Issues = "https://github.com/gsfc-oel/oceandata-notebooks/issues"
+
 [tool.jupytext.formats]
 "notebooks/" = "ipynb"
 "src/" = "py"
