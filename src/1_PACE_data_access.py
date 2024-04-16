@@ -5,9 +5,9 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.0
+#       jupytext_version: 1.16.1
 #   kernelspec:
-#     display_name: Python 3.10 (conda)
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
@@ -28,11 +28,11 @@
 # <font color="dodgerblue">**Ocean Biology Processing Group**</font> <br>
 # **Copyright:** 2024 NASA OBPG <br>
 # **License:** MIT <br>
-# **Authors:** Anna Windle (NASA/SSAI), Guoqing Wang (NASA/SSAI), Ian Carroll (NASA/UMBC), Carina Poulin (NASA/SSAI)
+# **Authors:** Anna Windle (NASA/SSAI), Ian Carroll (NASA/UMBC), Guoqing Wang (NASA/SSAI), Carina Poulin (NASA/SSAI)
 
 # <div class="alert alert-block alert-warning">
 #     
-# <b>PREREQUISITES 
+# <b>PREREQUISITES</b> 
 #     
 # This notebook has the following prerequisites:
 # - **<a href="https://urs.earthdata.nasa.gov/" target="_blank"> An Earthdata Login account</a>** is required to access data from the NASA Earthdata system, including NASA ocean color data.
@@ -40,6 +40,10 @@
 # There are no prerequisite notebooks for this module.
 # </div>
 # <hr>
+
+# + active=""
+# TODO: figure out how to get this all in the orange background
+# -
 
 # # 1. Accessing PACE data via the `earthaccess` library
 #
@@ -71,7 +75,7 @@
 # We begin by importing all of the libraries that we need to run this notebook. If you have built your python using the environment file provided in this repository, then you should have everything you need. For more information on building environment, please see the repository README.
 
 # + active=""
-# TODO: make an environment.yml file
+# TODO: On the OBPG website, include text for "Set up": with either an environment.yml file or requirements.txt. And include text about where you run these notebooks (locally, HPC, cloud)
 # -
 
 import earthaccess
@@ -98,17 +102,7 @@ if not auth.authenticated:
 #
 # </div>
 
-# There are multiple keywords we can use to discovery data from collections. The table below contains the `short_name`, `concept_id`, and `doi` for some collections we are interested in for other exercises. Each of these can be 
-# used to search for data or information related to the collection we are interested in. 
-
-# | Shortname | Collection Concept ID | DOI |
-# | --- | --- | --- |
-# | PACE_OCI_L2_AOP_NRT | C2330511440-OB_DAAC | XXXX |
-#
-
-# + active=""
-# TODO: Figure out concept ID and DOI for L2 pace files- maybe include some description on how to find this?
-# -
+# There are multiple keywords we can use to discovery data from collections. We will use the `short_name` to find data. 
 
 results = earthaccess.search_data(
     short_name = "PACE_OCI_L2_AOP_NRT",
@@ -116,21 +110,9 @@ results = earthaccess.search_data(
     count = 10    # Restricting to 10 records returned
 )
 
-results = earthaccess.search_data(
-    concept_id = "C2910373786-OB_CLOUD",
-    cloud_hosted = True,
-    count = 10    # Restricting to 10 records returned
-)
-
-results = earthaccess.search_data(
-    doi = "",
-    cloud_hosted = True,
-    count = 10    # Restricting to 10 records returned
-)
-
 # We can refine our search by passing more parameters that describe the spatiotemporal domain of our use case. Here, we use the `temporal` parameter to request a date range and the `bounding_box` parameter to request granules that intersect with a bounding box. We can even provide a `cloud_cover` threshold to limit files that have a lower percetnage of cloud cover
 
-date_range = ("2024-04-01", "2024-04-12")
+date_range = ("2024-04-01", "2024-04-16")
 bbox = (-76.75,36.97,-75.74,39.01)
 
 results = earthaccess.search_data(
@@ -138,7 +120,7 @@ results = earthaccess.search_data(
     cloud_hosted = True,
     temporal = date_range,
     bounding_box = bbox, 
-    cloud_cover = (0,100)
+    cloud_cover = (0,50)
 )
 
 # <div class="alert alert-info" role="alert">
@@ -147,6 +129,9 @@ results = earthaccess.search_data(
 # [Back to top](#TOC_TOP)
 #
 # </div>
+
+# TODO: describe how this is only to download locally or have seperate notebook that uses earthaccess.download ? 
+# explain alt: section 4- Access data in cloud? use data in the cloud instead of download data. and explain how all other notebooks will follow that format. 
 
 # A quick way to do a direct download is to list the results and press on the link to download each file individually. 
 
@@ -160,7 +145,7 @@ results[0]
 # In some cases you may want to download multiple files at once. `earthaccess` makes downloading the data from the search results very easy using the `earthaccess.download()` function. Files will be downloaded in 'local_path'.
 
 downloaded_files = earthaccess.download(
-    results[0:2],
+    results[0],
     local_path='storage/',
 )
 

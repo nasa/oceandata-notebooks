@@ -5,11 +5,11 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.0
+#       jupytext_version: 1.16.1
 #   kernelspec:
-#     display_name: custom
+#     display_name: Python 3 (ipykernel)
 #     language: python
-#     name: custom
+#     name: python3
 # ---
 
 # <table><tr>
@@ -30,7 +30,7 @@
 # <font color="dodgerblue">**Ocean Biology Processing Group**</font> <br>
 # **Copyright:** 2024 NASA OBPG <br>
 # **License:** MIT <br>
-# **Authors:** Anna Windle (NASA/SSAI), Guoqing Wang (NASA/SSAI), Ian Carroll (NASA/UMBC), Carina Poulin (NASA/SSAI)
+# **Authors:** Anna Windle (NASA/SSAI), Ian Carroll (NASA/UMBC), Guoqing Wang (NASA/SSAI), Carina Poulin (NASA/SSAI)
 
 # <div class="alert alert-block alert-warning">
 #     
@@ -41,6 +41,10 @@
 #     <br><br>
 # </div>
 # <hr>
+
+# + active=""
+# TODO: figure out how to get this all in the orange background
+# -
 
 # # 2. Understanding PACE file structure
 
@@ -65,9 +69,9 @@
 #
 # </div>
 #     
-#  1. [Querying PACE L1B file structure](#section2)
-#  2. [Querying PACE L2 file structure](#section3)
-#  3. [Querying PACE L3 file structure](#section4)
+#  1. [Inspecting PACE L1B file structure](#section2)
+#  2. [Inspecting PACE L2 file structure](#section3)
+#  3. [Inspecting PACE L3 file structure](#section4)
 #
 # <hr>
 
@@ -89,7 +93,7 @@ if not auth.authenticated:
 
 # <div class="alert alert-info" role="alert">
 #
-# ## <a id='section1'>1. Querying PACE L1B file structure
+# ## <a id='section1'>1. Inspecting PACE L1B file structure
 # [Back to top](#TOC_TOP)
 #
 # </div>
@@ -105,16 +109,18 @@ results = earthaccess.search_data(
     cloud_hosted = True,
     temporal = date_range,
     bounding_box = bbox,
-    #cloud_cover = (0,100) #TODO: figure out why cloud_cover isn't working
 )
 
 L1B_files = earthaccess.open(results)
 L1B_files
+
+# + active=""
+# TODO maybe: include text on different file systems. e.g. S3 or HTTPS
 # -
 
 # Let's open the first file of the L1B_files list:
 
-dfs = xr.open_dataset(L1B_files[1])
+dfs = xr.open_dataset(L1B_files[0])
 dfs
 
 # Notice that the xarray.Dataset has missing data in some of the categories. `xarray` cannot be used to open multi-group hierarchies or to list groups within a netCDF file, but it can open a specific group if you know it’s path.
@@ -130,7 +136,7 @@ dfs
 
 # The PACE L1B dataset groups are `sensor_band_parameters`, `scan_line_attributes`, `geolocation_data`, `navigation_data`, and `observation_data`. Let's open the `observation_data` group:
 
-df_obs = xr.open_dataset(L1B_files[1], group='observation_data')
+df_obs = xr.open_dataset(L1B_files[0], group='observation_data')
 df_obs
 
 # Now you can view the Dimensions, Coordinates, and Variables of this group. To show/hide attributes, press the paper icon on the right hand side of each variable. To show/hide data reprensetaton, press the cylinder icon. 
@@ -145,7 +151,7 @@ df_obs['rhot_blue'][100,:,:].plot()
 
 # <div class="alert alert-info" role="alert">
 #
-# ## <a id='section1'>2. Querying PACE L2 file structure
+# ## <a id='section2'>2. Inspecting PACE L2 file structure
 # [Back to top](#TOC_TOP)
 #
 # </div>
@@ -160,7 +166,8 @@ results = earthaccess.search_data(
     short_name = "PACE_OCI_L2_AOP_NRT",
     cloud_hosted = True,
     temporal = date_range,
-    bounding_box = bbox
+    bounding_box = bbox,
+    cloud_cover = (0,50) #can include a cloud threshold with L2 data and above
 )
 
 L2_files = earthaccess.open(results)
@@ -176,7 +183,7 @@ L2_files
 # The PACE L2 dataset groups are `sensor_band_parameters`, `scan_line_attributes`, `geophysical_data`, `navigation_data`. <br>
 # Let's look at the geophysical_data group
 
-df_geo = xr.open_dataset(L2_files[1], group='geophysical_data')
+df_geo = xr.open_dataset(L2_files[0], group='geophysical_data')
 df_geo
 
 # The Rrs data variable has a shape of (1710, 1272, 184). Let's map a random Rrs wavelength:
@@ -185,7 +192,7 @@ df_geo['Rrs'][:,:,100].plot()
 
 # Right now, the scene is being plotted using number_of_lines and pixels_per_line (x,y). Let's add some lat and lon values to map it in a real coordinate space. To do this, we need to create a new xarrray dataset (rrs_xds) and pull in information from the `navigational_data` group (df_nav).
 
-df_nav = xr.open_dataset(L2_files[1], group='navigation_data')
+df_nav = xr.open_dataset(L2_files[0], group='navigation_data')
 df_nav
 
 rrs_xds = df_nav.rename({"pixel_control_points": "pixels_per_line"})
@@ -217,13 +224,12 @@ ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
 
 rrs_xds.Rrs[:,:,100].plot(x='longitude', y='latitude', cmap='viridis', vmin=0)
 
-# +
-ax.plot(-60, 43, marker='o', color='red')
+# + active=""
+# TODO: Figure out how to extract a pixel to plot Rrs spectrum. Some snippets below that might be helpful
 
-fig
+# + jupyter={"outputs_hidden": true}
+rrs_xds.where((rrs_xds.latitude == 37) & (rrs_xds.longitude == -75), drop=True)
 # -
-
-rrs_xds.Rrs
 
 rrs_xds_point = rrs_xds.sel({
     "number_of_lines": 1650, 
@@ -232,6 +238,47 @@ rrs_xds_point = rrs_xds.sel({
 rrs_xds_point.coords
 
 rrs_xds_point["Rrs"].plot.line()
+
+# <div class="alert alert-info" role="alert">
+#
+# ## <a id='section3'>3. Inspecting PACE L3 file structure
+# [Back to top](#TOC_TOP)
+#
+# </div>
+
+# +
+date_range = ("2024-04-01", "2024-04-16")
+bbox = (-76.75,36.97,-75.74,39.01)
+
+results = earthaccess.search_data(
+    short_name = "PACE_OCI_L3M_RRS_NRT",
+    cloud_hosted = True,
+    temporal = date_range,
+    bounding_box = bbox
+) 
+
+L3_files = earthaccess.open(results)
+L3_files
+# -
+
+# PACE L3 data do not have any groups. We can open the dataset without specifying a group. 
+
+df = xr.open_dataset(L3_files[0])
+df
+
+# Notice that PACE L3 data has lat,lon coordinates. Let's map the Rrs_442 variable:
+
+# +
+fig = plt.figure()
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.coastlines()
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
+
+df.Rrs_442[:,:].plot(cmap='viridis', vmin=0)
+
+# + active=""
+# TODO: maybe add last section on opening multiple L1B/L2 files together using open_mfdataset
+# -
 
 # # Combining data 
 
