@@ -21,14 +21,10 @@
 #
 # </tr></table>
 
-# <a href="../Index.ipynb"><< Index</a>
-# <br>
-# <a href="./1_2_OLCI_file_structure.ipynb">Understanding PACE file structure >></a>
-
 # <font color="dodgerblue">**Ocean Biology Processing Group**</font> <br>
 # **Copyright:** 2024 NASA OBPG <br>
 # **License:** MIT <br>
-# **Authors:** Anna Windle (NASA/SSAI), Ian Carroll (NASA/UMBC), Guoqing Wang (NASA/SSAI), Carina Poulin (NASA/SSAI)
+# **Authors:** Anna Windle (NASA/SSAI), Ian Carroll (NASA/UMBC)
 
 # <div class="alert alert-block alert-warning">
 #     

@@ -20,23 +20,17 @@
 # <td> <img src="https://www.nasa.gov/wp-content/uploads/2023/04/nasa-logo-web-rgb.png" align='right', alt="Drawing" style="width: 70px;"/> </td>
 #
 # </tr></table>
-#
-#
-
-# <a href="../Index.ipynb"><< Index</a>
-# <br>
-# <a href="./1_2_OLCI_file_structure.ipynb">Understanding PACE file structure >></a>
 
 # <font color="dodgerblue">**Ocean Biology Processing Group**</font> <br>
 # **Copyright:** 2024 NASA OBPG <br>
 # **License:** MIT <br>
-# **Authors:** Anna Windle (NASA/SSAI), Ian Carroll (NASA/UMBC), Guoqing Wang (NASA/SSAI), Carina Poulin (NASA/SSAI)
+# **Authors:** Anna Windle (NASA/SSAI), Ian Carroll (NASA/UMBC)
 
 # <div class="alert alert-block alert-warning">
 #     
 # <b>PREREQUISITES 
 #     
-# The following modules are prerequisites for this notebook, and will retrieve the data required here.
+# This notebook has the following prerequisites:
 #   - **<a href="./1_PACE_data_access.ipynb" target="_blank">1_PACE_data_access.ipynb</a>**
 #     <br><br>
 # </div>
@@ -82,6 +76,7 @@ import xarray as xr
 import netCDF4 as nc
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
+import hvplot.xarray 
 
 # ## `earthaccess` authentication
 
@@ -227,17 +222,21 @@ rrs_xds.Rrs[:,:,100].plot(x='longitude', y='latitude', cmap='viridis', vmin=0)
 # + active=""
 # TODO: Figure out how to extract a pixel to plot Rrs spectrum. Some snippets below that might be helpful
 
-# + jupyter={"outputs_hidden": true}
-rrs_xds.where((rrs_xds.latitude == 37) & (rrs_xds.longitude == -75), drop=True)
+# +
+#rrs_xds.where((rrs_xds.latitude == 37) & (rrs_xds.longitude == -75), drop=True)
 # -
 
+'''
 rrs_xds_point = rrs_xds.sel({
     "number_of_lines": 1650, 
     "pixels_per_line": 1270,
 })
 rrs_xds_point.coords
+'''
 
-rrs_xds_point["Rrs"].plot.line()
+# +
+#rrs_xds_point["Rrs"].plot.line()
+# -
 
 # <div class="alert alert-info" role="alert">
 #
@@ -275,6 +274,9 @@ ax.coastlines()
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
 
 df.Rrs_442[:,:].plot(cmap='viridis', vmin=0)
+# -
+
+
 
 # + active=""
 # TODO: maybe add last section on opening multiple L1B/L2 files together using open_mfdataset
