@@ -95,6 +95,8 @@ if not auth.authenticated:
 
 # Let's use `xarray` to open up a PACE L1B netCDF files of the same scene using `earthaccess`. We will use the same search method used in <a href="./2_PACE_data_access.ipynb">2_PACE_data_access.ipynb </a> to access the data:
 
+# TODO : must raise error if not in region (i.e. uses HTTPS)
+
 # +
 date_range = ("2024-04-01", "2024-04-16")
 bbox = (-76.75,36.97,-75.74,39.01)
@@ -108,9 +110,6 @@ results = earthaccess.search_data(
 
 L1B_files = earthaccess.open(results)
 L1B_files
-
-# + active=""
-# TODO maybe: include text on different file systems. e.g. S3 or HTTPS
 # -
 
 # Let's open the first file of the L1B_files list:
@@ -127,6 +126,8 @@ dfs
 
 #datatree = open_datatree(L1B_files[0], engine='h5netcdf') 
 #datatree
+
+# TODO: include with just the list(datatree)
 # -
 
 # The PACE L1B dataset groups are `sensor_band_parameters`, `scan_line_attributes`, `geolocation_data`, `navigation_data`, and `observation_data`. Let's open the `observation_data` group:
@@ -140,7 +141,7 @@ df_obs
 
 df_obs['rhot_blue'].shape
 
-# Let's quickly plot one blue band:
+# Let's plot one blue band:
 
 df_obs['rhot_blue'][100,:,:].plot()
 
@@ -155,7 +156,7 @@ df_obs['rhot_blue'][100,:,:].plot()
 
 # +
 date_range = ("2024-04-01", "2024-04-16")
-bbox = (-76.75,36.97,-75.74,39.01)
+bbox = (-76.75, 36.97, -75.74, 39.01)
 
 results = earthaccess.search_data(
     short_name = "PACE_OCI_L2_AOP_NRT",
@@ -223,6 +224,9 @@ rrs_xds.Rrs[:,:,100].plot(x='longitude', y='latitude', cmap='viridis', vmin=0)
 # TODO: Figure out how to extract a pixel to plot Rrs spectrum. Some snippets below that might be helpful
 
 # +
+# TODO make this where thingy work, with point, and more general geometry if possible
+
+# +
 #rrs_xds.where((rrs_xds.latitude == 37) & (rrs_xds.longitude == -75), drop=True)
 # -
 
@@ -283,6 +287,10 @@ df.Rrs_442[:,:].plot(cmap='viridis', vmin=0)
 # -
 
 # # Combining data 
+
+# +
+# todo use L2
+# -
 
 dfs = xr.open_mfdataset(L1B_files, group="observation_data", combine="nested", 
                         concat_dim="number_of_scans", engine="h5netcdf")

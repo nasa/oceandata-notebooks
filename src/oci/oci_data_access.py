@@ -12,19 +12,9 @@
 #     name: python3
 # ---
 
-# <table><tr>
+# # Accessing PACE Data via the `earthaccess` Package
 #
-#
-# <td> <img src="https://oceancolor.gsfc.nasa.gov/images/ob-logo-svg-2.svg" alt="Drawing" align='right', style="width: 240px;"/> </td>
-#
-# <td> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/2449px-NASA_logo.svg.png" align='right', alt="Drawing" style="width: 70px;"/> </td>
-#
-# </tr></table>
-
-# <font color="dodgerblue">**Ocean Biology Processing Group**</font> <br>
-# **Copyright:** 2024 NASA OBPG <br>
-# **License:** MIT <br>
-# **Authors:** Anna Windle (NASA/SSAI), Ian Carroll (NASA/UMBC)
+# **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 
 # <div class="alert alert-block alert-warning">
 #     
@@ -35,14 +25,7 @@
 #
 # There are no prerequisite notebooks for this module.
 # </div>
-# <hr>
 
-# + active=""
-# TODO: figure out how to get this all in the orange background
-# -
-
-# # 1. Accessing PACE data via the `earthaccess` library
-#
 # ## Learning objectives
 #
 # At the end of this notebook you will know:
@@ -51,28 +34,31 @@
 # * How to use `earthaccess` to search for PACE data using search filters
 # * How to download PACE data
 #
-# ### Outline
+# ## Summary
+#
 # In this example we will use the `earthaccess` library to search for data collections from NASA Earthdata. `earthaccess` is a Python library that simplifies data discovery and access to NASA Earth science data by providing an abstraction layer for NASA’s [Common Metadata Repository (CMR) API](https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html) Search API. The library makes searching for data more approachable by using a simpler notation instead of low level HTTP queries. `earthaccess` takes the trouble out of Earthdata Login **authentication**, makes **search** easier, and provides a stream-line way to download or stream search results into an `xarray` object.
 #
 # For more on `earthaccess` visit the [`earthaccess` GitHub](https://github.com/nsidc/earthaccess) page and/or the [`earthaccess` documentation](https://earthaccess.readthedocs.io/en/latest/) site. Be aware that `earthaccess` is under active development. 
 #
 # <div class="alert alert-info" role="alert">
 #
-# ## <a id='TOC_TOP'>Contents
+# ## Contents
 #
 # </div>
-#     
-#  1. [`earthaccess` authentication](#section1)
-#  1. [Search for data](#section2)
-#  1. [Download data](#section3)
 #
-# <hr>
+# 1. [Imports](#imports)
+# 1. [NASA Earthdata authentication](#section1)
+# 1. [Search for data](#section2)
+# 1. [Download data](#section3)
 
-# We begin by importing all of the libraries that we need to run this notebook. If you have built your python using the environment file provided in this repository, then you should have everything you need. For more information on building environment, please see the repository README.
+# <div class="alert alert-info" role="alert">
+#
+# ## Imports
+# [Back to top](#contents)
+#
+# </div>
 
-# + active=""
-# TODO: On the OBPG website, include text for "Set up": with either an environment.yml file or requirements.txt. And include text about where you run these notebooks (locally, HPC, cloud)
-# -
+# We begin by importing all of the libraries that we need to run this notebook. If you have created an environment following the [guidance] provided with this notebook, then the packages will be sucessfully imported.
 
 import earthaccess
 
@@ -83,13 +69,11 @@ import earthaccess
 #
 # </div>
 
-# Next, we will start by authenticating using our Earthdata Login credentials. Authentication is not necessarily needed to search for publicaly available data collections in Earthdata, but is always need to download or access data from the NASA Earthdata archives. We can use `login` method from the `earthaccess` library here. This will create a authenticated session using our Earthdata Login credential. Our credentials can be passed along via **environmental variables** or by a **.netrc** file save in the home/user profile directory. If your credentials are not available in either location, we will be prompt to input our credentials and a **.netrc** will be created and saved for us.  
+# Next, we authenticate using our Earthdata Login credentials. Authentication is not necessarily needed to search for publicaly available data collections in Earthdata, but is always need to download or access data from the NASA Earthdata archives. We can use the `login` method from the `earthaccess` package. This will create a authenticated session with provided Earthdata Login username and password. The `earthaccess` package will search for credentials defined by **environmental variables** or within a **.netrc** file save in the home/user profile directory. If credentials are not found, an interactive prompt will allow you to input credentials. The `persist=True` argument ensures any discovered credentials
+# are stored in a `.netrc` file, so the argument is not necessary (but it's also harmless) for subsequent calls to `earthaccess.login`.
+#
 
-auth = earthaccess.login()
-# are we authenticated?
-if not auth.authenticated:
-    # ask for credentials and persist them in a .netrc file
-    auth.login(strategy="interactive", persist=True)
+auth = earthaccess.login(persist=True)
 
 # <div class="alert alert-info" role="alert">
 #
@@ -98,36 +82,44 @@ if not auth.authenticated:
 #
 # </div>
 
-# There are multiple keywords we can use to discovery data from collections. We will use the `short_name` to find data. 
+# There are multiple keywords we can use to discovery data from collections. We will use the `short_name` to find data. The `count` argument limits the number of granules returned in the `results` list.
 
 results = earthaccess.search_data(
     short_name = "PACE_OCI_L2_AOP_NRT",
     cloud_hosted = True,
-    count = 10    # Restricting to 10 records returned
+    count = 10,
 )
 
 # We can refine our search by passing more parameters that describe the spatiotemporal domain of our use case. Here, we use the `temporal` parameter to request a date range and the `bounding_box` parameter to request granules that intersect with a bounding box. We can even provide a `cloud_cover` threshold to limit files that have a lower percetnage of cloud cover
 
-date_range = ("2024-04-01", "2024-04-16")
-bbox = (-76.75,36.97,-75.74,39.01)
+dates = ("2024-04-01", "2024-04-16")
+bbox = (-76.75, 36.97, -75.74, 39.01)
+clouds = (0, 50)
 
 results = earthaccess.search_data(
     short_name = "PACE_OCI_L2_AOP_NRT",
     cloud_hosted = True,
-    temporal = date_range,
+    temporal = dates,
     bounding_box = bbox, 
-    cloud_cover = (0,50)
+    cloud_cover = clouds,
 )
+
+# The `display` function provides an rich display associated with each result. In this case, you see a direct download link. The link will open a new browser tab and download the data file to your local machine, which is not what you need to do for "in-region" access.
+
+for item in results:
+    display(item)
 
 # <div class="alert alert-info" role="alert">
 #
 # ## <a id='section3'>3. Download data
-# [Back to top](#TOC_TOP)
+# [Back to top](#contents)
 #
 # </div>
 
 # TODO: describe how this is only to download locally or have seperate notebook that uses earthaccess.download ? 
 # explain alt: section 4- Access data in cloud? use data in the cloud instead of download data. and explain how all other notebooks will follow that format. 
+#
+# TODO maybe: include text on different file systems. e.g. S3 or HTTPS
 
 # A quick way to do a direct download is to list the results and press on the link to download each file individually. 
 

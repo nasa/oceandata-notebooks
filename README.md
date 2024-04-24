@@ -10,21 +10,48 @@ A repository for notebooks delivered as [oceandata tutorials and data recipes][t
 ### Getting Started
 
 This collection of Jupyter notebooks is meant to help you get started accessing, visualizing, and analyzing
-our data products with Python. You can learn from these notebooks either by viewing the code and results on this
-site or by downloading the notebook files and running them with [JupyterLab][jupyterlab]. If you
-plan to run any of these notebooks, please read on, concerning environments on which the notebooks depend.
+OB.DAAC data products with Python. You can learn from these notebooks either by viewing the code and results on this
+webpage or by downloading the notebook files and running them with [JupyterLab][jupyterlab]. If you
+plan to run any of these notebooks, please continue reading for information about notebook dependencies.
 
-First, notebooks with a **Earthdata Cloud** banner are written to run on a host in the AWS "us-west-2" region, which
-is the particular cloud which stores the data. Running code in the same cloud that stores the data has advantages,
-including never having to download the data. You may already have access to such a host, for instance through a JupyterHub
+paragraph on "cloud" and do you need it? if you do not have cloud access, you can still learn from the cloud notebooks, but will
+need to download data (see 3).
+
+First, notebooks with **Earthdata Cloud** are written to be run "in the cloud" where NASA Earthdata archives OB.DAAC data
+products. In particular, the cloud provider used by NASA Earthdata is Amazon Web Services (AWS), and the archive is located
+in their "us-west-2" region. Running code in the same cloud that stores the data has advantages,
+including never having to download the data. You may already have access to the AWS platform, for instance through a JupyterHub
 maintained by [Openscapes][openscapes-hub], [Cryo in the Cloud][cryocloud], or NASA Goddard's [Open Science Studio][oss].
 If you are new to using NASA Earthdata Cloud, the [Cloud Cookbook][cookbook] provides a lot of background and resources
-that are constantly being improved by the [NASA-Openscapes][openscapes] community.
+that are constantly being improved by the [NASA-Openscapes][openscapes] community. TODO: cloud optimization
 
 Second, the notebooks import Python packages that must be installed and discoverable on the host. Please use our
 [environment.yml](./environment.yml) file to [create a Conda environment][conda-env] that satisfies all the dependencies,
 or otherwise ensure your environment satisifes these dependencies. Note that the environment includes
-the `ipykernel` package, in case you want to [make the environment available to JupyterLab as a kernel][conda-kernel].
+the `ipykernel` package in case your JupyterLab includes [nb_conda_kernels][nb_conda_kernels] or you want
+to manually [make the environment available to JupyterLab as a kernel][conda-kernel].
+
+### Notebooks
+
+#### Learn with OCI
+
+1. Download data using earthaccess
+1. **Earthdata Cloud** File Structure at 3 Processing Levels
+1. substitutions in cloud notebooks needed to run locally 
+
+#### Learn with HARP2
+
+1. under construction
+
+#### Learn with SpexONE
+
+1. under construction
+
+#### Learn with MODIS
+
+1. Map Level-2 Chlorophyll with netCDF4
+1. Map Level-2 Chlorophyll with XArray
+1. Map Level-3 Chlorophyll and Rrs with XArray
 
 ## For Contributors
 
@@ -51,6 +78,7 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 2. Formatting notebooks with black
 3. Testing notebooks in isolated environments (using `jupyter execute ...`)
 
+[nb_conda_kernels]: https://github.com/anaconda/nb_conda_kernels
 [conda-kernel]: https://ipython.readthedocs.io/en/stable/install/kernel_install.html#kernels-for-different-environments
 [conda-env]: https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
