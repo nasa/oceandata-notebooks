@@ -1,0 +1,29 @@
+PACE data tutorial planning:
+
+3 folders:
+learn-oci
+learn-spexone
+learn-harp2
+
+In each folder should have at least:
+1. (OCI) data access 
+2. (OCI) data file structure
+3. (OCI) plotting examples 
+
+
+Tutorial ideas:
+
+OCI:
+- plot radiance/reflectance spectra
+- learn about flags
+- plotting swath
+- in situ satellite matching
+- plotting different chl algs
+- plotting 
+
+SPEXone/HARP2:
+- plotting swath 
+- in situ satellite matching
+
+
+- simple ML aproach
