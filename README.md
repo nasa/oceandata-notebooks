@@ -81,6 +81,10 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
    ```
    jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --output-dir=docs
    ```
+5. Auto populate somewhere using:
+   ```
+   jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --to=html --output-dir=
+   ```
 
 [nb_conda_kernels]: https://github.com/anaconda/nb_conda_kernels
 [conda-kernel]: https://ipython.readthedocs.io/en/stable/install/kernel_install.html#kernels-for-different-environments

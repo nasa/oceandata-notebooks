@@ -141,7 +141,7 @@ line
 #
 # The `earthaccess.open` method is used when you want to directly read a file from a remote filesystem, and not to download it. When running code adjacent to the Earthdata Cloud, so that you don't need to download data, the `earthaccess.open` method is the way to go.
 #
-# The `earthaccess.download` method is used to copy files onto a filesystem local to the machine executing the function. For this method, provide the output of `earthaccess.search_data` along with the local path to store downloaded granules. Remember, this "local" filesystem is not on the machine running your web browser (unless the url shown by the browser begins with "localhost"). Even if you only want to read the data once, and downloading seems unncessary, if you use `earthaccess.open` while not adjacent to the Earthdata Cloud, performance will be very poor. This is not a problem with "the cloud" or with `earthaccess`, it has to do with the data format and may soon be resolved.
+# The `earthaccess.download` method is used to copy files onto a filesystem local to the machine executing the function. For this method, provide the output of `earthaccess.search_data` along with the local path to store downloaded granules. Remember, this "local" filesystem is not on the machine running your web browser (unless the URL shown by the browser begins with "localhost"). Even if you only want to read the data once, and downloading seems unncessary, if you use `earthaccess.open` while not adjacent to the Earthdata Cloud, performance will be very poor. This is not a problem with "the cloud" or with `earthaccess`, it has to do with the data format and may soon be resolved.
 
 paths = earthaccess.download(results, "L2_AOP")
 
@@ -150,7 +150,7 @@ paths = earthaccess.download(results, "L2_AOP")
 paths
 
 # <div class="alert alert-block alert-warning">
-# Anywhere in any of <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/">these notebooks</a> where <pre>paths = earthaccess.open(...)</pre> is used to read data directly from a remote filesystem, you need to substitue <pre>paths = earthaccess.download(..., local_path)</pre> before running the notebooks on a machine that does not have direct access to the Earthdata Cloud.
+# Anywhere in any of <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/">these notebooks</a> where <pre>paths = earthaccess.open(...)</pre> is used to read data directly from a remote filesystem, you need to substitute <pre>paths = earthaccess.download(..., local_path)</pre> before running the notebooks on a machine that does not have direct access to the Earthdata Cloud.
 # </div>
 # <div class="alert alert-info" role="alert">
 # <p>You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on opening OCI data with XArray.</p>
