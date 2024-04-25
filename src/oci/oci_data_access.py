@@ -71,7 +71,7 @@ import earthaccess
 # <a href="#toc">[Back to top]</a>
 # </div>
 #
-# Next, we authenticate using our Earthdata Login credentials. Authentication is not necessarily needed to search for publicaly available data collections in Earthdata, but is always needed to download or open data from the NASA Earthdata archives. We can use the `login` method from the `earthaccess` package. This will create a authenticated session when we provide a valid Earthdata Login username and password.
+# Next, we authenticate using our Earthdata Login credentials. Authentication is not necessarily needed to search for publicaly available data collections in Earthdata, but is always needed to download or open data from the NASA Earthdata archives. We can use the `login` method from the `earthaccess` package. This will create an authenticated session when we provide a valid Earthdata Login username and password.
 #
 # The `earthaccess` package will search for credentials defined by **environmental variables** or within a **.netrc** file saved in the home directory. If credentials are not found, an interactive prompt will allow you to input credentials. The `persist=True` argument ensures any discovered credentials
 # are stored in a `.netrc` file, so the argument is not necessary (but it's also harmless) for subsequent calls to `earthaccess.login`.
@@ -83,7 +83,7 @@ auth = earthaccess.login(persist=True)
 # <a href="#toc">[Back to top]</a>
 # </div>
 #
-# There are multiple ways to identify "collections" on NASA Earthdata (discovered with the `search_datasets` method) and the "granules" contained in a collection (discovered with the `search_data` method). You can search collections by `instrument` to get started.
+# There are multiple ways to identify "collections" on NASA Earthdata (discovered with the `search_datasets` method) and "granules" contained in a collection (discovered with the `search_data` method). You can search collections by `instrument` to get started.
 
 results = earthaccess.search_datasets(
     instrument="oci",
@@ -92,7 +92,7 @@ for item in results:
     summary = item.summary()
     print(summary["short-name"])
 
-# The `search_datasets` method returned collections. Next we use the `search_data` method to find data objects within a collection using the `short_name` for the PACE/OCI Level-2 quick-look product for apparent optical properties (although you could search accross collections too). The `count` argument limits the number of granules returned and stored in the `results` list.
+# The `search_datasets` method returned collections. Next, we use the `search_data` method to find data objects within a collection using the `short_name` for the PACE/OCI Level-2 quick-look product for apparent optical properties (although you could search accross collections too). The `count` argument limits the number of granules returned and stored in the `results` list.
 
 results = earthaccess.search_data(
     short_name = "PACE_OCI_L2_AOP_NRT",
@@ -114,7 +114,7 @@ results = earthaccess.search_data(
 )
 # -
 
-# Displaying a result showes a direct download link. The link will download the granule to your local machine, which may or may not be what you want to do. Remember, the "local machine" is the one running the web browser application which may or may not be the machine executing this notebook.
+# Displaying a result shows a direct download link. The link will download the granule to your local machine, which may or may not be what you want to do. Remember, the "local machine" is the one running the web browser application which may or may not be the machine executing this notebook.
 
 results[0]
 
@@ -126,7 +126,7 @@ results[0]
 # </div>
 #
 # First, let's see what happens if you don't download the granules. If you instead use `earthaccess.open` on the
-# list of granules, you end up with a list of file-like objects, which are meant to be use like a path to an actual file.
+# list of granules, you end up with a list of file-like objects, which are meant to be used like a path to an actual file.
 
 paths = earthaccess.open(results)
 
@@ -155,3 +155,5 @@ paths
 # <div class="alert alert-info" role="alert">
 # <p>You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on opening OCI data with XArray.</p>
 # </div>
+
+
