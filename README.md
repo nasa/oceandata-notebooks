@@ -77,6 +77,10 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 1. Curating dependencies for virtualenv without duplicating environment.yml
 2. Formatting notebooks with black
 3. Testing notebooks in isolated environments (using `jupyter execute ...`)
+4. Auto populate `docs/` using:
+   ```
+   jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --output-dir=docs
+   ```
 
 [nb_conda_kernels]: https://github.com/anaconda/nb_conda_kernels
 [conda-kernel]: https://ipython.readthedocs.io/en/stable/install/kernel_install.html#kernels-for-different-environments
