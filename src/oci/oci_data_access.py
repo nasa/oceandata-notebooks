@@ -12,7 +12,7 @@
 #     name: python3
 # ---
 
-# # Access OCI Data with `earthaccess`
+# # Access Data from the Ocean Color Instrument (OCI)
 #
 # **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 #
@@ -21,10 +21,9 @@
 # <p>This notebook has the following prerequisites:</p>
 # <ul>
 #     <li>
-#     <a href="https://urs.earthdata.nasa.gov/" target="_blank"> An <b>Earthdata Login</b> account</a> is required to access data from the NASA Earthdata system, including NASA ocean color data.
+#     <a href="https://urs.earthdata.nasa.gov/" target="_blank">An <b>Earthdata Login</b> account</a> is required to access data from the NASA Earthdata system, including NASA ocean color data.
 #     </li>
 # </ul>
-# <p>There are no prerequisite notebooks for this module.</p>
 # </div>
 #
 # ## Learning objectives
@@ -40,6 +39,12 @@
 # In this example we will use the `earthaccess` package to search for data collections from NASA Earthdata. This package, published on the [Python Package Index][pypi] and [conda-forge][conda], facilitates discovery and use of all NASA Earth Science data products by providing an abstraction layer for NASA’s [Common Metadata Repository (CMR) API][cmr] and by simplifying requests to NASA's [Earthdata Cloud][edcloud]. Searching for data is more approachable using `earthaccess` than low-level HTTP requests, and the same goes for S3 requests.
 #
 # In short, `earthaccess` helps **authenticate** with Earthdata Login, makes **search** easier, and provides a stream-lined way to **load data** into `xarray` containers. For more on `earthaccess`, visit the [documentation][earthaccess-docs] site. Be aware that `earthaccess` is under active development.
+#
+# To understand the discussions below on downloading and opening data, we need to clearly understand **where our notebook is running**. There are three cases to distinguish:
+#
+# 1. The notebook is running on the local host. For instance, you started a Jupyter server on your laptop.
+# 1. The notebook is running on a remote host, but it does not have direct access to the NASA Earthdata Cloud. For instance, you are running in [GitHub Codespaces][codespaces].
+# 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud. At this time, we cannot provide a "for instance" which is available to everyone.
 #
 # <div class="alert alert-info" role="alert">
 # <h2>Contents</h2><a name="toc"></a>
@@ -57,6 +62,7 @@
 #
 # We begin by importing the only library we need to run this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the package will be sucessfully imported.
 #
+# [codespaces]: https://github.blog/changelog/2022-11-09-using-codespaces-with-jupyterlab-public-beta/
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 # [edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
 # [earthaccess-docs]: https://earthaccess.readthedocs.io/en/stable/
@@ -114,12 +120,10 @@ results = earthaccess.search_data(
 )
 # -
 
-# Displaying a result shows a direct download link. The link will download the granule to your local machine, which may or may not be what you want to do. Remember, the "local machine" is the one running the web browser application which may or may not be the machine executing this notebook.
+# Displaying a result shows a direct download link. The link will download the granule to your local machine, which may or may not be what you want to do. Even if you are running the notebook on a remote host, this download link will open a new browser tab or window and offer to save a file to your local machine. If you are running the notebook locally, this may be of use. However, in the next section we'll see how to download all the results with one command.
 
 results[0]
 
-# If the URL shown in your web browser begins with "localhost", then clicking the data link will have roughly the same effect as the scripted download discussed next. If the URL shown in your browser is not "localhost", then the code is not running on your local machine and you need the following scripted method below to download data to the machine running the code.
-#
 # <div class="alert alert-info" role="alert">
 # <h2>4. Download Data</h2><a name="download"></a>
 # <a href="#toc">[Back to top]</a>
@@ -130,7 +134,7 @@ results[0]
 
 paths = earthaccess.open(results)
 
-# The list of file-like objects held in `paths` can each be read like a normal file. That's true for NetCDF readers, but for a quick demo we just read the first few bytes without any specialized reader.
+# The list of file-like objects held in `paths` can each be read like a normal file. That's true of NetCDF readers, but for a quick demo we just read the first few bytes without any specialized reader.
 
 with paths[0] as file:
     line = file.readline().strip()
@@ -139,9 +143,13 @@ line
 # Of course that doesn't mean anything (does it? 😉), because this is a binary file that needs a reader which
 # understands the file format.
 #
-# The `earthaccess.open` method is used when you want to directly read a file from a remote filesystem, and not to download it. When running code adjacent to the Earthdata Cloud, so that you don't need to download data, the `earthaccess.open` method is the way to go.
+# The `earthaccess.open` method is used when you want to directly read a file from a remote filesystem, and not to download it. When running code on a host with direct access to the NASA Earthdata Cloud, you don't need to download the data, and `earthaccess.open` is the way to go.
 #
-# The `earthaccess.download` method is used to copy files onto a filesystem local to the machine executing the function. For this method, provide the output of `earthaccess.search_data` along with the local path to store downloaded granules. Remember, this "local" filesystem is not on the machine running your web browser (unless the URL shown by the browser begins with "localhost"). Even if you only want to read the data once, and downloading seems unncessary, if you use `earthaccess.open` while not adjacent to the Earthdata Cloud, performance will be very poor. This is not a problem with "the cloud" or with `earthaccess`, it has to do with the data format and may soon be resolved.
+# Now, let's look at the `earthaccess.download` method, which is used to copy files onto a filesystem local to the machine executing the code. For this method, provide the output of `earthaccess.search_data` along with a directory where `earthaccess` will store downloaded granules. This directory is on the host running the notebook; make sure you understand whether it is local or remote.
+#
+# Even if you only want to read a slice of the data, and downloading seems unncessary, if you use `earthaccess.open` while not running on a remote host with direct access to the NASA Earthdata Cloud, performance will be very poor. This is not a problem with "the cloud" or with `earthaccess`, it has to do with the data format and may soon be resolved.
+#
+# Let's continue to downloading the list of granules!
 
 paths = earthaccess.download(results, "L2_AOP")
 
@@ -150,10 +158,8 @@ paths = earthaccess.download(results, "L2_AOP")
 paths
 
 # <div class="alert alert-block alert-warning">
-# Anywhere in any of <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/">these notebooks</a> where <pre>paths = earthaccess.open(...)</pre> is used to read data directly from a remote filesystem, you need to substitute <pre>paths = earthaccess.download(..., local_path)</pre> before running the notebooks on a machine that does not have direct access to the Earthdata Cloud.
+# Anywhere in any of <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/">these notebooks</a> where <pre>paths = earthaccess.open(...)</pre> is used to read data directly from the NASA Earthdata Cloud, you need to substitute <pre>paths = earthaccess.download(..., local_path)</pre> before running the notebook on a host, whether local or remote, that does not have direct access to the NASA Earthdata Cloud.
 # </div>
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on opening OCI data with XArray.</p>
+# <p>You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on opening the structure of OCI data products at 3 processing levels.</p>
 # </div>
-
-
