@@ -22,7 +22,7 @@
 #
 # For more on `earthaccess` visit the [`earthaccess` GitHub](https://github.com/nsidc/earthaccess) page and/or the [`earthaccess` documentation](https://earthaccess.readthedocs.io/en/latest/) site. Be aware that `earthaccess` is under active development. 
 #
-# >[!Note]   
+# >[!Important]   
 # ><b>PREREQUISITES</b>
 # <br>This notebook has the following prerequisites:
 # >- **<a href="https://urs.earthdata.nasa.gov/" target="_blank"> An Earthdata Login account</a>** is required to access data from the NASA Earthdata system, including NASA ocean color data.
@@ -41,7 +41,7 @@
 # ***
 #
 # 1. [Imports](#imports)
-# 1. [NASA Earthdata authentication](#section1)
+# 1. [`earthaccess` authentication](#section1)
 # 1. [Search for data](#section2)
 # 1. [Download data](#section3)
 

@@ -7,25 +7,31 @@ A repository for notebooks delivered as [oceandata tutorials and data recipes][t
 > [!NOTE]
 > This "For Users" section should be delivered as content displayed on the [webpage][tutorials] as the first section.
 
-### Getting Started
+## About
 
 This collection of Jupyter notebooks is meant to help you get started accessing, visualizing, and analyzing
 OB.DAAC data products with Python. You can learn from these notebooks either by viewing the code and results on this
 webpage or by downloading the notebook files and running them with [JupyterLab][jupyterlab]. If you
 plan to run any of these notebooks, please continue reading for information about notebook dependencies.
 
-paragraph on "cloud" and do you need it? if you do not have cloud access, you can still learn from the cloud notebooks, but will
-need to download data (see 3).
+### Before you start
 
-First, notebooks with **Earthdata Cloud** are written to be run "in the cloud" where NASA Earthdata archives OB.DAAC data
-products. In particular, the cloud provider used by NASA Earthdata is Amazon Web Services (AWS), and the archive is located
-in their "us-west-2" region. Running code in the same cloud that stores the data has advantages,
-including never having to download the data. You may already have access to the AWS platform, for instance through a JupyterHub
-maintained by [Openscapes][openscapes-hub], [Cryo in the Cloud][cryocloud], or NASA Goddard's [Open Science Studio][oss].
-If you are new to using NASA Earthdata Cloud, the [Cloud Cookbook][cookbook] provides a lot of background and resources
-that are constantly being improved by the [NASA-Openscapes][openscapes] community. TODO: cloud optimization
+#### 1. The cloud
 
-Second, the notebooks import Python packages that must be installed and discoverable on the host. Please use our
+The **Earthdata Cloud** icon next to some notebooks indicates that they use data from the cloud that requires Amazon Web Services (AWS) cloud access, which is the cloud provider that NASA Earthdata uses to archive data in their "us-west-2" region. If you do not have AWS cloud access, you can still learn from the cloud notebooks, but will need to download data (see *notebook1?*).
+
+##### How do I know if I have AWS cloud access? 
+You may already have access to the AWS platform through your institution. For example through a JupyterHub maintained by [Openscapes][openscapes-hub], [Cryo in the Cloud][cryocloud], or NASA Goddard's [Open Science Studio][oss]. If that is not the case, you may also get an individual [AWS S3 credentials](https://obdaac-tea.earthdatacloud.nasa.gov/s3credentialsREADME). 
+
+TODO: info on AWS S3 temporary credentials?
+
+Running code in the same cloud that stores the data has advantages, including never having to download the data. If you are new to using NASA Earthdata Cloud, the [Cloud Cookbook][cookbook] provides a lot of background and resources that are constantly being improved by the [NASA-Openscapes][openscapes] community. 
+
+TODO: cloud optimization
+
+#### 2. Python environment setup
+
+The notebooks import Python packages that must be installed and discoverable on the host. Please use our
 [environment.yml](./environment.yml) file to [create a Conda environment][conda-env] that satisfies all the dependencies,
 or otherwise ensure your environment satisifes these dependencies. Note that the environment includes
 the `ipykernel` package in case your JupyterLab includes [nb_conda_kernels][nb_conda_kernels] or you want
@@ -35,8 +41,8 @@ to manually [make the environment available to JupyterLab as a kernel][conda-ker
 
 #### Learn with OCI
 
-1. Download data using earthaccess
-1. **Earthdata Cloud** File Structure at 3 Processing Levels
+1. Download data using the earthaccess library
+1. **Earthdata Cloud** File Structure at Three Processing Levels
 1. substitutions in cloud notebooks needed to run locally 
 
 #### Learn with HARP2
@@ -52,6 +58,9 @@ to manually [make the environment available to JupyterLab as a kernel][conda-ker
 1. Map Level-2 Chlorophyll with netCDF4
 1. Map Level-2 Chlorophyll with XArray
 1. Map Level-3 Chlorophyll and Rrs with XArray
+
+### Acknowledgements
+This repository has greatly benefited from works of multiple open-science projects, notably [Learn OLCI](https://github.com/wekeo/learn-olci/blob/main/README.md) and the [NASA EarthData Cloud Cookbook](https://nasa-openscapes.github.io/earthdata-cloud-cookbook/).
 
 ## For Contributors
 
@@ -89,3 +98,7 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 [cryocloud]: https://hub.cryointhecloud.com/
 [oss]: https://oss.smce.nasa.gov/
 [jupyterlab]: https://jupyter.org/
+
+```python
+
+```

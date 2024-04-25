@@ -12,64 +12,47 @@
 #     name: python3
 # ---
 
-# <table><tr>
+# # Understanding PACE file structure
 #
-#
-# <td> <img src="https://oceancolor.gsfc.nasa.gov/images/ob-logo-svg-2.svg" alt="Drawing" align='right', style="width: 240px;"/> </td>
-#
-# <td> <img src="https://www.nasa.gov/wp-content/uploads/2023/04/nasa-logo-web-rgb.png" align='right', alt="Drawing" style="width: 70px;"/> </td>
-#
-# </tr></table>
+# **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 
-# <font color="dodgerblue">**Ocean Biology Processing Group**</font> <br>
-# **Copyright:** 2024 NASA OBPG <br>
-# **License:** MIT <br>
-# **Authors:** Anna Windle (NASA/SSAI), Ian Carroll (NASA/UMBC)
-
-# <div class="alert alert-block alert-warning">
-#     
-# <b>PREREQUISITES 
-#     
-# This notebook has the following prerequisites:
-#   - **<a href="./1_PACE_data_access.ipynb" target="_blank">1_PACE_data_access.ipynb</a>**
-#     <br><br>
-# </div>
-# <hr>
-
-# + active=""
-# TODO: figure out how to get this all in the orange background
-# -
-
-# # 2. Understanding PACE file structure
-
-# ## Learning objectives
-#
-# At the end of this notebok you will know:
-# * What a netCDF format is
-# * How to use `xarray` library to open PACE data
-# * What variables are present in each group for PACE data files (L1B, L2, and L3)
-#
-# ## Outline
+# ## Summary
+# ***
 # In this example we will use the 'earthaccess' library to access a Level-1B, Level-2, and Level-3 PACE netcdf files and open them using `xarray`.
 #
 #
 # **`netCDF`** (network Common Data Form) is a file format for storing multidimensional scientific data (variables). It is optimized for array-oriented data access and support a machine-independent format for representing scientific data. Files ending in `.nc` are netCDF files.
 #
 # **<a href="https://xarray.dev/" target="_blank">`xarray`</a>** is a library that supports the use of multi-dimensional arrays in Python. It is widely used to handle Earth observation data, which often involves multiple dimensions — for instance, longitude, latitude, time, and channels/bands. <br>
+
+# >[!Important]   
+# ><b>PREREQUISITES</b>
+# <br>This notebook has the following prerequisites:
+# >- **<a href="./1_PACE_data_access.ipynb" target="_blank">1_PACE_data_access.ipynb</a>**
+#     <br><br>
+# </div>
+
+# ## Learning objectives
+# ***
 #
-# <div class="alert alert-info" role="alert">
+# At the end of this notebok you will know:
+# * What a netCDF format is
+# * How to use `xarray` library to open PACE data
+# * What variables are present in each group for PACE data files (L1B, L2, and L3)
+#
 #
 # ## <a id='TOC_TOP'>Contents
-#
-# </div>
+# ***
 #     
-#  1. [Inspecting PACE L1B file structure](#section2)
-#  2. [Inspecting PACE L2 file structure](#section3)
-#  3. [Inspecting PACE L3 file structure](#section4)
-#
-# <hr>
+#  1. [Imports](#section1)
+#  2. [`earthaccess` authentification](#section2)
+#  3. [Inspecting PACE L1B file structure](#section3)
+#  4. [Inspecting PACE L2 file structure](#section4)
+#  5. [Inspecting PACE L3 file structure](#section5)
 
-# We begin by importing all of the libraries that we need to run this notebook. If you have built your python using the environment file provided in this repository, then you should have everything you need. For more information on building environment, please see the repository README.
+# ## <a id='section1'>1. Imports
+# ***
+# We begin by importing all of the libraries that we need to run this notebook. If you have created an environment following the [guidance] provided with this notebook, then the packages will be sucessfully imported.
 
 import earthaccess
 import xarray as xr
@@ -78,7 +61,8 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import hvplot.xarray 
 
-# ## `earthaccess` authentication
+# ## <a id='section2'>2.`earthaccess` authentication
+# ***
 
 auth = earthaccess.login()
 # are we authenticated?
@@ -86,14 +70,10 @@ if not auth.authenticated:
     # ask for credentials and persist them in a .netrc file
     auth.login(strategy="interactive", persist=True)
 
-# <div class="alert alert-info" role="alert">
-#
-# ## <a id='section1'>1. Inspecting PACE L1B file structure
-# [Back to top](#TOC_TOP)
-#
-# </div>
+# ## <a id='section3'>3. Inspecting PACE L1B file structure
+# ***
 
-# Let's use `xarray` to open up a PACE L1B netCDF files of the same scene using `earthaccess`. We will use the same search method used in <a href="./2_PACE_data_access.ipynb">2_PACE_data_access.ipynb </a> to access the data:
+# Let's open up a set of PACE L1B netCDF files of the same scene using `earthaccess`. We will use the same search method used in <a href="./2_PACE_data_access.ipynb">2_PACE_data_access.ipynb </a> to access the data:
 
 # TODO : must raise error if not in region (i.e. uses HTTPS)
 
@@ -112,14 +92,20 @@ L1B_files = earthaccess.open(results)
 L1B_files
 # -
 
-# Let's open the first file of the L1B_files list:
+# We use `xarray` to open up PACE L1B netCDF files. Let's open the first file of the L1B_files list:
 
 dfs = xr.open_dataset(L1B_files[0])
 dfs
 
-# Notice that the xarray.Dataset has missing data in some of the categories. `xarray` cannot be used to open multi-group hierarchies or to list groups within a netCDF file, but it can open a specific group if you know it’s path.
+# Notice that the xarray.Dataset has missing data in some of the categories. `xarray` cannot be used to open multi-group hierarchies or to list groups within a netCDF file, but it can open a specific group if you know its path.
 #
-# Tip: The `datatree` python library can be used to show group names. Uncomment below to run:
+# <div class="alert alert-info" role="alert"> 
+#
+# The `datatree` python library can be used to show group names. 
+#
+# Uncomment below to run:
+#
+# </div>
 
 # +
 #from datatree import open_datatree
@@ -145,12 +131,8 @@ df_obs['rhot_blue'].shape
 
 df_obs['rhot_blue'][100,:,:].plot()
 
-# <div class="alert alert-info" role="alert">
-#
-# ## <a id='section2'>2. Inspecting PACE L2 file structure
-# [Back to top](#TOC_TOP)
-#
-# </div>
+# ## <a id='section4'>4. Inspecting PACE L2 file structure
+# ***
 
 # Now, let's open a PACE L2 Apparent Optical Data (AOP) file. We'll use the same `earthaccess` search to find the data:
 
@@ -242,12 +224,8 @@ rrs_xds_point.coords
 #rrs_xds_point["Rrs"].plot.line()
 # -
 
-# <div class="alert alert-info" role="alert">
-#
-# ## <a id='section3'>3. Inspecting PACE L3 file structure
-# [Back to top](#TOC_TOP)
-#
-# </div>
+# ## <a id='section5'>5. Inspecting PACE L3 file structure
+# ***
 
 # +
 date_range = ("2024-04-01", "2024-04-16")
