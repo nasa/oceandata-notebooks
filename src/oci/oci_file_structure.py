@@ -162,7 +162,7 @@ rrs.sizes
 
 # The Rrs variable has length 184 in the wavelength dimension, so the blue, red, and SWIR wavelengths have been combined. Let's map the Rrs at "wavelength_3d" position 100.
 
-plot = rrs.sel({"wavelength_3d": 100}).plot()
+plot = rrs.sel({"wavelength_3d": 100}).plot(cmap='viridis')
 
 # Right now, the scene is being plotted using `number_of_lines` and `pixels_per_line` as "x" and "y", respectively. We need to add latitude and longitude values to create a true map. To do this, we will create a merged `xarray.Dataset` that pulls in information from the "navigation_data" group.
 
@@ -219,6 +219,8 @@ rrs_box.sizes
 
 rrs_stack = rrs_box.stack({"pixel": ["number_of_lines", "pixels_per_line"]}, create_index=False)
 plot = rrs_stack.plot.line(hue="pixel")
+
+# We will go over how to plot Rrs spectra with accurate wavelength values on the x-axis in an upcoming notebook. 
 
 # [Back to top](#toc)
 # <a name="l3"></a>
@@ -298,7 +300,7 @@ chla = np.log10(dataset["chlor_a"])
 chla.attrs.update({
     "units": f'lg({dataset["chlor_a"].attrs["units"]})',
 })
-plot = chla.sel({"date": 0}).plot(aspect=2, size=4)
+plot = chla.sel({"date": 0}).plot(aspect=2, size=4, cmap='GnBu_r')
 
 # ... to a map of average values, skipping "NaN" values that result from clouds.
 
@@ -307,7 +309,7 @@ chla_avg.attrs.update({
     "long_name": chla.attrs["long_name"],
     "units": f'lg({chla.attrs["units"]})',
 })
-plot = chla_avg.plot(aspect=2, size=4)
+plot = chla_avg.plot(aspect=2, size=4, cmap='GnBu_r')
 
 # <div class="alert alert-info" role="alert">
 # <p>You have completed the notebook on OCI file structure. More notebooks are comming soon!</p>
