@@ -12,242 +12,245 @@
 #     name: python3
 # ---
 
-# # Understanding PACE file structure
+# # File Structure at Three Processing Levels for the Ocean Color Instrument (OCI)
 #
 # **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
-
+#
+# > **PREREQUISITES**
+# >
+# > This notebook has the following prerequisites:
+# > - <a href="oci_data_access.html" target="_blank">OCI Data Access</a>
+#
 # ## Summary
 # ***
-# In this example we will use the 'earthaccess' library to access a Level-1B, Level-2, and Level-3 PACE netcdf files and open them using `xarray`.
 #
+# In this example we will use the `earthaccess` package to access an OCI Level-1B, Level-2, and Level-3 NetCDF file and open them using `xarray`.
 #
-# **`netCDF`** (network Common Data Form) is a file format for storing multidimensional scientific data (variables). It is optimized for array-oriented data access and support a machine-independent format for representing scientific data. Files ending in `.nc` are netCDF files.
+# **NetCDF** ([Network Common Data Format][netcdf]) is a binary file format for storing multidimensional scientific data (variables). It is optimized for array-oriented data access and support a machine-independent format for representing scientific data. Files ending in `.nc` are NetCDF files.
 #
-# **<a href="https://xarray.dev/" target="_blank">`xarray`</a>** is a library that supports the use of multi-dimensional arrays in Python. It is widely used to handle Earth observation data, which often involves multiple dimensions — for instance, longitude, latitude, time, and channels/bands. <br>
-
-# >[!Important]   
-# ><b>PREREQUISITES</b>
-# <br>This notebook has the following prerequisites:
-# >- **<a href="./1_PACE_data_access.ipynb" target="_blank">1_PACE_data_access.ipynb</a>**
-#     <br><br>
-# </div>
-
-# ## Learning objectives
-# ***
+# **XArray** is a [package][xarray] that supports the use of multi-dimensional arrays in Python. It is widely used to handle Earth observation data, which often involves multiple dimensions — for instance, longitude, latitude, time, and channels/bands.
+#
+# ## Learning Objectives
 #
 # At the end of this notebok you will know:
-# * What a netCDF format is
-# * How to use `xarray` library to open PACE data
-# * What variables are present in each group for PACE data files (L1B, L2, and L3)
+# * How to find groups in a NetCDF file
+# * How to use `xarray` to open OCI data
+# * What key variables are present in the groups within OCI L1B, L2, and L3 files
 #
-#
-# ## <a id='TOC_TOP'>Contents
+# <a name="toc"></a>
+# ## Contents
 # ***
 #     
-#  1. [Imports](#section1)
-#  2. [`earthaccess` authentification](#section2)
-#  3. [Inspecting PACE L1B file structure](#section3)
-#  4. [Inspecting PACE L2 file structure](#section4)
-#  5. [Inspecting PACE L3 file structure](#section5)
-
-# ## <a id='section1'>1. Imports
+# 1. [Setup](#setup)
+# 1. [Inspecting OCI L1B File Structure](#l1b)
+# 1. [Inspecting OCI L2 File Structure](#l2)
+# 1. [Inspecting OCI L3 File Structure](#l3)
+#
+# <a name="setup"></a>
+# ## 1. Setup
 # ***
-# We begin by importing all of the libraries that we need to run this notebook. If you have created an environment following the [guidance] provided with this notebook, then the packages will be sucessfully imported.
+#
+# We begin by importing all of the packages used in this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the imports will be successful.
+#
+# [netcdf]: https://www.unidata.ucar.edu/software/netcdf/
+# [xarray]: https://docs.xarray.dev/
+# [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
-import earthaccess
-import xarray as xr
-import netCDF4 as nc
-import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
-import hvplot.xarray 
+import earthaccess
+import h5netcdf
+import matplotlib.pyplot as plt
+import numpy as np
+import xarray as xr
 
-# ## <a id='section2'>2.`earthaccess` authentication
+# Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
+
+auth = earthaccess.login(persist=True)
+
+# [Back to top](#top)
+# <a name="l1b"></a>
+# ## 2. Inspecting OCI L1B File Structure
 # ***
-
-auth = earthaccess.login()
-# are we authenticated?
-if not auth.authenticated:
-    # ask for credentials and persist them in a .netrc file
-    auth.login(strategy="interactive", persist=True)
-
-# ## <a id='section3'>3. Inspecting PACE L1B file structure
-# ***
-
-# Let's open up a set of PACE L1B netCDF files of the same scene using `earthaccess`. We will use the same search method used in <a href="./2_PACE_data_access.ipynb">2_PACE_data_access.ipynb </a> to access the data:
-
-# TODO : must raise error if not in region (i.e. uses HTTPS)
+#
+# Let's use `xarray` to open up a OCI L1B NetCDF file using `earthaccess`. We will use the same search method used in <a href="oci_data_access.html">OCI Data Access</a>. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
 
 # +
-date_range = ("2024-04-01", "2024-04-16")
-bbox = (-76.75,36.97,-75.74,39.01)
-
-results = earthaccess.search_data(
-    short_name = "PACE_OCI_L1B_SCI",
-    cloud_hosted = True,
-    temporal = date_range,
-    bounding_box = bbox,
-)
-
-L1B_files = earthaccess.open(results)
-L1B_files
-# -
-
-# We use `xarray` to open up PACE L1B netCDF files. Let's open the first file of the L1B_files list:
-
-dfs = xr.open_dataset(L1B_files[0])
-dfs
-
-# Notice that the xarray.Dataset has missing data in some of the categories. `xarray` cannot be used to open multi-group hierarchies or to list groups within a netCDF file, but it can open a specific group if you know its path.
-#
-# <div class="alert alert-info" role="alert"> 
-#
-# The `datatree` python library can be used to show group names. 
-#
-# Uncomment below to run:
-#
-# </div>
-
-# +
-#from datatree import open_datatree
-
-#datatree = open_datatree(L1B_files[0], engine='h5netcdf') 
-#datatree
-
-# TODO: include with just the list(datatree)
-# -
-
-# The PACE L1B dataset groups are `sensor_band_parameters`, `scan_line_attributes`, `geolocation_data`, `navigation_data`, and `observation_data`. Let's open the `observation_data` group:
-
-df_obs = xr.open_dataset(L1B_files[0], group='observation_data')
-df_obs
-
-# Now you can view the Dimensions, Coordinates, and Variables of this group. To show/hide attributes, press the paper icon on the right hand side of each variable. To show/hide data reprensetaton, press the cylinder icon. 
-
-# The dimensions of the `rhot_blue` variable is (blue_bands, number_of_scans, ccd_pixels) and has the shape (119, 1709, 1272). 
-
-df_obs['rhot_blue'].shape
-
-# Let's plot one blue band:
-
-df_obs['rhot_blue'][100,:,:].plot()
-
-# ## <a id='section4'>4. Inspecting PACE L2 file structure
-# ***
-
-# Now, let's open a PACE L2 Apparent Optical Data (AOP) file. We'll use the same `earthaccess` search to find the data:
-
-# +
-date_range = ("2024-04-01", "2024-04-16")
+tspan = ("2024-04-01", "2024-04-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 
 results = earthaccess.search_data(
-    short_name = "PACE_OCI_L2_AOP_NRT",
-    cloud_hosted = True,
-    temporal = date_range,
+    short_name = "PACE_OCI_L1B_SCI",
+    temporal = tspan,
     bounding_box = bbox,
-    cloud_cover = (0,50) #can include a cloud threshold with L2 data and above
 )
-
-L2_files = earthaccess.open(results)
-L2_files
-
-# +
-#from datatree import open_datatree
-
-#datatree = open_datatree(L2_files[0], engine='h5netcdf') 
-#datatree
 # -
 
-# The PACE L2 dataset groups are `sensor_band_parameters`, `scan_line_attributes`, `geophysical_data`, `navigation_data`. <br>
-# Let's look at the geophysical_data group
+paths = earthaccess.open(results)
 
-df_geo = xr.open_dataset(L2_files[0], group='geophysical_data')
-df_geo
+# We want to confirm we are running code on a remote host with direct access to the NASA Earthdata Cloud. The next cell has
+# no effect if we are, and otherwise raises an error. If there's an error, consider the substitution explained in the OCI Data Access notebook.
 
-# The Rrs data variable has a shape of (1710, 1272, 184). Let's map a random Rrs wavelength:
+try:
+    paths[0].f.bucket
+except AttributeError:
+    raise "The result opened without an S3FileSystem."
 
-df_geo['Rrs'][:,:,100].plot()
+# Let's open the first file of the L1B files list:
 
-# Right now, the scene is being plotted using number_of_lines and pixels_per_line (x,y). Let's add some lat and lon values to map it in a real coordinate space. To do this, we need to create a new xarrray dataset (rrs_xds) and pull in information from the `navigational_data` group (df_nav).
+dataset = xr.open_dataset(paths[0])
+dataset
 
-df_nav = xr.open_dataset(L2_files[0], group='navigation_data')
-df_nav
-
-rrs_xds = df_nav.rename({"pixel_control_points": "pixels_per_line"})
-rrs_xds = xr.merge((df_geo, rrs_xds))
-rrs_xds = rrs_xds.set_coords(("longitude", "latitude"))
-rrs_xds
-
-# Although we now have coordinates, they won't help much because the data are not "gridded" by latitude and longitude.
-# The Level 2 data are the original instument swath, and have not been resampled to a regular grid. Therefore latitude
-# and longitude are known, but cannot be used to "look-up" values like you can along the dataset's dimensions. <br>
+# Notice that this `xarray.Dataset` has nothing but "Attributes". We cannot use `xarray` to open multi-group hierarchies or list groups within a NetCDF file, but it can open a specific group if you know its path. The `xarray-datatree` package is going to be merged into `xarray` in the not too distant future, which will allow `xarray` to open the entire hieerarchy. In the meantime, we can use a lower level reader to see the top-level groups.
 #
-# Let's plot a scatter plot of the pixel locations so we can see the irregular spacing. 
+# TODO: Link to a PACE/OCI user's guide, referencing the section which explains each group.
 
-rrs_xds.sel({"number_of_lines": slice(None, None, 1720//20),
-        "pixels_per_line": slice(None, None, 1272//20),}).plot.scatter(x="longitude", y="latitude")
+with h5netcdf.File(paths[0]) as file:
+    groups = list(file)
+groups
 
-# Let's plot this new xarray dataset the same way as before, but add lat, lon
+# Let's open the "observation_data" group, which contains the core science variables.
 
-rrs_xds.Rrs[:,:,100].plot(x='longitude', y='latitude', cmap='viridis', vmin=0)
+dataset = xr.open_dataset(paths[0], group="observation_data")
+dataset
 
+# Now you can view the Dimensions, Coordinates, and Variables of this group. To show/hide attributes, press the paper icon on the right hand side of each variable. To show/hide data reprensetaton, press the cylinder icon. For instance, you could check the attributes on "rhot_blue" to see that this variable is the "Top of Atmosphere Blue Band Reflectance".
+#
+# The dimensions of the "rhot_blue" variable are ("blue_bands", "number_of_scans", "ccd_pixels"), and it has shape (119, 1709, 1272). The `sizes` attribute of a variable gives us that information as a dictionary.
 
-# If you wanna get fancy, add a coastline
+dataset["rhot_blue"].sizes
+
+# Let's plot the reflectance at postion 100 in the "blue_bands" dimension.
+
+plot = dataset["rhot_blue"].sel({"blue_bands": 100}).plot()
+
+# [Back to top](#toc)
+# <a name="l2"></a>
+# ## 3. Inspecting OCI L2 File Structure
+#
+# OCI L2 files include retrievals of geophysical variables, such as Apparent Optical Properties (AOP), for each L1 swath. We'll use the same `earthaccess` search for L2 AOP data. Although now we can use `cloud_cover` too.
 
 # +
+tspan = ("2024-04-01", "2024-04-23")
+bbox = (-76.75, 36.97, -75.74, 39.01)
+clouds = (0, 50)
+
+results = earthaccess.search_data(
+    short_name = "PACE_OCI_L2_AOP_NRT",
+    temporal = tspan,
+    bounding_box = bbox,
+    cloud_cover = clouds,
+)
+# -
+
+paths = earthaccess.open(results)
+try:
+    paths[0].f.bucket
+except AttributeError:
+    raise "The result opened without an S3FileSystem."
+
+with h5netcdf.File(paths[0]) as file:
+    groups = list(file)
+groups
+
+# Let's look at the "geophysical_data" group, which is a new group generated by the level 2 processing.
+
+dataset = xr.open_dataset(paths[0], group="geophysical_data")
+rrs = dataset["Rrs"]
+rrs
+
+rrs.sizes
+
+# The Rrs variable has length 184 in the wavelength dimension, so the blue, red, and SWIR wavelengths have been combined. Let's map the Rrs at "wavelength_3d" position 100.
+
+plot = rrs.sel({"wavelength_3d": 100}).plot()
+
+# Right now, the scene is being plotted using `number_of_lines` and `pixels_per_line` as "x" and "y", respectively. We need to add latitude and longitude values to create a true map. To do this, we will create a merged `xarray.Dataset` that pulls in information from the "navigation_data" group.
+
+dataset = xr.open_dataset(paths[0], group="navigation_data")
+dataset = dataset.set_coords(("longitude", "latitude"))
+dataset = dataset.rename({"pixel_control_points": "pixels_per_line"})
+dataset = xr.merge((rrs, dataset.coords))
+dataset
+
+# Although we now have coordinates, they won't immediately help because the data are not gridded by latitude and longitude.
+# The Level 2 data cover the original instrument swath and have not been resampled to a regular grid. Therefore latitude
+# and longitude are known, but cannot be used immediately to "look-up" values like you can along an array's dimensions.
+#
+# Let's make a scatter plot of the pixel locations so we can see the irregular spacing. By selecting a `slice` with a step size larger than one, we get a subset of the locations for better visualization.
+
+plot = dataset.sel(
+    {
+        "number_of_lines": slice(None, None, 1720 // 20),
+        "pixels_per_line": slice(None, None, 1272 // 20),
+    },
+).plot.scatter(x="longitude", y="latitude")
+
+# Let's plot this new `xarray.Dataset` the same way as before, but add latitude and longitude.
+
+rrs = dataset["Rrs"].sel({"wavelength_3d": 100})
+plot = rrs.plot(x="longitude", y="latitude", cmap="viridis", vmin=0)
+
+# Now you can project the data onto a grid. If you wanna get fancy, add a coastline.
+
 fig = plt.figure()
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.coastlines()
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
+plot = rrs.plot(x="longitude", y="latitude", cmap="viridis", vmin=0, ax=ax)
 
-rrs_xds.Rrs[:,:,100].plot(x='longitude', y='latitude', cmap='viridis', vmin=0)
+# Let's plot the full "Rrs" spectrum for individual pixels. A visualization with all the pixels
+# wouldn't be useful, but limiting to a bounding box gives a simple way to subset pixels. Note that,
+# since we still don't have gridded data (i.e. our latitude and longitude coordinates are two-dimensional),
+# we can't `slice` on a built-in index. Without getting into anything complex, we can just box it out.
 
-# + active=""
-# TODO: Figure out how to extract a pixel to plot Rrs spectrum. Some snippets below that might be helpful
+rrs_box = dataset["Rrs"].where(
+    (
+        (dataset["latitude"] > 37.52)
+        & (dataset["latitude"] < 37.55)
+        & (dataset["longitude"] > -75.46)
+        & (dataset["longitude"] < -75.43)
+    ),
+    drop=True
+)
+rrs_box.sizes
+
+# The line plotting method will only draw a line plot for 1D data, which we can get by stacking
+# our two spatial dimensions and choosing to show the new "pixel dimension" as different colors.
+
+rrs_stack = rrs_box.stack({"pixel": ["number_of_lines", "pixels_per_line"]}, create_index=False)
+plot = rrs_stack.plot.line(hue="pixel")
+
+# [Back to top](#toc)
+# <a name="l3"></a>
+# ## 4. Inspecting OCI L3 File Structure
+#
+#
+# At Level-3 there are binned (B) and mapped (M) products available for OCI. The L3M remote sensing reflectance (Rrs) files contain global maps of Rrs. We'll use the same `earthaccess` method to find the data.
 
 # +
-# TODO make this where thingy work, with point, and more general geometry if possible
-
-# +
-#rrs_xds.where((rrs_xds.latitude == 37) & (rrs_xds.longitude == -75), drop=True)
-# -
-
-'''
-rrs_xds_point = rrs_xds.sel({
-    "number_of_lines": 1650, 
-    "pixels_per_line": 1270,
-})
-rrs_xds_point.coords
-'''
-
-# +
-#rrs_xds_point["Rrs"].plot.line()
-# -
-
-# ## <a id='section5'>5. Inspecting PACE L3 file structure
-# ***
-
-# +
-date_range = ("2024-04-01", "2024-04-16")
-bbox = (-76.75,36.97,-75.74,39.01)
+tspan = ("2024-04-16", "2024-04-20")
+bbox = (-76.75, 36.97, -75.74, 39.01)
 
 results = earthaccess.search_data(
     short_name = "PACE_OCI_L3M_RRS_NRT",
-    cloud_hosted = True,
-    temporal = date_range,
-    bounding_box = bbox
+    temporal = tspan,
+    bounding_box = bbox,
 ) 
-
-L3_files = earthaccess.open(results)
-L3_files
 # -
 
-# PACE L3 data do not have any groups. We can open the dataset without specifying a group. 
+paths = earthaccess.open(results)
+try:
+    paths[0].f.bucket
+except AttributeError:
+    raise "The result opened without an S3FileSystem."
 
-df = xr.open_dataset(L3_files[0])
-df
+# OCI L3 data do not have any groups, so we can open the dataset without the `group` argument.
+# Let's take a look at the first file.
 
-# Notice that PACE L3 data has lat,lon coordinates. Let's map the Rrs_442 variable:
+dataset = xr.open_dataset(paths[0])
+dataset
+
+# Notice that OCI L3M data has `lat` and `lon` coordinates, so it's easy to slice out a bounding box and map the "Rrs_442" variable.
 
 # +
 fig = plt.figure()
@@ -255,23 +258,57 @@ ax = plt.axes(projection=ccrs.PlateCarree())
 ax.coastlines()
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
 
-df.Rrs_442[:,:].plot(cmap='viridis', vmin=0)
+rrs_442 = dataset["Rrs_442"].sel({"lat": slice(-25, -45), "lon": slice(10, 30)})
+plot = rrs_442.plot(cmap="viridis", vmin=0, ax=ax)
 # -
-
-
-
-# + active=""
-# TODO: maybe add last section on opening multiple L1B/L2 files together using open_mfdataset
-# -
-
-# # Combining data 
+# Also becuase the L3M variables have `lat` and `lon` coordinates, it's possible to stack multiple granules along a
+# new dimension that corresponds to time.
+# Instead of `xr.open_dataset`, we use `xr.open_mfdataset` to create a single `xarray.Dataset` (the "mf" in `open_mfdataset` stands for multiple files) from an array of paths.
+#
+# We also use a new search filter available in `earthaccess.search_data`: the `granule_name` argument accepts strings with the "*" wildcard. We need this to distinguish daily ("DAY") from eight-day ("8D") composites, as well as to get the 0.1 degree resolution projections.
 
 # +
-# todo use L2
+tspan = ("2024-04-12", "2024-04-24")
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_CHL_NRT",
+    temporal=tspan,
+    granule_name="*.DAY.*.0p1deg.*",
+)
 # -
 
-dfs = xr.open_mfdataset(L1B_files, group="observation_data", combine="nested", 
-                        concat_dim="number_of_scans", engine="h5netcdf")
-dfs
+paths = earthaccess.open(results)
+try:
+    paths[0].f.bucket
+except AttributeError:
+    raise "The result opened without an S3FileSystem."
 
+# The `paths` list is sorted temporally by default, which means the shape of the `paths` array specifies the way we need to tile the files together into larger arrays. We specify `combine="nested"` to combine the files according to the shape of the array of files (or file-like objects), even though `paths` is not a "nested" list in this case. The `concat_dim="date"` argument generates a new dimension in the combined dataset, because "date" is not an existing dimension in the individual files.
 
+dataset = xr.open_mfdataset(
+    paths,
+    combine="nested", 
+    concat_dim="date",
+)
+dataset
+
+# A common reason to generate a single dataset from multiple, daily images is to create a composite. Compare the map from a single day ...
+
+chla = np.log10(dataset["chlor_a"])
+chla.attrs.update({
+    "units": f'lg({dataset["chlor_a"].attrs["units"]})',
+})
+plot = chla.sel({"date": 0}).plot(aspect=2, size=4)
+
+# ... to a map of average values, skipping "NaN" values that result from clouds.
+
+chla_avg = chla.mean("date")
+chla_avg.attrs.update({
+    "long_name": chla.attrs["long_name"],
+    "units": f'lg({chla.attrs["units"]})',
+})
+plot = chla_avg.plot(aspect=2, size=4)
+
+# <div class="alert alert-info" role="alert">
+# <p>You have completed the notebook on OCI file structure. More notebooks are comming soon!</p>
+# </div>
