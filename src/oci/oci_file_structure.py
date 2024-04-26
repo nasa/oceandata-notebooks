@@ -313,7 +313,7 @@ chla_avg = chla.mean("date")
 chla_avg.attrs.update(
     {
         "long_name": chla.attrs["long_name"],
-        "units": f'lg({chla.attrs["units"]})',
+        "units": chla.attrs["units"],
     }
 )
 plot = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
