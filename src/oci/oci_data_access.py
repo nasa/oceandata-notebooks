@@ -200,7 +200,7 @@ line
 # a binary file that needs a reader which understands the file format.
 #
 # The `earthaccess.open` method is used when you want to directly read
-# a file from a remote filesystem, and not to download it. When
+# a file from a remote filesystem, and not download it. When
 # running code on a host with direct access to the NASA Earthdata
 # Cloud, you don't need to download the data, and `earthaccess.open`
 # is the way to go.
