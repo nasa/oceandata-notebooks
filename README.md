@@ -35,9 +35,9 @@ to manually [make the environment available to JupyterLab as a kernel][conda-ker
 
 #### Learn with OCI
 
-1. Download data using earthaccess
+1. Data Access
 1. **Earthdata Cloud** File Structure at 3 Processing Levels
-1. substitutions in cloud notebooks needed to run locally 
+1. more comming soon!
 
 #### Learn with HARP2
 
@@ -49,9 +49,13 @@ to manually [make the environment available to JupyterLab as a kernel][conda-ker
 
 #### Learn with MODIS
 
-1. Map Level-2 Chlorophyll with netCDF4
-1. Map Level-2 Chlorophyll with XArray
-1. Map Level-3 Chlorophyll and Rrs with XArray
+1. Map Level-2 Chlorophyll using `netcdf4`
+1. Map Level-2 Chlorophyll using `xarray`
+1. Map Level-3 Chlorophyll and Rrs using `xarray`
+
+### How to Cite
+
+
 
 ## For Contributors
 

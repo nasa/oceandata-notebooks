@@ -50,17 +50,17 @@
 # <h2>Contents</h2><a name="toc"></a>
 # </div>
 #
-# 1. [Imports](#imports)
+# 1. [Setup](#setup)
 # 1. [NASA Earthdata authentication](#auth)
 # 1. [Search for data](#search)
 # 1. [Download data](#download)
 #
 # <div class="alert alert-info" role="alert">
-# <h2>1. Imports</h2><a name="imports"></a>
+# <h2>1. Setup</h2><a name="setup"></a>
 # <a href="#toc">[Back to top]</a>
 # </div>
 #
-# We begin by importing the only library we need to run this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the package will be sucessfully imported.
+# We begin by importing the only package used in this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the import will be successful.
 #
 # [codespaces]: https://github.blog/changelog/2022-11-09-using-codespaces-with-jupyterlab-public-beta/
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
@@ -108,13 +108,13 @@ results = earthaccess.search_data(
 # We can refine our search by passing more parameters that describe the spatiotemporal domain of our use case. Here, we use the `temporal` parameter to request a date range and the `bounding_box` parameter to request granules that intersect with a bounding box. We can even provide a `cloud_cover` threshold to limit files that have a lower percetnage of cloud cover. We do not provide a `count`, so we'll get all granules that satisfy the constraints.
 
 # +
-dates = ("2024-04-01", "2024-04-16")
+tspand = ("2024-04-01", "2024-04-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 clouds = (0, 50)
 
 results = earthaccess.search_data(
     short_name = "PACE_OCI_L2_AOP_NRT",
-    temporal = dates,
+    temporal = tspan,
     bounding_box = bbox, 
     cloud_cover = clouds,
 )
