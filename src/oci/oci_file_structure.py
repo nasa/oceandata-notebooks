@@ -40,7 +40,7 @@
 # <a name="toc"></a>
 # ## Contents
 # ***
-#     
+#
 # 1. [Setup](#setup)
 # 1. [Inspecting OCI L1B File Structure](#l1b)
 # 1. [Inspecting OCI L2 File Structure](#l2)
@@ -79,9 +79,9 @@ tspan = ("2024-04-01", "2024-04-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 
 results = earthaccess.search_data(
-    short_name = "PACE_OCI_L1B_SCI",
-    temporal = tspan,
-    bounding_box = bbox,
+    short_name="PACE_OCI_L1B_SCI",
+    temporal=tspan,
+    bounding_box=bbox,
 )
 # -
 
@@ -135,10 +135,10 @@ bbox = (-76.75, 36.97, -75.74, 39.01)
 clouds = (0, 50)
 
 results = earthaccess.search_data(
-    short_name = "PACE_OCI_L2_AOP_NRT",
-    temporal = tspan,
-    bounding_box = bbox,
-    cloud_cover = clouds,
+    short_name="PACE_OCI_L2_AOP_NRT",
+    temporal=tspan,
+    bounding_box=bbox,
+    cloud_cover=clouds,
 )
 # -
 
@@ -162,7 +162,7 @@ rrs.sizes
 
 # The Rrs variable has length 184 in the wavelength dimension, so the blue, red, and SWIR wavelengths have been combined. Let's map the Rrs at "wavelength_3d" position 100.
 
-plot = rrs.sel({"wavelength_3d": 100}).plot(cmap='viridis')
+plot = rrs.sel({"wavelength_3d": 100}).plot(cmap="viridis")
 
 # Right now, the scene is being plotted using `number_of_lines` and `pixels_per_line` as "x" and "y", respectively. We need to add latitude and longitude values to create a true map. To do this, we will create a merged `xarray.Dataset` that pulls in information from the "navigation_data" group.
 
@@ -210,17 +210,20 @@ rrs_box = dataset["Rrs"].where(
         & (dataset["longitude"] > -75.46)
         & (dataset["longitude"] < -75.43)
     ),
-    drop=True
+    drop=True,
 )
 rrs_box.sizes
 
 # The line plotting method will only draw a line plot for 1D data, which we can get by stacking
 # our two spatial dimensions and choosing to show the new "pixel dimension" as different colors.
 
-rrs_stack = rrs_box.stack({"pixel": ["number_of_lines", "pixels_per_line"]}, create_index=False)
+rrs_stack = rrs_box.stack(
+    {"pixel": ["number_of_lines", "pixels_per_line"]},
+    create_index=False,
+)
 plot = rrs_stack.plot.line(hue="pixel")
 
-# We will go over how to plot Rrs spectra with accurate wavelength values on the x-axis in an upcoming notebook. 
+# We will go over how to plot Rrs spectra with accurate wavelength values on the x-axis in an upcoming notebook.
 
 # [Back to top](#toc)
 # <a name="l3"></a>
@@ -234,10 +237,10 @@ tspan = ("2024-04-16", "2024-04-20")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 
 results = earthaccess.search_data(
-    short_name = "PACE_OCI_L3M_RRS_NRT",
-    temporal = tspan,
-    bounding_box = bbox,
-) 
+    short_name="PACE_OCI_L3M_RRS_NRT",
+    temporal=tspan,
+    bounding_box=bbox,
+)
 # -
 
 paths = earthaccess.open(results)
@@ -289,7 +292,7 @@ except AttributeError:
 
 dataset = xr.open_mfdataset(
     paths,
-    combine="nested", 
+    combine="nested",
     concat_dim="date",
 )
 dataset
@@ -297,19 +300,23 @@ dataset
 # A common reason to generate a single dataset from multiple, daily images is to create a composite. Compare the map from a single day ...
 
 chla = np.log10(dataset["chlor_a"])
-chla.attrs.update({
-    "units": f'lg({dataset["chlor_a"].attrs["units"]})',
-})
-plot = chla.sel({"date": 0}).plot(aspect=2, size=4, cmap='GnBu_r')
+chla.attrs.update(
+    {
+        "units": f'lg({dataset["chlor_a"].attrs["units"]})',
+    }
+)
+plot = chla.sel({"date": 0}).plot(aspect=2, size=4, cmap="GnBu_r")
 
 # ... to a map of average values, skipping "NaN" values that result from clouds.
 
 chla_avg = chla.mean("date")
-chla_avg.attrs.update({
-    "long_name": chla.attrs["long_name"],
-    "units": f'lg({chla.attrs["units"]})',
-})
-plot = chla_avg.plot(aspect=2, size=4, cmap='GnBu_r')
+chla_avg.attrs.update(
+    {
+        "long_name": chla.attrs["long_name"],
+        "units": f'lg({chla.attrs["units"]})',
+    }
+)
+plot = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
 
 # <div class="alert alert-info" role="alert">
 # <p>You have completed the notebook on OCI file structure. More notebooks are comming soon!</p>

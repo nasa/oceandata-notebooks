@@ -56,8 +56,8 @@
 # At the end of this notebook you will know:
 #
 # * How to store your NASA Earthdata Login credentials with `earthaccess`
-# * How to use `earthaccess` to search for PACE data using search filters
-# * How to download PACE data, but only when you need to
+# * How to use `earthaccess` to search for OCI data using search filters
+# * How to download OCI data, but only when you need to
 #
 # <a name="toc"></a>
 # ## Contents
@@ -104,9 +104,9 @@ import earthaccess
 # allow you to input credentials.
 #
 # <div class="alert alert-info" role="alert">
-# The `persist=True` argument ensures any discovered credentials are
-# stored in a `.netrc` file, so the argument is not necessary (but
-# it's also harmless) for subsequent calls to `earthaccess.login`.
+# The <code>persist=True</code> argument ensures any discovered credentials are
+# stored in a <code>.netrc</code> file, so the argument is not necessary (but
+# it's also harmless) for subsequent calls to <code>earthaccess.login</code>.
 # </div>
 
 auth = earthaccess.login(persist=True)
@@ -117,31 +117,30 @@ auth = earthaccess.login(persist=True)
 # ***
 
 # Collections on NASA Earthdata are discovered with the
-# `search_datasets` method, which accepts an `instrument` filter as an
+# `search_datasets` function, which accepts an `instrument` filter as an
 # easy way to get started. Each of the items in the list of
-# collections returned has a "short name".
+# collections returned has a "short-name".
 
-results = earthaccess.search_datasets(
-    instrument="oci",
-)
+results = earthaccess.search_datasets(instrument="oci")
+
 for item in results:
     summary = item.summary()
     print(summary["short-name"])
 
-# Next, we use the `search_data` method to find granules within a
+# Next, we use the `search_data` function to find granules within a
 # collection. Let's use the `short_name` for the PACE/OCI Level-2
 # quick-look product for apparent optical properties (although you can
 # search for granules accross collections too).
 #
 # <div class="alert alert-info" role="alert">
-# The short name can also be found on <a href="https://search.earthdata.nasa.gov/search?fi=SPEXone!HARP2!OCI&fpb0=Space-based%20Platforms" target="_blank"> Eartdata Search</a>, directly under the collection name, when clicking on the "i" button for each collection in a search result.
+# The short name can also be found on <a href="https://search.earthdata.nasa.gov/search?fi=SPEXone!HARP2!OCI&fpb0=Space-based%20Platforms" target="_blank"> Eartdata Search</a>, directly under the collection name, after clicking on the "i" button for a collection in any search result.
 # </div>
 #
 # The `count` argument limits the number of granules returned and stored in the `results` list.
 
 results = earthaccess.search_data(
-    short_name = "PACE_OCI_L2_AOP_NRT",
-    count = 1,
+    short_name="PACE_OCI_L2_AOP_NRT",
+    count=1,
 )
 
 # We can refine our search by passing more parameters that describe
@@ -158,10 +157,10 @@ bbox = (-76.75, 36.97, -75.74, 39.01)
 clouds = (0, 50)
 
 results = earthaccess.search_data(
-    short_name = "PACE_OCI_L2_AOP_NRT",
-    temporal = tspan,
-    bounding_box = bbox, 
-    cloud_cover = clouds,
+    short_name="PACE_OCI_L2_AOP_NRT",
+    temporal=tspan,
+    bounding_box=bbox,
+    cloud_cover=clouds,
 )
 # -
 
@@ -182,7 +181,7 @@ results[0]
 # ***
 #
 # First, let's understand what the alternative is to downloading
-# granules. The `earthaccess.open` method accepts the results from
+# granules. The `earthaccess.open` function accepts the list of results from
 # `earthaccess.search_data` and returns a list of file-like objects,
 # but no actual files are transferred.
 
@@ -199,15 +198,15 @@ line
 # Of course that doesn't mean anything (does it? 😉), because this is
 # a binary file that needs a reader which understands the file format.
 #
-# The `earthaccess.open` method is used when you want to directly read
-# a file from a remote filesystem, and not download it. When
+# The `earthaccess.open` function is used when you want to directly read
+# a bytes from a remote filesystem, but not download a whole file. When
 # running code on a host with direct access to the NASA Earthdata
-# Cloud, you don't need to download the data, and `earthaccess.open`
+# Cloud, you don't need to download the data and `earthaccess.open`
 # is the way to go.
 #
-# Now, let's look at the `earthaccess.download` method, which is used
+# Now, let's look at the `earthaccess.download` function, which is used
 # to copy files onto a filesystem local to the machine executing the
-# code. For this method, provide the output of
+# code. For this function, provide the output of
 # `earthaccess.search_data` along with a directory where `earthaccess`
 # will store downloaded granules.
 #
@@ -228,8 +227,8 @@ paths = earthaccess.download(results, "L2_AOP")
 paths
 
 # <div class="alert alert-block alert-warning">
-# Anywhere in any of <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/">these notebooks</a> where <pre>paths = earthaccess.open(...)</pre> is used to read data directly from the NASA Earthdata Cloud, you need to substitute <pre>paths = earthaccess.download(..., local_path)</pre> before running the notebook on a host, whether local or remote, that does not have direct access to the NASA Earthdata Cloud.
+# Anywhere in any of <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/">these notebooks</a> where <pre>paths = earthaccess.open(...)</pre> is used to read data directly from the NASA Earthdata Cloud, you need to substitute <pre>paths = earthaccess.download(..., local_path)</pre> before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
 # </div>
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on opening the structure of OCI data products at 3 processing levels.</p>
+# <p>You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on File Structure at Three Processing Levels.</p>
 # </div>
