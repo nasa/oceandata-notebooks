@@ -36,7 +36,8 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
    ```
 5. Auto populate somewhere using:
    ```
-   jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --to=html --output-dir=
+   cd docs/oci
+   jupyter nbconvert --to=html --execute *.ipynb
    ```
 
 ## How to Cite
