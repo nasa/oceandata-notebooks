@@ -12,48 +12,43 @@
 #     name: python3
 # ---
 
-# # File Structure at 3 Processing Levels for the Ocean Color Instrument (OCI)
+# # File Structure at Three Processing Levels for the Ocean Color Instrument (OCI)
 #
 # **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 #
-# <div class="alert alert-block alert-warning">
-# <b>PREREQUISITES</b>
-# <p>This notebook has the following prerequisites:</p>
-# <ul>
-#     <li>
-#     <a href="oci_data_access.html" target="_blank">OCI Data Access</a>
-#     </li>
-# </ul>
-# </div>
-#
-# ## Learning objectives
-#
-# At the end of this notebok you will know:
-# * What the NetCDF format is
-# * How to use `xarray` library to open OCI data
-# * What variables are present in each group for OCI data files (L1B, L2, and L3)
+# > **PREREQUISITES**
+# >
+# > This notebook has the following prerequisites:
+# > - <a href="oci_data_access.html" target="_blank">OCI Data Access</a>
 #
 # ## Summary
+# ***
 #
 # In this example we will use the `earthaccess` package to access an OCI Level-1B, Level-2, and Level-3 NetCDF file and open them using `xarray`.
 #
 # **NetCDF** ([Network Common Data Format][netcdf]) is a binary file format for storing multidimensional scientific data (variables). It is optimized for array-oriented data access and support a machine-independent format for representing scientific data. Files ending in `.nc` are NetCDF files.
 #
-# **XArray** is a [package][xarray] that supports the use of multi-dimensional arrays in Python. It is widely used to handle Earth observation data, which often involves multiple dimensions — for instance, longitude, latitude, time, and channels/bands. <br>
+# **XArray** is a [package][xarray] that supports the use of multi-dimensional arrays in Python. It is widely used to handle Earth observation data, which often involves multiple dimensions — for instance, longitude, latitude, time, and channels/bands.
 #
-# <div class="alert alert-info" role="alert">
-# <h2>Contents</h2><a name="toc"></a>
-# </div>
+# ## Learning Objectives
 #
+# At the end of this notebok you will know:
+# * How to find groups in a NetCDF file
+# * How to use `xarray` to open OCI data
+# * What key variables are present in the groups within OCI L1B, L2, and L3 files
+#
+# <a name="toc"></a>
+# ## Contents
+# ***
+#     
 # 1. [Setup](#setup)
-# 1. [Inspecting PACE L1B file structure](#l1b)
-# 1. [Inspecting PACE L2 file structure](#l2)
-# 1. [Inspecting PACE L3 file structure](#l3)
+# 1. [Inspecting OCI L1B File Structure](#l1b)
+# 1. [Inspecting OCI L2 File Structure](#l2)
+# 1. [Inspecting OCI L3 File Structure](#l3)
 #
-# <div class="alert alert-info" role="alert">
-# <h2>1. Setup</h2><a name="setup"></a>
-# <a href="#toc">[Back to top]</a>
-# </div>
+# <a name="setup"></a>
+# ## 1. Setup
+# ***
 #
 # We begin by importing all of the packages used in this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the imports will be successful.
 #
@@ -68,15 +63,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
-
-# Get (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
+# Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
 
 auth = earthaccess.login(persist=True)
 
-# <div class="alert alert-info" role="alert">
-# <h2>2. Inspecting OCI L1B File Structure</h2><a name="l1b"></a>
-# <a href="#toc">[Back to top]</a>
-# </div>
+# [Back to top](#top)
+# <a name="l1b"></a>
+# ## 2. Inspecting OCI L1B File Structure
+# ***
 #
 # Let's use `xarray` to open up a OCI L1B NetCDF file using `earthaccess`. We will use the same search method used in <a href="oci_data_access.html">OCI Data Access</a>. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
 
@@ -107,12 +101,12 @@ dataset = xr.open_dataset(paths[0])
 dataset
 
 # Notice that this `xarray.Dataset` has nothing but "Attributes". We cannot use `xarray` to open multi-group hierarchies or list groups within a NetCDF file, but it can open a specific group if you know its path. The `xarray-datatree` package is going to be merged into `xarray` in the not too distant future, which will allow `xarray` to open the entire hieerarchy. In the meantime, we can use a lower level reader to see the top-level groups.
+#
+# TODO: Link to a PACE/OCI user's guide, referencing the section which explains each group.
 
 with h5netcdf.File(paths[0]) as file:
     groups = list(file)
 groups
-
-# TODO: Link to a PACE/OCI user's guide, referencing the section which explains each group.
 
 # Let's open the "observation_data" group, which contains the core science variables.
 
@@ -129,10 +123,9 @@ dataset["rhot_blue"].sizes
 
 plot = dataset["rhot_blue"].sel({"blue_bands": 100}).plot()
 
-# <div class="alert alert-info" role="alert">
-# <h2>3. Inspecting OCI L2 File Structure</h2><a name="l2"></a>
-# <a href="#toc">[Back to top]</a>
-# </div>
+# [Back to top](#toc)
+# <a name="l2"></a>
+# ## 3. Inspecting OCI L2 File Structure
 #
 # OCI L2 files include retrievals of geophysical variables, such as Apparent Optical Properties (AOP), for each L1 swath. We'll use the same `earthaccess` search for L2 AOP data. Although now we can use `cloud_cover` too.
 
@@ -197,7 +190,6 @@ plot = dataset.sel(
 rrs = dataset["Rrs"].sel({"wavelength_3d": 100})
 plot = rrs.plot(x="longitude", y="latitude", cmap="viridis", vmin=0)
 
-
 # Now you can project the data onto a grid. If you wanna get fancy, add a coastline.
 
 fig = plt.figure()
@@ -228,12 +220,12 @@ rrs_box.sizes
 rrs_stack = rrs_box.stack({"pixel": ["number_of_lines", "pixels_per_line"]}, create_index=False)
 plot = rrs_stack.plot.line(hue="pixel")
 
-# <div class="alert alert-info" role="alert">
-# <h2>4. Inspecting OCI L3 File Structure</h2><a name="l3"></a>
-# <a href="#toc">[Back to top]</a>
-# </div>
+# [Back to top](#toc)
+# <a name="l3"></a>
+# ## 4. Inspecting OCI L3 File Structure
 #
-# At Level-3, there are binned (B) and mapped (M) products available for OCI. The L3M Remote sensing reflectance (Rrs) files contain global maps of Rrs. We'll use the same `earthaccess` search to find the data.
+#
+# At Level-3 there are binned (B) and mapped (M) products available for OCI. The L3M remote sensing reflectance (Rrs) files contain global maps of Rrs. We'll use the same `earthaccess` method to find the data.
 
 # +
 tspan = ("2024-04-16", "2024-04-20")
