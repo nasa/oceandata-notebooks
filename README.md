@@ -6,6 +6,7 @@ A repository for notebooks delivered as [oceandata tutorials and data recipes][t
 
 > [!NOTE]
 > This "For Users" section should be delivered as content displayed on the [webpage][tutorials] as the first section.
+> That page will (eventually) have notebook download links targeting the [docs](docs/) folder.
 
 ### About
 
