@@ -26,3 +26,7 @@ OCI:
 SPEXone/HARP2:
 - plotting swath 
 - in situ satellite matching
+
+
+TODO
+- link to User's Guide that explain nc file contents in detail

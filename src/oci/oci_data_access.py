@@ -24,7 +24,6 @@
 # > - There are no prerequisite notebooks for this module.
 #
 # ## Summary
-# ***
 #
 # In this example we will use the `earthaccess` package to search for
 # OCI products on NASA Earthdata. The `earthaccess` package, published
@@ -51,7 +50,6 @@
 # 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud. At this time, we cannot provide a "for instance" which is available to everyone.
 #
 # ## Learning Objectives
-# ***
 #
 # At the end of this notebook you will know:
 #
@@ -61,7 +59,6 @@
 #
 # <a name="toc"></a>
 # ## Contents
-# ***
 #
 # 1. [Setup](#setup)
 # 1. [NASA Earthdata Authentication](#auth)
@@ -70,7 +67,6 @@
 #
 # <a name="setup"></a>
 # ## 1. Setup
-# ***
 #
 # We begin by importing the only package used in this notebook. If you
 # have created an environment following the [guidance][tutorials]
@@ -89,9 +85,7 @@ import earthaccess
 # [Back to top](#top)
 # <a name="auth"></a>
 # ## 2. NASA Earthdata Authentication
-# ***
 #
-
 # Next, we authenticate using our Earthdata Login
 # credentials. Authentication is not needed to search publicaly
 # available collections in Earthdata, but is always needed to access
@@ -114,8 +108,7 @@ auth = earthaccess.login(persist=True)
 # [Back to top](#top)
 # <a name="search"></a>
 # ## 3. Search for Data
-# ***
-
+#
 # Collections on NASA Earthdata are discovered with the
 # `search_datasets` function, which accepts an `instrument` filter as an
 # easy way to get started. Each of the items in the list of
@@ -178,7 +171,6 @@ results[0]
 # [Back to top](#top)
 # <a name="download"></a>
 # ## 4. Download Data
-# ***
 #
 # First, let's understand what the alternative is to downloading
 # granules. The `earthaccess.open` function accepts the list of results from

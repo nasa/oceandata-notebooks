@@ -22,7 +22,6 @@
 # > - <a href="oci_data_access.html" target="_blank">OCI Data Access</a>
 #
 # ## Summary
-# ***
 #
 # In this example we will use the `earthaccess` package to access an OCI Level-1B, Level-2, and Level-3 NetCDF file and open them using `xarray`.
 #
@@ -39,7 +38,6 @@
 #
 # <a name="toc"></a>
 # ## Contents
-# ***
 #
 # 1. [Setup](#setup)
 # 1. [Inspecting OCI L1B File Structure](#l1b)
@@ -48,7 +46,6 @@
 #
 # <a name="setup"></a>
 # ## 1. Setup
-# ***
 #
 # We begin by importing all of the packages used in this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the imports will be successful.
 #
@@ -70,7 +67,6 @@ auth = earthaccess.login(persist=True)
 # [Back to top](#top)
 # <a name="l1b"></a>
 # ## 2. Inspecting OCI L1B File Structure
-# ***
 #
 # Let's use `xarray` to open up a OCI L1B NetCDF file using `earthaccess`. We will use the same search method used in <a href="oci_data_access.html">OCI Data Access</a>. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
 
@@ -101,8 +97,6 @@ dataset = xr.open_dataset(paths[0])
 dataset
 
 # Notice that this `xarray.Dataset` has nothing but "Attributes". We cannot use `xarray` to open multi-group hierarchies or list groups within a NetCDF file, but it can open a specific group if you know its path. The `xarray-datatree` package is going to be merged into `xarray` in the not too distant future, which will allow `xarray` to open the entire hieerarchy. In the meantime, we can use a lower level reader to see the top-level groups.
-#
-# TODO: Link to a PACE/OCI user's guide, referencing the section which explains each group.
 
 with h5netcdf.File(paths[0]) as file:
     groups = list(file)
@@ -228,7 +222,6 @@ plot = rrs_stack.plot.line(hue="pixel")
 # [Back to top](#toc)
 # <a name="l3"></a>
 # ## 4. Inspecting OCI L3 File Structure
-#
 #
 # At Level-3 there are binned (B) and mapped (M) products available for OCI. The L3M remote sensing reflectance (Rrs) files contain global maps of Rrs. We'll use the same `earthaccess` method to find the data.
 
