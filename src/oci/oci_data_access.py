@@ -144,7 +144,6 @@ results = earthaccess.search_data(
 # a lower percetnage of cloud cover. We do not provide a `count`, so
 # we'll get all granules that satisfy the constraints.
 
-# +
 tspan = ("2024-04-01", "2024-04-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 clouds = (0, 50)
@@ -155,7 +154,6 @@ results = earthaccess.search_data(
     bounding_box=bbox,
     cloud_cover=clouds,
 )
-# -
 
 # Displaying a single result shows a direct download link: try it! The
 # link will download the granule to your local machine, which may or
