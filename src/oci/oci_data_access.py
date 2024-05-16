@@ -156,14 +156,26 @@ results = earthaccess.search_data(
 
 results[0]
 
+results[1]
+
+results[2]
+
 # [Back to top](#top)
 # <a name="download"></a>
 # ## 4. Download Data
 #
-# First, let's understand what the alternative is to downloading
-# granules. The `earthaccess.open` function accepts the list of results from
-# `earthaccess.search_data` and returns a list of file-like objects,
-# but no actual files are transferred.
+# An upcoming tutorial will need access to Level-1 files, whether or not we have direct access to the Earthdata Cloud, so let's go ahead and download a couple granules. As always, we start with an `earthaccess.search_data`.
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L1B_SCI",
+    temporal=tspan,
+    bounding_box=bbox,
+    count=2,
+)
+
+# Now, we need to first understand the alternative to downloading granules, since you may be surprised
+# that there is an alternative at all. The `earthaccess.open` function accepts the list of results from
+# `earthaccess.search_data` and returns a list of file-like objects. No actual files are transferred.
 
 paths = earthaccess.open(results)
 
@@ -199,8 +211,9 @@ line
 #
 # Let's continue to downloading the list of granules!
 
-os.mkdir("L2_BGC")
-paths = earthaccess.download(results, "L2_BGC")
+directory = pathlib.Path("L1B")
+directory.mkdir(exist_ok=True)
+paths = earthaccess.download(results, directory)
 
 # The `paths` list now contains paths to actual files on the local
 # filesystem.
