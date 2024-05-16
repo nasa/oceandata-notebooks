@@ -1,17 +1,3 @@
-# ---
-# jupyter:
-#   jupytext:
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.16.1
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
 # # Access Data from the Ocean Color Instrument (OCI)
 #
 # **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
@@ -82,6 +68,10 @@
 
 import earthaccess
 
+# We also need `os` for directory creation, at least until `earthaccess` version 0.9.1 is available.
+
+import os
+
 # [Back to top](#top)
 # <a name="auth"></a>
 # ## 2. NASA Earthdata Authentication
@@ -122,17 +112,17 @@ for item in results:
 
 # Next, we use the `search_data` function to find granules within a
 # collection. Let's use the `short_name` for the PACE/OCI Level-2
-# quick-look product for apparent optical properties (although you can
+# quick-look, or near real time (NRT), product for biogeochemical properties (although you can
 # search for granules accross collections too).
 #
 # <div class="alert alert-info" role="alert">
-# The short name can also be found on <a href="https://search.earthdata.nasa.gov/search?fi=SPEXone!HARP2!OCI&fpb0=Space-based%20Platforms" target="_blank"> Eartdata Search</a>, directly under the collection name, after clicking on the "i" button for a collection in any search result.
+# The short name can also be found on <a href="https://search.earthdata.nasa.gov/search?fi=SPEXone!HARP2!OCI" target="_blank"> Eartdata Search</a>, directly under the collection name, after clicking on the "i" button for a collection in any search result.
 # </div>
 #
-# The `count` argument limits the number of granules returned and stored in the `results` list.
+# The `count` argument limits the number of granules returned and stored in the `results` list, not the number of granules found.
 
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_AOP_NRT",
+    short_name="PACE_OCI_L2_BGC_NRT",
     count=1,
 )
 
@@ -144,12 +134,12 @@ results = earthaccess.search_data(
 # a lower percetnage of cloud cover. We do not provide a `count`, so
 # we'll get all granules that satisfy the constraints.
 
-tspan = ("2024-04-01", "2024-04-16")
+tspan = ("2024-05-01", "2024-05-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 clouds = (0, 50)
 
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_AOP_NRT",
+    short_name="PACE_OCI_L2_BGC_NRT",
     temporal=tspan,
     bounding_box=bbox,
     cloud_cover=clouds,
@@ -209,7 +199,8 @@ line
 #
 # Let's continue to downloading the list of granules!
 
-paths = earthaccess.download(results, "L2_AOP")
+os.mkdir("L2_BGC")
+paths = earthaccess.download(results, "L2_BGC")
 
 # The `paths` list now contains paths to actual files on the local
 # filesystem.

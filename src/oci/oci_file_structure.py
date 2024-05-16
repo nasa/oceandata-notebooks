@@ -1,17 +1,3 @@
-# ---
-# jupyter:
-#   jupytext:
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.16.1
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
 # # File Structure at Three Processing Levels for the Ocean Color Instrument (OCI)
 #
 # **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
@@ -71,7 +57,7 @@ auth = earthaccess.login(persist=True)
 # Let's use `xarray` to open up a OCI L1B NetCDF file using `earthaccess`. We will use the same search method used in <a href="oci_data_access.html">OCI Data Access</a>. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
 
 # +
-tspan = ("2024-04-01", "2024-04-16")
+tspan = ("2024-05-01", "2024-05-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 
 results = earthaccess.search_data(
@@ -124,7 +110,7 @@ plot = dataset["rhot_blue"].sel({"blue_bands": 100}).plot()
 # OCI L2 files include retrievals of geophysical variables, such as Apparent Optical Properties (AOP), for each L1 swath. We'll use the same `earthaccess` search for L2 AOP data. Although now we can use `cloud_cover` too.
 
 # +
-tspan = ("2024-04-01", "2024-04-23")
+tspan = ("2024-05-01", "2024-05-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 clouds = (0, 50)
 
@@ -226,7 +212,7 @@ plot = rrs_stack.plot.line(hue="pixel")
 # At Level-3 there are binned (B) and mapped (M) products available for OCI. The L3M remote sensing reflectance (Rrs) files contain global maps of Rrs. We'll use the same `earthaccess` method to find the data.
 
 # +
-tspan = ("2024-04-16", "2024-04-20")
+tspan = ("2024-05-01", "2024-05-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 
 results = earthaccess.search_data(
@@ -266,7 +252,7 @@ plot = rrs_442.plot(cmap="viridis", vmin=0, ax=ax)
 # We also use a new search filter available in `earthaccess.search_data`: the `granule_name` argument accepts strings with the "*" wildcard. We need this to distinguish daily ("DAY") from eight-day ("8D") composites, as well as to get the 0.1 degree resolution projections.
 
 # +
-tspan = ("2024-04-12", "2024-04-24")
+tspan = ("2024-05-01", "2024-05-8")
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_CHL_NRT",
@@ -300,7 +286,7 @@ chla.attrs.update(
 )
 plot = chla.sel({"date": 0}).plot(aspect=2, size=4, cmap="GnBu_r")
 
-# ... to a map of average values, skipping "NaN" values that result from clouds.
+# ... to a map of average values, skipping "NaN" values that result from clouds and the OCI's tilt maneuver.
 
 chla_avg = chla.mean("date")
 chla_avg.attrs.update(
