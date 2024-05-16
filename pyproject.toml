@@ -37,6 +37,10 @@ Homepage = "https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/"
 Repository = "https://github.com/gsfc-oel/oceandata-notebooks"
 Issues = "https://github.com/gsfc-oel/oceandata-notebooks/issues"
 
+[tool.jupytext]
+notebook_metadata_filter = "-all"
+cell_metadata_filter = "-all"
+
 [tool.jupytext.formats]
 "notebooks/" = "ipynb"
 "src/" = "py"
