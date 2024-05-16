@@ -68,9 +68,9 @@
 
 import earthaccess
 
-# We also need `os` for directory creation, at least until `earthaccess` version 0.9.1 is available.
+# We also need `pathlib` for directory creation, at least until `earthaccess` version 0.9.1 is available.
 
-import os
+import pathlib
 
 # [Back to top](#top)
 # <a name="auth"></a>
@@ -145,8 +145,8 @@ results = earthaccess.search_data(
     cloud_cover=clouds,
 )
 
-# Displaying a single result shows a direct download link: try it! The
-# link will download the granule to your local machine, which may or
+# Displaying results shows the direct download link: try it! The
+# link will download one granule to your local machine, which may or
 # may not be what you want to do. Even if you are running the notebook
 # on a remote host, this download link will open a new browser tab or
 # window and offer to save a file to your local machine. If you are
@@ -187,7 +187,7 @@ with paths[0] as file:
     line = file.readline().strip()
 line
 
-# Of course that doesn't mean anything (does it? 😉), because this is
+# Of course that doesn't mean anything (or does it? 😉), because this is
 # a binary file that needs a reader which understands the file format.
 #
 # The `earthaccess.open` function is used when you want to directly read
