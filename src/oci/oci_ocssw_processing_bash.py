@@ -38,19 +38,22 @@
 #
 # ### (Optional) Use a Bash Kernel
 #
-# Open a Terminal from the JupyterLab Launcher, and use `conda` to install the bask kernel.
+# Run the following command. If the terminal asks you to update conda, type Y to accept.
 #
-# ```
-# $ conda install -c conda-forge bash_kernel
-# ```
 #
+# [seadas]: https://seadas.gsfc.nasa.gov/
+
+# %conda install bash_kernel
+
 # Follow the prompts from conda to proceed with any installs and updates by entering "y" to accept.
 #
 # Confirm the bash kernel is installed by starting a new Launcher. You should see the bash kernel along with Python and other kernels installed in your JupyterHub.
-# Now change the notebook's kernel by clicking on the kernel name in the upper-right corner of the notebook window and selecting the Bash kernel.
-# You can now execute the code cells in Bash without copying them to the Terminal.
 #
-# [seadas]: https://seadas.gsfc.nasa.gov/
+# Restart the kernel (refresh button on the upper-right of the kernel window).
+#
+# ### Change your notebook kernel to Bash
+#
+# You should now change the kernel of the notebook by clicking on the kernel name in the upper-right corner of the window and selecting the Bash kernel before moving on to the rest of the tutorial. 
 
 # [Back to top](#toc)
 # <a name="ocssw"></a>
@@ -114,15 +117,15 @@ l2gen
 
 # Feel free to explore all of `l2gen` options to produce a highly customized Level-2 dataset for your research. Here we just scratch the surface.
 #
-# To process a L1B file using `l2gen` you need, at a minimum, to set an input file name (`ifile`) and an output file name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the Surface Reflectance suite used to make true color images (SFREFL). We turn off the atmospheric correction with the `at to save processing time.
+# To process a L1B file using `l2gen` you need, at a minimum, to set an input file name (`ifile`) and an output file name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the Surface Reflectance suite used to make true color images (SFREFL). We turn off the atmospheric correction with the `atmocor` to save processing time.
 #
 # Confirm that the L1B file to process is at the expected location by listing (with `ls`) the directory contents. If the directory is empty, check that you've completed the prerequiste notebooks for this tutorial!
 
-ls L1B
+# ls L1B
 
 # Create a directory for output files.
 
-mkdir L2
+# mkdir L2
 
 # + scrolled=true
 l2gen \
@@ -133,7 +136,5 @@ l2gen \
 # -
 
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on installing and using OCCSW to process PACE data. More notebooks are comming soon!</p>
+# <p>You have completed the notebook on installing OCCSW to process PACE data. More notebooks are comming soon!</p>
 # </div>
-
-
