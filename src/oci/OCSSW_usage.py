@@ -11,30 +11,29 @@
 # > - "Learn with OCI"/"Data Access"
 #
 # ## Summary
-# ***
-# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB. DAAC), used to process, display and analyse ocean color data. A GUI-based SeaDAS application is available, and it can be used through command line. SeaDAS's processing components found in the OCSSW package. 
+#
+# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB. DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes SeaDAS-OCSSW, the core libraries or data processing components. There is a CLI for the SeaDAS-OCSSW data processing components, known simply as OCSSW, which we can use on a remote host without a desktop.
 #
 # This tutorial will show you how to process PACE OCI data on a JupyterHub server using some of the OCSSW functions. 
 #
 # ## Learning Objectives
-# ***
+#
 # <a name="toc"></a>
 # At the end of this notebok you will know:
-# * How to find and download a L1B file to your server using the earthaccess library
-# * How to process L1B data to Level 2 with l2gen
-# * How to merge two images with L2bin
-# * How to create a map with l3mapgen
+# * How to process L1B data to Level 2 with `l2gen`
+# * How to merge two images with `L2bin`
+# * How to create a map with `l3mapgen`
 #
 # ## Contents
-# ***
+#
 # 1. [Initial Setup](#setup)
 # 2. [Get L1B data](#data)
-# 3. [Process data with l2gen](#l2gen)
-# 4. [Merge images with L2bin](#l2bin)
-# 5. [Make a map with L3mapgen](#l3mapgen)
+# 3. [Process data with `l2gen`](#l2gen)
+# 4. [Merge images with `L2bin`](#l2bin)
+# 5. [Make a map with `L3mapgen`](#l3mapgen)
 #      
 # ## 1. Setup <a name="setup"></a> 
-# *** 
+#
 # ### Imports
 #
 # We begin by importing all of the packages used in this notebook. If you have created an environment following the guidance provided with this tutorial, then the imports will be successful.
@@ -51,14 +50,14 @@ import pandas as pd
 import os
 
 # ## 2. Get OCI Level 1B data <a name="data"></a>
-# ***
+#
 
 # ### Search for data
 # Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
 
 auth = earthaccess.login(persist=True)
 
-# We will use the same search method used in OCI Data Access. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
+# We will use the `earthaccess` search method used in the OCI Data Access notebook. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
 
 # +
 tspan = ("2024-04-27", "2024-04-28")
@@ -72,8 +71,6 @@ results = earthaccess.search_data(
 
 quicklooks = [display(g) for g in results[0:10]]
 # -
-
-paths = earthaccess.open(results)
 
 # ### Create a directory where you will store the granules
 
@@ -90,7 +87,7 @@ paths
 
 path = ('granules/PACE_OCI.20240427T161654.L1B.nc')
 
-# Open the dataset using xarray
+# Open the dataset using `xarray`
 
 dataset = xr.open_dataset(path, group="observation_data")
 dataset
@@ -99,23 +96,24 @@ dataset
 
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 
-# ## 3. Process L1B data with l2gen <a name="l2gen"></a>
-# ***
-# L2gen will process the L1B data to L2 using the parameters you will specify for it. 
+# ## 3. Process L1B data with `l2gen` <a name="l2gen"></a>
+#
+# `L2gen` will process the L1B data to L2 using the parameters you will specify for it. 
 
-# ### Run l2gen
+# ### Run `l2gen`
 
 # <div class="alert alert-warning">
 # OCSSW functions need to run in the Bash language. We can create a Bash cell in a Python Jupyter Notebook using the Bash magic command (%%bash). In the specific case of OCSSW functions, we need to set up the temporary OCSSW environment in each cell where we use OCSSW functions, since they are not retained from one cell to the next. 
 # <br>    
 # <br>We need to start each of those cells with: <br>
 #     
+#     # %%bash
 #     export OCSSWROOT=ocssw
 #     source $OCSSWROOT/OCSSW_bash.env
 #
 # </div>
 #
-# Run the l2gen command by itself to view the extensive list of options available. You can find more information about l2gen and other OCSSW functions on the [seadas website](https://seadas.gsfc.nasa.gov/help-8.3.0/processors/ProcessL2gen.html)
+# Run the `l2gen` command by itself to view the extensive list of options available. You can find more information about `l2gen` and other OCSSW functions on the [seadas website](https://seadas.gsfc.nasa.gov/help-8.3.0/processors/ProcessL2gen.html)
 
 # + scrolled=true language="bash"
 # #--- temporary environment setup for bash magic cell /
@@ -125,9 +123,9 @@ plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 # l2gen
 # -
 
-# To process a L1B file using L2gen, at a minimum, you need to set an infile name (ifile) and an outfile name (ofile). You can indicate a data suite, in this example, we will proceed with the surface reflectance suite used to make true color images (SFREFL).
+# To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can indicate a data suite, in this example, we will proceed with the surface reflectance suite used to make true color images (`SFREFL`).
 #
-# Feel free to explore l2gen options to produce the level 2 dataset you need. 
+# Feel free to explore `l2gen` options to produce the level 2 dataset you need. 
 
 # + scrolled=true language="bash"
 # #--- /
@@ -144,7 +142,7 @@ plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 # Once this process is done, you are ready to visualize your L2 data!
 
 # ### Visualize L2 data
-# ***
+#
 
 # Open your L2 netcdf file and look at the contents
 
@@ -157,12 +155,12 @@ dataset
 
 plot = rhos.sel({"wavelength_3d": 25}).plot(cmap="viridis")
 
-# ## 4. Merge two images with L2bin <a name="l2bin"></a>
-# ***
-# It can be useful to merge two images along a swath to create a single, larger image. L2bin is a OCSSW function that can help us do that. 
+# ## 4. Merge two images with `l2bin` <a name="l2bin"></a>
+#
+# It can be useful to merge two images along a swath to create a single, larger image. `l2bin` is a OCSSW function that can help us do that. 
 #
 # ### Find and dowload L2 data
-# First, let's find L2 data using the earthaccess library:
+# First, let's find L2 data using the `earthaccess` library:
 
 # +
 tspan = ("2024-04-27", "2024-04-28")
@@ -187,8 +185,8 @@ os.makedirs("granules_l2bin")
 paths = earthaccess.download(results, "./granules_l2bin")
 paths
 
-# ### L2bin processing
-# L2bin requires an infile containing the paths and names of the files to be merged. Let's create one:
+# ### `l2bin` processing
+# `l2bin` requires an infile containing the paths and names of the files to be merged. Let's create one:
 
 file_path = '/home/jovyan/ocssw_test/granules_l2bin/'
 with open("./granules_l2bin/filelist.txt", mode='w', newline='') as fp:
@@ -197,7 +195,7 @@ with open("./granules_l2bin/filelist.txt", mode='w', newline='') as fp:
             f = os.path.join(file_path, file)
             fp.write(str(f) + os.linesep) 
 
-# We can have a look at the possible options from L2bin:
+# We can have a look at the possible options from `l2bin`:
 
 # + scrolled=true language="bash"
 # #--- /
@@ -208,7 +206,7 @@ with open("./granules_l2bin/filelist.txt", mode='w', newline='') as fp:
 # l2bin
 # -
 
-# Now run L2bin using your chosen parameters:
+# Now run `l2bin` using your chosen parameters:
 
 # + scrolled=true language="bash"
 # #--- /
@@ -226,14 +224,14 @@ with open("./granules_l2bin/filelist.txt", mode='w', newline='') as fp:
 # -
 
 # ### Visualize your L3 dataset
-# Once the L3 file is created. You can open it with xarray to visualize it. 
+# Once the L3 file is created. You can open it with `xarray` to visualize it. 
 
 # + scrolled=true
 dataset = xr.open_dataset('/home/jovyan/ocssw_test/granules_l2bin/PACE_OCI.20240427T161654.L3m.DAY.all.1km.nc')
 dataset
 # -
 
-# Now we can plot the merged dataset and add map elements like coastlines and gridlines. The robust parameter of the plot removes the data outliers. 
+# Now we can plot the merged dataset and add map elements like coastlines and gridlines. The `robust` parameter of the plot removes the data outliers. 
 
 # +
 fig = plt.figure()
@@ -247,11 +245,11 @@ plt.ylim(35, 60);
 plt.xlim(-75, -50);
 # -
 
-# ## 5. Make a map with L3mapgen <a name="l3mapgen"></a>
+# ## 5. Make a map with `l3mapgen` <a name="l3mapgen"></a>
 # ***
 
-# ### Run L3mapgen
-# The L3mapgen function of OCSSW allows you to create maps with a wide array of options you can see below:
+# ### Run `l3mapgen`
+# The `l3mapgen` function of OCSSW allows you to create maps with a wide array of options you can see below:
 
 # + scrolled=true language="bash"
 # #--- /
@@ -262,7 +260,7 @@ plt.xlim(-75, -50);
 # l3mapgen
 # -
 
-# Run L3mapgen to make a 1km map with a plate carree projection. 
+# Run `l3mapgen` to make a 1km map with a plate carree projection. 
 
 # + scrolled=true language="bash"
 # #--- /
@@ -281,9 +279,9 @@ plt.xlim(-75, -50);
 
 # ### Visualize your map
 #
-# The level 3 map dataset can now be opened with the SeaDAS GUI application or using xarray in a jupyter notebook to produce a map. 
+# The level 3 map dataset can now be opened with the SeaDAS GUI application or using `xarray` in a jupyter notebook to produce a map. 
 #
-# Here is an example using xarray:
+# Here is an example using `xarray`:
 
 dataset = xr.open_dataset('/home/jovyan/ocssw_test/granules_l2bin/PACE_OCI.20240427T161654.L3m.DAY.all.1km.nc')
 

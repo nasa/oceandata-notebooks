@@ -117,9 +117,9 @@ l2gen
 
 # Feel free to explore all of `l2gen` options to produce a highly customized Level-2 dataset for your research. Here we just scratch the surface.
 #
-# To process a L1B file using `l2gen` you need, at a minimum, to set an input file name (`ifile`) and an output file name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the Surface Reflectance suite used to make true color images (SFREFL). We turn off the atmospheric correction with the `atmocor` to save processing time.
+# To process a L1B file using `l2gen` you need, at a minimum, to set an input file name (`ifile`) and an output file name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the Surface Reflectance suite used to make true color images (`SFREFL`). We turn off the atmospheric correction with `atmocor` to save processing time.
 #
-# Confirm that the L1B file to process is at the expected location by listing (with `ls`) the directory contents. If the directory is empty, check that you've completed the prerequiste notebooks for this tutorial!
+# For this example, we will be using the L1B file downloaded in the OCI Data Access notebook. Confirm that the L1B file to process is at the expected location by listing (with `ls`) the directory contents. If the directory is empty, check that you've completed the prerequiste notebooks for this tutorial!
 
 # ls L1B
 
