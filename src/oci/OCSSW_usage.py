@@ -20,8 +20,8 @@
 #
 # <a name="toc"></a>
 # At the end of this notebok you will know:
-# * How to process L1B data to Level 2 with `l2gen`
-# * How to merge two images with `L2bin`
+# * How to process Level 1B data to Level 2 with `l2gen`
+# * How to merge two images with `l2bin`
 # * How to create a map with `l3mapgen`
 #
 # ## Contents
@@ -29,8 +29,8 @@
 # 1. [Initial Setup](#setup)
 # 2. [Get L1B data](#data)
 # 3. [Process data with `l2gen`](#l2gen)
-# 4. [Merge images with `L2bin`](#l2bin)
-# 5. [Make a map with `L3mapgen`](#l3mapgen)
+# 4. [Merge images with `l2bin`](#l2bin)
+# 5. [Make a map with `l3mapgen`](#l3mapgen)
 #      
 # ## 1. Setup <a name="setup"></a> 
 #
@@ -57,7 +57,7 @@ import os
 
 auth = earthaccess.login(persist=True)
 
-# We will use the `earthaccess` search method used in the OCI Data Access notebook. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
+# We will use the `earthaccess` search method used in the OCI Data Access notebook. Note that Level 1B (L1B) files do not include cloud coverage metadata, so we cannot use that filter.
 
 # +
 tspan = ("2024-04-27", "2024-04-28")
@@ -98,7 +98,7 @@ plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 
 # ## 3. Process L1B data with `l2gen` <a name="l2gen"></a>
 #
-# `L2gen` will process the L1B data to L2 using the parameters you will specify for it. 
+# `l2gen` will process the L1B data to L2 using the parameters you will specify for it. 
 
 # ### Run `l2gen`
 
@@ -107,7 +107,7 @@ plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 # <br>    
 # <br>We need to start each of those cells with: <br>
 #     
-#     # %%bash
+#     # # %%bash
 #     export OCSSWROOT=ocssw
 #     source $OCSSWROOT/OCSSW_bash.env
 #
@@ -146,10 +146,12 @@ plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 
 # Open your L2 netcdf file and look at the contents
 
+# + scrolled=true
 path = ('granules/PACE_OCI.20240427T161654.L2.nc')
 dataset = xr.open_dataset(path, group="geophysical_data")
 rhos = dataset["rhos"]
 dataset
+# -
 
 # Plot one wavelength from the dataset
 
