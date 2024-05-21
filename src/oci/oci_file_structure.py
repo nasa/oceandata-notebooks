@@ -5,7 +5,7 @@
 # > **PREREQUISITES**
 # >
 # > This notebook has the following prerequisites:
-# > - <a href="oci_data_access.html" target="_blank">OCI Data Access</a>
+# > <a href="oci_data_access.html" target="_blank">OCI Data Access</a>
 #
 # ## Summary
 #
@@ -45,6 +45,7 @@ import h5netcdf
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
+import pandas as pd
 
 # Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
 
@@ -123,10 +124,6 @@ results = earthaccess.search_data(
 # -
 
 paths = earthaccess.open(results)
-try:
-    paths[0].f.bucket
-except AttributeError:
-    raise "The result opened without an S3FileSystem."
 
 with h5netcdf.File(paths[0]) as file:
     groups = list(file)
@@ -223,10 +220,6 @@ results = earthaccess.search_data(
 # -
 
 paths = earthaccess.open(results)
-try:
-    paths[0].f.bucket
-except AttributeError:
-    raise "The result opened without an S3FileSystem."
 
 # OCI L3 data do not have any groups, so we can open the dataset without the `group` argument.
 # Let's take a look at the first file.
@@ -262,10 +255,6 @@ results = earthaccess.search_data(
 # -
 
 paths = earthaccess.open(results)
-try:
-    paths[0].f.bucket
-except AttributeError:
-    raise "The result opened without an S3FileSystem."
 
 # The `paths` list is sorted temporally by default, which means the shape of the `paths` array specifies the way we need to tile the files together into larger arrays. We specify `combine="nested"` to combine the files according to the shape of the array of files (or file-like objects), even though `paths` is not a "nested" list in this case. The `concat_dim="date"` argument generates a new dimension in the combined dataset, because "date" is not an existing dimension in the individual files.
 
@@ -274,6 +263,12 @@ dataset = xr.open_mfdataset(
     combine="nested",
     concat_dim="date",
 )
+
+# Add a date dimension using the dates from the netCDF files.
+
+dates = [ xr.open_dataset(a).attrs["time_coverage_end"] for a in paths]
+dt = pd.to_datetime(dates)
+dataset = dataset.assign_coords(date=dt.values)
 dataset
 
 # A common reason to generate a single dataset from multiple, daily images is to create a composite. Compare the map from a single day ...
@@ -284,7 +279,7 @@ chla.attrs.update(
         "units": f'lg({dataset["chlor_a"].attrs["units"]})',
     }
 )
-plot = chla.sel({"date": 0}).plot(aspect=2, size=4, cmap="GnBu_r")
+plot = chla.sel(date = "2024-05-02").plot(aspect=2, size=4, cmap="GnBu_r")
 
 # ... to a map of average values, skipping "NaN" values that result from clouds and the OCI's tilt maneuver.
 
@@ -296,6 +291,10 @@ chla_avg.attrs.update(
     }
 )
 plot = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
+
+# We can also create a time series of mean values over the whole region.
+
+chla.mean(dim=["lon", "lat"]).plot();
 
 # <div class="alert alert-info" role="alert">
 # <p>You have completed the notebook on OCI file structure. More notebooks are comming soon!</p>
