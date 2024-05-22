@@ -294,7 +294,8 @@ plot = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
 
 # We can also create a time series of mean values over the whole region.
 
-chla.mean(dim=["lon", "lat"]).plot(linestyle='-', marker='o', color='b');
+chla_avg = chla.mean(dim=["lon", "lat"], keep_attrs=True)
+plot = chla_avg.plot(linestyle='-', marker='o', color='b')
 
 # <div class="alert alert-info" role="alert">
 # <p>You have completed the notebook on OCI file structure. More notebooks are coming soon!</p>
