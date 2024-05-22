@@ -40,26 +40,28 @@
 #
 # [seadas]: https://seadas.gsfc.nasa.gov/
 
+# +
+# Python Standard Library
+import os
+import pathlib
+
+# Python Packages
 import cartopy.crs as ccrs
 import earthaccess
-import h5netcdf
-import matplotlib.pyplot as plt
-import numpy as np
 import xarray as xr
-import pandas as pd
-import os
+# -
 
 # ## 2. Get OCI Level 1B data <a name="data"></a>
 #
 
 # ### Search for data
+#
 # Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
 
 auth = earthaccess.login(persist=True)
 
 # We will use the `earthaccess` search method used in the OCI Data Access notebook. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
 
-# +
 tspan = ("2024-04-27", "2024-04-28")
 location = (-56.53125, 49.81134)
 
@@ -69,27 +71,26 @@ results = earthaccess.search_data(
     point=location,
 )
 
-quicklooks = [display(g) for g in results[0:10]]
-# -
+# TODO simpler, but why iterate for one granule?
+for item in results:
+    display(item)
 
 # ### Create a directory where you will store the granules
 
-os.makedirs("granules")
+parent = pathlib.Path("granules")
+parent.mkdir(exist_ok=True)
 
 # ### Download the granules to the folder
 
-paths = earthaccess.download(results, "./granules")
+#FIXME is this redownloading in cloud?
+paths = earthaccess.download(results, parent)
 paths
 
 # ### Visualize L1B data 
 
-# Create a variable called paths with the L1B file
-
-path = ('granules/PACE_OCI.20240427T161654.L1B.nc')
-
 # Open the dataset using `xarray`
 
-dataset = xr.open_dataset(path, group="observation_data")
+dataset = xr.open_dataset(paths[0], group="observation_data")
 dataset
 
 # We can have a look at the L1B dataset. At this level, geographical coordinates and band wavelenths are not available. We will need to process the file to Level 2 or 3 to get those.
@@ -103,23 +104,26 @@ plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 # ### Run `l2gen`
 
 # <div class="alert alert-warning">
-# OCSSW functions need to run in the Bash language. We can create a Bash cell in a Python Jupyter Notebook using the Bash magic command (%%bash). In the specific case of OCSSW functions, we need to set up the temporary OCSSW environment in each cell where we use OCSSW functions, since they are not retained from one cell to the next. 
-# <br>    
-# <br>We need to start each of those cells with: <br>
-#     
-#     # %%bash
-#     export OCSSWROOT=ocssw
-#     source $OCSSWROOT/OCSSW_bash.env
-#
+# OCSSW programs are run from the command line in Bash, but we can have a Bash terminal-in-a-cell using the IPython <a href="https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands" target=_blank>magic</a> command `%%bash`. In the specific case of OCSSW programs, the Bash environment created for that cell must be set up by loading `$OCSSWROOT/OCSSW_bash.env`.
 # </div>
 #
-# Run the `l2gen` command by itself to view the extensive list of options available. You can find more information about `l2gen` and other OCSSW functions on the [seadas website](https://seadas.gsfc.nasa.gov/help-8.3.0/processors/ProcessL2gen.html)
+# Every `%%bash` cell which calls an OCSSW program needs to `source` the environment
+# definition file shipped with OCSSW, because its effects are not retained from one cell to the next.
+# We can, however, define the `OCSSWROOT` environment variable in a way that effects every `%%bash` cell.
+
+os.environ["OCSSWROOT"] = "/tmp/ocssw"
+
+# Then we need a couple lines, which will appear in multiple cells below, to begin a Bash cell initiated with the `OCSSW_bash.env` file.
+# ```
+# # %%bash
+# source $OCSSWROOT/OCSSW_bash.env
+# ```
+#
+# Using this pattern, run the `l2gen` command by itself to view the extensive list of options available. You can find more information about `l2gen` and other OCSSW functions on the [seadas website](https://seadas.gsfc.nasa.gov/help-8.3.0/processors/ProcessL2gen.html)
 
 # + scrolled=true language="bash"
-# #--- temporary environment setup for bash magic cell /
-# export OCSSWROOT=ocssw
 # source $OCSSWROOT/OCSSW_bash.env
-# #--- \
+#
 # l2gen
 # -
 
@@ -127,16 +131,13 @@ plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 #
 # Feel free to explore `l2gen` options to produce the level 2 dataset you need. 
 
-# + scrolled=true language="bash"
-# #--- /
-# export OCSSWROOT=ocssw
+ifile = str(paths[0])
+ofile = ifile.replace("L1B", "L2")
+
+# + scrolled=true magic_args="-s {ifile} {ofile}" language="bash"
 # source $OCSSWROOT/OCSSW_bash.env
-# #--- \
 #
-# l2gen ifile=/home/jovyan/ocssw_test/granules/PACE_OCI.20240427T161654.L1B.nc \
-# ofile=/home/jovyan/ocssw_test/granules/PACE_OCI.20240427T161654.L2.nc \
-# suite=SFREFL \
-# atmocor=1
+# l2gen ifile=$1 ofile=$2 suite=SFREFL atmocor=1
 # -
 
 # Once this process is done, you are ready to visualize your L2 data!
@@ -146,8 +147,8 @@ plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 
 # Open your L2 netcdf file and look at the contents
 
-path = ('granules/PACE_OCI.20240427T161654.L2.nc')
-dataset = xr.open_dataset(path, group="geophysical_data")
+# TODO why only 50 bands?
+dataset = xr.open_dataset(ofile, group="geophysical_data")
 rhos = dataset["rhos"]
 dataset
 
@@ -163,6 +164,9 @@ plot = rhos.sel({"wavelength_3d": 25}).plot(cmap="viridis")
 # First, let's find L2 data using the `earthaccess` library:
 
 # +
+# TODO why not keep going with the same products?
+# -
+
 tspan = ("2024-04-27", "2024-04-28")
 location = (-56.95313,55.57192)
 clouds = (0, 100)
@@ -173,61 +177,60 @@ results = earthaccess.search_data(
     point=location,
     cloud_cover=clouds,
 )
-quicklooks = [display(g) for g in results[0:10]]
-# -
+
+for item in results[0:10]:
+    display(item)
 
 # In order to download netcdf files, we need to create a directory
 
-os.makedirs("granules_l2bin")
+parent = pathlib.Path("granules_l2bin")
+parent.mkdir(exist_ok=True)
 
 # Now let's download the granules to the directory
 
-paths = earthaccess.download(results, "./granules_l2bin")
+paths = earthaccess.download(results, parent)
 paths
 
 # ### `l2bin` processing
 # `l2bin` requires an infile containing the paths and names of the files to be merged. Let's create one:
 
-file_path = '/home/jovyan/ocssw_test/granules_l2bin/'
-with open("./granules_l2bin/filelist.txt", mode='w', newline='') as fp:
-    for file in os.listdir(file_path):
-        if file.endswith('.nc'):
-            f = os.path.join(file_path, file)
-            fp.write(str(f) + os.linesep) 
+ifile = "l2bin-list.txt"
+with open(ifile, mode='w', newline='') as fp:
+    for file in parent.glob("*.nc"):
+        f = os.path.join(file_path, file)
+        fp.write(str(f) + os.linesep)
 
 # We can have a look at the possible options from `l2bin`:
 
 # + scrolled=true language="bash"
-# #--- /
-# export OCSSWROOT=ocssw
 # source $OCSSWROOT/OCSSW_bash.env
-# #--- \
 #
 # l2bin
 # -
 
 # Now run `l2bin` using your chosen parameters:
 
-# + scrolled=true language="bash"
-# #--- /
-# export OCSSWROOT=ocssw
+ofile = str(parent / "PACE_OCI.20240427T161654.L3b.DAY.nc")
+
+# + scrolled=true magic_args="-s {ifile} {ofile}" language="bash"
 # source $OCSSWROOT/OCSSW_bash.env
-# #--- \
 #
-# l2bin ifile=/home/jovyan/ocssw_test/granules_l2bin/filelist.txt \
-# ofile=/home/jovyan/ocssw_test/granules_l2bin/PACE_OCI.20240427T161654.L3b.DAY.nc \
-# prodtype=regional \
-# resolution=1 \
-# flaguse=NONE \
-# rowgroup=2000 \
-# verbose=1
+# l2bin ifile=$1 ofile=$2 prodtype=regional resolution=1 flaguse=NONE rowgroup=2000
+
+# +
+# FIXME why not just one?
 # -
+
+dataset = xr.open_dataset(ofile, group="level-3_binned_data")
+dataset
+
+dataset["rhos_2258"][34].data
 
 # ### Visualize your L3 dataset
 # Once the L3 file is created. You can open it with `xarray` to visualize it. 
 
 # + scrolled=true
-dataset = xr.open_dataset('/home/jovyan/ocssw_test/granules_l2bin/PACE_OCI.20240427T161654.L3m.DAY.all.1km.nc')
+dataset = xr.open_dataset(parent / "PACE_OCI.20240427T161654.L3m.DAY.all.1km.nc")
 dataset
 # -
 
@@ -252,10 +255,7 @@ plt.xlim(-75, -50);
 # The `l3mapgen` function of OCSSW allows you to create maps with a wide array of options you can see below:
 
 # + scrolled=true language="bash"
-# #--- /
-# export OCSSWROOT=ocssw
 # source $OCSSWROOT/OCSSW_bash.env
-# #--- \
 #
 # l3mapgen
 # -
@@ -263,10 +263,7 @@ plt.xlim(-75, -50);
 # Run `l3mapgen` to make a 1km map with a plate carree projection. 
 
 # + scrolled=true language="bash"
-# #--- /
-# export OCSSWROOT=ocssw
 # source $OCSSWROOT/OCSSW_bash.env
-# #--- \
 #
 # l3mapgen ifile=/home/jovyan/ocssw_test/granules_l2bin/PACE_OCI.20240427T161654.L3b.DAY.nc \
 # ofile=/home/jovyan/ocssw_test/granules_l2bin/PACE_OCI.20240427T161654.L3m.DAY.all.1km.nc \
@@ -283,11 +280,11 @@ plt.xlim(-75, -50);
 #
 # Here is an example using `xarray`:
 
-dataset = xr.open_dataset('/home/jovyan/ocssw_test/granules_l2bin/PACE_OCI.20240427T161654.L3m.DAY.all.1km.nc')
+dataset = xr.open_dataset(parent / "PACE_OCI.20240427T161654.L3m.DAY.all.1km.nc")
 
 # Make a quick plot with the data:
 
-plot = dataset.chlor_a.plot(x="lon", y="lat")
+plot = dataset["chlor_a"].plot(x="lon", y="lat")
 
 # Add coastines, gridlines, and remove the outliers:
 
@@ -297,7 +294,7 @@ ax = plt.axes(projection=ccrs.PlateCarree())
 ax.coastlines(linewidth=0.5)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0)
 
-plot = dataset['chlor_a'].plot(x="lon", y="lat", cmap="viridis", robust=True)
+plot = dataset["chlor_a"].plot(x="lon", y="lat", cmap="viridis", robust=True)
 
 plt.ylim(35, 60);
 plt.xlim(-75, -50);

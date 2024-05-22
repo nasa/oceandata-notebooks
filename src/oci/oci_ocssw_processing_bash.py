@@ -43,7 +43,9 @@
 #
 # [seadas]: https://seadas.gsfc.nasa.gov/
 
+# + scrolled=true
 # %conda install bash_kernel
+# -
 
 # Follow the prompts from conda to proceed with any installs and updates by entering "y" to accept.
 #
