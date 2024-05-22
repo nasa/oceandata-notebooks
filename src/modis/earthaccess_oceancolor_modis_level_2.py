@@ -128,7 +128,9 @@ dataset
 
 # Plot the data.
 
-dataset['log10_chlor_a'].plot(aspect=2, size=4, x="longitude", y="latitude", cmap = 'jet', vmin=-2, vmax=1.3);
+p = dataset['log10_chlor_a'].plot(aspect=2, size=4,
+                        x="longitude", y="latitude",
+                        cmap = 'jet', vmin=-2, vmax=1.3)
 
 # Add some decoration to the plot.
 
@@ -147,7 +149,7 @@ ax.xaxis.set_major_formatter(lon_formatter)
 ax.yaxis.set_major_formatter(lat_formatter)
 plot = dataset['log10_chlor_a'].plot(x="longitude", y="latitude", cmap="jet", vmin=-2, vmax=1.3, ax=ax)
 
-plt.title(ds.time_coverage_start);
+plt.title(ds.time_coverage_start)
 # -
 
 # <div class="alert alert-info" role="alert">

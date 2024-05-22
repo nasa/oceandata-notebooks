@@ -98,7 +98,7 @@ ds
 
 ds['log10_chlor_a'] = np.log10(ds["chlor_a"])
 ds['log10_chlor_a'].plot(x='lon', y='lat', cmap = 'jet', vmin=-2, vmax=1.3);
-plt.title(ds.time_coverage_start);
+plot = plt.title(ds.time_coverage_start)
 
 # We can add some decoration to the plot.
 
@@ -110,7 +110,7 @@ ax.coastlines()
 ax.set_global()
 plot = ds['log10_chlor_a'].plot(x='lon', y='lat', cmap = 'jet', vmin=-2, vmax=1.3, ax=ax, transform=cartopy.crs.PlateCarree())
 
-plt.title(ds.time_coverage_start);
+plt.title(ds.time_coverage_start)
 # -
 
 # ## Repeat with another dataset
@@ -148,7 +148,7 @@ ax.coastlines()
 ax.set_global()
 plot = ds['log10_rrs'].plot(x='lon', y='lat', cmap = 'jet', vmin=-3, vmax=-1, ax=ax, transform=cartopy.crs.PlateCarree())
 
-plt.title(ds.time_coverage_start);
+plt.title(ds.time_coverage_start)
 # -
 
 # <div class="alert alert-info" role="alert">
