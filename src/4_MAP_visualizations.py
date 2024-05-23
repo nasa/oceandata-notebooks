@@ -12,22 +12,13 @@
 #     name: python3
 # ---
 
-# <table><tr>
-#
-#
-# <td> <img src="https://oceancolor.gsfc.nasa.gov/images/ob-logo-svg-2.svg" alt="Drawing" align='right', style="width: 240px;"/> </td>
-#
-# <td> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/2449px-NASA_logo.svg.png" align='right', alt="Drawing" style="width: 70px;"/> </td>
-#
-# </tr></table>
-
 # TO DO: update this once the adjacent notebooks exist
 # <a href="../Index.ipynb"><< PLACEHOLDER</a> | <a href="../Index.ipynb">PLACEHOLDER >></a>
 
 # <font color="dodgerblue">**Ocean Biology Processing Group**</font> <br>
 # **Copyright:** 2024 NASA OBPG <br>
 # **License:** MIT <br>
-# **Authors:** Sean Foley (NASA/MSU), Meng Gao (NASA/SSAI)
+#
 
 # <div class="alert alert-block alert-warning">
 #     
@@ -40,7 +31,12 @@
 # </div>
 # <hr>
 
-# # 4. Visualize PACE's multi-angle polarimeter data
+# # Visualize PACE's multi-angle polarimeter data
+#
+# **Authors:** Sean Foley (NASA/MSU), Meng Gao (NASA/SSAI)
+#
+# ## Summary
+# PACE has two multi-angle polarimeters: [HARP2](https://pace.oceansciences.org/harp2.htm) and [SPEXOne](https://pace.oceansciences.org/spexone.htm). These sensors offer unique data, which is useful for its own scientific purposes, as well as complementing the data from OCI. Working with multi-angle polarimeters requires you to understand both multi-angle data and some basic concepts about polarization. This notebook will walk you through some basic understanding and visualizations of multi-angle polarimetry, so that you feel comfortable incorporating this data into your future projects.
 #
 # ## Learning objectives
 #
@@ -51,29 +47,18 @@
 # * Some basic concepts about polarization
 # * How to make animations of multi-angle data
 #
-# ### Outline
-# PACE has two multi-angle polarimeters: [HARP2](https://pace.oceansciences.org/harp2.htm) and [SPEXOne](https://pace.oceansciences.org/spexone.htm). These sensors offer unique data, which is useful for its own scientific purposes, as well as complementing the data from OCI. Working with multi-angle polarimeters requires you to understand both multi-angle data and some basic concepts about polarization. This notebook will walk you through some basic understanding and visualizations of multi-angle polarimetry, so that you feel comfortable incorporating this data into your future projects.
 #
-# <div class="alert alert-info" role="alert">
+# <a name="toc"></a>
+# ## Contents
 #
-# ## <a id='TOC_TOP'>Contents
+#  1. [Setup](#setup)
+#  2. [Understanding Multi-Angle Data](#multiangle)
+#  3. [Understanding Polarimetry](#polarimetry)
+#  4. [Radiance to Reflectance](#reflectance)
+#  5. [A Simple Animation](#animation)
 #
-# </div>
-#     
-#  1. [Setup](#section1)
-#  2. [Understanding Multi-Angle Data](#section2)
-#  3. [Understanding Polarimetry](#section3)
-#  4. [Radiance to Reflectance](#section4)
-#  5. [A Simple Animation](#section5)
-#
-# <hr>
-
-# <div class="alert alert-info" role="alert">
-#
-# ## <a id='section1'>1. Setup
-# [Back to top](#TOC_TOP)
-#
-# </div>
+# <a name="setup"></a>
+# ## 1. Setup
 #
 # First, we import the libraries we will need:
 
@@ -120,20 +105,23 @@ groups = [None, 'sensor_views_bands', 'bin_attributes', 'geolocation_data', 'obs
 harp_data = xr.merge([xr.open_dataset(downloaded_files[0], group=g) for g in groups])
 # -
 
-# <div class="alert alert-info" role="alert">
+# [Back to top](#toc)
+# <a name="multiangle"></a>
+# ## 2. Understanding Multi-Angle Data
 #
-# ## <a id='section2'>2. Understanding Multi-Angle Data
-# [Back to top](#TOC_TOP)
+# HARP2 is a multi-spectral sensor, like OCI, with 4 spectral bands. These roughly correspond to green, red, near infrared (NIR), and blue (in that order). HARP2 is also multi-angle. These angles are with respect to the satellite track. Essentially, HARP2 is always looking ahead, looking behind, and everywhere in between. The number of angles varies per sensor. The red band has 60 angles, while the green, blue, and NIR bands each have 10.
 #
-# </div>
-#
-# HARP2 data has 4 spectral bands, which roughly correspond to green, red, near infrared (NIR), and blue (in that order). The red band has 60 angles, while the green, blue, and NIR bands each have 10. These angles are with respect to the satellite track. Essentially, HARP2 is always looking ahead, looking behind, and everywhere in between.
+# In the HARP2 data, the angles and the spectral bands are combined into one axis. I'll refer to this combined axis as HARP2's "channels." Below, we'll make a quick plot both the viewing angles and the wavelengths of HARP2's channels. In both plots, the x-axis is simply the channel index.
 
 # +
+# get the view angles and wavelengths
 angles = harp_data["sensor_view_angle"]
 wavelengths = harp_data["intensity_wavelength"]
+
+# Get a range over the channels (0 to 89, in this case)
 arange = np.arange(angles.shape[0])
 
+# Creates a figure with 1 row and 2 columns and a fitting figsize for many screens
 fig, axs = plt.subplots(2, 1, figsize=(14, 7))
 axs[0].set_ylabel("View Angle (degrees)")
 axs[0].set_xlabel("Index")
@@ -154,12 +142,9 @@ axs[0].legend();
 axs[1].legend();
 # -
 
-# <div class="alert alert-info" role="alert">
-#
-# ## <a id='section3'>3. Understanding Polarimetry
-# [Back to top](#TOC_TOP)
-#
-# </div>
+# [Back to top](#toc)
+# <a name="polarimetry"></a>
+# ## 3. Understanding Polarimetry
 #
 # Both of the multi-angle polarimeters are sensitive to the polarization of light. Polarization describes the geometric orientation of the oscillation of light waves. Randomly polarized light (like light coming directly from the sun) has an approximately equal amount of waves in every orientation. When light reflects of certain surfaces, it can become nonrandomly polarized.
 #
@@ -228,7 +213,9 @@ fig.suptitle(f"{harp_data.product_name} RGB");
 # Next, let's take a look at the degree of linear polarization (DoLP).
 
 # +
+# get the DoLP out of the xarray dataset
 dolp = harp_data["dolp"][..., 0].to_masked_array()
+# get the RGB DoLP at the nadir indices
 rgb_dolp = dolp[:, :, (red_nadir_idx, green_nadir_idx, blue_nadir_idx)]
 
 # Creates a figure with 1 row and 2 columns, a fitting figsize for many screens, and uses the projection defined above.
@@ -270,20 +257,20 @@ ax.set_ylabel("DoLP")
 ax.set_title("Mean DoLP by view angle");
 # -
 
-# <div class="alert alert-info" role="alert">
-#
-# ## <a id='section4'>4. Radiance to Reflectance
-# [Back to top](#TOC_TOP)
-#
-# </div>
+# [Back to top](#toc)
+# <a name='reflectance'></a>
+# ## 4. Radiance to Reflectance
 #
 # We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). Basically, this conversion compensates for the differences in appearance due to the viewing angle and sun angle.
 #
 # The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
 
 # +
+# Solar irradiance
 f0 = harp_data['intensity_f0'].to_masked_array()[:, 0]
+# Solar zenith angle (SZA)
 sza = harp_data['solar_zenith_angle'].to_masked_array()
+# Sun-Earth distance in astronomical units
 r_sun_earth = np.float32(harp_data.sun_earth_distance)
 
 def rad_to_refl(rad, f0, sza, r):
@@ -324,18 +311,17 @@ ax.set_ylabel("Reflectance")
 ax.set_title("Mean reflectance by view angle");
 # -
 
-# <div class="alert alert-info" role="alert">
-#
-# ## <a id='section5'>5. A Simple Animation
-# [Back to top](#TOC_TOP)
-#
-# </div>
+# [Back to top](#toc)
+# <a name='animation'>
+# ## 5. A Simple Animation
 #
 # All that is great for looking at a single angle at a time, but it doesn't capture the multi-angle nature of the instrument. Multi-angle data innately captures information about 3D structure. To get a sense of that, we'll make an animation of the scene with the 60 viewing angles available for the red band.
 #
 # Note: you can generate this animation with geolocated data as well, using `pcolormesh` as shown in the above code blocks. However, this can be a little slow for multi-angle data, so for now we'll just use the un-interpolated arrays. This means there will be some stripes of what seems like missing data at certain angles. These stripes actually result from the gridding of the multi-angle data, and are not a bug.
 #
-# WARNING: there is some flickering in the animation generated by the next code block.
+# <div class="alert alert-info" role="alert">
+# <p>WARNING: there is some flickering in the animation generated by the next code block.</p>
+# </div>
 
 # +
 # Create an animated PNG object
