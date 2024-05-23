@@ -12,28 +12,16 @@
 #     name: python3
 # ---
 
-# TO DO: update this once the adjacent notebooks exist
-# <a href="../Index.ipynb"><< PLACEHOLDER</a> | <a href="../Index.ipynb">PLACEHOLDER >></a>
-
-# <font color="dodgerblue">**Ocean Biology Processing Group**</font> <br>
-# **Copyright:** 2024 NASA OBPG <br>
-# **License:** MIT <br>
-#
-
-# <div class="alert alert-block alert-warning">
-#     
-# <b>PREREQUISITES</b> 
-#     
-# This notebook has the following prerequisites:
-# - **<a href="https://urs.earthdata.nasa.gov/" target="_blank"> An Earthdata Login account</a>** is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# - Familiarity with notebook "1_PACE_data_access" is recommended before using this notebook
-#
-# </div>
-# <hr>
-
 # # Visualize PACE's multi-angle polarimeter data
 #
 # **Authors:** Sean Foley (NASA/MSU), Meng Gao (NASA/SSAI)
+#
+# > **PREREQUISITES**
+# >
+# > This notebook has the following prerequisites:
+# > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
+# >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+# > - Familiarity with notebook "Accessing OBDAAC Ocean Color Data With Earthaccess" is recommended before using this notebook.
 #
 # ## Summary
 # PACE has two multi-angle polarimeters: [HARP2](https://pace.oceansciences.org/harp2.htm) and [SPEXOne](https://pace.oceansciences.org/spexone.htm). These sensors offer unique data, which is useful for its own scientific purposes, as well as complementing the data from OCI. Working with multi-angle polarimeters requires you to understand both multi-angle data and some basic concepts about polarization. This notebook will walk you through some basic understanding and visualizations of multi-angle polarimetry, so that you feel comfortable incorporating this data into your future projects.
