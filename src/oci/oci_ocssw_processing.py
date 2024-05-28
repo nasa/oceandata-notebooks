@@ -185,7 +185,7 @@ par = {
 }
 write_par("l2gen.par", par)
 
-# With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell.
+# With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell. 
 
 # + scrolled=true language="bash"
 # source $OCSSWROOT/OCSSW_bash.env
@@ -193,7 +193,7 @@ write_par("l2gen.par", par)
 # l2gen par=l2gen.par
 # -
 
-# If successful, the `l2gen` program created a netCDF file at the `ofile` path. The contents should include the `chlor_a` product from the `BGC` suite of products. Once this process is done, you are ready to visualize your "custom" L2 data. Use the `robust=True` option to ignore outliers.
+# If successful, the `l2gen` program created a netCDF file at the `ofile` path. The contents should include the `chlor_a` product from the `BGC` suite of products. Once this process is done, you are ready to visualize your "custom" L2 data. Use the `robust=True` option to ignore outlier chl a values.
 
 dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
 plot = dataset["chlor_a"].plot(cmap="viridis", robust=True)
