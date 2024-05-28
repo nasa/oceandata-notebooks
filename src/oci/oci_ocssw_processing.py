@@ -22,8 +22,8 @@
 #
 # <a name="toc"></a>
 # At the end of this notebok you will know:
-# * How to process L1B data to Level-2 with `l2gen`
-# * How to merge two images with `L2bin`
+# * How to process Level-1B data to Level-2 with `l2gen`
+# * How to merge two images with `l2bin`
 # * How to create a map with `l3mapgen`
 #
 # ## Contents
@@ -67,16 +67,17 @@ def write_par(path, par):
 # from the Python Standard Library. Instead of writing comma-separated values, however, we specify
 # a non-default delimiter to get equals-separated values. Not something you usually see in a data file,
 # but it's better than writing our own utility from scratch!
-
+#
 # ## 2. Get OCI Data <a name="data"></a>
 #
-
+#
 # Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
 
 auth = earthaccess.login(persist=True)
 
-# We will use the `earthaccess` search method described in the OCI Data Access notebook. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter. In this search, the spatial filter is performed on a location given as a
-# point represented by a tuple of latitude and longitude in decimal degrees.
+# We will use the `earthaccess` search method used in the OCI Data Access notebook. Note that Level-1B (L1B) files
+# do not include cloud coverage metadata, so we cannot use that filter. In this search, the spatial filter is
+# performed on a location given as a point represented by a tuple of latitude and longitude in decimal degrees.
 
 tspan = ("2024-04-27", "2024-04-28")
 location = (-56.5, 49.8)
@@ -274,15 +275,12 @@ dataset
 
 # Now that we have projected data, we can make a map with coastines and gridlines.
 
-# +
 fig = plt.figure()
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.coastlines(linewidth=0.5)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.3)
-
 plot = dataset["chlor_a"].plot(x="lon", y="lat", cmap="viridis", robust=True, ax=ax)
-# -
+
 # <div class="alert alert-info" role="alert">
 # <p>You have completed the notebook on using OCCSW to process PACE data. More notebooks are comming soon!</p>
 # </div>
-
