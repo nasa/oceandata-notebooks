@@ -7,11 +7,11 @@
 # > This notebook has the following prerequisites:
 # > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
 # >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_file_structure/" target="_blank">Data Access</a>
+# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_file_structure/" target="_blank">OCI Data Access</a>
 #
 # ## Summary
 #
-# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB. DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes SeaDAS-OCSSW, the core libraries or data processing components. There is a command line interface (CLI) for the SeaDAS-OCSSW data processing components, known simply as OCSSW, which we can use to write processing scripts or notebooks.
+# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes SeaDAS-OCSSW, the core libraries or data processing components. There is a command line interface (CLI) for the SeaDAS-OCSSW data processing components, known simply as OCSSW, which we can use to write processing scripts or notebooks.
 #
 # This tutorial will show you how to install OCSSW on a Linux server and how to start doing data processing by processing a Level 1B (L1B) file from PACE OCI to a Level 2 (L2) file using `l2gen`.
 #
@@ -46,11 +46,11 @@
 # %conda install bash_kernel
 # -
 
-# Follow the prompts from conda to proceed with any installs and updates by entering "y" to accept.
+# Follow the prompts from conda to proceed with any installs and updates. If prompted, enter "y" to accept.
 #
 # Confirm the bash kernel is installed by starting a new Launcher. You should see the bash kernel along with Python and other kernels installed in your JupyterHub.
 #
-# Restart the kernel (refresh button on the upper-right of the kernel window).
+# Restart the kernel (refresh button on top of notebook or upper-right of the kernel window).
 #
 # ### Change your notebook kernel to Bash
 #
@@ -60,7 +60,7 @@
 # <a name="ocssw"></a>
 # ## 2. Install OCSSW
 #
-# The OCSSW software is not a Python package and not available from `conda` or any other repository. To install it, we begin by aquiring an installer script from the Ocean Biology DAAC. This script is actually part of OCSSW, but we can use it independently to download and install the OCSSW binaries suitable for our system.
+# The OCSSW software is not a Python package and not available from `conda` or any other repository. To install it, we begin by aquiring an installer script from the OB.DAAC. This script is actually part of OCSSW, but we can use it independently to download and install the OCSSW binaries suitable for our system.
 
 wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw
 
@@ -73,6 +73,8 @@ wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
 chmod +x install_ocssw
 
 # Take a look at the different OCSSW "tags" you can install. It is recommended to use the most recent one for the installation, which is T2024.16 at the time of writing this tutorial. 
+#
+# TODO: define differences between tags? R vs T vs V?
 
 # + scrolled=true
 ./install_ocssw --list_tags
@@ -90,7 +92,7 @@ printenv OCSSWROOT
 
 # Install OCSSW using the `--tag` argument to pick from the list above. Also provide optional arguments for sensors you will be working with. In this case, we will only be using OCI. A list of optional arguments can be found on the OCSSW webpage or with `./install_ocssw --help`.
 #
-# *Tip:* The process is not finished as long as the counter to the left of the cell shows `[*]`. It may take some time to install all the tools.
+# *Tip:* The process is not finished as long as the counter to the left of the cell shows `[*]`. It will take some time to install all the tools (7 of 7 installations).
 
 ./install_ocssw --tag=T2024.19 --seadas --oci
 
@@ -108,7 +110,7 @@ which install_ocssw
 # <a name="l2gen"></a>
 # ## 3. Process L1B Data with `l2gen`
 #
-# Run `l2gen` by itself to view the extensive list of options available. You can find more information [on the seadas website][docs].
+# Run `l2gen` by itself to view the extensive list of options available. You can find more information [on the Seadas website][docs].
 #
 # [docs]: https://seadas.gsfc.nasa.gov/help-8.3.0/processors/ProcessL2gen.html
 
@@ -118,15 +120,15 @@ l2gen
 
 # Feel free to explore all of `l2gen` options to produce a highly customized Level-2 dataset for your research. Here we just scratch the surface.
 #
-# To process a L1B file using `l2gen` you need, at a minimum, to set an input file name (`ifile`) and an output file name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the Surface Reflectance suite used to make true color images (`SFREFL`). We turn off the atmospheric correction with `atmocor` to save processing time.
+# To process a L1B file using `l2gen` you need, at a minimum, to set an input file name (`ifile`) and an output file name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the Surface Reflectance suite used to make true color images (`SFREFL`). We turn off the atmospheric correction with `atmocor=0` to save processing time.
 #
 # For this example, we will be using the L1B file downloaded in the OCI Data Access notebook. Confirm that the L1B file to process is at the expected location by listing (with `ls`) the directory contents. If the directory is empty, check that you've completed the prerequiste notebooks for this tutorial!
 
-# ls L1B
+ls L1B
 
 # Create a directory for output files.
 
-# mkdir L2
+mkdir L2
 
 # + scrolled=true
 l2gen \
@@ -136,6 +138,10 @@ l2gen \
   atmocor=0
 # -
 
+# *Tip*: Scroll down in the output above to see updates on processing. Upon completion, you should have a new processed L2 file in your L2 folder. 
+
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on installing OCCSW to process PACE data. More notebooks are comming soon!</p>
+# <p>You have completed the notebook on installing OCCSW. Check out the notebook on OCSSW processing PACE data: oci_ocssw_processing.ipynb</p>
 # </div>
+
+
