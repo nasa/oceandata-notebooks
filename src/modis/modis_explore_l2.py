@@ -9,13 +9,13 @@
 # >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
 # > - There are no prerequisite notebooks for this module.
 #
-#
 # ## Summary
+#
 # This tutorial demonstrates accessing and analyzing NASA ocean color data using Python from the NASA Ocean Biology Distributed Active Archive Center (OB.DAAC) archives. Currently, there are several ways to find and access ocean color data:
 # 1. [NASA's Earthdata Search](https://search.earthdata.nasa.gov/search)
 # 2. [NASA's CMR API](https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html)
 # 3. [OB.DAAC OPENDAP](https://oceandata.sci.gsfc.nasa.gov/opendap/)
-# 4. [Ocean color file search](https://oceandata.sci.gsfc.nasa.gov/api/file_search_help)
+# 4. [OB.DAAC File Search](https://oceandata.sci.gsfc.nasa.gov/api/file_search_help)
 #
 # In this tutorial, we will focus on using `earthaccess` Python module to access MODIS Aqua ocean color data through NASA's Common Metadata Repository (CMR), a metadata system that catalogs Earth Science data and associated metadata records. The level 2 dataset of MODIS Aqua is one of the most popular datasets of OB.DAAC. Here we will use MODIS Aqua L2 Chlorophyll *a* data of the Chesapeake Bay as an example.
 # The standard NASA ocean color Chlorophyll *a* algorithm is described in the [Algorithm Theoretical Basis Document (ATBD)](https://www.earthdata.nasa.gov/apt/documents/chlor-a/v1.0).
