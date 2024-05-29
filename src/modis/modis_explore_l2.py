@@ -1,5 +1,4 @@
 # # Explore Level-2 Ocean Color data from the Moderate Resolution Imaging Spectroradiometer (MODIS) on the Aqua Satellite
-# <a name="top"></a>
 # **Authors:** Guoqing Wang (NASA, GSFC); Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
 #
 # > **PREREQUISITES**
@@ -50,7 +49,7 @@ import numpy as np
 import xarray as xr
 
 
-# [Back to top](#top)
+# [Back to top](#toc)
 # <a name="auth"></a>
 # ## 2. NASA Earthdata Authentication
 #
@@ -73,17 +72,17 @@ import xarray as xr
 
 auth = earthaccess.login(persist=True)
 
-# [Back to top](#top)
+# [Back to top](#toc)
 # <a name="search"></a>
 # ## 3. Search for Data
 #
 # The MODIS instrument, on board the Aqua satellite, collects ocean color data, processed from Level-1 through Level-4 and distributed by the OB.DAAC. In this example, we will use the standard Chlorophyll a data from Level-2 ocean color files. To find data we will use the `earthaccess` Python library to search on NASA's CMR API.
 #
-# NASA data collections, i.e. a series of related granules, are discoverable with `earthaccess.search_datasets`. Various search parameters can be used to search collections and granules using metadata attributes. See more details [here](https://github.com/nsidc/earthaccess/blob/main/notebooks/Demo.ipynb). Below, CMR Catalog are queried to find collections with **"ocean color"** keyword in them, managed by **"OBDAAC"**. The returned response can be used to retrieve the `ShortName` and `concept-id` for each dataset.
+# NASA data collections, i.e. a series of related granules, are discoverable with `earthaccess.search_datasets`. Various search parameters can be used to search collections and granules using metadata attributes. See more details [here](https://github.com/nsidc/earthaccess/blob/main/notebooks/Demo.ipynb). Below, CMR Catalog are queried to find collections with **"L2 ocean color"** keyword in them, with the **MODIS** instrument. The returned response can be used to retrieve the `ShortName` and `concept-id` for each dataset.
 
 results = earthaccess.search_datasets(
     keyword="L2 ocean color",
-    daac = "OBDAAC",
+    instrument="MODIS",
 )
 
 # Each result has a `summary` method with information such as the collection's short-name.
@@ -127,7 +126,7 @@ JSON(results)
 
 paths = earthaccess.download(results, "data")
 
-# [Back to top](#top)
+# [Back to top](#toc)
 # <a name="plot"></a>
 # ## 5. Plot Data
 #
