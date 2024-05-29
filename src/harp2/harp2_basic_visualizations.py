@@ -295,7 +295,7 @@ ax[1].imshow(refl.sel({"number_of_views": red_nadir_idx}), cmap="gray")
 ax[1].set_title("Reflectance")
 plt.show()
 
-# Reflectance line plot
+# Create a line plot of the mean reflectance for each view angle and spectral channel. The flatness of this plot serves as a sanity check that nothing has gone horribly wrong with our data processing.
 
 # +
 fig, ax = plt.subplots(figsize=(16, 6))
@@ -343,10 +343,14 @@ anim = APNG()
 refl_red = refl[..., 10:70]
 refl_pretty = (refl_red - refl_red.min()) / (refl_red.max() - refl_red.min())
 
-# A very mild Gaussian filter over the angular axis will improve the animation's smoothness
+# A very mild Gaussian filter over the angular axis will improve the animation's smoothness.
 
 refl_pretty.data = gaussian_filter1d(refl_pretty, sigma=0.5, truncate=2, axis=2)
+
+# Raising the image to the power 2/3 will brighten it a little bit. Cast it to an unsigned 8-bit integer so we can write it to a png later.
+
 refl_pretty = refl_pretty ** (2 / 3)
+refl_pretty.data[np.isnan(refl_pretty)] = 0  # set all of our not-a-number (NaN) values to 0
 refl_pretty = (255 * refl_pretty).astype(np.uint8)
 
 # Append all but the first and last frame in reverse order, to get a 'bounce' effect.
