@@ -1,5 +1,5 @@
 # # Explore Level-2 Ocean Color data from the Moderate Resolution Imaging Spectroradiometer (MODIS) on the Aqua Satellite
-#
+# <a name="top"></a>
 # **Authors:** Guoqing Wang (NASA, GSFC); Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
 #
 # > **PREREQUISITES**
@@ -26,7 +26,6 @@
 # * How to find OB.DAAC ocean color data
 # * How to download files using `earthaccess`
 # * How to create a plot using `xarray`
-#
 # <a name="toc"></a>
 # ## Contents
 #
@@ -35,7 +34,6 @@
 # 1. [Search for Data](#search)
 # 1. [Download Data](#download)
 # 1. [Plot Data](#plot)
-#
 # <a name="setup"></a>
 # ## 1. Setup
 #
@@ -85,7 +83,7 @@ auth = earthaccess.login(persist=True)
 
 results = earthaccess.search_datasets(
     keyword="L2 ocean color",
-    instrument="MODIS",
+    daac = "OBDAAC",
 )
 
 # Each result has a `summary` method with information such as the collection's short-name.
@@ -125,7 +123,7 @@ JSON(results)
 # <a name="download"></a>
 # ## 4. Download Data
 #
-# Since the data are not hosted in the Earthdata Cloud, we need to download files. This will download the data in a folder called "data" in your working directory.
+# Since the data are not hosted in the Earthdata Cloud (see output from `results[0]` above), we need to download files. This will download the data in a folder called "data" in your working directory.
 
 paths = earthaccess.download(results, "data")
 
