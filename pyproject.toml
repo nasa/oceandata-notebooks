@@ -22,6 +22,10 @@ email = "guoqing.wang@nasa.gov"
 name = "Carina Poulin"
 email = "carina.poulin@nasa.gov"
 
+[[project.authors]]
+name = "Sean Foley"
+email = "sean.r.foley@nasa.gov"
+
 [project.urls]
 Homepage = "https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/"
 Repository = "https://github.com/gsfc-oel/oceandata-notebooks"
