@@ -7,13 +7,15 @@
 # > This notebook has the following prerequisites:
 # > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
 # >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# > - "Learn with OCI"/"Data Access"
+# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/" target="_blank">Data Access</a>
 #
 # ## Summary
 #
-# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB. DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes SeaDAS-OCSSW, the core libraries or data processing components. There is a CLI for the SeaDAS-OCSSW data processing components, known simply as OCSSW, which we can use on a remote host without a desktop.
+# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB. DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There are also command line programs for the OCSSW libraries, which we can use to write processing scripts or notebooks.
 #
-# This tutorial will show you how to install OCSSW on a JupyterHub server and how to start doing data processing by processing a Level 1b (L1B) file from PACE OCI to a Level 2 (L2) file using `l2gen`.
+# This tutorial will show you how to install OCSSW on a Linux server and how to start doing data processing by processing a Level-1B (L1B) file from PACE OCI to a Level-2 (L2) file using `l2gen`.
+#
+# [seadas]: https://seadas.gsfc.nasa.gov/
 #
 # ## Learning Objectives
 #
@@ -39,11 +41,10 @@
 # ### (Optional) Use a Bash Kernel
 #
 # Run the following command. If the terminal asks you to update conda, type Y to accept.
-#
-#
-# [seadas]: https://seadas.gsfc.nasa.gov/
 
+# + scrolled=true
 # %conda install bash_kernel
+# -
 
 # Follow the prompts from conda to proceed with any installs and updates by entering "y" to accept.
 #
@@ -91,7 +92,7 @@ printenv OCSSWROOT
 #
 # *Tip:* The process is not finished as long as the counter to the left of the cell shows `[*]`. It may take some time to install all the tools.
 
-./install_ocssw --tag=T2024.16 --seadas --oci
+./install_ocssw --tag=T2024.19 --seadas --oci
 
 # Finish up by calling `source` on the "OCSSW_bash.env" file, which exports additional environment variables. This environment file specifies the locations of all files required by OCSSW, and must be exported in every Terminal or Bash kernel before you run `l2gen` or any other OCSSW command.
 
