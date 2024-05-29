@@ -1,4 +1,4 @@
-# # Accessing OB.DAAC Ocean Color Data With earthaccess
+# # Explore Level-2 Ocean Color data from the Moderate Resolution Imaging Spectroradiometer (MODIS) on the Aqua Satellite
 #
 # **Authors:** Guoqing Wang (NASA, GSFC); Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
 #
@@ -43,15 +43,13 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
-import os
-import earthaccess
-import netCDF4 as nc
-import xarray as xr
-import numpy as np
-import matplotlib.pyplot as plt
-import cartopy
-import cartopy.crs as ccrs
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
+from IPython.display import JSON
+import cartopy
+import earthaccess
+import matplotlib.pyplot as plt
+import numpy as np
+import xarray as xr
 
 
 # [Back to top](#top)
@@ -81,108 +79,104 @@ auth = earthaccess.login(persist=True)
 # <a name="search"></a>
 # ## 3. Search for Data
 #
-# MODIS-Aqua level 1 - level 4 ocean color data products are hosted by the OB.DAAC. In this example, we will use the standard Chlorophyll *a* data from level 2 ocean color files. To find data we will use the `earthaccess` Python library to search on NASA's CMR API.
+# The MODIS instrument, on board the Aqua satellite, collects ocean color data, processed from Level-1 through Level-4 and distributed by the OB.DAAC. In this example, we will use the standard Chlorophyll a data from Level-2 ocean color files. To find data we will use the `earthaccess` Python library to search on NASA's CMR API.
 #
-# `earthaccess.search_datasets` is used to search for NASA data collections. Various search parameters can be used to search collections and granules using metadata attributes. See more details [here](https://github.com/nsidc/earthaccess/blob/main/notebooks/Demo.ipynb). Below, CMR Catalog are queried to find collections with **'ocean color'** keyword in them, managed by **'OBDAAC'**. The returned response can be used to retrieve the `ShortName` and `concept-id` for each dataset.
+# NASA data collections, i.e. a series of related granules, are discoverable with `earthaccess.search_datasets`. Various search parameters can be used to search collections and granules using metadata attributes. See more details [here](https://github.com/nsidc/earthaccess/blob/main/notebooks/Demo.ipynb). Below, CMR Catalog are queried to find collections with **"ocean color"** keyword in them, managed by **"OBDAAC"**. The returned response can be used to retrieve the `ShortName` and `concept-id` for each dataset.
 
 results = earthaccess.search_datasets(
-    keyword = 'ocean color',
-    daac = "OBDAAC",
+    keyword="L2 ocean color",
+    instrument="MODIS",
 )
 
-# The `umm` field has information such as short name and abstract.
+# Each result has a `summary` method with information such as the collection's short-name.
 
-for x in results[0:10]:
-    print(x['umm']['ShortName'])
+set((i.summary()["short-name"] for i in results))
 
 # We are interested in the `MODISA_L2_OC` dataset.
 
-[x['umm']['Abstract'] for x in results if x['umm']['ShortName']=='MODISA_L2_OC']
-
-# We can use spatial and temporal arguments to search for granules covering Chesapeake Bay during the time frame of Oct 15 - 23, 2020. We can also add the cloud_cover parameter to filter out granules with too much cloud coverage. 
+# We can use spatial and temporal arguments to search for granules covering Chesapeake Bay during the time frame of Oct 15 - 23, 2020. We can also add the cloud_cover parameter to filter out granules with too much cloud coverage.
 # cloud_cover = (0, 50) # max 50% of cloud coverage
 
-date_range = ("2020-10-15", "2020-10-23")
-bbox = (-76.75,36.97,-75.74,39.01)
+tspan = ("2020-10-15", "2020-10-23")
+bbox = (-76.75, 36.97, -75.74, 39.01)
+cc = (0, 50)
+
 results = earthaccess.search_data(
-    short_name = 'MODISA_L2_OC',
-    temporal = date_range,
-    bounding_box = bbox,
-    cloud_cover = (0, 50)
+    short_name="MODISA_L2_OC",
+    temporal=tspan,
+    bounding_box=bbox,
+    cloud_cover=cc,
 )
 
-# Now we can print some info about these granules using the built-in methods
-data_links = [{'links': g.data_links(), 'size (MB):': g.size()} for g in results[0:3]]
-data_links
+# Now we can print some info about these granules using the built-in methods. We can see how each result prefers to display itself.
 
-# preview the data granules
 results[0]
 
-# preview more information
-results[0:1]
+# Or we could use the `data_links` and `size` methods provided on each result.
+
+data_links = [{"links": i.data_links(), "size (MB):": i.size()} for i in results]
+JSON(data_links, expanded=True)
+
+# Or we can interactively inspect all the fields underlying a result.
+
+JSON(results)
 
 # [Back to top](#top)
 # <a name="download"></a>
 # ## 4. Download Data
 #
-# Since the data are not cloud-hosted, we need to download. This will download the data in a folder called 'data' in your working directory. 
+# Since the data are not hosted in the Earthdata Cloud, we need to download files. This will download the data in a folder called "data" in your working directory.
 
-# download the first file granule
-files = earthaccess.download(results[0], "data")
+paths = earthaccess.download(results, "data")
 
 # [Back to top](#top)
 # <a name="plot"></a>
 # ## 5. Plot Data
 #
 
-# + active=""
-# TODO: clean this up a little
+# Step-by-step, we'll build a nice map showing the log-transformed chlorophyll a estimate for the first granule we
+# downloaded. The first step is to open some of the "groups" present within the NetCDF files to begin preparing
+# a variable to plot.
 
-# +
-filename = 'data/AQUA_MODIS.20201016T174500.L2.OC.nc'
-ds = xr.open_dataset(filename)
+prod = xr.open_dataset(paths[0])
+product_name = prod.attrs["product_name"]
+obs = xr.open_dataset(paths[0], group="geophysical_data")
+nav = xr.open_dataset(paths[0], group="navigation_data")
 
-ds_geo = xr.open_dataset(filename, group='geophysical_data')['chlor_a']
+# The "navigation_data" group has geospatial coordinates that we merge into the "geophysical_data" group, which has the
+# "chlor_a" product.
 
-ds_nav = xr.open_dataset(filename, group='navigation_data')
-ds_nav = ds_nav.set_coords(("longitude", "latitude"))
-ds_nav = ds_nav.rename({"pixel_control_points": "pixels_per_line"})
+nav = nav.set_coords(("longitude", "latitude"))
+nav = nav.rename({"pixel_control_points": "pixels_per_line"})
+dataset = xr.merge((obs, nav.coords))
 
-dataset = xr.merge((ds_geo, ds_nav.coords))
+# Now, we can pull out and fine-tune the "chlor_a" variable for visualization.
 
-dataset['log10_chlor_a'] = np.log10(dataset["chlor_a"])
-dataset
+array = np.log10(dataset["chlor_a"])
+array.attrs.update(
+    {
+        "units": f'log10({dataset["chlor_a"].attrs["units"]})',
+    }
+)
 
-# + active=""
-# TODO: change colorbar label to be log chl 
-# -
+# The `plot` method from XArray's plotting api is an easy way to take an `xr.Dataset` or `xr.DataArray` to
+# a `matplotlib` figure.
 
-p = dataset['log10_chlor_a'].plot(aspect=2, size=4,
-                        x="longitude", y="latitude",
-                        cmap = 'jet', vmin=-2, vmax=1.3)
+plot = array.plot(
+    x="longitude", y="latitude", aspect=2, size=4, cmap="jet", robust=True
+)
 
-# Add some decoration to the plot.
+# We can enrich the visualiation using `matplotlib` and `cartopy`. The coordinates are latitude and longitude, so if we add the "Plate Carree" coordinate reference system (CRS) to our axes, we will get an improved map.
 
-# +
-fig = plt.figure(figsize=(10, 7))
-map_projection = cartopy.crs.PlateCarree()
-ax = plt.axes(projection=map_projection)
-
-ax.coastlines()
+fig, ax = plt.subplots(
+    figsize=(10, 7), subplot_kw={"projection": cartopy.crs.PlateCarree()}
+)
+array.plot(x="longitude", y="latitude", cmap="jet", robust=True, ax=ax)
+ax.gridlines(draw_labels={"bottom": "x", "left": "y"})
 ax.add_feature(cartopy.feature.STATES, linewidth=0.5)
-ax.set_xticks(np.linspace(-85, -55, 5), crs=map_projection)
-ax.set_yticks(np.linspace(26, 48, 5), crs=map_projection)
-lon_formatter = LongitudeFormatter(zero_direction_label=True)
-lat_formatter = LatitudeFormatter()
-ax.xaxis.set_major_formatter(lon_formatter)
-ax.yaxis.set_major_formatter(lat_formatter)
-plot = dataset['log10_chlor_a'].plot(x="longitude", y="latitude", cmap="jet", vmin=-2, vmax=1.3, ax=ax)
-
-plt.title(ds.time_coverage_start)
-# -
+ax.set_title(product_name, loc="center")
+plt.show()
 
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook MODIS Aqua L2 data access. </p>
+# <p>You have completed the notebook on Aqua/MODIS L2 data exploration.</p>
 # </div>
-
-
