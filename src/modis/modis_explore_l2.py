@@ -1,0 +1,182 @@
+# # Explore Level-2 Ocean Color data from the Moderate Resolution Imaging Spectroradiometer (MODIS) on the Aqua Satellite
+#
+# **Authors:** Guoqing Wang (NASA, GSFC); Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
+#
+# > **PREREQUISITES**
+# >
+# > This notebook has the following prerequisites:
+# > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
+# >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+# > - There are no prerequisite notebooks for this module.
+#
+# ## Summary
+#
+# This tutorial demonstrates accessing and analyzing NASA ocean color data using Python from the NASA Ocean Biology Distributed Active Archive Center (OB.DAAC) archives. Currently, there are several ways to find and access ocean color data:
+# 1. [NASA's Earthdata Search](https://search.earthdata.nasa.gov/search)
+# 2. [NASA's CMR API](https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html)
+# 3. [OB.DAAC OPENDAP](https://oceandata.sci.gsfc.nasa.gov/opendap/)
+# 4. [OB.DAAC File Search](https://oceandata.sci.gsfc.nasa.gov/api/file_search_help)
+#
+# In this tutorial, we will focus on using `earthaccess` Python module to access MODIS Aqua ocean color data through NASA's Common Metadata Repository (CMR), a metadata system that catalogs Earth Science data and associated metadata records. The level 2 dataset of MODIS Aqua is one of the most popular datasets of OB.DAAC. Here we will use MODIS Aqua L2 Chlorophyll *a* data of the Chesapeake Bay as an example.
+# The standard NASA ocean color Chlorophyll *a* algorithm is described in the [Algorithm Theoretical Basis Document (ATBD)](https://www.earthdata.nasa.gov/apt/documents/chlor-a/v1.0).
+#
+# ## Learning Objectives
+#
+# At the end of this notebok you will know:
+# * How to find OB.DAAC ocean color data
+# * How to download files using `earthaccess`
+# * How to create a plot using `xarray`
+#
+# <a name="toc"></a>
+# ## Contents
+#
+# 1. [Setup](#setup)
+# 1. [NASA Earthdata Authentication](#auth)
+# 1. [Search for Data](#search)
+# 1. [Download Data](#download)
+# 1. [Plot Data](#plot)
+#
+# <a name="setup"></a>
+# ## 1. Setup
+#
+# We begin by importing all of the packages used in this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the imports will be successful.
+#
+# [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
+
+from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
+from IPython.display import JSON
+import cartopy
+import earthaccess
+import matplotlib.pyplot as plt
+import numpy as np
+import xarray as xr
+
+
+# [Back to top](#top)
+# <a name="auth"></a>
+# ## 2. NASA Earthdata Authentication
+#
+# Next, we authenticate using our Earthdata Login
+# credentials. Authentication is not needed to search publicaly
+# available collections in Earthdata, but is always needed to access
+# data. We can use the `login` method from the `earthaccess`
+# package. This will create an authenticated session when we provide a
+# valid Earthdata Login username and password. The `earthaccess`
+# package will search for credentials defined by **environmental
+# variables** or within a **.netrc** file saved in the home
+# directory. If credentials are not found, an interactive prompt will
+# allow you to input credentials.
+#
+# <div class="alert alert-info" role="alert">
+# The <code>persist=True</code> argument ensures any discovered credentials are
+# stored in a <code>.netrc</code> file, so the argument is not necessary (but
+# it's also harmless) for subsequent calls to <code>earthaccess.login</code>.
+# </div>
+
+auth = earthaccess.login(persist=True)
+
+# [Back to top](#top)
+# <a name="search"></a>
+# ## 3. Search for Data
+#
+# The MODIS instrument, on board the Aqua satellite, collects ocean color data, processed from Level-1 through Level-4 and distributed by the OB.DAAC. In this example, we will use the standard Chlorophyll a data from Level-2 ocean color files. To find data we will use the `earthaccess` Python library to search on NASA's CMR API.
+#
+# NASA data collections, i.e. a series of related granules, are discoverable with `earthaccess.search_datasets`. Various search parameters can be used to search collections and granules using metadata attributes. See more details [here](https://github.com/nsidc/earthaccess/blob/main/notebooks/Demo.ipynb). Below, CMR Catalog are queried to find collections with **"ocean color"** keyword in them, managed by **"OBDAAC"**. The returned response can be used to retrieve the `ShortName` and `concept-id` for each dataset.
+
+results = earthaccess.search_datasets(
+    keyword="L2 ocean color",
+    instrument="MODIS",
+)
+
+# Each result has a `summary` method with information such as the collection's short-name.
+
+set((i.summary()["short-name"] for i in results))
+
+# We are interested in the `MODISA_L2_OC` dataset.
+
+# We can use spatial and temporal arguments to search for granules covering Chesapeake Bay during the time frame of Oct 15 - 23, 2020. We can also add the cloud_cover parameter to filter out granules with too much cloud coverage.
+# cloud_cover = (0, 50) # max 50% of cloud coverage
+
+tspan = ("2020-10-15", "2020-10-23")
+bbox = (-76.75, 36.97, -75.74, 39.01)
+cc = (0, 50)
+
+results = earthaccess.search_data(
+    short_name="MODISA_L2_OC",
+    temporal=tspan,
+    bounding_box=bbox,
+    cloud_cover=cc,
+)
+
+# Now we can print some info about these granules using the built-in methods. We can see how each result prefers to display itself.
+
+results[0]
+
+# Or we could use the `data_links` and `size` methods provided on each result.
+
+data_links = [{"links": i.data_links(), "size (MB):": i.size()} for i in results]
+JSON(data_links, expanded=True)
+
+# Or we can interactively inspect all the fields underlying a result.
+
+JSON(results)
+
+# [Back to top](#top)
+# <a name="download"></a>
+# ## 4. Download Data
+#
+# Since the data are not hosted in the Earthdata Cloud, we need to download files. This will download the data in a folder called "data" in your working directory.
+
+paths = earthaccess.download(results, "data")
+
+# [Back to top](#top)
+# <a name="plot"></a>
+# ## 5. Plot Data
+#
+
+# Step-by-step, we'll build a nice map showing the log-transformed chlorophyll a estimate for the first granule we
+# downloaded. The first step is to open some of the "groups" present within the NetCDF files to begin preparing
+# a variable to plot.
+
+prod = xr.open_dataset(paths[0])
+product_name = prod.attrs["product_name"]
+obs = xr.open_dataset(paths[0], group="geophysical_data")
+nav = xr.open_dataset(paths[0], group="navigation_data")
+
+# The "navigation_data" group has geospatial coordinates that we merge into the "geophysical_data" group, which has the
+# "chlor_a" product.
+
+nav = nav.set_coords(("longitude", "latitude"))
+nav = nav.rename({"pixel_control_points": "pixels_per_line"})
+dataset = xr.merge((obs, nav.coords))
+
+# Now, we can pull out and fine-tune the "chlor_a" variable for visualization.
+
+array = np.log10(dataset["chlor_a"])
+array.attrs.update(
+    {
+        "units": f'log10({dataset["chlor_a"].attrs["units"]})',
+    }
+)
+
+# The `plot` method from XArray's plotting api is an easy way to take an `xr.Dataset` or `xr.DataArray` to
+# a `matplotlib` figure.
+
+plot = array.plot(
+    x="longitude", y="latitude", aspect=2, size=4, cmap="jet", robust=True
+)
+
+# We can enrich the visualiation using `matplotlib` and `cartopy`. The coordinates are latitude and longitude, so if we add the "Plate Carree" coordinate reference system (CRS) to our axes, we will get an improved map.
+
+fig, ax = plt.subplots(
+    figsize=(10, 7), subplot_kw={"projection": cartopy.crs.PlateCarree()}
+)
+array.plot(x="longitude", y="latitude", cmap="jet", robust=True, ax=ax)
+ax.gridlines(draw_labels={"bottom": "x", "left": "y"})
+ax.add_feature(cartopy.feature.STATES, linewidth=0.5)
+ax.set_title(product_name, loc="center")
+plt.show()
+
+# <div class="alert alert-info" role="alert">
+# <p>You have completed the notebook on Aqua/MODIS L2 data exploration.</p>
+# </div>
