@@ -1,4 +1,4 @@
-# # Processing with OCSSW programs l2gen, l2bin, and l3mapgen
+# # Processing with OCSSW Tools: l2gen, l2bin, and l3mapgen
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
 #
@@ -7,8 +7,7 @@
 # > This notebook has the following prerequisites:
 # > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
 # >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_file_structure/" target="_blank">OCI Data Access</a>
-# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_ocssw_processing_bash/" target="_blank">Installing and Running the OCSSW Command Line Interface (CLI)</a>
+# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_ocssw_processing_bash/" target="_blank">Installing and Running OCSSW Command-line Tools</a>
 #
 # ## Summary
 #

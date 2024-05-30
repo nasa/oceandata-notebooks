@@ -1,13 +1,11 @@
-# # Installing and Running the OCSSW Command Line Interface (CLI)
+# # Installing and Running OCSSW Command-line Tools
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
 #
 # > **PREREQUISITES**
 # >
 # > This notebook has the following prerequisites:
-# > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
-# >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_file_structure/" target="_blank">OCI Data Access</a>
+# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_file_structure/" target="_blank">Data Access</a>
 #
 # ## Summary
 #
@@ -30,15 +28,19 @@
 # 1. [Setup](#setup)
 # 1. [Install OCSSW](#ocssw)
 # 1. [Process Data with `l2gen`](#l2gen)
-#      
+#
 # <a name="setup"></a> 
 # ## 1. Setup
 #
-# <div class="alert alert-warning" role="alert">
+# <div class="alert alert-info" role="alert">
 # This tutorial is written in a Jupyter notebook connected to a Bash kernel. If you have downloaded this Jupyter notebook and want to run it, you also need to connected it to a Bash kernel. Alternatively, you can copy the code cells to the Terminal application found in the JupyterLab Launcher, which speaks Bash or something close enough.
 # </div>
 #
 # ### (Optional) Use a Bash Kernel
+#
+# <div class="alert alert-danger" role="alert">
+# Conda uses a lot of memory while configuring your environment. Choose an option with more than about 5GB of RAM from the JupyterHub Control Panel, or your install will fail.
+# </div>
 #
 # Run the following command. If the terminal asks you to update conda, type Y to accept.
 
@@ -48,13 +50,7 @@
 
 # Follow the prompts from conda to proceed with any installs and updates. If prompted, enter "y" to accept.
 #
-# Confirm the bash kernel is installed by starting a new Launcher. You should see the bash kernel along with Python and other kernels installed in your JupyterHub.
-#
-# Restart the kernel (refresh button on top of notebook or upper-right of the kernel window).
-#
-# ### Change your notebook kernel to Bash
-#
-# You should now change the kernel of the notebook by clicking on the kernel name in the upper-right corner of the window and selecting the Bash kernel before moving on to the rest of the tutorial. 
+# Confirm the bash kernel is installed by starting a new Launcher. You should see the bash kernel along with Python and other kernels installed in your JupyterHub. You should now **change the kernel of the notebook** by clicking on the kernel name in the upper-right corner of the window and selecting the Bash kernel before moving on to the rest of the tutorial.
 
 # [Back to top](#toc)
 # <a name="ocssw"></a>
@@ -72,9 +68,7 @@ wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
 
 chmod +x install_ocssw
 
-# Take a look at the different OCSSW "tags" you can install. It is recommended to use the most recent one for the installation, which is T2024.16 at the time of writing this tutorial. 
-#
-# TODO: define differences between tags? R vs T vs V?
+# Take a look at the different OCSSW "tags" you can install. It is recommended to use the most recent one for the installation, which is T2024.16 at the time of writing this tutorial. Tags starting with "V" are operational versions, and tags starting with "T" are test versions. Use "T" to get process the latest data products, but know the processing may change a lot between tags.
 
 # + scrolled=true
 ./install_ocssw --list_tags
@@ -87,7 +81,7 @@ export OCSSWROOT=/tmp/ocssw
 printenv OCSSWROOT
 
 # <div class="alert alert-info" role="alert">
-# You will need to repeat these installation steps if your OCSSWROOT directory does not persist between sessions. The `/tmp/ocssw` folder, for instance, will not be present the next time JupyterHub creates a server. Consider the trade off between installation time, speed, and storage costs when choosing your OCSSWROOT. We use the quick and cheap location for this tutorial.
+# You will need to repeat these installation steps if your OCSSWROOT directory does not persist between sessions. The `/tmp/ocssw` folder, for instance, will not be present the next time JupyterHub creates a server. Consider the trade off between installation time, speed, and storage costs when choosing your OCSSWROOT. With the arguments below, the installation takes 11GB of storage space. We use the quick and cheap location for this tutorial.
 # </div>
 
 # Install OCSSW using the `--tag` argument to pick from the list above. Also provide optional arguments for sensors you will be working with. In this case, we will only be using OCI. A list of optional arguments can be found on the OCSSW webpage or with `./install_ocssw --help`.
