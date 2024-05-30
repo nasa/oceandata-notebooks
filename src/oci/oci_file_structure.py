@@ -51,7 +51,7 @@ import pandas as pd
 
 auth = earthaccess.login(persist=True)
 
-# [Back to top](#top)
+# [Back to top](#toc)
 # <a name="l1b"></a>
 # ## 2. Inspecting OCI L1B File Structure
 #
@@ -94,7 +94,7 @@ groups
 dataset = xr.open_dataset(paths[0], group="observation_data")
 dataset
 
-# Now you can view the Dimensions, Coordinates, and Variables of this group. To show/hide attributes, press the paper icon on the right hand side of each variable. To show/hide data reprensetaton, press the cylinder icon. For instance, you could check the attributes on "rhot_blue" to see that this variable is the "Top of Atmosphere Blue Band Reflectance".
+# Now you can view the Dimensions, Coordinates, and Variables of this group. To show/hide attributes, press the paper icon on the right hand side of each variable. To show/hide data representation, press the cylinder icon. For instance, you could check the attributes on "rhot_blue" to see that this variable is the "Top of Atmosphere Blue Band Reflectance".
 #
 # The dimensions of the "rhot_blue" variable are ("blue_bands", "number_of_scans", "ccd_pixels"), and it has shape (119, 1709, 1272). The `sizes` attribute of a variable gives us that information as a dictionary.
 
@@ -298,7 +298,7 @@ chla_avg = chla.mean(dim=["lon", "lat"], keep_attrs=True)
 plot = chla_avg.plot(linestyle='-', marker='o', color='b')
 
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on OCI file structure. More notebooks are coming soon!</p>
+# <p>You have completed the notebook on OCI file structure.</p>
 # </div>
 
 

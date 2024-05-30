@@ -5,13 +5,17 @@
 # > **PREREQUISITES**
 # >
 # > This notebook has the following prerequisites:
-# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_file_structure/" target="_blank">Data Access</a>
+
+# > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
+# >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/" target="_blank">Data Access</a>
 #
 # ## Summary
 #
-# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes SeaDAS-OCSSW, the core libraries or data processing components. There is a command line interface (CLI) for the SeaDAS-OCSSW data processing components, known simply as OCSSW, which we can use to write processing scripts or notebooks.
+# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB. DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There are also command line programs for the OCSSW libraries, which we can use to write processing scripts or notebooks.
+
 #
-# This tutorial will show you how to install OCSSW on a Linux server and how to start doing data processing by processing a Level 1B (L1B) file from PACE OCI to a Level 2 (L2) file using `l2gen`.
+# This tutorial will show you how to install OCSSW on a Linux server and how to start doing data processing by processing a Level-1B (L1B) file from PACE OCI to a Level-2 (L2) file using `l2gen`.
 #
 # [seadas]: https://seadas.gsfc.nasa.gov/
 #
