@@ -72,7 +72,7 @@ import earthaccess
 
 import pathlib
 
-# [Back to top](#top)
+# [Back to top](#toc)
 # <a name="auth"></a>
 # ## 2. NASA Earthdata Authentication
 #
@@ -95,7 +95,7 @@ import pathlib
 
 auth = earthaccess.login(persist=True)
 
-# [Back to top](#top)
+# [Back to top](#toc)
 # <a name="search"></a>
 # ## 3. Search for Data
 #
@@ -160,7 +160,7 @@ results[1]
 
 results[2]
 
-# [Back to top](#top)
+# [Back to top](#toc)
 # <a name="download"></a>
 # ## 4. Download Data
 #
