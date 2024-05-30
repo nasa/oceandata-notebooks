@@ -1,4 +1,4 @@
-# # Visualize Data from the Hyper-Angular Rainbow Polarimeter (HARP2)
+# # Visualize Data from the Spectro-polarimeter for Planetary Exploration one (SPEXone)
 #
 # **Authors:** Sean Foley (NASA, MSU), Meng Gao (NASA, SSAI), Ian Carroll (NASA, UMBC)
 #
@@ -17,7 +17,7 @@
 #
 # At the end of this notebook you will know:
 #
-# * How to acquire data from HARP2
+# * How to acquire data from SPEXone
 # * How to plot geolocated imagery
 # * Some basic concepts about polarization
 # * How to make animations of multi-angle data
@@ -36,6 +36,11 @@
 # ## 1. Setup
 #
 # First, import the libraries we will need.
+#
+
+# If not available in default installation, we may need to install the library. 
+
+pip install apng
 
 # +
 from pathlib import Path
@@ -53,7 +58,7 @@ import xarray as xr
 
 # -
 
-# The radiances collected by HARP2 often need to be converted, using additional properties, to reflectances. Write a function for anything you'll repeat like this.
+# The radiances collected by SPEXone often need to be converted, using additional properties, to reflectances. Write a function for anything you'll repeat like this.
 
 
 def rad_to_refl(rad, f0, sza, r):
@@ -66,20 +71,20 @@ def rad_to_refl(rad, f0, sza, r):
 
     Returns: Reflectance.
     """
-    return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) / f0
+    return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) /f0
 
 
 # [Back to top](#toc)
 # <a name="data"></a>
 # ## 2. Get Level-1C Data
 #
-# Download some HARP2 Level-1C data using the `short_name` value "PACE_HARP2_L1C_SCI" in `earthaccess.search_data`. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface. Note that this might take a while, depending on the speed of your internet connection, and the progress bar will seem frozen because we're only downloading one file.
+# Download some HARP2 Level-1C data using the `short_name` value "PACE_SPEXONE_L1C_SCI" in `earthaccess.search_data`. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface. Note that this might take a while, depending on the speed of your internet connection, and the progress bar will seem frozen because we're only downloading one file.
 
 auth = earthaccess.login(persist=True)
 
 tspan = ("2024-05-20", "2024-05-20")
 results = earthaccess.search_data(
-    short_name="PACE_HARP2_L1C_SCI",
+    short_name="PACE_SPEXONE_L1C_SCI",
     temporal=tspan,
     count=1,
 )
@@ -95,96 +100,112 @@ obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 # <a name="multiangle"></a>
 # ## 2. Understanding Multi-Angle Data
 #
-# HARP2 is a multi-spectral sensor, like OCI, with 4 spectral bands. These roughly correspond to green, red, near infrared (NIR), and blue (in that order). HARP2 is also multi-angle. These angles are with respect to the satellite track. Essentially, HARP2 is always looking ahead, looking behind, and everywhere in between. The number of angles varies per sensor. The red band has 60 angles, while the green, blue, and NIR bands each have 10.
-#
-# In the HARP2 data, the angles and the spectral bands are combined into one axis. I'll refer to this combined axis as HARP2's "channels." Below, we'll make a quick plot both the viewing angles and the wavelengths of HARP2's channels. In both plots, the x-axis is simply the channel index.
+# SPEXone is a hyper-spectral sensor with 400 intensity bands (380-779nm) and 50 polarization bands (within 385-770nm).  SPEXone is also multi-angle measures five view angles for all its spectral bands. Therefore, there is no need to combine the spectral bands and angles together into one axis as what HARP2 data is organized. 
 #
 # Pull out the view angles and wavelengths.
 
 angles = view["sensor_view_angle"]
-wavelengths = view["intensity_wavelength"]
+wavelengths_i = view["intensity_wavelength"]
+wavelengths_p = view["polarization_wavelength"]
 
-# Create a figure with 2 rows and 1 column and a reasonable size for many screens.
+# Create a figure with 3 rows and 1 column and a reasonable size for many screens. The wavelengths for intensity and polarization are plotted in separated rows, where an arbitrary angle index is choosen.
 
-fig, ax = plt.subplots(2, 1, figsize=(14, 7))
+# +
+fig, ax = plt.subplots(3, 1, figsize=(14, 7))
 ax[0].set_ylabel("View Angle (degrees)")
 ax[0].set_xlabel("Index")
 ax[1].set_ylabel("Wavelength (nm)")
 ax[1].set_xlabel("Index")
-plot_data = [
-    (0, 10, "green", "^", "green"),
-    (10, 70, "red", "*", "red"),
-    (70, 80, "black", "s", "NIR"),
-    (80, 90, "blue", "o", "blue"),
-]
-for start_idx, end_idx, color, marker, label in plot_data:
-    ax[0].plot(
-        np.arange(start_idx, end_idx),
-        angles[start_idx:end_idx],
-        color=color,
-        marker=marker,
-        label=label,
-    )
-    ax[1].plot(
-        np.arange(start_idx, end_idx),
-        wavelengths[start_idx:end_idx],
-        color=color,
-        marker=marker,
-        label=label,
-    )
+
+angle_index = 0 
+color, marker = 'blue', 'o'
+ax[0].plot(
+    #np.arange(start_idx, end_idx),
+    angles,
+    color=color,
+    marker=marker,
+    label='All bands'
+)
+ax[1].plot(
+    #np.arange(start_idx, end_idx),
+    wavelengths_i[angle_index, :],
+    color=color,
+    marker=marker,
+    label='Intensity',
+)
+ax[2].plot(
+    #np.arange(start_idx, end_idx),
+    wavelengths_p[angle_index, :],
+    color=color,
+    marker=marker,
+    label='polarization',
+)
 ax[0].legend()
 ax[1].legend()
+ax[2].legend()
 plt.show()
+# -
 
 # [Back to top](#toc)
 # <a name="polarimetry"></a>
 # ## 3. Understanding Polarimetry
 #
-# HARP2 is sensitive to the polarization of light. Polarization describes the geometric orientation of the oscillation of light waves. Randomly polarized light (like light coming directly from the sun) has an approximately equal amount of waves in every orientation. When light reflects of certain surfaces, it can become nonrandomly polarized.
+# Both HARP2 and SPEXone conduct polarized measurements. Polarization describes the geometric orientation of the oscillation of light waves. Randomly polarized light (like light coming directly from the sun) has an approximately equal amount of waves in every orientation. When light reflects of certain surfaces or scattered by small particles, it can become nonrandomly polarized.
 #
-# Polarimetric data is typically represented using [Stokes vectors](https://en.wikipedia.org/wiki/Stokes_parameters). These have four components: I, Q, U, and V. HARP2 is only sensitive to linear polarization, and does not detect circular polarization. Since the V component corresponds to circular polarization, the data only includes the I, Q, and U elements of the Stokes vector.
+# Polarimetric data is typically represented using [Stokes vectors](https://en.wikipedia.org/wiki/Stokes_parameters). These have four components: I, Q, U, and V. Both HARP2 and SPEXone are only sensitive to linear polarization, and does not detect circular polarization. Since the V component corresponds to circular polarization, the data only includes the I, Q, and U elements of the Stokes vector.
 #
-# Let's make a plot of the I, Q, and U components of our Stokes vector, using the RGB channels, which will help our eyes make sense of the data. We'll use the view that is closest to pointing straight down, which is called the "nadir" view in the code. It is important to understand that, because HARP2 is a pushbroom sensor with a wide swath, the sensor zenith angle at the edges of the swath will still be high. It's only a true nadir view close to the center of the swath. Still, the average sensor zenith angle will be lowest in this view.)
+# Let's make a plot of the I, Q, and U components of our Stokes vector, using the RGB channels, which will help our eyes make sense of the data. We'll use the view that is closest to pointing straight down, which is called the "nadir" view in the code.  Since SPEXone swath is relatively narrow (100km), the sensor zenith angle at the edges of the swath will be slightly higher. It's only a true nadir view close to the center of the swath. 
 #
 # The I, Q, and U components of the Stokes vector are separate variables in the `obs` dataset.
 
 stokes = obs[["i", "q", "u"]]
 
-# The first 10 channels are green, the next 60 channels are red, and the final 10 channels are blue (we're skipping NIR).
-# In each of those groups of channels, we get the index of the minimum absolute value of the camera angle, corresponding to our nadir view.
+# Check the data dimension
 
-green_nadir_idx = np.argmin(np.abs(angles[:10].values))
-red_nadir_idx = 10 + np.argmin(np.abs(angles[10:70].values))
-blue_nadir_idx = 80 + np.argmin(np.abs(angles[80:].values))
+stokes["i"].shape, stokes["q"].shape, stokes["u"].shape
 
-# Then, get the data at the nadir indices.
+# The first three dimensions are the pixels along track, pixels cross tracks, and the view angles. Note that the dimensions for the stokes vector I, and Q (U) are different. Therefore, for visulizations, we will separate I and other polarization related variables. 
 
-rgb_stokes = stokes.isel(
+# Nadir index can be simply set as
+
+nadir_idx = 2
+
+# We then thoose three RGB bands similar to HARP2 at 665, 550, and 440nm
+
+wavelengths_i_index = [60, 170, 285]
+wavelengths_i[0,wavelengths_i_index].values
+
+# Then, get the data at the nadir indices and RGB bands:
+
+rgb_i = stokes[["i"]].isel(
     {
-        "number_of_views": [red_nadir_idx, green_nadir_idx, blue_nadir_idx],
+        "number_of_views": nadir_idx,
+        'intensity_bands_per_view': wavelengths_i_index
     }
 )
 
+# Check data dimension again
+
+rgb_i["i"].shape
+
+
 # A few adjustments make the image easier to visualize. First, normalize the data between 0 and 1. Second, bring out some of the darker colors.
 
-rgb_stokes = (rgb_stokes - rgb_stokes.min()) / (rgb_stokes.max() - rgb_stokes.min())
-rgb_stokes = rgb_stokes ** (3 / 4)
+def rgb_data_scale(rgb):
+    rgb = (rgb- rgb.min()) / (rgb.max() - rgb.min())
+    rgb = rgb ** (3 / 4)
+    return rgb
+
+
+rgb_i = rgb_data_scale(rgb_i)
 
 # Add latitude and longitude as auxilliary (i.e. non-index) coordinates to use in the map projection.
 
-rgb_stokes = rgb_stokes.assign_coords(
+rgb_i = rgb_i.assign_coords(
     {
         "lat": geo["latitude"],
         "lon": geo["longitude"],
     }
-)
-
-# Since the nadir view is not processed at swath edges, a better image will result from finding a valid window within the dataset. Using just the array for the I component, we crop the `rgb_stokes` dataset using the `where` attribute and some boolean logic applied across different dimensions of the array.
-
-window = rgb_stokes["i"].notnull().all("number_of_views")
-crop_rgb_stokes = rgb_stokes.where(
-    window.any("bins_along_track") & window.any("bins_across_track"),
-    drop=True,
 )
 
 # The granule crosses the 180 degree longitude, so we set up the figure and subplots to use a Plate Carree projection shifted to center on a -170 longitude. The data has coordinates from the default (i.e. centered at 0 longitude) Plate Carree projection, so we give that CRS as a `transform`.
@@ -193,61 +214,68 @@ crop_rgb_stokes = rgb_stokes.where(
 
 # +
 crs = ccrs.PlateCarree(-170)
-fig, ax = plt.subplots(1, 3, figsize=(16, 5), subplot_kw={"projection": crs})
+fig, ax = plt.subplots(1, 1, figsize=(16, 5), subplot_kw={"projection": crs})
 fig.suptitle(f'{prod.attrs["product_name"]} RGB')
 
-for i, (key, value) in enumerate(crop_rgb_stokes.items()):
-    ax[i].pcolormesh(value["lon"], value["lat"], value, transform=ccrs.PlateCarree())
-    ax[i].gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
-    ax[i].coastlines(color="grey")
-    ax[i].set_title(key.capitalize())
+
+key, value ="i", rgb_i["i"]
+ax.pcolormesh(value["lon"], value["lat"], value, transform=ccrs.PlateCarree())
+ax.gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
+ax.coastlines(color="grey")
+ax.set_title(key.capitalize())
 # -
 
-# It's pretty plain to see that the I plot makes sense to the eye: we can see clouds over the Pacific Ocean (this scene is south of the Cook Islands and east of Australia). This is because the I component of the Stokes vector corresponds to the total intensity. In other words, this is roughly what your eyes would see. However, the Q and U plots don't quite make as much sense to the eye. We can see that there is some sort of transition in the middle, which is the satellite track. This transition occurs in both plots, but is stronger in Q. This gives us a hint: the type of linear polarization we see in the scene depends on the angle with which we view the scene.
+# It's pretty plain to see that the I plot makes sense to the eye: we can see clouds over the Pacific Ocean (this scene is south of the Cook Islands and east of Australia). This is because the I component of the Stokes vector corresponds to the total intensity. In other words, this is roughly what your eyes would see.
 #
-# [This Wikipedia plot](https://upload.wikimedia.org/wikipedia/commons/3/31/StokesParameters.png) is very helpful for understanding what exactly the Q and U components of the Stokes vector mean. Q describes how much the light is oriented in -90°/90° vs. 0°/180°, while U describes how much light is oriented in -135°/45°; vs. -45°/135°.
 #
-# Next, let's take a look at the degree of linear polarization (DoLP).
+# Next, let's take a look at Q and U, as well as the degree of linear polarization (DoLP). Since the polarization dimension is different with the intensity spectral dimension, we select three polarization bands at similar spectral bands comparing with the intensities.
 
-rgb_dolp = obs["dolp"].isel(
+wavelengths_p_index = [9, 25, 39]
+wavelengths_p[0,wavelengths_p_index].values
+
+rgb_p = obs[["q", "u", "dolp"]].isel(
     {
-        "number_of_views": [red_nadir_idx, green_nadir_idx, blue_nadir_idx],
+        "number_of_views": nadir_idx,
+        'polarization_bands_per_view': wavelengths_p_index
     }
 )
-crop_rgb_dolp = rgb_dolp.where(
-    window.any("bins_along_track") & window.any("bins_across_track"),
-    drop=True,
-)
-crop_rgb = xr.merge((crop_rgb_dolp, crop_rgb_stokes))
+
+rgb = xr.merge([rgb_i, rgb_p])
 
 # Create a figure with 1 row and 2 columns, having a good width for many screens, that will use the projection defined above. For the two columns, we iterate over just the I and DoLP arrays.
 
 # +
-fig, ax = plt.subplots(1, 2, figsize=(16, 8), subplot_kw={"projection": crs})
+fig, ax = plt.subplots(1, 4, figsize=(16, 8), subplot_kw={"projection": crs})
 fig.suptitle(f'{prod.attrs["product_name"]} RGB')
 
-for i, (key, value) in enumerate(crop_rgb[["i", "dolp"]].items()):
+for i, (key, value) in enumerate(rgb[["i", "q", "u", "dolp"]].items()):
     ax[i].pcolormesh(value["lon"], value["lat"], value, transform=ccrs.PlateCarree())
     ax[i].gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
     ax[i].coastlines(color="grey")
     ax[i].set_title(key.capitalize())
 # -
+
+# Different with the I component, the Q and U plots don't quite make as much sense to the eye. We can see that there is some sort of transition in the middle, which is the satellite track. This transition occurs in both plots, but is stronger in Q. This gives us a hint: the type of linear polarization we see in the scene depends on the angle with which we view the scene.
+#
+# [This Wikipedia plot](https://upload.wikimedia.org/wikipedia/commons/3/31/StokesParameters.png) is very helpful for understanding what exactly the Q and U components of the Stokes vector mean. Q describes how much the light is oriented in -90°/90° vs. 0°/180°, while U describes how much light is oriented in -135°/45°; vs. -45°/135°.
+#
 
 # DoLP line plot
 
 dolp_mean = obs["dolp"].mean(["bins_along_track", "bins_across_track"])
 dolp_mean = (dolp_mean - dolp_mean.min()) / (dolp_mean.max() - dolp_mean.min())
+#select the same three bands as for the RGB plots, note that SPEXone do not have the same NIR bands at 870, therefore not included here
+dolp_mean = dolp_mean [:, wavelengths_p_index]
 
-fig, ax = plt.subplots(figsize=(16, 6))
-wv_uq = np.unique(wavelengths.values)
-plot_data = [("b", "o"), ("g", "^"), ("r", "*"), ("k", "s")]
-for wv_idx in range(4):
-    wv = wv_uq[wv_idx]
-    wv_mask = wavelengths.values == wv
+fig, ax = plt.subplots(1,1, figsize=(16, 6))
+wv_uq = np.unique(wavelengths_i.values)
+plot_data = [("b", "o"), ("g", "^"), ("r", "*")]
+for wv_idx in range(3):
+    wv = wavelengths_p[0, wavelengths_p_index[wv_idx]].values
     c, m = plot_data[wv_idx]
     ax.plot(
-        angles.values[wv_mask],
-        dolp_mean[wv_mask],
+        angles.values,
+        dolp_mean[:, wv_idx],
         color=c,
         marker=m,
         markersize=7,
@@ -275,38 +303,34 @@ refl = rad_to_refl(
 )
 
 fig, ax = plt.subplots(1, 2, figsize=(16, 8))
-ax[0].imshow(obs["i"].sel({"number_of_views": red_nadir_idx}), cmap="gray")
+red_idx = wavelengths_i_index[2]
+ax[0].imshow(obs["i"].sel({"number_of_views": nadir_idx,'intensity_bands_per_view': red_idx}), cmap="gray")
 ax[0].set_title("Radiance")
-ax[1].imshow(refl.sel({"number_of_views": red_nadir_idx}), cmap="gray")
+ax[1].imshow(refl.sel({"number_of_views": nadir_idx,'intensity_bands_per_view': red_idx}), cmap="gray")
 ax[1].set_title("Reflectance")
 plt.show()
 
-# Create a line plot of the mean reflectance for each view angle and spectral channel. The flatness of this plot serves as a sanity check that nothing has gone horribly wrong with our data processing.
+# Create a line plot of the reflectance for each view angle and spectral channel on a selected pixel. The flatness of this plot serves as a sanity check that nothing has gone horribly wrong with our data processing.
 
-# +
-fig, ax = plt.subplots(figsize=(16, 6))
-wv_uq = np.unique(wavelengths.values)
-plot_data = [("b", "o"), ("g", "^"), ("r", "*"), ("black", "s")]
-refl_mean = refl.mean(["bins_along_track", "bins_across_track"])
-for wv_idx in range(4):
-    wv = wv_uq[wv_idx]
-    wv_mask = wavelengths.values == wv
+fig, ax = plt.subplots(1,1, figsize=(16, 6))
+plot_data = [("b", "o"), ("g", "^"), ("r", "*")]
+refl_pixel= refl[350,12] #select an arbitrary pixel
+for wv_idx in range(3):
+    wv = wavelengths_p[0, wavelengths_p_index[wv_idx]].values
     c, m = plot_data[wv_idx]
     ax.plot(
-        angles.values[wv_mask],
-        refl_mean[wv_mask],
+        angles.values,
+        refl_pixel[:, wv_idx],
         color=c,
         marker=m,
         markersize=7,
         label=str(wv),
     )
-
 ax.legend()
 ax.set_xlabel("Nominal View Angle (°)")
 ax.set_ylabel("Reflectance")
-ax.set_title("Mean Reflectance by View Angle")
+ax.set_title("Reflectance by View Angle")
 plt.show()
-# -
 
 # [Back to top](#toc)
 # <a name='animation'>
@@ -326,7 +350,9 @@ anim = APNG()
 
 # Get the reflectances of just the red channel, and normalize the reflectance to lie between 0 and 1.
 
-refl_red = refl[..., 10:70]
+red_idx = wavelengths_i_index[2]
+
+refl_red = refl[..., red_idx]
 refl_pretty = (refl_red - refl_red.min()) / (refl_red.max() - refl_red.min())
 
 # A very mild Gaussian filter over the angular axis will improve the animation's smoothness.
@@ -352,12 +378,12 @@ with TemporaryDirectory() as tmp:
         path = Path(tmp) / f"{i:04d}.png"
         imageio.imwrite(path, frame)
         anim.append_file(path, delay=i)
-    anim.save(f'harp2_red_anim_{prod.attrs["product_name"].split(".")[1]}.png')
+    anim.save(f'spxeone_red_anim_{prod.attrs["product_name"].split(".")[1]}.png')
 
 # Check it out! This is a great example of multi-layer clouds. You can use the parallax effect to distinguish between these layers.
 #
 # The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
 #
-# ![A multi-angle HARP2 animation](harp2_red_anim_20240519T235950.png)
+# ![A multi-angle SPEXone animation](spxeone_red_anim_20240520T025629.png)
 
-
+#
