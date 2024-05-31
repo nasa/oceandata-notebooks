@@ -1,4 +1,4 @@
-# # Processing with OCSSW programs l2gen, l2bin, and l3mapgen
+# # Processing with OCSSW Tools: l2gen, l2bin, and l3mapgen
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
 #
@@ -7,12 +7,11 @@
 # > This notebook has the following prerequisites:
 # > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
 # >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_file_structure/" target="_blank">Data Access</a>
-# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_ocssw_processing_bash/" target="_blank">Installing and Running the OCSSW Command Line Interface (CLI)</a>
+# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_ocssw_processing_bash/" target="_blank">Installing and Running OCSSW Command-line Tools</a>
 #
 # ## Summary
 #
-# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB. DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes SeaDAS-OCSSW, the core libraries or data processing components. There is a command line interface (CLI) for the SeaDAS-OCSSW data processing components, known simply as OCSSW, which we can use to write processing scripts or notebooks.
+# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes SeaDAS-OCSSW, the core libraries or data processing components. There is a command line interface (CLI) for the SeaDAS-OCSSW data processing components, known simply as OCSSW, which we can use to write processing scripts or notebooks.
 #
 # This tutorial will show you how to combine PACE OCI data access with Python followed by processing using the sequence of OCSSW programs `l2gen`, `l2bin`, and `l3mapgen`.
 #
@@ -53,14 +52,20 @@ import matplotlib.pyplot as plt
 
 
 # We are also going to define a function to help write OCSSW parameter files, which
-# occurs several times in this tutorial. The function will require a path to a file
-# location as the first argument: the parameter file will be written
-# there. The function will require an iterable of parameter values as the second argument.
+# occurs several times in this tutorial. <br>
+#
+# Inputs: <br>
+# `path`: where parameter file will be written <br>
+# `par`: iterable of parameter values
+#
+# Outputs:
+# `values`: parameter values
 
 def write_par(path, par):
     with open(path, "w") as file:
         writer = csv.writer(file, delimiter="=")
-        writer.writerows(par.items())
+        values = writer.writerows(par.items())
+    return values
 
 
 # To write the results in the format understood by OCSSW, this function uses the `csv.writer`
@@ -105,7 +110,7 @@ paths = earthaccess.download(results, parent)
 
 l2gen_ifile = paths[0]
 
-# The Level-1 files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
+# The Level-1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
 # On OCI, the reflectances are grouped into blue, red, and short-wave infrared (SWIR) wavelengths. Open
 # the dataset's "observatin_data" group in the netCDF file using `xarray` to plot a "rhot_red"
 # wavelength.
@@ -113,7 +118,7 @@ l2gen_ifile = paths[0]
 dataset = xr.open_dataset(paths[0], group="observation_data")
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 
-# This tutorial will demonstrate processing that Level-1 granule into a Level-2 granule. Because that can
+# This tutorial will demonstrate processing this Level-1B granule into a Level-2 granule. Because that can
 # take several minutes, we'll also download a couple of Level-2 granules to save time for the next step of compositing multiple Level-2 granules into a single granule.
 
 location = [(-56.5, 49.8), (-55.0, 49.8)]
@@ -131,32 +136,31 @@ for item in results:
     display(item)
 
 paths = earthaccess.download(results, parent)
+paths
 
 # While we have the downloaded location stored in the list `paths`, write it to a text file for future use.
 
 with open("l2bin_ifile.txt", "w") as file:
-    file.write("\n".join(paths))
+    file.write("".join(str(paths)))
 
 # ## 3. Process L1B Data with `l2gen` <a name="l2gen"></a>
 #
 
-# At Level-1, we neither have any geophysical variables nor are the data projected for easy map making. We will need to process the file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters. 
+# At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters. 
 
 # <div class="alert alert-warning">
-# OCSSW programs are run from the command line in Bash, but we can have a Bash terminal-in-a-cell using the IPython <a href="https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands" target=_blank>magic</a> command `%%bash`. In the specific case of OCSSW programs, the Bash environment created for that cell must be set up by loading `$OCSSWROOT/OCSSW_bash.env`.
+# OCSSW programs are run from the command line in Bash, but we can have a Bash terminal-in-a-cell using the IPython <a href="https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands" target=_blank>magic</a> command  `%%bash`. In the specific case of OCSSW programs, the Bash environment created for that cell must be set up by loading `$OCSSWROOT/OCSSW_bash.env`.
 # </div>
 #
-# Every `%%bash` cell which calls an OCSSW program needs to `source` the environment
+# TODO: figure out how to highlight %%bash and $OCSSWROOT/OCSSW_bash.env above
+#
+# Every `%%bash` cell that calls an OCSSW program needs to `source` the environment
 # definition file shipped with OCSSW, because its effects are not retained from one cell to the next.
 # We can, however, define the `OCSSWROOT` environment variable in a way that effects every `%%bash` cell.
 
 os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
 
 # Then we need a couple lines, which will appear in multiple cells below, to begin a Bash cell initiated with the `OCSSW_bash.env` file.
-# ```
-# # %%bash
-# source $OCSSWROOT/OCSSW_bash.env
-# ```
 #
 # Using this pattern, run the `l2gen` command with the single argument `help` to view the extensive list of options available. You can find more information about `l2gen` and other OCSSW functions on the [seadas website](https://seadas.gsfc.nasa.gov/help-8.3.0/processors/ProcessL2gen.html)
 
@@ -166,21 +170,21 @@ os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
 # l2gen help
 # -
 
-# To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the biogeochemical (BGC) suite that includes Chlorophyll A estimates.
+# To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the biogeochemical (BGC) suite that includes chlorophyll *a* estimates.
 #
 # Parameters can be passed to OCSSW programs through a text file. They can also be passed as arguments, but writing to a text file leaves a clear processing record. Define the parameters in a dictionary, then send it to the `write_par` function
 # defined in the [Setup](#setup) section.
 
 par = {
     "ifile": l2gen_ifile,
-    "ofile": l2gen_ifile.replace("L1B", "L2"),
+    "ofile": str(l2gen_ifile).replace("L1B", "L2"),
     "suite": "BGC",
     "l2prod": "chlor_a",
     "atmocor": 1,
 }
 write_par("l2gen.par", par)
 
-# With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell.
+# With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell. 
 
 # + scrolled=true language="bash"
 # source $OCSSWROOT/OCSSW_bash.env
@@ -188,7 +192,7 @@ write_par("l2gen.par", par)
 # l2gen par=l2gen.par
 # -
 
-# If successful, the `l2gen` program created a netCDF file at the `ofile` path. The contents should include the `chlor_a` product from the `BGC` suite of products. Once this process is done, you are ready to visualize your "custom" L2 data. Use the `robust=True` option to ignore outliers.
+# If successful, the `l2gen` program created a netCDF file at the `ofile` path. The contents should include the `chlor_a` product from the `BGC` suite of products. Once this process is done, you are ready to visualize your "custom" L2 data. Use the `robust=True` option to ignore outlier chl a values.
 
 dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
 plot = dataset["chlor_a"].plot(cmap="viridis", robust=True)
