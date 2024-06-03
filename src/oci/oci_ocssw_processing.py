@@ -143,7 +143,7 @@ paths
 # While we have the downloaded location stored in the list `paths`, write it to a text file for future use.
 
 with open("l2bin_ifile.txt", "w") as file:
-    file.write("".join(str(paths)))
+    file.write("\n".join(paths))
 
 # ## 3. Process L1B Data with `l2gen` <a name="l2gen"></a>
 #
