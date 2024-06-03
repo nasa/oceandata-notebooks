@@ -11,8 +11,7 @@ See [docs](docs/index.md).
 > [!IMPORTANT]
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
 > - Create new notebooks in the `notebooks/` folder.
-> - Open notebooks found only in the `src/` folder with **Open With** -> **Notebook** from the "right-click"
->    menu. Save and close the notebook. The notebook will now exist in the `notebooks/` folder.
+> - If a notebook is missing from the `notebooks/` folder, but its paired ".py" file is present in the `src/` folder, open a terminal and run `jupytext -s src/*/*.py`.
 
 Keeping notebooks in a code repository presents challenges for collaboration and curation,
 because notebooks can contain very large blobs of binary outputs and they also include
