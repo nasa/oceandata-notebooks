@@ -38,37 +38,43 @@
 #
 # We begin by importing all of the packages used in this notebook.
 
+# +
 import csv
 import os
 import pathlib
+
 import cartopy.crs as ccrs
 import earthaccess
 import xarray as xr
 import matplotlib.pyplot as plt
-
+# -
 
 # We are also going to define a function to help write OCSSW parameter files, which
-# occurs several times in this tutorial. <br>
-#
-# Inputs: <br>
-# `path`: where parameter file will be written <br>
-# `par`: iterable of parameter values
-#
-# Outputs:
-# `values`: parameter values
+# is needed several times in this tutorial. To write the results in the format understood
+# by OCSSW, this function uses the `csv.writer` from the Python Standard Library. Instead of
+# writing comma-separated values, however, we specify a non-default delimiter to get
+# equals-separated values. Not something you usually see in a data file, but it's better than
+# writing our own utility from scratch!
 
 def write_par(path, par):
+    """
+    Prepare a "par file" to be read by one of the OCSSW tools, as an
+    alternative to specifying each parameter on the command line.
+
+    Args:
+        path (str): where to write the parameter file
+        par (dict): the parameter names and values included in the file
+    """
     with open(path, "w") as file:
         writer = csv.writer(file, delimiter="=")
         values = writer.writerows(par.items())
-    return values
 
 
-# To write the results in the format understood by OCSSW, this function uses the `csv.writer`
-# from the Python Standard Library. Instead of writing comma-separated values, however, we specify
-# a non-default delimiter to get equals-separated values. Not something you usually see in a data file,
-# but it's better than writing our own utility from scratch!
-#
+# The Python docstring (fenced by triple quotation marks in the function definition) is not
+# essential, but it helps describe what the function does.
+
+help(write_par)
+
 # ## 2. Get OCI Data <a name="data"></a>
 #
 #
@@ -93,7 +99,7 @@ results = earthaccess.search_data(
 
 results[0]
 
-# Create a directory where you will store the granules (at least until earthaccess 0.9.1 is released).
+# Create a directory where you will store downloaded granules (nb. this step is unnecessary with earthaccess >= 0.9.1).
 
 parent = pathlib.Path("granules")
 parent.mkdir(exist_ok=True)
@@ -145,10 +151,8 @@ with open("l2bin_ifile.txt", "w") as file:
 # At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters. 
 
 # <div class="alert alert-warning">
-# OCSSW programs are run from the command line in Bash, but we can have a Bash terminal-in-a-cell using the IPython <a href="https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands" target=_blank>magic</a> command  `%%bash`. In the specific case of OCSSW programs, the Bash environment created for that cell must be set up by loading `$OCSSWROOT/OCSSW_bash.env`.
+# OCSSW programs are run from the command line in Bash, but we can have a Bash terminal-in-a-cell using the IPython <a href="https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands" target=_blank>magic</a> command <code>%%bash</code>. In the specific case of OCSSW programs, the Bash environment created for that cell must be set up by loading <code>$OCSSWROOT/OCSSW_bash.env</code>.
 # </div>
-#
-# TODO: figure out how to highlight %%bash and $OCSSWROOT/OCSSW_bash.env above
 #
 # Every `%%bash` cell that calls an OCSSW program needs to `source` the environment
 # definition file shipped with OCSSW, because its effects are not retained from one cell to the next.

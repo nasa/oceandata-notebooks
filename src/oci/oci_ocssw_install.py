@@ -5,19 +5,13 @@
 # > **PREREQUISITES**
 # >
 # > This notebook has the following prerequisites:
-
 # > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
 # >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
 # > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/" target="_blank">Data Access</a>
 #
 # ## Summary
 #
-# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There are also command line programs for the OCSSW libraries, which we can use to write processing scripts or notebooks.
-#
-# [seadas]: https://seadas.gsfc.nasa.gov/
-
-#
-# This tutorial will show you how to install OCSSW on a Linux server and how to start doing data processing by processing a Level-1B (L1B) file from PACE OCI to a Level-2 (L2) file using `l2gen`.
+# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There are also command line programs for the OCSSW libraries, which we can use to write processing scripts or notebooks. This tutorial will show you how to install OCSSW and test it by processing a Level-1B (L1B) file from PACE OCI to a Level-2 (L2) file using `l2gen`. The installation can find OCSSW tools that work on modern Linux and macOS operating systems but not Windows.
 #
 # [seadas]: https://seadas.gsfc.nasa.gov/
 #
@@ -34,6 +28,7 @@
 # 1. [Setup](#setup)
 # 1. [Install OCSSW](#ocssw)
 # 1. [Process Data with `l2gen`](#l2gen)
+# 1. [All-in-One](#all) 
 #
 # <a name="setup"></a> 
 # ## 1. Setup
@@ -74,7 +69,7 @@ wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
 
 chmod +x install_ocssw
 
-# Take a look at the different OCSSW "tags" you can install. It is recommended to use the most recent one for the installation, which is T2024.16 at the time of writing this tutorial. Tags starting with "V" are operational versions, and tags starting with "T" are test versions. Use "T" to process the latest data products, but keep in mind that processing can change a lot between tags. Tags with "R" means ___.
+# Take a look at the different OCSSW "tags" you can install. It is recommended to use the most recent one for the installation, which is T2024.16 at the time of writing this tutorial. Tags starting with "V" are operational versions, and tags starting with "T" are test versions. Use "T" to process the latest data products, but keep in mind that processing can change a lot between tags. Other tags are deprecated, including those starting with "R".
 
 # + scrolled=true
 ./install_ocssw --list_tags
@@ -130,7 +125,7 @@ ls L1B
 
 mkdir L2
 
-# And run! Note, this may take some time (__). 
+# And run! Note, this may take several minutes.
 
 # + scrolled=true
 l2gen \
@@ -142,8 +137,27 @@ l2gen \
 
 # *Tip*: Scroll down in the output above to see updates on processing. Upon completion, you should have a new processed L2 file in your L2 folder. 
 
+# [Back to top](#toc)
+# <a name="all"></a>
+# ## 4. All-in-One
+#
+# In case you need to run the sequence above in a terminal regularly, here are all the commands
+# to copy and run together. This assumes you already used `wget` to persist the install script
+# and `manifest.json` in the current directory.
+
+export OCSSWROOT=/tmp/ocssw
+./install_ocssw --tag=T2024.19 --seadas --oci
+source $OCSSWROOT/OCSSW_bash.env
+
+# Or, if that assumption is wrong and you also need to `wget` those files, copy and run the following.
+
+wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw
+wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
+chmod +x install_ocssw
+export OCSSWROOT=/tmp/ocssw
+./install_ocssw --tag=T2024.19 --seadas --oci
+source $OCSSWROOT/OCSSW_bash.env
+
 # <div class="alert alert-info" role="alert">
 # <p>You have completed the notebook on installing OCCSW. Check out the notebook on OCSSW processing PACE data: oci_ocssw_processing.ipynb</p>
 # </div>
-
-
