@@ -1,6 +1,30 @@
-# # Understand PACE L1C angle of polarization
-# Meng Gao, 
-# May 30, 2024
+# # Understand PACE L1C Angle of Linear Polarization (AoLP)
+#
+#
+# **Authors:** Meng Gao (NASA, SSAI), Riley Blocker (NASA, SSAI), James Allen (NASA, MSU), Kirk Knobelspiesse (NASA)
+#
+# > **PREREQUISITES**
+# >
+# > This notebook has the following prerequisites:
+# > (to be updated if there is any)
+#
+# ## Summary
+#
+# PACE has two Multi-Angle Polarimeters (MAPs): [SPEXOne](https://pace.oceansciences.org/spexone.htm) and [HARP2](https://pace.oceansciences.org/harp2.htm). These sensors offer unique data, which is useful for its own scientific purposes and also complements the data from OCI. Working with data from the MAPs requires you to understand both multi-angle data and some basic concepts about polarization. This notebook will walk you through some basic understanding and visualizations on the Stokes vector, particular on the angle of linear polarization. 
+#
+# ## Learning objectives
+#
+# At the end of this notebook you will know:
+#
+# * How to define Stokes vector
+# * How to define Angle of Linear Polarization (AoLP)
+# * How to compute AoLP for HARP2 and SPEXone
+#
+# <a name="toc"></a>
+# ## Contents
+#
+# (to be updated)
+#
 
 # ### Definitions
 
