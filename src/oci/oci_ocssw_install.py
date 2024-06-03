@@ -12,7 +12,9 @@
 #
 # ## Summary
 #
-# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB. DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There are also command line programs for the OCSSW libraries, which we can use to write processing scripts or notebooks.
+# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There are also command line programs for the OCSSW libraries, which we can use to write processing scripts or notebooks.
+#
+# [seadas]: https://seadas.gsfc.nasa.gov/
 
 #
 # This tutorial will show you how to install OCSSW on a Linux server and how to start doing data processing by processing a Level-1B (L1B) file from PACE OCI to a Level-2 (L2) file using `l2gen`.
@@ -72,7 +74,7 @@ wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
 
 chmod +x install_ocssw
 
-# Take a look at the different OCSSW "tags" you can install. It is recommended to use the most recent one for the installation, which is T2024.16 at the time of writing this tutorial. Tags starting with "V" are operational versions, and tags starting with "T" are test versions. Use "T" to get process the latest data products, but know the processing may change a lot between tags.
+# Take a look at the different OCSSW "tags" you can install. It is recommended to use the most recent one for the installation, which is T2024.16 at the time of writing this tutorial. Tags starting with "V" are operational versions, and tags starting with "T" are test versions. Use "T" to process the latest data products, but keep in mind that processing can change a lot between tags. Tags with "R" means ___.
 
 # + scrolled=true
 ./install_ocssw --list_tags
@@ -127,6 +129,8 @@ ls L1B
 # Create a directory for output files.
 
 mkdir L2
+
+# And run! Note, this may take some time (__). 
 
 # + scrolled=true
 l2gen \

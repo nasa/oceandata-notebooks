@@ -11,9 +11,9 @@
 #
 # ## Summary
 #
-# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes SeaDAS-OCSSW, the core libraries or data processing components. There is a command line interface (CLI) for the SeaDAS-OCSSW data processing components, known simply as OCSSW, which we can use to write processing scripts or notebooks.
+# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There are also command line programs for the OCSSW libraries, which we can use to write processing scripts or notebooks.
 #
-# This tutorial will show you how to combine PACE OCI data access with Python followed by processing using the sequence of OCSSW programs `l2gen`, `l2bin`, and `l3mapgen`.
+# This tutorial will show you how to process PACE OCI data using the sequence of OCSSW programs `l2gen`, `l2bin`, and `l3mapgen`.
 #
 # [seadas]: https://seadas.gsfc.nasa.gov/
 #
@@ -36,15 +36,11 @@
 # <a name="setup"></a> 
 # ## 1. Setup
 #
-# We begin by importing all of the packages used in this notebook, starting with the Python Standard Library.
+# We begin by importing all of the packages used in this notebook.
 
 import csv
 import os
 import pathlib
-
-# If you have created an environment following the guidance provided with this tutorial, then
-# imports of contributed Python packages will be successful.
-
 import cartopy.crs as ccrs
 import earthaccess
 import xarray as xr
