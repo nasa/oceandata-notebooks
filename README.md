@@ -11,12 +11,14 @@ See [docs](docs/index.md).
 > [!IMPORTANT]
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
 > - Create new notebooks in the `notebooks/` folder.
-> - If a notebook is missing from the `notebooks/` folder, but its paired ".py" file is present in the `src/` folder, open a terminal and run `jupytext -s src/*/*.py`.
+> - If a notebook is missing from the `notebooks/` folder, but its paired ".py" file is present in
+>   the `src/` folder, open a terminal from the project root and run `jupytext -s src/*/*.py`.
+> - Nothing in the `docs/notebooks/` folder should be manually edited.
 
 Keeping notebooks in a code repository presents challenges for collaboration and curation,
 because notebooks can contain very large blobs of binary outputs and they also include
 constantly changing metadata. This repository contains ".py" files that the [Jupytext extension][jupytext]
-synchronizes with notebooks (".ipynb" files) in your working tree. The ".py" files live
+synchronizes with notebooks (".ipynb" files). The ".py" files live
 in the `src/` folder and are commited to the repository. The paired ".ipynb" files live
 in the `notebooks/` folder and are ignored by the repository. Other than the steps above,
 just work on the ".ipynb" files, save your changes, and commit normally (well, almost ... git
@@ -31,7 +33,7 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 3. Testing notebooks in isolated environments (using `jupyter execute ...`)
 4. Auto populate `docs/` using:
    ```
-   jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --output-dir=docs
+   jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --output-dir=docs/notebooks notebooks/*/*.ipynb
    ```
 5. Auto populate somewhere using:
    ```
