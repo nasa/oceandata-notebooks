@@ -26,16 +26,19 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 
 ## For Maintainers
 
+To prepare for a release, ensure that the clean notebooks are updated in the `docs/notebooks/` folder.
+```
+jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --output-dir=docs/notebooks notebooks/*/*.ipynb
+```
+Those are the targets for the "Downloand and Run" links on the [tutorials][tutorials] page. Note that opening those notebooks in Jupyter will dirty them up again, so
+do not include the changes introduced by opening the clean notebooks in any commit.
+
 **WIP**:
 
 1. Curating dependencies without duplicating between pyproject.toml and environment.yml
-2. Formatting notebooks with black
-3. Testing notebooks in isolated environments (using `jupyter execute ...`)
-4. Auto populate `docs/` using:
-   ```
-   jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --output-dir=docs/notebooks notebooks/*/*.ipynb
-   ```
-5. Auto populate somewhere using:
+1. Formatting notebooks with black
+1. Testing notebooks in isolated environments (using `jupyter execute ...`)
+1. Auto populate somewhere using:
    ```
    cd docs/oci
    jupyter nbconvert --to=html --execute *.ipynb
