@@ -11,9 +11,9 @@
 #
 # ## Summary
 #
-# PACE has two Multi-Angle Polarimeters (MAPs): [SPEXOne](https://pace.oceansciences.org/spexone.htm) and [HARP2](https://pace.oceansciences.org/harp2.htm). These sensors offer unique data, which is useful for its own scientific purposes and also complements the data from OCI. Working with data from the MAPs requires you to understand both multi-angle data and some basic concepts about polarization. This notebook will walk you through some basic understanding and visualizations of multi-angle polarimetry, so that you feel comfortable incorporating this data into your future projects.
+# PACE has two Multi-Angle Polarimeters (MAPs): [SPEXone](https://pace.oceansciences.org/spexone.htm) and [HARP2](https://pace.oceansciences.org/harp2.htm). These sensors offer unique data, which is useful for its own scientific purposes and also complements the data from OCI. Working with data from the MAPs requires you to understand both multi-angle data and some basic concepts about polarization. This notebook will walk you through some basic understanding and visualizations of multi-angle polarimetry, so that you feel comfortable incorporating this data into your future projects.
 #
-# ## Learning objectives
+# ## Learning Objectives
 #
 # At the end of this notebook you will know:
 #
@@ -35,22 +35,18 @@
 # <a name="setup"></a>
 # ## 1. Setup
 #
-# First, import the libraries we will need.
+# Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
 #
-
-# If not available in default installation, we may need to install the library. 
-
-pip install apng
+# [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/ 
 
 # +
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from apng import APNG
 from scipy.ndimage import gaussian_filter1d
+from matplotlib import animation
 import cartopy.crs as ccrs
 import earthaccess
-import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
@@ -63,6 +59,7 @@ import xarray as xr
 
 def rad_to_refl(rad, f0, sza, r):
     """Convert radiance to reflectance.
+    
     Args:
         rad: Radiance.
         f0: Solar irradiance.
@@ -71,14 +68,14 @@ def rad_to_refl(rad, f0, sza, r):
 
     Returns: Reflectance.
     """
-    return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) /f0
+    return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) / f0
 
 
 # [Back to top](#toc)
 # <a name="data"></a>
 # ## 2. Get Level-1C Data
 #
-# Download some HARP2 Level-1C data using the `short_name` value "PACE_SPEXONE_L1C_SCI" in `earthaccess.search_data`. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface. Note that this might take a while, depending on the speed of your internet connection, and the progress bar will seem frozen because we're only downloading one file.
+# Download some SPEXone Level-1C data using the `short_name` value "PACE_SPEXONE_L1C_SCI" in `earthaccess.search_data`. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface. Note that this might take a while, depending on the speed of your internet connection, and the progress bar will seem frozen because we're only downloading one file.
 
 auth = earthaccess.login(persist=True)
 
@@ -92,196 +89,108 @@ results = earthaccess.search_data(
 paths = earthaccess.open(results)
 
 prod = xr.open_dataset(paths[0])
-view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
+obs = xr.open_dataset(paths[0], group="observation_data")
+view = xr.open_dataset(paths[0], group="sensor_views_bands")
 geo = xr.open_dataset(paths[0], group="geolocation_data")
-obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
+
+# The `prod` dataset, as usual for OB.DAAC products, contains attributes but no variables. Merge it with the "observation_data" and "geolocation_data", setting latitude and longitude as auxiliary (e.e. non-index) coordinates, to get started.
+
+dataset = xr.merge((prod, obs, geo))
+dataset = dataset.set_coords(["longitude", "latitude"])
+dataset
 
 # [Back to top](#toc)
 # <a name="multiangle"></a>
 # ## 2. Understanding Multi-Angle Data
 #
-# SPEXone is a hyper-spectral sensor with 400 intensity bands (380-779nm) and 50 polarization bands (within 385-770nm).  SPEXone is also multi-angle measures five view angles for all its spectral bands. Therefore, there is no need to combine the spectral bands and angles together into one axis as what HARP2 data is organized. 
-#
-# Pull out the view angles and wavelengths.
+# SPEXone is a hyper-spectral sensor with 400 intensity bands (380-779nm) and 50 polarization bands (within 385-770nm).  SPEXone is also multi-angle, reading at five view angles for all its spectral bands. The "number_of_views" dimension in the Level-1C format is introduced for compatibility between HARP2 and SPEXone, providing a uniform way to handle "channels" that differ in  *either* angle *or* wavelength. A result is that we don't have a coordinate (with an index) for intensity or polarization wavelengths, but we can mark the releavant variables as auxiliary (i.e. non-indexed) coordinates. The "number_of_views" dimension can, however, be indexed by a "sensor_view_angles" coordinate. Embed these relationships in the `dataset` object by changing the "sensor_view_angle" variable to a coordinate and an index in `view`, setting the wavelength variables to coordinates without an index, and then merging the result with the existing `dataset`.
 
-angles = view["sensor_view_angle"]
-wavelengths_i = view["intensity_wavelength"]
-wavelengths_p = view["polarization_wavelength"]
-
-# Create a figure with 3 rows and 1 column and a reasonable size for many screens. The wavelengths for intensity and polarization are plotted in separated rows, where an arbitrary angle index is choosen.
-
-# +
-fig, ax = plt.subplots(3, 1, figsize=(14, 7))
-ax[0].set_ylabel("View Angle (degrees)")
-ax[0].set_xlabel("Index")
-ax[1].set_ylabel("Wavelength (nm)")
-ax[1].set_xlabel("Index")
-
-angle_index = 0 
-color, marker = 'blue', 'o'
-ax[0].plot(
-    #np.arange(start_idx, end_idx),
-    angles,
-    color=color,
-    marker=marker,
-    label='All bands'
+view = view.set_coords(
+    (
+        "sensor_view_angle",
+        "intensity_wavelength",
+        "polarization_wavelength",
+    )
 )
-ax[1].plot(
-    #np.arange(start_idx, end_idx),
-    wavelengths_i[angle_index, :],
-    color=color,
-    marker=marker,
-    label='Intensity',
-)
-ax[2].plot(
-    #np.arange(start_idx, end_idx),
-    wavelengths_p[angle_index, :],
-    color=color,
-    marker=marker,
-    label='polarization',
-)
-ax[0].legend()
-ax[1].legend()
-ax[2].legend()
-plt.show()
-# -
+view = view.set_xindex("sensor_view_angle")
+dataset = xr.merge((dataset, view))
 
 # [Back to top](#toc)
 # <a name="polarimetry"></a>
 # ## 3. Understanding Polarimetry
 #
-# Both HARP2 and SPEXone conduct polarized measurements. Polarization describes the geometric orientation of the oscillation of light waves. Randomly polarized light (like light coming directly from the sun) has an approximately equal amount of waves in every orientation. When light reflects of certain surfaces or scattered by small particles, it can become nonrandomly polarized.
+# Both HARP2 and SPEXone conduct polarized measurements. Polarization describes the geometric orientation of the oscillation of light waves. Randomly polarized light (like light coming directly from the sun) has an approximately equal amount of waves in every orientation. When light reflects off certain surfaces or is scattered by small particles, it can become non-randomly polarized.
 #
-# Polarimetric data is typically represented using [Stokes vectors](https://en.wikipedia.org/wiki/Stokes_parameters). These have four components: I, Q, U, and V. Both HARP2 and SPEXone are only sensitive to linear polarization, and does not detect circular polarization. Since the V component corresponds to circular polarization, the data only includes the I, Q, and U elements of the Stokes vector.
+# Polarimetric data is typically represented using [Stokes vectors][stokes]. These have four components: I, Q, U, and V. Both HARP2 and SPEXone are only sensitive to linear polarization, and do not detect circular polarization. Since the V component corresponds to circular polarization, the data only includes the I, Q, and U elements of the Stokes vector.
 #
-# Let's make a plot of the I, Q, and U components of our Stokes vector, using the RGB channels, which will help our eyes make sense of the data. We'll use the view that is closest to pointing straight down, which is called the "nadir" view in the code.  Since SPEXone swath is relatively narrow (100km), the sensor zenith angle at the edges of the swath will be slightly higher. It's only a true nadir view close to the center of the swath. 
+# The I, Q, and U components of the Stokes vector are separate variables in `dataset`.
 #
-# The I, Q, and U components of the Stokes vector are separate variables in the `obs` dataset.
+# [stokes]: https://en.wikipedia.org/wiki/Stokes_parameters
 
-stokes = obs[["i", "q", "u"]]
+dataset[["i", "q", "u"]]
 
-# Check the data dimension
+# Examine the dimensions of each Stokes component. The first three dimensions are the positions along track, the position in the cross track direction, and the view angles. Note that the fourth dimension for I is different from that for Q and U. The 400 wavelengths for intensity differ from the 50 wavelengths for polarization.
+#
+# Let's make a plot of the I, Q, and U components of our Stokes vector as well as the degree of linear polarization (DoLP), using RGB wavelengths to help our eyes make sense of the data. We'll use the sensor view angle that is closest to pointing straight down, which is nominally the "nadir" view. Since the SPEXone swath is relatively narrow (100km), the sensor zenith angle at the edges of the swath is only slightly higher, but the only true nadir view is still at the center of the swath.
+#
+# Once we've chosen a single sensor view angle, we can now also add an index for each wavelength coordinate.
 
-stokes["i"].shape, stokes["q"].shape, stokes["u"].shape
+nadir = dataset.sel({"sensor_view_angle": 0})
+nadir = (
+    nadir
+    .set_xindex("intensity_wavelength")
+    .set_xindex("polarization_wavelength")
+)
+nadir
 
-# The first three dimensions are the pixels along track, pixels cross tracks, and the view angles. Note that the dimensions for the stokes vector I, and Q (U) are different. Therefore, for visulizations, we will separate I and other polarization related variables. 
+# Narrow the two wavelength dimensions down by selecting RGB bands at around 665, 550, and 440nm.
 
-# Nadir index can be simply set as
-
-nadir_idx = 2
-
-# We then thoose three RGB bands similar to HARP2 at 665, 550, and 440nm
-
-wavelengths_i_index = [60, 170, 285]
-wavelengths_i[0,wavelengths_i_index].values
-
-# Then, get the data at the nadir indices and RGB bands:
-
-rgb_i = stokes[["i"]].isel(
+nadir_rgb = nadir[["i", "dolp", "q", "u"]].sel(
     {
-        "number_of_views": nadir_idx,
-        'intensity_bands_per_view': wavelengths_i_index
-    }
+        "intensity_wavelength": [665, 550, 440],
+        "polarization_wavelength": [665, 550, 440],
+    },
+    method="nearest",
 )
 
-# Check data dimension again
+# The dimensions of variables within the dataset are now suitable for visualization as images!
 
-rgb_i["i"].shape
+dict(nadir_rgb.sizes)
 
+# A small adjustment makes the image easier to visualize. Normalize the data between 0 and 1, and then bring out some of the darker colors by raising the normalized data to a power a little smaller than one.
 
-# A few adjustments make the image easier to visualize. First, normalize the data between 0 and 1. Second, bring out some of the darker colors.
+nadir_rgb = ((nadir_rgb - nadir_rgb.min()) / (nadir_rgb.max() - nadir_rgb.min())) ** (3 / 4)
 
-def rgb_data_scale(rgb):
-    rgb = (rgb- rgb.min()) / (rgb.max() - rgb.min())
-    rgb = rgb ** (3 / 4)
-    return rgb
+# The figure will hav 2 rows and 2 columns, for the I, Q, U, and DoLP arrays, spanning a width suitable for many screens. The latitude and longitude coordinates, while not gridded, can be mapped using the "Plate Carree" coordinate reference system.
 
-
-rgb_i = rgb_data_scale(rgb_i)
-
-# Add latitude and longitude as auxilliary (i.e. non-index) coordinates to use in the map projection.
-
-rgb_i = rgb_i.assign_coords(
-    {
-        "lat": geo["latitude"],
-        "lon": geo["longitude"],
-    }
-)
-
-# The granule crosses the 180 degree longitude, so we set up the figure and subplots to use a Plate Carree projection shifted to center on a -170 longitude. The data has coordinates from the default (i.e. centered at 0 longitude) Plate Carree projection, so we give that CRS as a `transform`.
-#
-# The figure will hav 1 row and 3 columns, for each of the I, Q, and U arrays, spanning a width suitable for many screens.
+crs_data = ccrs.PlateCarree()
 
 # +
-crs = ccrs.PlateCarree(-170)
-fig, ax = plt.subplots(1, 1, figsize=(16, 5), subplot_kw={"projection": crs})
-fig.suptitle(f'{prod.attrs["product_name"]} RGB')
+fig, ax = plt.subplots(2, 2, figsize=(8, 10), subplot_kw={"projection": crs_data})
+fig.suptitle(f'RGB: {prod.attrs["product_name"]}')
 
+for i, item in enumerate(("i", "dolp", "q", "u")):
+    array = nadir_rgb[item].dropna("bins_along_track", how="all")
+    ax[i//2, i%2].pcolormesh(array["longitude"], array["latitude"], array)
+    ax[i//2, i%2].gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
+    ax[i//2, i%2].set_title(item.upper())
 
-key, value ="i", rgb_i["i"]
-ax.pcolormesh(value["lon"], value["lat"], value, transform=ccrs.PlateCarree())
-ax.gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
-ax.coastlines(color="grey")
-ax.set_title(key.capitalize())
+plt.show()
 # -
 
-# It's pretty plain to see that the I plot makes sense to the eye: we can see clouds over the Pacific Ocean (this scene is south of the Cook Islands and east of Australia). This is because the I component of the Stokes vector corresponds to the total intensity. In other words, this is roughly what your eyes would see.
+# It's pretty plain to see that the I and DoLP plots make sense to the eye: we can see clouds over the Pacific Ocean (this scene is south of the Cook Islands and east of Australia). This is because the I component of the Stokes vector corresponds to the total intensity. In other words, this is roughly what your eyes would see.
 #
-#
-# Next, let's take a look at Q and U, as well as the degree of linear polarization (DoLP). Since the polarization dimension is different with the intensity spectral dimension, we select three polarization bands at similar spectral bands comparing with the intensities.
-
-wavelengths_p_index = [9, 25, 39]
-wavelengths_p[0,wavelengths_p_index].values
-
-rgb_p = obs[["q", "u", "dolp"]].isel(
-    {
-        "number_of_views": nadir_idx,
-        'polarization_bands_per_view': wavelengths_p_index
-    }
-)
-
-rgb = xr.merge([rgb_i, rgb_p])
-
-# Create a figure with 1 row and 2 columns, having a good width for many screens, that will use the projection defined above. For the two columns, we iterate over just the I and DoLP arrays.
-
-# +
-fig, ax = plt.subplots(1, 4, figsize=(16, 8), subplot_kw={"projection": crs})
-fig.suptitle(f'{prod.attrs["product_name"]} RGB')
-
-for i, (key, value) in enumerate(rgb[["i", "q", "u", "dolp"]].items()):
-    ax[i].pcolormesh(value["lon"], value["lat"], value, transform=ccrs.PlateCarree())
-    ax[i].gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
-    ax[i].coastlines(color="grey")
-    ax[i].set_title(key.capitalize())
-# -
-
-# Different with the I component, the Q and U plots don't quite make as much sense to the eye. We can see that there is some sort of transition in the middle, which is the satellite track. This transition occurs in both plots, but is stronger in Q. This gives us a hint: the type of linear polarization we see in the scene depends on the angle with which we view the scene.
+# Take a look now at Q and U. Unlike the I component, the Q and U plots don't quite make as much sense to the eye. We can see that there is some sort of transition in the middle, which is the satellite track. This transition occurs in both plots, but is stronger in Q. This gives us a hint: the type of linear polarization we see in the scene depends on the angle with which we view the scene.
 #
 # [This Wikipedia plot](https://upload.wikimedia.org/wikipedia/commons/3/31/StokesParameters.png) is very helpful for understanding what exactly the Q and U components of the Stokes vector mean. Q describes how much the light is oriented in -90°/90° vs. 0°/180°, while U describes how much light is oriented in -135°/45°; vs. -45°/135°.
-#
 
 # DoLP line plot
 
-dolp_mean = obs["dolp"].mean(["bins_along_track", "bins_across_track"])
-dolp_mean = (dolp_mean - dolp_mean.min()) / (dolp_mean.max() - dolp_mean.min())
-#select the same three bands as for the RGB plots, note that SPEXone do not have the same NIR bands at 870, therefore not included here
-dolp_mean = dolp_mean [:, wavelengths_p_index]
+dolp = dataset["dolp"].mean(["bins_along_track", "bins_across_track"])
+dolp = (dolp - dolp.min()) / (dolp.max() - dolp.min())
 
-fig, ax = plt.subplots(1,1, figsize=(16, 6))
-wv_uq = np.unique(wavelengths_i.values)
-plot_data = [("b", "o"), ("g", "^"), ("r", "*")]
-for wv_idx in range(3):
-    wv = wavelengths_p[0, wavelengths_p_index[wv_idx]].values
-    c, m = plot_data[wv_idx]
-    ax.plot(
-        angles.values,
-        dolp_mean[:, wv_idx],
-        color=c,
-        marker=m,
-        markersize=7,
-        label=str(wv),
-    )
-ax.legend()
+fig, ax = plt.subplots(figsize=(14, 5))
+dolp.plot.scatter(x="sensor_view_angle", hue="polarization_wavelength", cmap="rainbow", ax=ax)
 ax.set_xlabel("Nominal View Angle (°)")
 ax.set_ylabel("DoLP")
 ax.set_title("Mean DoLP by View Angle")
@@ -296,37 +205,34 @@ plt.show()
 # The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
 
 refl = rad_to_refl(
-    rad=obs["i"],
-    f0=view["intensity_f0"],
-    sza=geo["solar_zenith_angle"],
-    r=float(prod.attrs["sun_earth_distance"]),
+    rad=dataset["i"],
+    f0=dataset["intensity_f0"],
+    sza=dataset["solar_zenith_angle"],
+    r=float(dataset.attrs["sun_earth_distance"]),
 )
 
-fig, ax = plt.subplots(1, 2, figsize=(16, 8))
-red_idx = wavelengths_i_index[2]
-ax[0].imshow(obs["i"].sel({"number_of_views": nadir_idx,'intensity_bands_per_view': red_idx}), cmap="gray")
+nadir["refl"] = refl.sel({"sensor_view_angle": 0})
+nadir_red = nadir.sel({"intensity_wavelength": 665})
+
+# +
+fig, ax = plt.subplots(1, 2, figsize=(10, 6), subplot_kw={"projection": crs_data})
+
+for i, item in enumerate(("i", "refl")):
+    array = nadir_red[item].dropna("bins_along_track", how="all")
+    ax[i].pcolormesh(array["longitude"], array["latitude"], array, cmap="gray")
+    ax[i].gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
+    
 ax[0].set_title("Radiance")
-ax[1].imshow(refl.sel({"number_of_views": nadir_idx,'intensity_bands_per_view': red_idx}), cmap="gray")
 ax[1].set_title("Reflectance")
 plt.show()
+# -
 
 # Create a line plot of the reflectance for each view angle and spectral channel on a selected pixel. The flatness of this plot serves as a sanity check that nothing has gone horribly wrong with our data processing.
 
-fig, ax = plt.subplots(1,1, figsize=(16, 6))
-plot_data = [("b", "o"), ("g", "^"), ("r", "*")]
-refl_pixel= refl[350,12] #select an arbitrary pixel
-for wv_idx in range(3):
-    wv = wavelengths_p[0, wavelengths_p_index[wv_idx]].values
-    c, m = plot_data[wv_idx]
-    ax.plot(
-        angles.values,
-        refl_pixel[:, wv_idx],
-        color=c,
-        marker=m,
-        markersize=7,
-        label=str(wv),
-    )
-ax.legend()
+refl_sub = refl[350, 12].sel({"intensity_bands_per_view": slice(None, None, 20)})
+
+fig, ax = plt.subplots(figsize=(14, 5))
+refl_sub.plot.scatter(x="sensor_view_angle", hue="intensity_wavelength", cmap="rainbow", ax=ax)
 ax.set_xlabel("Nominal View Angle (°)")
 ax.set_ylabel("Reflectance")
 ax.set_title("Reflectance by View Angle")
@@ -337,23 +243,16 @@ plt.show()
 # ## 5. A Simple Animation
 #
 # <div class="alert alert-info" role="alert">
-# <p>WARNING: there is some flickering in the animation displayed in this section.</p>
+#
+# WARNING: there is some flickering in the animation displayed in this section.
+#
 # </div>
 #
-# All that is great for looking at a single angle at a time, but it doesn't capture the multi-angle nature of the instrument. Multi-angle data innately captures information about 3D structure. To get a sense of that, we'll make an animation of the scene with the 60 viewing angles available for the red band.
-#
-# Note: you can generate this animation with geolocated data as well, using `pcolormesh` as shown in the above code blocks. However, this can be a little slow for multi-angle data, so for now we'll just use the un-interpolated arrays. This means there will be some stripes of what seems like missing data at certain angles. These stripes actually result from the gridding of the multi-angle data, and are not a bug.
+# All that is great for looking at a single angle at a time, but it doesn't capture the multi-angle nature of the instrument. Multi-angle data innately captures information about 3D structure. To get a sense of that, we'll make an animation of the scene with the 5 viewing angles available.
 
-# Create an animated PNG object.
+# Normalize the reflectance to lie between 0 and 1.
 
-anim = APNG()
-
-# Get the reflectances of just the red channel, and normalize the reflectance to lie between 0 and 1.
-
-red_idx = wavelengths_i_index[2]
-
-refl_red = refl[..., red_idx]
-refl_pretty = (refl_red - refl_red.min()) / (refl_red.max() - refl_red.min())
+refl_pretty = (refl - refl.min()) / (refl.max() - refl.min())
 
 # A very mild Gaussian filter over the angular axis will improve the animation's smoothness.
 
@@ -362,28 +261,48 @@ refl_pretty.data = gaussian_filter1d(refl_pretty, sigma=0.5, truncate=2, axis=2)
 # Raising the image to the power 2/3 will brighten it a little bit. Cast it to an unsigned 8-bit integer so we can write it to a png later.
 
 refl_pretty = refl_pretty ** (2 / 3)
-refl_pretty.data[np.isnan(refl_pretty)] = 0  # set all of our not-a-number (NaN) values to 0
-refl_pretty = (255 * refl_pretty).astype(np.uint8)
 
 # Append all but the first and last frame in reverse order, to get a 'bounce' effect.
 
-frames = np.concatenate([refl_pretty, refl_pretty[..., -1:1:-1]], axis=2)
+frames = np.arange(refl_pretty.sizes["number_of_views"])
+frames = np.concatenate((frames, frames[-2::-1]))
+frames
 
-# Save each frame to this directory and append the files to our animated PNG object
-# Make a temporary directory to dump frames into.
+# %matplotlib widget
 
-with TemporaryDirectory() as tmp:
-    for i in range(frames.shape[2]):
-        frame = frames[..., i]
-        path = Path(tmp) / f"{i:04d}.png"
-        imageio.imwrite(path, frame)
-        anim.append_file(path, delay=i)
-    anim.save(f'spxeone_red_anim_{prod.attrs["product_name"].split(".")[1]}.png')
+# +
+fig, ax = plt.subplots(subplot_kw={"projection": crs_data})
+fig.canvas.header_visible = False
 
-# Check it out! This is a great example of multi-layer clouds. You can use the parallax effect to distinguish between these layers.
+array = refl_pretty[{"number_of_views": 0}]
+array = array.set_xindex("intensity_wavelength").sel({"intensity_wavelength": 400})
+im = ax.pcolormesh(array["longitude"], array["latitude"], array, cmap="gray")
+ax.gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
+
+def update(i):
+    array = refl_pretty[{"number_of_views": i}]
+    array = array.set_xindex("intensity_wavelength").sel({"intensity_wavelength": 665})
+    im.set_data(array)
+    return im
+
+an = animation.FuncAnimation(fig=fig, func=update, frames=frames, interval=300)
+plt.show()
+# -
+
+# This scene is a great example of multi-layer clouds. You can use the parallax effect to distinguish between these layers.
 #
-# The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
-#
-# ![A multi-angle SPEXone animation](spxeone_red_anim_20240520T025629.png)
+# The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles! When it starts driving you crazy though, time to pause.
 
+an.pause()
+
+# But it's so mesmerizing!
+
+an.resume()
+
+# And once you've really had enough, call `plt.close()`.
+
+# <div class="alert alert-info" role="alert">
+#     
+# You have completed the notebook giving a first look at SPEXone data. More notebooks are comming soon!
 #
+# </div>
