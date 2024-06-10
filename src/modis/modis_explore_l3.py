@@ -1,12 +1,22 @@
 # # Explore Level-3 Ocean Color data from the Moderate Resolution Imaging Spectroradiometer (MODIS) on the Aqua Satellite
-# **Authors:** Guoqing Wang (NASA, GSFC); Ian Carroll (NASA, UMBC), Eli Holmes (NOAA)
 #
-# > **PREREQUISITES**
-# >
-# > This notebook has the following prerequisites:
-# > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
-# >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# > - Learn with MODIS: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/modis_explore_l2/" target="_blank">Explore Level-2 Ocean Color</a>
+# **Authors:** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA)
+#
+# <div class="alert alert-success" role="alert">
+#
+# **PREREQUISITES**
+# - Learn with MODIS: [Data Access][modis_explore_l2]
+#
+# </div>
+#
+# <div class="alert alert-info" role="alert">
+#
+# An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+#
+# </div>
+#
+# [edl]: https://urs.earthdata.nasa.gov/
+# [modis_explore_l2]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/modis_explore_l2/
 #
 # ## Summary
 #
@@ -27,13 +37,15 @@
 # * How to find OB.DAAC ocean color data
 # * How to download files using `earthaccess`
 # * How to create a plot using `xarray`
-# <a name="toc"></a>
+#
 # ## Contents
 #
 # 1. [Setup](#setup)
 # 1. [Access Data](#access)
 # 1. [Plot Data](#plot)
+#
 # <a name="setup"></a>
+
 # ## 1. Setup
 #
 # We begin by importing all of the packages used in this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the imports will be successful.
@@ -48,8 +60,8 @@ import xarray as xr
 
 auth = earthaccess.login(persist=True)
 
-# [Back to top](#toc)
-# <a name="access"></a>
+# [back to top](#contents) <a name="access"></a>
+
 # ## 2. Access Data
 #
 # In this example, the image to be used is MODIS AQUA L3 8-day averaged 4km chlorophyll image for Sep 13-20, 2016 and the January 2020 monthly average for Rrs_412. First we need to search for that data. These data are hosted by the OB.DAAC. The `earthaccess.search_datasets` function queries the CMR for collections. To do this search we need to know something about the data information, particularly that we are looking for `L3m` or Level-3 mapped collections and MODIS AQUA.
@@ -80,19 +92,19 @@ results = earthaccess.search_data(
 
 results[0]
 
-# We need to check if the data are cloud-hosted. If they are, we can load into memory directly without downloading. If they are not cloud-hosted, we need to download the data file.
+# We need to check if the data are cloud-hosted. If *they* are *and we* are, we can load into memory directly without downloading. If they are not cloud-hosted, we need to download the data file.
 
 results[0].cloud_hosted
 
-# The data are not cloud-hosted so we download with `earthaccess.download()`. `earthaccess` will handle authentication for us.
+# The data are not cloud-hosted so we download with `earthaccess.download()`.
 
 paths = earthaccess.download(results, "data")
 
 dataset = xr.open_dataset(paths[0])
 dataset
 
-# [Back to top](#toc)
-# <a name="access"></a>
+# [back to top](#contents) <a name="plot"></a>
+
 # ## 3. Plot Data
 
 array = np.log10(dataset["chlor_a"])
@@ -111,8 +123,6 @@ ax.coastlines()
 ax.set_title(dataset.attrs["product_name"])
 plt.show()
 
-# **Make another plot - of Rrs_412**
-#
 # Repeat these steps to map the monthly Rrs_412 dataset, a temporal average of cloud-free pixels, aggregated to 9km spatial resolution, for October 2020.
 
 tspan = ("2020-10-01", "2020-10-01")
@@ -127,7 +137,7 @@ paths = earthaccess.download(results, "data")
 dataset = xr.open_dataset(paths[0])
 
 fig = plt.figure(figsize=(10, 5))
-ax = fig.add_subplot(projection=crs_proj)
+ax = plt.axes(projection=crs_proj)
 dataset["Rrs_412"].plot(
     x="lon", y="lat", cmap="jet", robust=True, ax=ax, transform=crs_data
 )
@@ -135,6 +145,10 @@ ax.coastlines()
 ax.set_title(dataset.attrs["product_name"])
 plt.show()
 
+# [back to top](#contents)
+#
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on Level-3 mapped ocean color data from Aqua/MODIS.</p>
+#
+# You have completed the notebook on Level-3 mapped ocean color data from Aqua/MODIS.
+#
 # </div>

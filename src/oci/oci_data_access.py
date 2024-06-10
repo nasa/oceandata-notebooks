@@ -2,12 +2,14 @@
 #
 # **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 #
-# > **PREREQUISITES**
-# >
-# > This notebook has the following prerequisites:
-# > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
-# >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# > - There are no prerequisite notebooks for this module.
+# <div class="alert alert-info" role="alert">
+#
+# An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+#
+# </div>
+#
+# [edl]: https://urs.earthdata.nasa.gov/
+# [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 #
 # ## Summary
 #
@@ -43,7 +45,6 @@
 # * How to use `earthaccess` to search for OCI data using search filters
 # * How to download OCI data, but only when you need to
 #
-# <a name="toc"></a>
 # ## Contents
 #
 # 1. [Setup](#setup)
@@ -52,6 +53,7 @@
 # 1. [Download Data](#download)
 #
 # <a name="setup"></a>
+
 # ## 1. Setup
 #
 # We begin by importing the only package used in this notebook. If you
@@ -72,8 +74,8 @@ import earthaccess
 
 import pathlib
 
-# [Back to top](#toc)
-# <a name="auth"></a>
+# [back to top](#contents) <a name="auth"></a>
+
 # ## 2. NASA Earthdata Authentication
 #
 # Next, we authenticate using our Earthdata Login
@@ -95,8 +97,8 @@ import pathlib
 
 auth = earthaccess.login(persist=True)
 
-# [Back to top](#toc)
-# <a name="search"></a>
+# [back to top](#contents) <a name="search"></a>
+
 # ## 3. Search for Data
 #
 # Collections on NASA Earthdata are discovered with the
@@ -160,8 +162,8 @@ results[1]
 
 results[2]
 
-# [Back to top](#toc)
-# <a name="download"></a>
+# [back to top](#contents) <a name="download"></a>
+
 # ## 4. Download Data
 #
 # An upcoming tutorial will need access to Level-1 files, whether or not we have direct access to the Earthdata Cloud, so let's go ahead and download a couple granules. As always, we start with an `earthaccess.search_data`.
@@ -221,8 +223,17 @@ paths = earthaccess.download(results, directory)
 paths
 
 # <div class="alert alert-block alert-warning">
-# Anywhere in any of <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/">these notebooks</a> where <pre>paths = earthaccess.open(...)</pre> is used to read data directly from the NASA Earthdata Cloud, you need to substitute <pre>paths = earthaccess.download(..., local_path)</pre> before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
+#
+# Anywhere in any of [these notebooks][tutorials] where `paths = earthaccess.open(...)` is used to read data directly from the NASA Earthdata Cloud, you need to substitute `paths = earthaccess.download(..., local_path)` before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
+#
 # </div>
+#
+# [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/"
+
+# [back to top](#contents)
+#
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on File Structure at Three Processing Levels.</p>
+#     
+# You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on File Structure at Three Processing Levels.
+#
 # </div>

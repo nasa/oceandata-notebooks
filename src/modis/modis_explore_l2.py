@@ -1,20 +1,21 @@
 # # Explore Level-2 Ocean Color data from the Moderate Resolution Imaging Spectroradiometer (MODIS) on the Aqua Satellite
-# **Authors:** Guoqing Wang (NASA, GSFC); Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
 #
-# > **PREREQUISITES**
-# >
-# > This notebook has the following prerequisites:
-# > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
-# >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# > - There are no prerequisite notebooks for this module.
+# **Authors:** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
+#
+# <div class="alert alert-info" role="alert">
+#
+# An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+#
+# </div>
 #
 # ## Summary
 #
 # This tutorial demonstrates accessing and analyzing NASA ocean color data using Python from the NASA Ocean Biology Distributed Active Archive Center (OB.DAAC) archives. Currently, there are several ways to find and access ocean color data:
+#
 # 1. [NASA's Earthdata Search](https://search.earthdata.nasa.gov/search)
-# 2. [NASA's CMR API](https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html)
-# 3. [OB.DAAC OPENDAP](https://oceandata.sci.gsfc.nasa.gov/opendap/)
-# 4. [OB.DAAC File Search](https://oceandata.sci.gsfc.nasa.gov/api/file_search_help)
+# 1. [NASA's CMR API](https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html)
+# 1. [OB.DAAC OPENDAP](https://oceandata.sci.gsfc.nasa.gov/opendap/)
+# 1. [OB.DAAC File Search](https://oceandata.sci.gsfc.nasa.gov/api/file_search_help)
 #
 # In this tutorial, we will focus on using `earthaccess` Python module to access MODIS Aqua ocean color data through NASA's Common Metadata Repository (CMR), a metadata system that catalogs Earth Science data and associated metadata records. The level 2 dataset of MODIS Aqua is one of the most popular datasets of OB.DAAC. Here we will use MODIS Aqua L2 Chlorophyll *a* data of the Chesapeake Bay as an example.
 # The standard NASA ocean color Chlorophyll *a* algorithm is described in the [Algorithm Theoretical Basis Document (ATBD)](https://www.earthdata.nasa.gov/apt/documents/chlor-a/v1.0).
@@ -25,7 +26,7 @@
 # * How to find OB.DAAC ocean color data
 # * How to download files using `earthaccess`
 # * How to create a plot using `xarray`
-# <a name="toc"></a>
+#
 # ## Contents
 #
 # 1. [Setup](#setup)
@@ -33,7 +34,9 @@
 # 1. [Search for Data](#search)
 # 1. [Download Data](#download)
 # 1. [Plot Data](#plot)
+#
 # <a name="setup"></a>
+
 # ## 1. Setup
 #
 # We begin by importing all of the packages used in this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the imports will be successful.
@@ -49,8 +52,8 @@ import numpy as np
 import xarray as xr
 
 
-# [Back to top](#toc)
-# <a name="auth"></a>
+# [back to top](#contents) <a name="auth"></a>
+
 # ## 2. NASA Earthdata Authentication
 #
 # Next, we authenticate using our Earthdata Login
@@ -72,8 +75,8 @@ import xarray as xr
 
 auth = earthaccess.login(persist=True)
 
-# [Back to top](#toc)
-# <a name="search"></a>
+# [back to top](#contents) <a name="search"></a>
+
 # ## 3. Search for Data
 #
 # The MODIS instrument, on board the Aqua satellite, collects ocean color data, processed from Level-1 through Level-4 and distributed by the OB.DAAC. In this example, we will use the standard Chlorophyll a data from Level-2 ocean color files. To find data we will use the `earthaccess` Python library to search on NASA's CMR API.
@@ -118,34 +121,35 @@ JSON(data_links, expanded=True)
 
 JSON(results)
 
-# [Back to top](#top)
-# <a name="download"></a>
+# [back to top](#contents) <a name="download"></a>
+
 # ## 4. Download Data
 #
 # Since the data are not hosted in the Earthdata Cloud (see output from `results[0]` above), we need to download files. This will download the data in a folder called "data" in your working directory.
 
 paths = earthaccess.download(results, "data")
 
-# [Back to top](#toc)
-# <a name="plot"></a>
+# [back to top](#contents) <a name="plot"></a>
+
 # ## 5. Plot Data
 #
-
 # Step-by-step, we'll build a nice map showing the log-transformed chlorophyll a estimate for the first granule we
 # downloaded. The first step is to open some of the "groups" present within the NetCDF files to begin preparing
 # a variable to plot.
 
 prod = xr.open_dataset(paths[0])
-product_name = prod.attrs["product_name"]
 obs = xr.open_dataset(paths[0], group="geophysical_data")
 nav = xr.open_dataset(paths[0], group="navigation_data")
 
 # The "navigation_data" group has geospatial coordinates that we merge into the "geophysical_data" group, which has the
 # "chlor_a" product.
 
-nav = nav.set_coords(("longitude", "latitude"))
-nav = nav.rename({"pixel_control_points": "pixels_per_line"})
-dataset = xr.merge((obs, nav.coords))
+nav = (
+    nav
+    .set_coords(("longitude", "latitude"))
+    .rename({"pixel_control_points": "pixels_per_line"})
+)
+dataset = xr.merge((prod, obs, nav.coords))
 
 # Now, we can pull out and fine-tune the "chlor_a" variable for visualization.
 
@@ -156,7 +160,7 @@ array.attrs.update(
     }
 )
 
-# The `plot` method from XArray's plotting api is an easy way to take an `xr.Dataset` or `xr.DataArray` to
+# The `plot` method from XArray's plotting API is an easy way to take an `xr.Dataset` or `xr.DataArray` to
 # a `matplotlib` figure.
 
 plot = array.plot(
@@ -165,15 +169,18 @@ plot = array.plot(
 
 # We can enrich the visualiation using `matplotlib` and `cartopy`. The coordinates are latitude and longitude, so if we add the "Plate Carree" coordinate reference system (CRS) to our axes, we will get an improved map.
 
-fig, ax = plt.subplots(
-    figsize=(10, 7), subplot_kw={"projection": cartopy.crs.PlateCarree()}
-)
+fig = plt.figure(figsize=(10, 7))
+ax = plt.axes(projection=cartopy.crs.PlateCarree())
 array.plot(x="longitude", y="latitude", cmap="jet", robust=True, ax=ax)
 ax.gridlines(draw_labels={"bottom": "x", "left": "y"})
 ax.add_feature(cartopy.feature.STATES, linewidth=0.5)
-ax.set_title(product_name, loc="center")
+ax.set_title(dataset.attrs["product_name"], loc="center")
 plt.show()
 
+# [back to top](#contents)
+#
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on Aqua/MODIS L2 data exploration.</p>
+#
+# You have completed the notebook on Aqua/MODIS L2 data exploration.
+#
 # </div>

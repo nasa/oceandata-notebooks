@@ -2,10 +2,21 @@
 #
 # **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 #
-# > **PREREQUISITES**
-# >
-# > This notebook has the following prerequisites:
-# > <a href="oci_data_access.html" target="_blank">OCI Data Access</a>
+# <div class="alert alert-success" role="alert">
+#
+# **PREREQUISITES**
+# - Learn with OCI: [Data Access][oci-data-access]
+#
+# </div>
+#
+# <div class="alert alert-info" role="alert">
+#
+# An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+#
+# </div>
+#
+# [edl]: https://urs.earthdata.nasa.gov/
+# [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 #
 # ## Summary
 #
@@ -15,6 +26,9 @@
 #
 # **XArray** is a [package][xarray] that supports the use of multi-dimensional arrays in Python. It is widely used to handle Earth observation data, which often involves multiple dimensions — for instance, longitude, latitude, time, and channels/bands.
 #
+# [netcdf]: https://www.unidata.ucar.edu/software/netcdf/
+# [xarray]: https://docs.xarray.dev/
+#
 # ## Learning Objectives
 #
 # At the end of this notebok you will know:
@@ -22,21 +36,19 @@
 # * How to use `xarray` to open OCI data
 # * What key variables are present in the groups within OCI L1B, L2, and L3 files
 #
-# <a name="toc"></a>
 # ## Contents
 #
 # 1. [Setup](#setup)
-# 1. [Inspecting OCI L1B File Structure](#l1b)
-# 1. [Inspecting OCI L2 File Structure](#l2)
-# 1. [Inspecting OCI L3 File Structure](#l3)
+# 1. [Explore L1B File Structure](#l1b)
+# 1. [Explore L2 File Structure](#l2)
+# 1. [Explore L3 File Structure](#l3)
 #
 # <a name="setup"></a>
+
 # ## 1. Setup
 #
-# We begin by importing all of the packages used in this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the imports will be successful.
+# Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
 #
-# [netcdf]: https://www.unidata.ucar.edu/software/netcdf/
-# [xarray]: https://docs.xarray.dev/
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
 import cartopy.crs as ccrs
@@ -51,9 +63,9 @@ import pandas as pd
 
 auth = earthaccess.login(persist=True)
 
-# [Back to top](#toc)
-# <a name="l1b"></a>
-# ## 2. Inspecting OCI L1B File Structure
+# [back to top](#contents) <a name="l1b"></a>
+
+# ## 2. Explore L1B File Structure
 #
 # Let's use `xarray` to open up a OCI L1B NetCDF file using `earthaccess`. We will use the same search method used in <a href="oci_data_access.html">OCI Data Access</a>. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
 
@@ -71,7 +83,9 @@ results = earthaccess.search_data(
 paths = earthaccess.open(results)
 
 # We want to confirm we are running code on a remote host with direct access to the NASA Earthdata Cloud. The next cell has
-# no effect if we are, and otherwise raises an error. If there's an error, consider the substitution explained in the OCI Data Access notebook.
+# no effect if we are, and otherwise raises an error. If there is an error, consider the substitution explained in the [Data Access][data-access] notebook.
+#
+# [data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 
 try:
     paths[0].f.bucket
@@ -104,9 +118,9 @@ dataset["rhot_blue"].sizes
 
 plot = dataset["rhot_blue"].sel({"blue_bands": 100}).plot()
 
-# [Back to top](#toc)
-# <a name="l2"></a>
-# ## 3. Inspecting OCI L2 File Structure
+# [back to top](#contents) <a name="l2"></a>
+
+# ## 3. Explore L2 File Structure
 #
 # OCI L2 files include retrievals of geophysical variables, such as Apparent Optical Properties (AOP), for each L1 swath. We'll use the same `earthaccess` search for L2 AOP data. Although now we can use `cloud_cover` too.
 
@@ -171,9 +185,10 @@ plot = rrs.plot(x="longitude", y="latitude", cmap="viridis", vmin=0)
 
 fig = plt.figure()
 ax = plt.axes(projection=ccrs.PlateCarree())
+rrs.plot(x="longitude", y="latitude", cmap="viridis", vmin=0, ax=ax)
 ax.coastlines()
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
-plot = rrs.plot(x="longitude", y="latitude", cmap="viridis", vmin=0, ax=ax)
+plt.show()
 
 # Let's plot the full "Rrs" spectrum for individual pixels. A visualization with all the pixels
 # wouldn't be useful, but limiting to a bounding box gives a simple way to subset pixels. Note that,
@@ -201,10 +216,10 @@ rrs_stack = rrs_box.stack(
 plot = rrs_stack.plot.line(hue="pixel")
 
 # We will go over how to plot Rrs spectra with accurate wavelength values on the x-axis in an upcoming notebook.
+#
+# [back to top](#contents) <a name="l3"></a>
 
-# [Back to top](#toc)
-# <a name="l3"></a>
-# ## 4. Inspecting OCI L3 File Structure
+# ## 4. Explore L3 File Structure
 #
 # At Level-3 there are binned (B) and mapped (M) products available for OCI. The L3M remote sensing reflectance (Rrs) files contain global maps of Rrs. We'll use the same `earthaccess` method to find the data.
 
@@ -229,30 +244,28 @@ dataset
 
 # Notice that OCI L3M data has `lat` and `lon` coordinates, so it's easy to slice out a bounding box and map the "Rrs_442" variable.
 
-# +
+rrs_442 = dataset["Rrs_442"].sel({"lat": slice(-25, -45), "lon": slice(10, 30)})
+rrs_442
+
 fig = plt.figure()
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.coastlines()
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
+rrs_442.plot(cmap="viridis", vmin=0, ax=ax)
+plt.show()
 
-rrs_442 = dataset["Rrs_442"].sel({"lat": slice(-25, -45), "lon": slice(10, 30)})
-plot = rrs_442.plot(cmap="viridis", vmin=0, ax=ax)
-# -
 # Also becuase the L3M variables have `lat` and `lon` coordinates, it's possible to stack multiple granules along a
 # new dimension that corresponds to time.
 # Instead of `xr.open_dataset`, we use `xr.open_mfdataset` to create a single `xarray.Dataset` (the "mf" in `open_mfdataset` stands for multiple files) from an array of paths.
 #
-# We also use a new search filter available in `earthaccess.search_data`: the `granule_name` argument accepts strings with the "*" wildcard. We need this to distinguish daily ("DAY") from eight-day ("8D") composites, as well as to get the 0.1 degree resolution projections.
+# We also use a new search filter available in `search_data`: the `granule_name` argument accepts strings with the "*" wildcard. We need this to distinguish daily ("DAY") from eight-day ("8D") composites, as well as to get the 0.1 degree resolution projections.
 
-# +
 tspan = ("2024-05-01", "2024-05-8")
-
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_CHL_NRT",
     temporal=tspan,
     granule_name="*.DAY.*.0p1deg.*",
 )
-# -
 
 paths = earthaccess.open(results)
 
@@ -266,7 +279,7 @@ dataset = xr.open_mfdataset(
 
 # Add a date dimension using the dates from the netCDF files.
 
-dates = [ xr.open_dataset(a).attrs["time_coverage_end"] for a in paths]
+dates = [xr.open_dataset(a).attrs["time_coverage_end"] for a in paths]
 dt = pd.to_datetime(dates)
 dataset = dataset.assign_coords(date=dt.values)
 dataset
@@ -276,20 +289,14 @@ dataset
 chla = np.log10(dataset["chlor_a"])
 chla.attrs.update(
     {
-        "units": f'lg({dataset["chlor_a"].attrs["units"]})',
+        "units": f'log({dataset["chlor_a"].attrs["units"]})',
     }
 )
 plot = chla.sel(date = "2024-05-02").plot(aspect=2, size=4, cmap="GnBu_r")
 
 # ... to a map of average values, skipping "NaN" values that result from clouds and the OCI's tilt maneuver.
 
-chla_avg = chla.mean("date")
-chla_avg.attrs.update(
-    {
-        "long_name": chla.attrs["long_name"],
-        "units": chla.attrs["units"],
-    }
-)
+chla_avg = chla.mean("date", keep_attrs=True)
 plot = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
 
 # We can also create a time series of mean values over the whole region.
@@ -297,8 +304,10 @@ plot = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
 chla_avg = chla.mean(dim=["lon", "lat"], keep_attrs=True)
 plot = chla_avg.plot(linestyle='-', marker='o', color='b')
 
+# [back to top](#contents)
+#
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on OCI file structure.</p>
+#
+# You have completed the notebook on OCI file structure.
+#
 # </div>
-
-
