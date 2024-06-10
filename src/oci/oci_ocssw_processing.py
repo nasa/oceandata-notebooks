@@ -142,6 +142,7 @@ paths
 
 # While we have the downloaded location stored in the list `paths`, write it to a text file for future use.
 
+paths = [str(i) for i in paths]
 with open("l2bin_ifile.txt", "w") as file:
     file.write("\n".join(paths))
 
