@@ -1,17 +1,3 @@
-# ---
-# jupyter:
-#   jupytext:
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.16.1
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
 # # Visualize Data from the Hyper-Angular Rainbow Polarimeter (HARP2)
 #
 # **Authors:** Sean Foley (NASA, MSU), Meng Gao (NASA, SSAI), Ian Carroll (NASA, UMBC)
@@ -67,21 +53,9 @@ import xarray as xr
 
 # -
 
-# The radiances collected by HARP2 often need to be converted, using additional properties, to reflectances. Write a function for anything you'll repeat like this.
+# *Tip: If a library is not installed in your Jupyter environment, install it using the following command. Make sure your server has sufficient memory. 
 
-
-def rad_to_refl(rad, f0, sza, r):
-    """Convert radiance to reflectance.
-    Args:
-        rad: Radiance.
-        f0: Solar irradiance.
-        sza: Solar zenith angle.
-        r: Sun-Earth distance (in AU).
-
-    Returns: Reflectance.
-    """
-    return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) * f0
-
+# !pip install apng #change "apng" for any package that is not importing properly above
 
 # [Back to top](#toc)
 # <a name="data"></a>
@@ -100,6 +74,8 @@ results = earthaccess.search_data(
 
 paths = earthaccess.open(results)
 
+# Create variables from the data groups in the granule.
+
 prod = xr.open_dataset(paths[0])
 view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
 geo = xr.open_dataset(paths[0], group="geolocation_data")
@@ -110,6 +86,8 @@ obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 # ## 2. Understanding Multi-Angle Data
 #
 # HARP2 is a multi-spectral sensor, like OCI, with 4 spectral bands. These roughly correspond to green, red, near infrared (NIR), and blue (in that order). HARP2 is also multi-angle. These angles are with respect to the satellite track. Essentially, HARP2 is always looking ahead, looking behind, and everywhere in between. The number of angles varies per sensor. The red band has 60 angles, while the green, blue, and NIR bands each have 10.
+#
+# <img src='https://i.imgur.com/TiVa4Vz.png' style="width:600px"><figcaption> Source: NASA SVS </figcaption>
 #
 # In the HARP2 data, the angles and the spectral bands are combined into one axis. I'll refer to this combined axis as HARP2's "channels." Below, we'll make a quick plot both the viewing angles and the wavelengths of HARP2's channels. In both plots, the x-axis is simply the channel index.
 #
@@ -122,9 +100,9 @@ wavelengths = view["intensity_wavelength"]
 
 fig, ax = plt.subplots(2, 1, figsize=(14, 7))
 ax[0].set_ylabel("View Angle (degrees)")
-ax[0].set_xlabel("Index")
+ax[0].set_xlabel("HARP2 Channel Index")
 ax[1].set_ylabel("Wavelength (nm)")
-ax[1].set_xlabel("Index")
+ax[1].set_xlabel("HARP2 Channel Index")
 plot_data = [
     (0, 10, "green", "^", "green"),
     (10, 70, "red", "*", "red"),
@@ -157,6 +135,9 @@ plt.show()
 # HARP2 is sensitive to the polarization of light. Polarization describes the geometric orientation of the oscillation of light waves. Randomly polarized light (like light coming directly from the sun) has an approximately equal amount of waves in every orientation. When light reflects of certain surfaces, it can become nonrandomly polarized.
 #
 # Polarimetric data is typically represented using [Stokes vectors](https://en.wikipedia.org/wiki/Stokes_parameters). These have four components: I, Q, U, and V. HARP2 is only sensitive to linear polarization, and does not detect circular polarization. Since the V component corresponds to circular polarization, the data only includes the I, Q, and U elements of the Stokes vector.
+#
+# <img src=https://upload.wikimedia.org/wikipedia/commons/9/94/Emmaalexander_Stokes_params.png style="width: 500px">
+# <figcaption> Source: Emma Alexander </figcaption>
 #
 # Let's make a plot of the I, Q, and U components of our Stokes vector, using the RGB channels, which will help our eyes make sense of the data. We'll use the view that is closest to pointing straight down, which is called the "nadir" view in the code. It is important to understand that, because HARP2 is a pushbroom sensor with a wide swath, the sensor zenith angle at the edges of the swath will still be high. It's only a true nadir view close to the center of the swath. Still, the average sensor zenith angle will be lowest in this view.)
 #
@@ -247,7 +228,7 @@ for i, (key, value) in enumerate(crop_rgb[["i", "dolp"]].items()):
     ax[i].set_title(key.capitalize())
 # -
 
-# DoLP line plot
+# DoLP line plot showing the DoLP per view angle
 
 dolp_mean = obs["dolp"].mean(["bins_along_track", "bins_across_track"])
 dolp_mean = (dolp_mean - dolp_mean.min()) / (dolp_mean.max() - dolp_mean.min())
@@ -278,8 +259,24 @@ plt.show()
 # ## 4. Radiance to Reflectance
 #
 # We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). This conversion compensates for the differences in appearance due to the viewing angle and sun angle.
-#
-# The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
+
+# Let's create a function for the conversion, since we will use it again. Write a function for anything you'll repeat like this.
+
+
+def rad_to_refl(rad, f0, sza, r):
+    """Convert radiance to reflectance.
+    Args:
+        rad: Radiance.
+        f0: Solar irradiance.
+        sza: Solar zenith angle.
+        r: Sun-Earth distance (in AU).
+
+    Returns: Reflectance.
+    """
+    return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) * f0
+
+
+# Get the reflectances using the function you just created. 
 
 refl = rad_to_refl(
     rad=obs["i"],
@@ -288,6 +285,8 @@ refl = rad_to_refl(
     r=float(prod.attrs["sun_earth_distance"]),
 )
 
+# Plot the radiances and reflectances. The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
+
 fig, ax = plt.subplots(1, 2, figsize=(16, 8))
 ax[0].imshow(obs["i"].sel({"number_of_views": red_nadir_idx}), cmap="gray")
 ax[0].set_title("Radiance")
@@ -295,7 +294,7 @@ ax[1].imshow(refl.sel({"number_of_views": red_nadir_idx}), cmap="gray")
 ax[1].set_title("Reflectance")
 plt.show()
 
-# Create a line plot of the mean reflectance for each view angle and spectral channel. The flatness of this plot serves as a sanity check that nothing has gone horribly wrong with our data processing.
+# Now create a line plot of the mean reflectance for each view angle and spectral channel. The flatness of this plot serves as a sanity check that nothing has gone horribly wrong with our data processing.
 
 # +
 fig, ax = plt.subplots(figsize=(16, 6))
@@ -373,3 +372,5 @@ with TemporaryDirectory() as tmp:
 # The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
 #
 # ![A multi-angle HARP2 animation](harp2_red_anim_20240519T235950.png)
+
+
