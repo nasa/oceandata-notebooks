@@ -1,10 +1,6 @@
 # Oceandata Notebooks
 
-A repository for notebooks delivered as [oceandata tutorials and data recipes][tutorials].
-
-## For Users
-
-See [docs](docs/index.md).
+A repository for notebooks published as [oceandata tutorials and data recipes][tutorials].
 
 ## For Contributors
 
@@ -30,15 +26,15 @@ To prepare for a release, ensure that the clean notebooks are updated in the `do
 ```
 jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --output-dir=docs/notebooks notebooks/**/*.ipynb
 ```
-Those are the targets for the "Downloand and Run" links on the [tutorials][tutorials] page. Note that opening those notebooks in Jupyter will dirty them up again, so
+Those are the (eventual) targets for the "Downloand and Run" links on the [tutorials][tutorials] page. Note that opening those notebooks in Jupyter will dirty them up again, so
 do not include the changes introduced by opening the clean notebooks in any commit.
 
 **WIP**:
 
 1. Curating dependencies without duplicating between pyproject.toml and environment.yml
-1. Formatting notebooks with black
-1. Testing notebooks in isolated environments (using `jupyter execute ...`)
-1. Generate HTML using:
+1. Formatting notebooks with black (although black does not format comments)
+1. Testing notebooks in isolated environments (e.g. using `jupyter execute ...`)
+1. Automatically generate HTML using:
    ```
    jupyter nbconvert --to=html --TemplateExporter.filters="{'markdown2html': 'nbconvert.filters.markdown.markdown2html_pandoc'}"  --execute notebooks/**/*.ipynb
    ```

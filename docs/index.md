@@ -1,8 +1,4 @@
-# Tutorials and Data Recipes
-
-> [!NOTE]
-> This content is meant to be delivered on [Ocean Color site][tutorials].
-> That page will (eventually) have notebook download links targeting subfolders here in `docs/`.
+# Jupyter Notebooks
 
 ## About
 
