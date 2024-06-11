@@ -28,7 +28,7 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 
 To prepare for a release, ensure that the clean notebooks are updated in the `docs/notebooks/` folder.
 ```
-jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --output-dir=docs/notebooks notebooks/*/*.ipynb
+jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --output-dir=docs/notebooks notebooks/**/*.ipynb
 ```
 Those are the targets for the "Downloand and Run" links on the [tutorials][tutorials] page. Note that opening those notebooks in Jupyter will dirty them up again, so
 do not include the changes introduced by opening the clean notebooks in any commit.
@@ -38,11 +38,13 @@ do not include the changes introduced by opening the clean notebooks in any comm
 1. Curating dependencies without duplicating between pyproject.toml and environment.yml
 1. Formatting notebooks with black
 1. Testing notebooks in isolated environments (using `jupyter execute ...`)
-1. Auto populate somewhere using:
+1. Generate HTML using:
    ```
-   cd docs/oci
-   jupyter nbconvert --to=html --execute *.ipynb
+   jupyter nbconvert --to=html --TemplateExporter.filters="{'markdown2html': 'nbconvert.filters.markdown.markdown2html_pandoc'}"  --execute notebooks/**/*.ipynb
    ```
+   - TODO: automate `shopt -s globstar`
+   - TODO: fails for oci_install_ocssw because of `%conda` cell.
+   - TODO: https://github.com/jupyter/nbconvert/issues/1125
 
 ## How to Cite
 

@@ -2,12 +2,22 @@
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
 #
-# > **PREREQUISITES**
-# >
-# > This notebook has the following prerequisites:
-# > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
-# >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/" target="_blank">Data Access</a>
+# <div class="alert alert-success" role="alert">
+#
+# The following notebooks are **prerequisites** for this tutorial.
+#
+# - Learn with OCI: [Data Access][oci-data-access]
+#
+# </div>
+#
+# <div class="alert alert-info" role="alert">
+#
+# An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+#
+# </div>
+#
+# [edl]: https://urs.earthdata.nasa.gov/
+# [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 #
 # ## Summary
 #
@@ -22,7 +32,6 @@
 # * How to set up your OCSSW session
 # * How to process a L1B file to L2 using l2gen
 #
-# <a name="toc"></a>
 # ## Contents
 #
 # 1. [Setup](#setup)
@@ -31,16 +40,22 @@
 # 1. [All-in-One](#all) 
 #
 # <a name="setup"></a> 
+
 # ## 1. Setup
 #
 # <div class="alert alert-info" role="alert">
+#
 # This tutorial is written in a Jupyter notebook connected to a Bash kernel. If you have downloaded this Jupyter notebook and want to run it, you also need to connected it to a Bash kernel. Alternatively, you can copy the code cells to the Terminal application found in the JupyterLab Launcher, which speaks Bash or something close enough.
+#
 # </div>
+#
 #
 # ### (Optional) Use a Bash Kernel
 #
 # <div class="alert alert-danger" role="alert">
+#
 # Conda uses a lot of memory while configuring your environment. Choose an option with more than about 5GB of RAM from the JupyterHub Control Panel, or your install will fail.
+#
 # </div>
 #
 # Run the following command. If the terminal asks you to update conda, type Y to accept.
@@ -52,9 +67,9 @@
 # Follow the prompts from conda to proceed with any installs and updates. If prompted, enter "y" to accept.
 #
 # Confirm the bash kernel is installed by starting a new Launcher. You should see the bash kernel along with Python and other kernels installed in your JupyterHub. You should now **change the kernel of the notebook** by clicking on the kernel name in the upper-right corner of the window and selecting the Bash kernel before moving on to the rest of the tutorial.
+#
+# [back to top](#contents) <a name="ocssw"></a>
 
-# [Back to top](#toc)
-# <a name="ocssw"></a>
 # ## 2. Install OCSSW
 #
 # The OCSSW software is not a Python package and not available from `conda` or any other repository. To install it, we begin by aquiring an installer script from the OB.DAAC. This script is actually part of OCSSW, but we can use it independently to download and install the OCSSW binaries suitable for our system.
@@ -81,10 +96,14 @@ export OCSSWROOT=/tmp/ocssw
 
 printenv OCSSWROOT
 
-# <div class="alert alert-info" role="alert">
-# You will need to repeat these installation steps if your OCSSWROOT directory does not persist between sessions. The `/tmp/ocssw` folder, for instance, will not be present the next time JupyterHub creates a server. Consider the trade off between installation time, speed, and storage costs when choosing your OCSSWROOT. With the arguments below, the installation takes 11GB of storage space. We use the quick and cheap location for this tutorial.
+# <div class="alert alert-warning" role="alert">
+#     
+# You will need to [repeat these installation steps](#all) if your OCSSWROOT directory does not persist between sessions.
+#
 # </div>
-
+#
+# The `/tmp/ocssw` folder, for instance, will not be present the next time JupyterHub creates a server. Consider the trade off between installation time, speed, and storage costs when choosing your OCSSWROOT. With the arguments below, the installation takes 11GB of storage space. We use the quick and cheap location for this tutorial.
+#
 # Install OCSSW using the `--tag` argument to pick from the list above. Also provide optional arguments for sensors you will be working with. In this case, we will only be using OCI. A list of optional arguments can be found on the OCSSW webpage or with `./install_ocssw --help`.
 #
 # *Tip:* The process is not finished as long as the counter to the left of the cell shows `[*]`. It will take some time to install all the tools (7 of 7 installations).
@@ -100,9 +119,9 @@ source $OCSSWROOT/OCSSW_bash.env
 which install_ocssw
 
 # You are now ready to run `l2gen`, the Level-2 processing function for all ocean color instruments under the auspices of the GSFC Ocean Biology Processing Group!
+#
+# [back to top](#contents) <a name="l2gen"></a>
 
-# [Back to top](#toc)
-# <a name="l2gen"></a>
 # ## 3. Process L1B Data with `l2gen`
 #
 # Run `l2gen` by itself to view the extensive list of options available. You can find more information [on the Seadas website][docs].
@@ -119,11 +138,11 @@ l2gen
 #
 # For this example, we will be using the L1B file downloaded in the OCI Data Access notebook. Confirm that the L1B file to process is at the expected location by listing (with `ls`) the directory contents. If the directory is empty, check that you've completed the prerequiste notebooks for this tutorial!
 
-ls L1B
+# ls L1B
 
 # Create a directory for output files.
 
-mkdir L2
+# mkdir L2
 
 # And run! Note, this may take several minutes.
 
@@ -135,10 +154,14 @@ l2gen \
   atmocor=0
 # -
 
-# *Tip*: Scroll down in the output above to see updates on processing. Upon completion, you should have a new processed L2 file in your L2 folder. 
+# <div class="alert alert-success" role="alert">
+#
+# Scroll down in the output above to see updates on processing. Upon completion, you should have a new processed L2 file in your L2 folder.
+#
+# </div>
+#
+# [back to top](#contents) <a name="all"></a>
 
-# [Back to top](#toc)
-# <a name="all"></a>
 # ## 4. All-in-One
 #
 # In case you need to run the sequence above in a terminal regularly, here are all the commands
@@ -158,6 +181,10 @@ export OCSSWROOT=/tmp/ocssw
 ./install_ocssw --tag=T2024.19 --seadas --oci
 source $OCSSWROOT/OCSSW_bash.env
 
+# [back to top](#contents)
+#
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on installing OCCSW. Check out the notebook on OCSSW processing PACE data: oci_ocssw_processing.ipynb</p>
+#
+# You have completed the notebook on installing OCCSW. Check out the notebook on Processing with OCSSW Tools.
+#
 # </div>

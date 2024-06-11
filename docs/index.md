@@ -33,21 +33,20 @@ to manually [make the environment available to JupyterLab as a kernel][conda-ker
 1. **Earthdata Cloud** File Structure at Three Processing Levels
 1. Installing and Running OCSSW Command-line Tools
 1. Processing with OCSSW Tools: l2gen, l2bin, and l3mapgen
-1. more comming soon!
+1. More comming soon!
 
 ### Learn with HARP2
 
 1. **Earthdata Cloud** Data Visualization
-1. more comming soon!
 
 ### Learn with SpexONE
 
-1. under construction
+1. Coming soon!
 
 ### Learn with MODIS
 
-1. Explore Chlorophyll data in Instrument Swaths
-1. Explore Chlorophyll and Rrs data in Global Maps
+1. Explore Level-2 Ocean Color Data
+1. Explore Level-3 Ocean Color Data
 
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 [jupyterlab]: https://jupyter.org/

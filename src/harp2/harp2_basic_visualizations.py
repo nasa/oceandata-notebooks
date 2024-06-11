@@ -4,7 +4,8 @@
 #
 # <div class="alert alert-success" role="alert">
 #
-# **PREREQUISITES**
+# The following notebooks are **prerequisites** for this tutorial.
+#
 # - Learn with OCI: [Data Access][oci-data-access]
 #
 # </div>
@@ -63,23 +64,6 @@ import xarray as xr
 
 # -
 
-# The radiances collected by HARP2 often need to be converted, using additional properties, to reflectances. Write a function for anything you'll repeat like this.
-
-
-def rad_to_refl(rad, f0, sza, r):
-    """Convert radiance to reflectance.
-    
-    Args:
-        rad: Radiance.
-        f0: Solar irradiance.
-        sza: Solar zenith angle.
-        r: Sun-Earth distance (in AU).
-
-    Returns: Reflectance.
-    """
-    return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) / f0
-
-
 # [back to top](#contents) <a name="data"></a>
 
 # ## 2. Get Level-1C Data
@@ -99,13 +83,12 @@ paths = earthaccess.open(results)
 
 prod = xr.open_dataset(paths[0])
 view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
-geo = xr.open_dataset(paths[0], group="geolocation_data")
+geo = xr.open_dataset(paths[0], group="geolocation_data").set_coords(["longitude", "latitude"])
 obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 
 # The `prod` dataset, as usual for OB.DAAC products, contains attributes but no variables. Merge it with the "observation_data" and "geolocation_data", setting latitude and longitude as auxiliary (e.e. non-index) coordinates, to get started.
 
 dataset = xr.merge((prod, obs, geo))
-dataset = dataset.set_coords(["longitude", "latitude"])
 dataset
 
 # [back to top](#contents) <a name="multiangle"></a>
@@ -276,7 +259,24 @@ plt.show()
 # ## 4. Radiance to Reflectance
 #
 # We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). This conversion compensates for the differences in appearance due to the viewing angle and sun angle.
-#
+
+# The radiances collected by HARP2 often need to be converted, using additional properties, to reflectances. Write the conversion as a function, because you may need to repeat it.
+
+
+def rad_to_refl(rad, f0, sza, r):
+    """Convert radiance to reflectance.
+    
+    Args:
+        rad: Radiance.
+        f0: Solar irradiance.
+        sza: Solar zenith angle.
+        r: Sun-Earth distance (in AU).
+
+    Returns: Reflectance.
+    """
+    return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) / f0
+
+
 # The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
 
 refl = rad_to_refl(
@@ -355,35 +355,30 @@ frames
 
 # In order to display an animation in a Jupyter notebook, the "backend" for matplotlib has to be explicitly set to "widget".
 
-# %matplotlib widget
-
 # Now we can use `matplotlib.animation` to create an initial plot, define a function to update that plot for each new frame, and show the resulting animation. When we create the inital plot, we get back the object called `im` below. This object is an instance of `matplotlib.artist.Artist` and is responsible for rendering data on the axes. Our `update` function uses that artist's `set_data` method to leave everything in the plot the same other than the data used to make the image.
 
 # +
 fig, ax = plt.subplots()
-fig.canvas.header_visible = False
-
 im = ax.imshow(refl_pretty[{"number_of_views": 0}], cmap="gray")
+
 
 def update(i):
     im.set_data(refl_pretty[{"number_of_views": i}])
     return im
 
 an = animation.FuncAnimation(fig=fig, func=update, frames=frames, interval=30)
-plt.show()
+filename = f'harp2_red_anim_{dataset.attrs["product_name"].split(".")[1]}.gif'
+an.save(filename, writer="pillow")
+plt.close()
 # -
 
 # This scene is a great example of multi-layer clouds. You can use the parallax effect to distinguish between these layers.
 #
-# The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles! When it starts driving you crazy though, time to pause.
-
-an.pause()
-
-# But it's so mesmerizing!
-
-an.resume()
-
-# And once you've really had enough, call `plt.close()`.
+# The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
+#
+# ![A multi-angle HARP2 animation](harp2_red_anim_20240519T235950.gif)
+#
+# Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By default, `matplotlib` will not display an animation. To view the animation, we saved it as a file and displayed the result in the next cell. Alternatively, you could change the default by executing `%matplotlib widget`. The `widget` setting, which works in Jupyter Lab but not on a static website, you can use `plt.show()` as well as `an.pause()` and `an.resume()`.
 
 # [back to top](#contents)
 #

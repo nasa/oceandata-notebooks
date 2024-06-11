@@ -4,7 +4,8 @@
 #
 # <div class="alert alert-success" role="alert">
 #
-# **PREREQUISITES**
+# The following notebooks are **prerequisites** for this tutorial.
+#
 # - Learn with OCI: [Data Access][oci-data-access]
 #
 # </div>
@@ -20,7 +21,7 @@
 #
 # ## Summary
 #
-# In this example we will use the `earthaccess` package to access an OCI Level-1B, Level-2, and Level-3 NetCDF file and open them using `xarray`.
+# In this example we will use the `earthaccess` package to access OCI Level-1B (L1B), Level-2 (L2), and Level-3 (L3) NetCDF files and open them using `xarray`.
 #
 # **NetCDF** ([Network Common Data Format][netcdf]) is a binary file format for storing multidimensional scientific data (variables). It is optimized for array-oriented data access and support a machine-independent format for representing scientific data. Files ending in `.nc` are NetCDF files.
 #

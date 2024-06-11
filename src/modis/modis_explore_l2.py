@@ -1,4 +1,4 @@
-# # Explore Level-2 Ocean Color data from the Moderate Resolution Imaging Spectroradiometer (MODIS) on the Aqua Satellite
+# # Explore Level-2 Ocean Color Data from the Moderate Resolution Imaging Spectroradiometer (MODIS)
 #
 # **Authors:** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
 #
@@ -7,6 +7,8 @@
 # An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
 #
 # </div>
+#
+# [edl]: https://urs.earthdata.nasa.gov/
 #
 # ## Summary
 #

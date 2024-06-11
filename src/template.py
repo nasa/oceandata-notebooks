@@ -4,7 +4,8 @@
 #
 # <div class="alert alert-success" role="alert">
 #
-# **PREREQUISITES**
+# The following notebooks are **prerequisites** for this tutorial.
+#
 # - Learn with OCI: [Data Access][oci-data-access]
 #
 # </div>
@@ -84,6 +85,7 @@ auth = earthaccess.login(persist=True)
 # - prefer a whole markdown cell, with full descriptions, over inline code comments
 # - avoid splitting markdown cells that are adjacent
 # - remove any empty cell at the end of the notebook
+# - enable output scrolling for long outputs
 #
 # Here are the two additional "alert" boxes used in some notebooks to help you choose between "success", "danger", "warning", and "info".
 #
@@ -98,6 +100,11 @@ auth = earthaccess.login(persist=True)
 # Conda uses a lot of memory while configuring your environment. Choose an option with more than about 5GB of RAM from the JupyterHub Control Panel, or your install will fail.
 #
 # </div>
+
+# + scrolled=true
+for i in range(42):
+    print(i)
+# -
 
 # [back to top](#contents)
 #

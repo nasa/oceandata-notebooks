@@ -1,11 +1,12 @@
-# # Explore Level-3 Ocean Color data from the Moderate Resolution Imaging Spectroradiometer (MODIS) on the Aqua Satellite
+# # Explore Level-3 Ocean Color Data from the Moderate Resolution Imaging Spectroradiometer (MODIS)
 #
 # **Authors:** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA)
 #
 # <div class="alert alert-success" role="alert">
 #
-# **PREREQUISITES**
-# - Learn with MODIS: [Data Access][modis_explore_l2]
+# The following notebooks are **prerequisites** for this tutorial.
+#
+# - Learn with MODIS: [Explore Level-2 Ocean Color Data][modis_explore_l2]
 #
 # </div>
 #

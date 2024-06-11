@@ -2,12 +2,24 @@
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
 #
-# > **PREREQUISITES**
-# >
-# > This notebook has the following prerequisites:
-# > - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">Earthdata Login</a>**
-# >   account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-# > - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_ocssw_processing_bash/" target="_blank">Installing and Running OCSSW Command-line Tools</a>
+# <div class="alert alert-success" role="alert">
+#
+# The following notebooks are **prerequisites** for this tutorial.
+#
+# - Learn with OCI: [Data Access][oci-data-access]
+# - Learn with OCI: [Installing and Running OCSSW Command-line Tools][ocssw_install]
+#
+# </div>
+#
+# <div class="alert alert-info" role="alert">
+#
+# An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+#
+# </div>
+#
+# [edl]: https://urs.earthdata.nasa.gov/
+# [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
+# [ocssw_install]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_ocssw_install/
 #
 # ## Summary
 #
@@ -33,10 +45,13 @@
 # 1. [Composite L2 Data with `l2bin`](#l2bin)
 # 1. [Make a Map from Binned Data with `l3mapgen`](#l3mapgen)
 #      
-# <a name="setup"></a> 
+# <a name="setup"></a>
+
 # ## 1. Setup
 #
-# We begin by importing all of the packages used in this notebook.
+# Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
+#
+# [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 # +
 import csv
@@ -74,6 +89,8 @@ def write_par(path, par):
 # essential, but it helps describe what the function does.
 
 help(write_par)
+
+# [back to top](#contents) <a name="data"></a>
 
 # ## 2. Get OCI Data <a name="data"></a>
 #
@@ -146,18 +163,24 @@ paths = [str(i) for i in paths]
 with open("l2bin_ifile.txt", "w") as file:
     file.write("\n".join(paths))
 
+# [back to top](#contents) <a name="l2gen"></a>
+
 # ## 3. Process L1B Data with `l2gen` <a name="l2gen"></a>
 #
 
 # At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters. 
 
 # <div class="alert alert-warning">
-# OCSSW programs are run from the command line in Bash, but we can have a Bash terminal-in-a-cell using the IPython <a href="https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands" target=_blank>magic</a> command <code>%%bash</code>. In the specific case of OCSSW programs, the Bash environment created for that cell must be set up by loading <code>$OCSSWROOT/OCSSW_bash.env</code>.
+#
+# OCSSW programs are run from the command line in Bash, but we can have a Bash terminal-in-a-cell using the [IPython magic][magic] command `%%bash`. In the specific case of OCSSW programs, the Bash environment created for that cell must be set up by loading `$OCSSWROOT/OCSSW_bash.env`.
+#
 # </div>
 #
 # Every `%%bash` cell that calls an OCSSW program needs to `source` the environment
 # definition file shipped with OCSSW, because its effects are not retained from one cell to the next.
 # We can, however, define the `OCSSWROOT` environment variable in a way that effects every `%%bash` cell.
+#
+# [magic]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands
 
 os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
 
@@ -204,9 +227,9 @@ plot = dataset["chlor_a"].plot(cmap="viridis", robust=True)
 # a lot of information about the specifics of what the `l2gen` program generates.
 #
 # The next step for this tutorial is to merge multiple Level-2 granules together.
+#
+# [back to top](#contents) <a name="l2bin"></a>
 
-# [Back to top](#toc)
-# <a name="l2bin"></a>
 # ## 4. Composite L2 Data with `l2bin`
 #
 # It can be useful to merge adjacent scenes to create a single, larger image. The OCSSW program that performs merging, also known as "compositing" of remote sensing images, is called `l2bin`. Take a look at the program's options.
@@ -240,10 +263,10 @@ write_par("l2bin.par", par)
 # l2bin par=l2bin.par
 # -
 
-# [Back to top](#toc)
-# <a name="l3mapgen"></a>
-# ## 5. Make a Map from Binned Data with `l3mapgen`
+# [back to top](#contents) <a name="l3mapgen"></a>
 
+# ## 5. Make a Map from Binned Data with `l3mapgen`
+#
 # The `l3mapgen` function of OCSSW allows you to create maps with a wide array of options you can see below:
 
 # + scrolled=true language="bash"
@@ -286,6 +309,10 @@ ax.coastlines(linewidth=0.5)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.3)
 plot = dataset["chlor_a"].plot(x="lon", y="lat", cmap="viridis", robust=True, ax=ax)
 
+# [back to top](#contents)
+#
 # <div class="alert alert-info" role="alert">
-# <p>You have completed the notebook on using OCCSW to process PACE data. More notebooks are comming soon!</p>
+#
+# You have completed the notebook on using OCCSW to process PACE data. More notebooks are comming soon!
+#
 # </div>
