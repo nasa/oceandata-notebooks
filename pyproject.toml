@@ -38,3 +38,19 @@ cell_metadata_filter = "-all,scrolled"
 [tool.jupytext.formats]
 "notebooks/" = "ipynb"
 "src/" = "py"
+
+[tool.hatch.envs.default]
+detached = true
+dependencies = [
+    "earthaccess",
+    "xarray"
+]
+
+[tool.hatch.envs.dev]
+extra-dependencies = [
+    "ipykernel",
+    "jupyter-book",
+    "jupytext"
+]
+# TODO: script for `jb build --path-output=docs src` but needs more flexibility
+# TODO: template.py -> template.ipynb

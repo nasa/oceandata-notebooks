@@ -1,0 +1,15 @@
+title: My sample book
+only_build_toc_files: true
+execute:
+  execute_notebooks: false
+  # TODO:
+  #   _build/html/_sources <- are these just copied from _build/jupyter_execute?
+  #   _build/jupyter_execute <- this is what we want to download for ipynb, if not executed
+  # what should happen is that build should put clean nbs in _sources and write html from executed
+sphinx:
+  config:
+    templates_path: ['_templates']
+    nb_custom_formats:
+        .py:
+            - jupytext.reads
+            - fmt: py
