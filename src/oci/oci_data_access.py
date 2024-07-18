@@ -37,6 +37,13 @@
 # 1. The notebook is running on a remote host, but it does not have direct access to the NASA Earthdata Cloud. For instance, you are running in [GitHub Codespaces][codespaces].
 # 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud. At this time, we cannot provide a "for instance" which is available to everyone.
 #
+# [pypi]: https://pypi.org/
+# [conda]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-data-access/
+# [cmr]: https://www.earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/cmr#:~:text=NASA's%20Common%20Metadata%20Repository%20(CMR,system%20for%20all%20EOSDIS%20metadata.
+# [edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
+# [earthaccess-docs]: https://earthaccess.readthedocs.io/en/latest/
+# [codespaces]: https://github.com/features/codespaces
+#
 # ## Learning Objectives
 #
 # At the end of this notebook you will know:
