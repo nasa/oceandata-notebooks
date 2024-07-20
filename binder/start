@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Set any environment variables here
+# These are inherited by all processes, *except* RStudio
+
+# Set up OCSSW
+source ${OCSSWROOT}/OCSSW_bash.env
+
+# Tell gh-scoped-creds which GitHub app to use for push access
+# See https://github.com/jupyterhub/gh-scoped-creds#github-app-configuration
+export GH_SCOPED_CREDS_CLIENT_ID="Iv1.bd27058fd393e285"
+export GH_SCOPED_CREDS_APP_URL="https://github.com/apps/cryocloud-github-access"
+
+exec "$@"

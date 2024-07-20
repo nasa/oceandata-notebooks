@@ -1,0 +1,26 @@
+ARG OCSSWTAG=T2024.21
+ARG OCDATAROOT=${HOME}/shared/pace-hackweek-2024/ocssw/share
+ARG OCSSWROOT=/opt/ocssw
+ENV OCSSWROOT=${OCSSWROOT}
+
+# Prepare for system installs
+USER root
+
+# Install OCSSW core files (i.e. without $OCSSWROOT/share)
+RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw &&\
+    wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py &&\
+    chmod +x install_ocssw &&\
+    ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt &&\
+    ln -s ${OCDATAROOT} ${OCSSWROOT} &&\
+    rm install_ocssw manifest.py
+
+# Override repo2docker use of start (so we can remove $REPO_DIR, or is broken?)
+ENV R2D_ENTRYPOINT=/usr/local/bin/repo2docker-start
+RUN cp ${REPO_DIR}/binder/start ${R2D_ENTRYPOINT} &&\
+    chmod +x ${R2D_ENTRYPOINT}
+
+# Return to non-root user
+USER ${NB_USER}
+
+# Update conda from lockfile
+RUN conda run conda-lock install --prefix=${NB_PYTHON_PREFIX} ${REPO_DIR}/binder/conda-lock.yml
