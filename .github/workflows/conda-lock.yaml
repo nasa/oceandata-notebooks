@@ -16,8 +16,9 @@ jobs:
     - name: install conda-lock with micromamba
       uses: mamba-org/setup-micromamba@main
       with:
-        cache-environment: true
+        environment-name: locker
         create-args: conda-lock
+        cache-environment: true
     - name: run conda-lock
       shell: bash -el {0}
       run: |
