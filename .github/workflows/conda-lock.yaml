@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - .github/workflows/lock.yaml
+      - .github/workflows/conda-lock.yaml
       - conda/environment.yml
 jobs:
   build:
