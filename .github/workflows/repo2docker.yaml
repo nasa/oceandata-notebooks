@@ -14,8 +14,12 @@ on:
       - binder/environment.yml
       - binder/start
       - binder/appendix
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 jobs:
   build:
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
     - name: free space on runner
@@ -33,3 +37,4 @@ jobs:
         DOCKER_REGISTRY: quay.io
         IMAGE_NAME: pacehackweek/pace-2024
         APPENDIX_FILE: binder/appendix
+        REPO_DIR: /tmp/repo

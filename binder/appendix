@@ -24,3 +24,6 @@ USER ${NB_USER}
 
 # Update conda from lockfile
 RUN conda run conda-lock install --prefix=${NB_PYTHON_PREFIX} ${REPO_DIR}/conda/conda-lock.yml
+
+# Clean up
+RUN rm -r ${REPO_DIR}
