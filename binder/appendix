@@ -19,6 +19,9 @@ ENV R2D_ENTRYPOINT=/usr/local/bin/repo2docker-start
 RUN cp ${REPO_DIR}/binder/start ${R2D_ENTRYPOINT} &&\
     chmod +x ${R2D_ENTRYPOINT}
 
+# Clean up root's mess
+RUN rm -r ${REPO_DIR}/__pycache__
+
 # Return to non-root user
 USER ${NB_USER}
 
