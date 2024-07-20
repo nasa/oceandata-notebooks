@@ -21,9 +21,8 @@ dependencies:
   # some more information
   - gh-scoped-creds
   # VS Code support
-  # FIXME version constraints help here, inexplicably
   - jupyter-vscode-proxy
-  - code-server
+  - code-server>4.0  # FIXME version constraint helps here, inexplicably
   # JupyterLab extensions and helpers
   - dask-labextension
   - ipykernel

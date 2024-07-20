@@ -13,7 +13,7 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: 4abd4e14dd80fe08315160dcd19e143bcf0f893db26e19333bd2f6317a292853
+    linux-64: 1ccfc22d7e68a8b08daeac540738f5ecded6046dd81ce438178b8f64760c40e2
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -1264,15 +1264,18 @@ package:
   category: main
   optional: false
 - name: code-server
-  version: 3.3.1
+  version: 4.23.1
   manager: conda
   platform: linux-64
   dependencies:
-    nodejs: '>=12'
-  url: https://conda.anaconda.org/conda-forge/linux-64/code-server-3.3.1-1.tar.bz2
+    __glibc: '>=2.28,<3.0.a0'
+    libgcc-ng: '>=12'
+    libstdcxx-ng: '>=12'
+    nodejs: '>=18.20.2,<19.0a0'
+  url: https://conda.anaconda.org/conda-forge/linux-64/code-server-4.23.1-hafe34db_1.conda
   hash:
-    md5: ac0d8a84697cb0d1ba1a522b406663f8
-    sha256: 297886b43f9495bcaf373009de50f8d087071f551eb77cbcff95fd09fbe69d9b
+    md5: 85ac5b17aec3d32bf07f442fea1b7610
+    sha256: 61420c434c53ec63f46391fd20d97f5213fd4f9041aa59e4298ca6de304d83ef
   category: main
   optional: false
 - name: colorama
@@ -4399,7 +4402,7 @@ package:
   category: main
   optional: false
 - name: leafmap
-  version: 0.35.10
+  version: 0.35.11
   manager: conda
   platform: linux-64
   dependencies:
@@ -4428,10 +4431,10 @@ package:
     scooby: ''
     whiteboxgui: ''
     xyzservices: ''
-  url: https://conda.anaconda.org/conda-forge/noarch/leafmap-0.35.10-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/leafmap-0.35.11-pyhd8ed1ab_0.conda
   hash:
-    md5: 882ca14eeac59b6f1c4cc961c8a8b2b9
-    sha256: 31b70af4225f69fab63fac0f05cfe86c769c33ea689fbf271c82dab0c648a428
+    md5: 0732621139c22ae1d2d14f13b8fe1888
+    sha256: 6ed14dde932f0d35ba4bac302915dbc34c6c69843856aad224308edddd6ce101
   category: main
   optional: false
 - name: lerc
@@ -6724,7 +6727,7 @@ package:
   category: main
   optional: false
 - name: nodejs
-  version: 22.5.0
+  version: 18.20.3
   manager: conda
   platform: linux-64
   dependencies:
@@ -6732,14 +6735,14 @@ package:
     icu: '>=73.2,<74.0a0'
     libgcc-ng: '>=12'
     libstdcxx-ng: '>=12'
-    libuv: '>=1.48.0,<2.0a0'
+    libuv: '>=1.48.0,<1.49.0a0'
     libzlib: '>=1.3.1,<2.0a0'
     openssl: '>=3.3.1,<4.0a0'
     zlib: ''
-  url: https://conda.anaconda.org/conda-forge/linux-64/nodejs-22.5.0-h6d9b948_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/nodejs-18.20.3-h6d9b948_0.conda
   hash:
-    md5: 58a725faf2de657ee6dc97641fd644d5
-    sha256: e79613985795fb492d84dab5b25d5a36b01ba7164d2216afcf3a0c02751129f9
+    md5: f358753b36726f70f979ca25dcb67b89
+    sha256: cafbc7f879114f95b6c5fe5113752dac07c349b963d2cf021cadaf2b9b8f525b
   category: main
   optional: false
 - name: notebook
