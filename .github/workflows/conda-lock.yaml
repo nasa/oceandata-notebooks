@@ -4,24 +4,24 @@ on:
     branches:
       - main
     paths:
-      - binder/environment-hub.yml
       - .github/workflows/lock.yaml
+      - conda/environment.yml
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:    
+    steps:
     - name: checkout repo
       uses: actions/checkout@main
     - name: install conda-lock with micromamba
       uses: mamba-org/setup-micromamba@main
       with:
-        environment-name: conda-lock-env
+        cache-environment: true
         create-args: conda-lock
     - name: run conda-lock
       shell: bash -el {0}
       run: |
-        cd binder
-        conda-lock --file environment-hub.yml --platform linux-64
+        cd conda
+        conda-lock --platform linux-64
     - name: commit changes to tracked files
       run: |
         if [[ $(git ls-files --modified) ]]; then

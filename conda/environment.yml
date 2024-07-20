@@ -1,0 +1,83 @@
+channels:
+  - conda-forge
+dependencies:
+  # FIXME top block hard codes content that ought to merge, but can't with conda-lock
+  # https://github.com/jupyterhub/repo2docker/blob/main/repo2docker/buildpacks/conda/environment.yml
+  - python=3.10
+  - nodejs=20
+  - pip
+  - ipywidgets==8.*   # https://github.com/jupyter-widgets/ipywidgets
+  - jupyter-offlinenotebook==0.3.*   # https://github.com/manics/jupyter-offlinenotebook
+  - jupyter-resource-usage==1.*   # https://github.com/jupyter-server/jupyter-resource-usage
+  - jupyter_server==2.*   # https://github.com/jupyter-server/jupyter_server
+  - jupyterhub-singleuser==5.*   # https://github.com/jupyterhub/jupyterhub
+  - jupyterlab==4.*   # https://github.com/jupyterlab/jupyterlab
+  - notebook==6.*   # https://github.com/jupyter/notebook
+
+  # ubuntu git is outdated
+  - git>=2.39
+  # gh-scoped-creds allows users to securely push to GitHub from their repo.
+  # https://blog.jupyter.org/securely-pushing-to-github-from-a-jupyterhub-3ee42dfdc54f has
+  # some more information
+  - gh-scoped-creds
+  # VS Code support
+  - jupyter-vscode-proxy
+  - code-server
+  # JupyterLab extensions and helpers
+  - dask-labextension
+  - ipykernel
+  - jupyterlab-geojson
+  - jupyterlab-git
+  - jupyterlab-h5web
+  - jupytext
+  - tqdm
+  # Core scientific python stack
+  - dask
+  - dask-geopandas
+  - flox
+  - networkx
+  - numba
+  - numpy<2.0
+  - pandas
+  - scikit-image
+  - scikit-learn
+  - scipy
+  - statsmodels
+  - xarray
+  # Core visualization packages
+  - bokeh
+  - cartopy
+  - geemap
+  - geoviews
+  - hvplot
+  - ipyleaflet
+  - ipympl
+  - leafmap
+  - matplotlib
+  - plotly
+  - seaborn
+  # Other science packages
+  ## Geospatial
+  - geopandas
+  - pygmt
+  - rasterio
+  - rioxarray
+  - satpy
+  ## Climate
+  - esmpy
+  - xmip
+  # File formats and file management, download, dataset caching
+  - apng
+  - awscli
+  - conda-lock
+  - earthaccess
+  - h5netcdf
+  - imageio
+  - intake-esm
+  - intake-stac
+  - intake-xarray
+  - kerchunk
+  - nco
+  - pillow
+  - pystac-client
+  - zarr
