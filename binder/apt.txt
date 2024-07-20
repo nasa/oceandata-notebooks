@@ -15,5 +15,6 @@ imagemagick
 
 # # Other niceties for command-line work and life
 htop
+rsync
 tree
 jq
