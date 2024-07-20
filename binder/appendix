@@ -23,4 +23,4 @@ RUN cp ${REPO_DIR}/binder/start ${R2D_ENTRYPOINT} &&\
 USER ${NB_USER}
 
 # Update conda from lockfile
-RUN conda run conda-lock install --prefix=${NB_PYTHON_PREFIX} ${REPO_DIR}/binder/conda-lock.yml
+RUN conda run conda-lock install --prefix=${NB_PYTHON_PREFIX} ${REPO_DIR}/conda/conda-lock.yml
