@@ -1,8 +1,6 @@
 name: update conda lockfile
 on:
   push:
-    branches:
-      - main
     paths:
       - .github/workflows/conda-lock.yaml
       - conda/environment.yml
