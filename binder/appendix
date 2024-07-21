@@ -14,7 +14,7 @@ RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw &&\
     ln -s ${OCDATAROOT} ${OCSSWROOT} &&\
     rm install_ocssw manifest.py
 
-# Override repo2docker use of start (so we can remove $REPO_DIR, or is broken?)
+# Override repo2docker use of start (so we can remove $REPO_DIR)
 ENV R2D_ENTRYPOINT=/usr/local/bin/repo2docker-start
 RUN cp ${REPO_DIR}/binder/start ${R2D_ENTRYPOINT} &&\
     chmod +x ${R2D_ENTRYPOINT}

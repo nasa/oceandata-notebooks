@@ -55,6 +55,7 @@ dependencies:
   - leafmap
   - matplotlib
   - plotly
+  - python-graphviz
   - seaborn
   # Other science packages
   ## Geospatial
