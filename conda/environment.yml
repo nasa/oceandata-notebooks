@@ -43,7 +43,7 @@ dependencies:
   - scikit-learn
   - scipy
   - statsmodels
-  - nvidia::pytorch
+  - pytorch::pytorch
   - xarray
   # Core visualization packages
   - bokeh
