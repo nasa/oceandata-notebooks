@@ -78,6 +78,7 @@ dependencies:
   - awscli
   - conda-lock
   - earthaccess
+  - hatch
   - h5netcdf
   - imageio
   - intake-esm
