@@ -1,4 +1,6 @@
 channels:
+  - pytorch
+  - nvidia
   - conda-forge
 dependencies:
   # FIXME top block hard codes content that ought to merge, but can't with conda-lock
@@ -43,7 +45,6 @@ dependencies:
   - scikit-learn
   - scipy
   - statsmodels
-  - pytorch::pytorch
   - xarray
   # Core visualization packages
   - bokeh
@@ -59,6 +60,10 @@ dependencies:
   - python-graphviz
   - seaborn
   # Other science packages
+  ## Machine-learning
+  - pytorch
+  - pytorch-cuda=12.1
+  - torchvision  
   ## Geospatial
   - geopandas
   - pygmt
