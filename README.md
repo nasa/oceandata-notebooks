@@ -6,10 +6,10 @@ A repository for notebooks published as [oceandata tutorials and data recipes][t
 
 > [!IMPORTANT]
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
-> - Create new notebooks in the `notebooks/` folder.
+> - Create new notebooks within the `notebooks/` folder, starting from a a copy of "COPYME.ipynb".
 > - If a notebook is missing from the `notebooks/` folder, but its paired ".py" file is present in
 >   the `src/` folder, open a terminal from the project root and run `jupytext --sync src/**/*.py`.
-> - Nothing in the `docs/notebooks/` folder should be manually edited.
+> - Nothing in the `docs/` folder should be manually edited.
 
 Keeping notebooks in a code repository presents challenges for collaboration and curation,
 because notebooks can contain very large blobs of binary outputs and they also include

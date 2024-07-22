@@ -52,5 +52,17 @@ extra-dependencies = [
     "jupyter-book",
     "jupytext"
 ]
-# TODO: script for `jb build --path-output=docs src` but needs more flexibility
-# TODO: template.py -> template.ipynb
+
+[tool.hatch.envs.jb]
+detached = true
+system-site-packages = true
+dependencies = [
+    "jupyter-book"
+]
+
+[tool.hatch.envs.jb.scripts]
+build = """
+    jb build --path-output=. --config=src/_config-exec.yml src && \
+    jb build --path-output=docs src && \
+    rsync -a docs/_build/jupyter_execute/ _build/html/_sources/
+    """
