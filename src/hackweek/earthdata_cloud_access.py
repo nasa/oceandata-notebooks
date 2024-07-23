@@ -1,6 +1,7 @@
-# # Access Data from the Ocean Color Instrument (OCI)
+# # Orientation to Earthdata Cloud Access
 #
-# **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
+#
+# **Tutorial Lead:** Anna Windle (NASA, SSAI)
 #
 # <div class="alert alert-info" role="alert">
 #
@@ -9,7 +10,6 @@
 # </div>
 #
 # [edl]: https://urs.earthdata.nasa.gov/
-# [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 #
 # ## Summary
 #
@@ -23,7 +23,7 @@
 # approachable using `earthaccess` than low-level HTTP requests, and
 # the same goes for S3 requests.
 #
-# In short, `earthaccess` helps **authenticate** with Earthdata Login,
+# In short, `earthaccess` helps **authenticate** with an Earthdata Login,
 # makes **search** easier, and provides a stream-lined way to **load
 # data** into `xarray` containers. For more on `earthaccess`, visit
 # the [documentation][earthaccess-docs] site. Be aware that
@@ -44,6 +44,7 @@
 # [earthaccess-docs]: https://earthaccess.readthedocs.io/en/latest/
 # [codespaces]: https://github.com/features/codespaces
 #
+#
 # ## Learning Objectives
 #
 # At the end of this notebook you will know:
@@ -60,6 +61,8 @@
 # 1. [Download Data](#download)
 #
 # <a name="setup"></a>
+#
+#
 
 # ## 1. Setup
 #
@@ -135,6 +138,8 @@ results = earthaccess.search_data(
     count=1,
 )
 
+results
+
 # We can refine our search by passing more parameters that describe
 # the spatiotemporal domain of our use case. Here, we use the
 # `temporal` parameter to request a date range and the `bounding_box`
@@ -143,7 +148,7 @@ results = earthaccess.search_data(
 # a lower percetnage of cloud cover. We do not provide a `count`, so
 # we'll get all granules that satisfy the constraints.
 
-tspan = ("2024-05-01", "2024-05-16")
+tspan = ("2024-07-01", "2024-07-31")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 clouds = (0, 50)
 
@@ -173,7 +178,7 @@ results[2]
 
 # ## 4. Download Data
 #
-# An upcoming tutorial will need access to Level-1 files, whether or not we have direct access to the Earthdata Cloud, so let's go ahead and download a couple granules. As always, we start with an `earthaccess.search_data`.
+# Let's go ahead and download a couple granules. 
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L1B_SCI",
