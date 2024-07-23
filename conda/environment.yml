@@ -16,8 +16,8 @@ dependencies:
   - jupyterlab==4.*   # https://github.com/jupyterlab/jupyterlab
   - notebook==6.*   # https://github.com/jupyter/notebook
 
-  # ubuntu git is outdated
-  - git>=2.39
+  # # ubuntu git is outdated
+  # - git>=2.39
   # gh-scoped-creds allows users to securely push to GitHub from their repo.
   # https://blog.jupyter.org/securely-pushing-to-github-from-a-jupyterhub-3ee42dfdc54f has
   # some more information
@@ -63,25 +63,25 @@ dependencies:
   - torchvision
   ## Geospatial
   - geopandas
-  - pygmt
+  # - pygmt
   - rasterio
   - rioxarray
   - satpy
-  ## Climate
-  - esmpy
-  - xmip
+  # ## Climate
+  # - esmpy
+  # - xmip
   # File formats and file management, download, dataset caching
-  - apng
-  - conda-lock
+  # - apng
+  # - conda-lock
   - earthaccess
   - hatch
   - h5netcdf
-  - imageio
-  - intake-esm
-  - intake-stac
-  - intake-xarray
+  # - imageio
+  # - intake-esm
+  # - intake-stac
+  # - intake-xarray
   - kerchunk
-  - nco
+  # - nco
   - pillow
-  - pystac-client
+  # - pystac-client
   - zarr
