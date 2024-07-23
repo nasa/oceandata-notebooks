@@ -3,7 +3,7 @@ channels:
   - nvidia
   - conda-forge
 dependencies:
-  # FIXME top block hard codes content that ought to merge, but can't with conda-lock
+  # FIXME top block hard codes content that ought to "merge", but how with conda-lock?
   # https://github.com/jupyterhub/repo2docker/blob/main/repo2docker/buildpacks/conda/environment.yml
   - python=3.10
   - nodejs
@@ -49,21 +49,18 @@ dependencies:
   # Core visualization packages
   - bokeh
   - cartopy
-  - geemap
   - geoviews
   - hvplot
   - ipyleaflet
   - ipympl
-  - leafmap
   - matplotlib
-  - plotly
   - python-graphviz
   - seaborn
   # Other science packages
   ## Machine-learning
   - pytorch
   - pytorch-cuda=12.1
-  - torchvision  
+  - torchvision
   ## Geospatial
   - geopandas
   - pygmt
@@ -75,8 +72,6 @@ dependencies:
   - xmip
   # File formats and file management, download, dataset caching
   - apng
-  - awscli
-  - conda-lock
   - earthaccess
   - hatch
   - h5netcdf
