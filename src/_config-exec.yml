@@ -1,7 +1,7 @@
 title: My sample book
 only_build_toc_files: true
 execute:
-  execute_notebooks: off
+  execute_notebooks: auto
   run_in_temp: true
 sphinx:
   local_extensions:
