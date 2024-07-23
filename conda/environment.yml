@@ -72,6 +72,7 @@ dependencies:
   - xmip
   # File formats and file management, download, dataset caching
   - apng
+  - conda-lock
   - earthaccess
   - hatch
   - h5netcdf
