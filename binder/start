@@ -2,6 +2,8 @@
 
 # Set any environment variables here
 # These are inherited by all processes, *except* RStudio
+export PYTHONPATH="${PYTHONPATH}:${HOME}/shared/pace-hackweek-2024/lib"
+export PYTHONPATH="${PYTHONPATH}:${HOME}/shared/pace-hackweek-2024/lib/ThoMaS"
 
 # Tell gh-scoped-creds which GitHub app to use for push access
 # See https://github.com/jupyterhub/gh-scoped-creds#github-app-configuration
