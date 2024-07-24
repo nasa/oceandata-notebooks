@@ -1,5 +1,4 @@
 ARG OCSSWTAG=T2024.21
-ARG OCDATAROOT=${HOME}/shared/pace-hackweek-2024/ocssw/share
 ARG OCSSWROOT=/opt/ocssw
 ENV OCSSWROOT=${OCSSWROOT}
 
@@ -19,14 +18,8 @@ ENV R2D_ENTRYPOINT=/usr/local/bin/repo2docker-start
 RUN cp ${REPO_DIR}/binder/start ${R2D_ENTRYPOINT} &&\
     chmod +x ${R2D_ENTRYPOINT}
 
-# Clean up root's mess
-RUN rm -r ${REPO_DIR}/__pycache__
+# Clean up
+RUN rm -r ${REPO_DIR}
 
 # Return to non-root user
 USER ${NB_USER}
-
-# Update conda from lockfile
-RUN conda run conda-lock install --prefix=${NB_PYTHON_PREFIX} ${REPO_DIR}/conda/conda-lock.yml
-
-# Clean up
-RUN rm -r ${REPO_DIR}

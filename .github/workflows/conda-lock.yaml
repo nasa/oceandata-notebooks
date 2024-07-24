@@ -21,7 +21,8 @@ jobs:
       shell: bash -el {0}
       run: |
         cd conda
-        conda-lock --platform linux-64
+        conda-lock --platform linux-64 --kind env
+        mv conda-linux-64.lock.yml ../binder/environment.yml
     - name: commit changes to tracked files
       run: |
         if [[ $(git ls-files --modified) ]]; then
