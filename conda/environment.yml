@@ -3,6 +3,12 @@ channels:
   - pytorch
   - conda-forge
 dependencies:
+  # dupe repo2docker constraints # TODO avoid?
+  # https://github.com/jupyterhub/repo2docker/blob/HEAD/repo2docker/buildpacks/conda/environment.yml
+  - python=3.10
+  - jupyter-resource-usage=1.*
+  - jupyterhub-singleuser=5.*
+  - notebook=6.*
   # Core scientific python stack
   - dask
   - dask-geopandas
