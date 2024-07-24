@@ -1,6 +1,72 @@
 channels:
   - conda-forge
+  - nvidia
+  - pytorch
 dependencies:
+  # Core scientific python stack
+  - dask
+  - dask-geopandas
+  - flox
+  - networkx
+  - numba
+  - numpy<2.0
+  - pandas
+  - scikit-image
+  - scikit-learn
+  - scipy
+  - statsmodels
+  - xarray
+  # Core visualization packages
+  - bokeh
+  - cartopy
+  - geoviews
+  - hvplot
+  - ipyleaflet
+  - ipympl
+  - matplotlib
+  - python-graphviz
+  - seaborn
+  # Other science packages
+  ## Machine-learning
+  - pytorch
+  - pytorch-cuda=12.1
+  - torchvision
+  ## Geospatial
+  - geopandas
+  # - pygmt
+  - rasterio
+  - rioxarray
+  - satpy
+  # ## Climate
+  # - esmpy
+  # - xmip
+  # File formats and file management, download, dataset caching
+  # - apng
+  # - conda-lock
+  - earthaccess
+  - hatch
+  - h5netcdf
+  # - imageio
+  # - intake-esm
+  # - intake-stac
+  # - intake-xarray
+  - kerchunk
+  # - nco
+  - pillow
+  # - pystac-client
+  - zarr
+  # JupyterLab extensions and helpers
+  - dask-labextension
+  - ipykernel
+  - jupyterlab-geojson
+  - jupyterlab-git
+  - jupyterlab-h5web
+  - jupytext
+  - tqdm
   # VS Code support
   - jupyter-vscode-proxy
   - code-server>4.0
+  # gh-scoped-creds allows users to securely push to GitHub from their repo.
+  # https://blog.jupyter.org/securely-pushing-to-github-from-a-jupyterhub-3ee42dfdc54f has
+  # some more information
+  - gh-scoped-creds
