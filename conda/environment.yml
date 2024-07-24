@@ -35,8 +35,8 @@ dependencies:
   # Other science packages
   ## Machine-learning
   - pytorch
-  # - pytorch-cuda=11.8
-  # - torchvision
+  - pytorch-cuda=12.1
+  - torchvision
   ## Geospatial
   - geopandas
   # - pygmt
