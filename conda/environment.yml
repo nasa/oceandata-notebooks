@@ -2,7 +2,6 @@ channels:
   - nvidia
   - pytorch
   - conda-forge
-  - eumetsat
 dependencies:
   # dupe repo2docker constraints # TODO avoid?
   # https://github.com/jupyterhub/repo2docker/blob/HEAD/repo2docker/buildpacks/conda/environment.yml
@@ -50,7 +49,7 @@ dependencies:
   # ThoMaS dependencies
   - cdsapi
   - ephem
-  - eumdac
+  - eumetsat::eumdac
   ## File formats and file management, download, dataset caching
   # - apng
   - earthaccess
