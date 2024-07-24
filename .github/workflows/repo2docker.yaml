@@ -37,4 +37,3 @@ jobs:
         DOCKER_REGISTRY: quay.io
         IMAGE_NAME: pacehackweek/pace-2024
         APPENDIX_FILE: binder/appendix
-        REPO_DIR: /tmp/repo
