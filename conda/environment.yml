@@ -2,6 +2,7 @@ channels:
   - nvidia
   - pytorch
   - conda-forge
+  - eumetsat
 dependencies:
   # dupe repo2docker constraints # TODO avoid?
   # https://github.com/jupyterhub/repo2docker/blob/HEAD/repo2docker/buildpacks/conda/environment.yml
@@ -9,7 +10,7 @@ dependencies:
   - jupyter-resource-usage=1.*
   - jupyterhub-singleuser=5.*
   - notebook=6.*
-  # Core scientific python stack
+  ## Core scientific python stack
   - dask
   - dask-geopandas
   - flox
@@ -22,7 +23,7 @@ dependencies:
   - scipy
   - statsmodels
   - xarray
-  # Core visualization packages
+  ## Core visualization packages
   - bokeh
   - cartopy
   - geoviews
@@ -32,23 +33,26 @@ dependencies:
   - matplotlib
   - python-graphviz
   - seaborn
-  # Other science packages
-  ## Machine-learning
+  ## Other science packages
+  # Machine-learning
   - pytorch
   - pytorch-cuda=12.1
   - torchvision
-  ## Geospatial
+  # Geospatial
   - geopandas
   # - pygmt
   - rasterio
   - rioxarray
   - satpy
-  # ## Climate
+  # Climate
   # - esmpy
   # - xmip
-  # File formats and file management, download, dataset caching
+  # ThoMaS dependencies
+  - cdsapi
+  - ephem
+  - eumdac
+  ## File formats and file management, download, dataset caching
   # - apng
-  # - conda-lock
   - earthaccess
   - hatch
   - h5netcdf
@@ -61,7 +65,11 @@ dependencies:
   - pillow
   # - pystac-client
   - zarr
-  # JupyterLab extensions and helpers
+  # gh-scoped-creds allows users to securely push to GitHub from their repo.
+  # https://blog.jupyter.org/securely-pushing-to-github-from-a-jupyterhub-3ee42dfdc54f has
+  # some more information
+  - gh-scoped-creds
+  ## JupyterLab extensions and helpers
   - dask-labextension
   - ipykernel
   - jupyterlab-geojson
@@ -69,10 +77,6 @@ dependencies:
   - jupyterlab-h5web
   - jupytext
   - tqdm
-  # VS Code support
+  ## VS Code support
   - jupyter-vscode-proxy
   - code-server>4.0
-  # gh-scoped-creds allows users to securely push to GitHub from their repo.
-  # https://blog.jupyter.org/securely-pushing-to-github-from-a-jupyterhub-3ee42dfdc54f has
-  # some more information
-  - gh-scoped-creds
