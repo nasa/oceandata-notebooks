@@ -1,6 +1,6 @@
 # # Matchups of ocean color products with OCI
 #
-# **Authors:** Anna Windle (NASA, SSAI)
+# **Authors:** Anna Windle (NASA, SSAI), James Allen (NASA, Morgan State University)
 #
 # <div class="alert alert-success" role="alert">
 #
@@ -87,23 +87,13 @@ auth = earthaccess.login(persist=True)
 
 # [back to top](#contents) <a name="l1b"></a>
 
-# ## 2. Open L2 OCI file
+# ## 2. Example: Full match-up exercise at the Chesapeake Bay AERONET-OC station
 #
-# Let's use `xarray` to open up a OCI L2 NetCDF file using `earthaccess`. We will use the same search method used in <a href="oci_file_structure.html">OCI File Structure</a>. Note that L2 files do not include cloud coverage metadata, so we cannot use that filter.
-
-# +
-tspan = ("2024-06-01", "2024-06-16")
-bbox = (-76.75, 36.97, -75.74, 39.01)
-clouds = (0, 50)
-
-results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_AOP_NRT",
-    temporal=tspan,
-    bounding_box=bbox,
-    cloud_cover=clouds,
-)
-# -
-
-paths = earthaccess.open(results)
+# ThoMaS will:
+# 1. Download AERONET-OC in situ data for the Chesapeake Bay station and convert to SeaBASS format
+# 2. Full matchup exercise: satellite extractions + minifiles + extraction statistics + matchup statistics
+# 3. Apply a BRDF correction
+# 4. Use ___ standard protocol for extractions and in situ-extraction comparisons. 
+#
 
 
