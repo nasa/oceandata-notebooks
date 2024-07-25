@@ -1,6 +1,6 @@
 channels:
   - pytorch
-  - eumdac
+  - eumetsat
   - conda-forge
 dependencies:
   # dupe repo2docker constraints # TODO avoid?
