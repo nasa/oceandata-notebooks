@@ -1,5 +1,5 @@
 *.md
-*.ipynb
+*.py
 /_build/*
 !/_build/html/
 /_build/html/*
