@@ -98,7 +98,7 @@ except AttributeError:
 dataset = xr.open_dataset(paths[0])
 dataset
 
-# Notice that this `xarray.Dataset` has nothing but "Attributes". We cannot use `xarray` to open multi-group hierarchies or list groups within a NetCDF file, but it can open a specific group if you know its path. The `xarray-datatree` package is going to be merged into `xarray` in the not too distant future, which will allow `xarray` to open the entire hieerarchy. In the meantime, we can use a lower level reader to see the top-level groups.
+# Notice that this `xarray.Dataset` has nothing but "Attributes". We cannot use `xarray` to open multi-group hierarchies or list groups within a NetCDF file, but it can open a specific group if you know its path. The `xarray-datatree` package is going to be merged into `xarray` in the not too distant future, which will allow `xarray` to open the entire hierarchy. In the meantime, we can use a lower level reader to see the top-level groups.
 
 with h5netcdf.File(paths[0]) as file:
     groups = list(file)
@@ -125,18 +125,15 @@ plot = dataset["rhot_blue"].sel({"blue_bands": 100}).plot()
 #
 # OCI L2 files include retrievals of geophysical variables, such as Apparent Optical Properties (AOP), for each L1 swath. We'll use the same `earthaccess` search for L2 AOP data. Although now we can use `cloud_cover` too.
 
-# +
 tspan = ("2024-05-01", "2024-05-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 clouds = (0, 50)
-
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_AOP_NRT",
     temporal=tspan,
     bounding_box=bbox,
     cloud_cover=clouds,
 )
-# -
 
 paths = earthaccess.open(results)
 
@@ -154,13 +151,12 @@ rrs.sizes
 
 # The Rrs variable has length 184 in the wavelength dimension, so the blue, red, and SWIR wavelengths have been combined. Let's map the Rrs at "wavelength_3d" position 100.
 
-plot = rrs.sel({"wavelength_3d": 100}).plot(cmap="viridis")
+plot = rrs.sel({"wavelength_3d": 100}).plot(cmap="viridis", robust=True)
 
 # Right now, the scene is being plotted using `number_of_lines` and `pixels_per_line` as "x" and "y", respectively. We need to add latitude and longitude values to create a true map. To do this, we will create a merged `xarray.Dataset` that pulls in information from the "navigation_data" group.
 
 dataset = xr.open_dataset(paths[0], group="navigation_data")
 dataset = dataset.set_coords(("longitude", "latitude"))
-dataset = dataset.rename({"pixel_control_points": "pixels_per_line"})
 dataset = xr.merge((rrs, dataset.coords))
 dataset
 
@@ -179,14 +175,14 @@ plot = dataset.sel(
 
 # Let's plot this new `xarray.Dataset` the same way as before, but add latitude and longitude.
 
-rrs = dataset["Rrs"].sel({"wavelength_3d": 100})
-plot = rrs.plot(x="longitude", y="latitude", cmap="viridis", vmin=0)
+rrs_sel = dataset["Rrs"].sel({"wavelength_3d": 100})
+plot = rrs_sel.plot(x="longitude", y="latitude", cmap="viridis", robust=True)
 
 # Now you can project the data onto a grid. If you wanna get fancy, add a coastline.
 
 fig = plt.figure()
 ax = plt.axes(projection=ccrs.PlateCarree())
-rrs.plot(x="longitude", y="latitude", cmap="viridis", vmin=0, ax=ax)
+rrs_sel.plot(x="longitude", y="latitude", cmap="viridis", robust=True, ax=ax)
 ax.coastlines()
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
 plt.show()
@@ -224,16 +220,12 @@ plot = rrs_stack.plot.line(hue="pixel")
 #
 # At Level-3 there are binned (B) and mapped (M) products available for OCI. The L3M remote sensing reflectance (Rrs) files contain global maps of Rrs. We'll use the same `earthaccess` method to find the data.
 
-# +
-tspan = ("2024-05-01", "2024-05-16")
-bbox = (-76.75, 36.97, -75.74, 39.01)
-
+tspan = ("2024-05-01", "2024-05-8")
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
     temporal=tspan,
-    bounding_box=bbox,
+    count=1,
 )
-# -
 
 paths = earthaccess.open(results)
 
@@ -252,16 +244,14 @@ fig = plt.figure()
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.coastlines()
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
-rrs_442.plot(cmap="viridis", vmin=0, ax=ax)
+rrs_442.plot(cmap="viridis", robust=True, ax=ax)
 plt.show()
 
-# Also becuase the L3M variables have `lat` and `lon` coordinates, it's possible to stack multiple granules along a
-# new dimension that corresponds to time.
+# Also becuase the L3M variables have `lat` and `lon` coordinates, it's possible to stack multiple granules along a new dimension that corresponds to time.
 # Instead of `xr.open_dataset`, we use `xr.open_mfdataset` to create a single `xarray.Dataset` (the "mf" in `open_mfdataset` stands for multiple files) from an array of paths.
 #
 # We also use a new search filter available in `search_data`: the `granule_name` argument accepts strings with the "*" wildcard. We need this to distinguish daily ("DAY") from eight-day ("8D") composites, as well as to get the 0.1 degree resolution projections.
 
-tspan = ("2024-05-01", "2024-05-8")
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_CHL_NRT",
     temporal=tspan,
