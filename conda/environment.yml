@@ -1,6 +1,4 @@
 channels:
-  - nvidia
-  - pytorch
   - conda-forge
 dependencies:
   # dupe repo2docker constraints # TODO avoid?
@@ -34,35 +32,25 @@ dependencies:
   - seaborn
   ## Other science packages
   # Machine-learning
-  - pytorch
-  - pytorch-cuda=12.1
-  - torchvision
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - pytorch::cpuonly
   # Geospatial
   - geopandas
   # - pygmt
   - rasterio
   - rioxarray
   - satpy
-  # Climate
-  # - esmpy
-  # - xmip
   # ThoMaS dependencies
   - cdsapi
   - ephem
   - eumetsat::eumdac
   ## File formats and file management, download, dataset caching
-  # - apng
   - earthaccess
   - hatch
   - h5netcdf
-  # - imageio
-  # - intake-esm
-  # - intake-stac
-  # - intake-xarray
   - kerchunk
-  # - nco
   - pillow
-  # - pystac-client
   - zarr
   # gh-scoped-creds allows users to securely push to GitHub from their repo.
   # https://blog.jupyter.org/securely-pushing-to-github-from-a-jupyterhub-3ee42dfdc54f has
