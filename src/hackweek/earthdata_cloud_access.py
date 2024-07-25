@@ -1,6 +1,7 @@
-# # Access Data from the Ocean Color Instrument (OCI)
+# # Orientation to Earthdata Cloud Access
 #
-# **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
+#
+# **Tutorial Lead:** Anna Windle (NASA, SSAI)
 #
 # <div class="alert alert-info" role="alert">
 #
@@ -9,7 +10,6 @@
 # </div>
 #
 # [edl]: https://urs.earthdata.nasa.gov/
-# [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 #
 # ## Summary
 #
@@ -23,7 +23,7 @@
 # approachable using `earthaccess` than low-level HTTP requests, and
 # the same goes for S3 requests.
 #
-# In short, `earthaccess` helps **authenticate** with Earthdata Login,
+# In short, `earthaccess` helps **authenticate** with an Earthdata Login,
 # makes **search** easier, and provides a stream-lined way to **load
 # data** into `xarray` containers. For more on `earthaccess`, visit
 # the [documentation][earthaccess-docs] site. Be aware that
@@ -35,7 +35,7 @@
 #
 # 1. The notebook is running on the local host. For instance, you started a Jupyter server on your laptop.
 # 1. The notebook is running on a remote host, but it does not have direct access to the NASA Earthdata Cloud. For instance, you are running in [GitHub Codespaces][codespaces].
-# 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud. At this time, we cannot provide a "for instance" which is available to everyone.
+# 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud. This is the case for the PACE Hackweek. 
 #
 # [pypi]: https://pypi.org/
 # [conda]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-data-access/
@@ -43,6 +43,7 @@
 # [edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
 # [earthaccess-docs]: https://earthaccess.readthedocs.io/en/latest/
 # [codespaces]: https://github.com/features/codespaces
+#
 #
 # ## Learning Objectives
 #
@@ -60,12 +61,12 @@
 # 1. [Download Data](#download)
 #
 # <a name="setup"></a>
+#
+#
 
 # ## 1. Setup
 #
-# We begin by importing the only package used in this notebook. If you
-# have created an environment following the [guidance][tutorials]
-# provided with this tutorial, then the import will be successful.
+# We begin by importing the packages used in this notebook. 
 #
 # [codespaces]: https://github.blog/changelog/2022-11-09-using-codespaces-with-jupyterlab-public-beta/
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
@@ -76,9 +77,8 @@
 # [pypi]: https://pypi.org/project/earthaccess/
 
 import earthaccess
-
-# We also need `pathlib` for directory creation, at least until `earthaccess` version 0.9.1 is available.
-
+import xarray as xr
+import h5netcdf
 import pathlib
 
 # [back to top](#contents) <a name="auth"></a>
@@ -135,6 +135,8 @@ results = earthaccess.search_data(
     count=1,
 )
 
+results
+
 # We can refine our search by passing more parameters that describe
 # the spatiotemporal domain of our use case. Here, we use the
 # `temporal` parameter to request a date range and the `bounding_box`
@@ -143,7 +145,7 @@ results = earthaccess.search_data(
 # a lower percetnage of cloud cover. We do not provide a `count`, so
 # we'll get all granules that satisfy the constraints.
 
-tspan = ("2024-05-01", "2024-05-16")
+tspan = ("2024-07-01", "2024-07-31")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 clouds = (0, 50)
 
@@ -169,58 +171,58 @@ results[1]
 
 results[2]
 
-# [back to top](#contents) <a name="download"></a>
-
-# ## 4. Download Data
+# ## 4. Open Data
 #
-# An upcoming tutorial will need access to Level-1 files, whether or not we have direct access to the Earthdata Cloud, so let's go ahead and download a couple granules. As always, we start with an `earthaccess.search_data`.
-
-results = earthaccess.search_data(
-    short_name="PACE_OCI_L1B_SCI",
-    temporal=tspan,
-    bounding_box=bbox,
-    count=2,
-)
-
-# Now, we need to first understand the alternative to downloading granules, since you may be surprised
-# that there is an alternative at all. The `earthaccess.open` function accepts the list of results from
-# `earthaccess.search_data` and returns a list of file-like objects. No actual files are transferred.
-
-paths = earthaccess.open(results)
-
-# The file-like objects held in `paths` can each be read like a normal
-# file. Here we load the first few bytes without any specialized
-# reader.
-
-with paths[0] as file:
-    line = file.readline().strip()
-line
-
-# Of course that doesn't mean anything (or does it? 😉), because this is
-# a binary file that needs a reader which understands the file format.
-#
-# The `earthaccess.open` function is used when you want to directly read
+# Let's go ahead and open a couple granules using `xarray`. The `earthaccess.open` function is used when you want to directly read
 # a bytes from a remote filesystem, but not download a whole file. When
 # running code on a host with direct access to the NASA Earthdata
 # Cloud, you don't need to download the data and `earthaccess.open`
 # is the way to go.
+
+paths = earthaccess.open(results)
+paths
+
+dataset = xr.open_dataset(paths[0])
+dataset
+
+# Notice that this `xarray.Dataset` has nothing but "Attributes". We cannot use `xarray` to open multi-group hierarchies or list groups within a NetCDF file, but it can open a specific group if you know its path. The `xarray-datatree` package is going to be merged into `xarray` in the not too distant future, which will allow `xarray` to open the entire hieerarchy. In the meantime, we can use a lower level reader to see the top-level groups.
+
+with h5netcdf.File(paths[0]) as file:
+    groups = list(file)
+groups
+
+dataset = xr.open_dataset(paths[0], group="geophysical_data")
+dataset
+
+# Let's do a quick plot of the `chlor_a` variable. You'll do more plotting in the Multidimensional Data Visualization tutorial.
+
+dataset.chlor_a.plot(vmax=50)
+
+# [back to top](#contents) <a name="download"></a>
+
+# ## 5. Download Data
 #
-# Now, let's look at the `earthaccess.download` function, which is used
+# Let's go ahead and download a couple granules. 
+
+# Let's look at the `earthaccess.download` function, which is used
 # to copy files onto a filesystem local to the machine executing the
 # code. For this function, provide the output of
-# `earthaccess.search_data` along with a directory where `earthaccess`
-# will store downloaded granules.
+# `earthaccess.search_data` along with a directory where `earthaccess` will store downloaded granules.
 #
 # Even if you only want to read a slice of the data, and downloading
-# seems unncessary, if you use `earthaccess.open` while not running on
-# a remote host with direct access to the NASA Earthdata Cloud,
+# seems unncessary, if you use `earthaccess.open` while not running on a remote host with direct access to the NASA Earthdata Cloud,
 # performance will be very poor. This is not a problem with "the
-# cloud" or with `earthaccess`, it has to do with the data format and
-# may soon be resolved.
+# cloud" or with `earthaccess`, it has to do with the data format and may soon be resolved.
 #
-# Let's continue to downloading the list of granules!
 
-directory = pathlib.Path("L1B")
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L2_BGC_NRT",
+    temporal=tspan,
+    bounding_box=bbox,
+    cloud_cover=clouds,
+)
+
+directory = pathlib.Path("L2_BGC")
 directory.mkdir(exist_ok=True)
 paths = earthaccess.download(results, directory)
 
@@ -229,18 +231,9 @@ paths = earthaccess.download(results, directory)
 
 paths
 
-# <div class="alert alert-block alert-warning">
-#
-# Anywhere in any of [these notebooks][tutorials] where `paths = earthaccess.open(...)` is used to read data directly from the NASA Earthdata Cloud, you need to substitute `paths = earthaccess.download(..., local_path)` before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
-#
-# </div>
-#
-# [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/"
+# We can open up that locally saved file using `xarray` as well
 
-# [back to top](#contents)
-#
-# <div class="alert alert-info" role="alert">
-#     
-# You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on File Structure at Three Processing Levels.
-#
-# </div>
+dataset = xr.open_dataset(paths[0], group="geophysical_data")
+dataset
+
+# [back to top](#contents) <a name="download"></a>
