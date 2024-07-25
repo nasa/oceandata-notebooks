@@ -1,6 +1,7 @@
 format: jb-book
 root: index
 chapters:
+- file: notebooks/hackweek/earthdata_cloud_access.py
 - file: notebooks/oci/oci_data_access.py
 # - file: notebooks/oci/oci_file_structure.py
 # - file: notebooks/oci/oci_ocssw_install.py
