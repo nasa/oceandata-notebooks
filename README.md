@@ -23,24 +23,26 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 ## For Maintainers
 
 In addition to the ".py" files paired to notebooks, the `src/` folder contains configuration
-for a [Jupyter Book][jb]. Building the tutorials as a static website allows for separation
-of each tutorial's content from the JavaScript and CSS, unlike standalone HTML files built with `nbconvert`. Run the following commands in an environment with all tutorial dependencies along
-with the jupyter-book package.
+for a [Jupyter Book][jb]. Building the notebooks as a static website allows for separation
+of content from the JavaScript and CSS, unlike standalone HTML files built with `nbconvert`. Run
+the following commands in an environment with all dependencies along with the jupyter-book package.
 
 ```
-#jb build --path-output=docs/ src
 jb build src
 ```
-That populates the top level `docs/` folder. The next one overwrites the evaluated notebooks
-in the website `_sources` folder with unevaluated, clean notebooks.
+That populates the top (mostly) git-ignored `src/_build` folder.
 ```
-#jupytext --to=notebook docs/_build/html/_sources/**/*.py
-jupytext --to=notebook src/_build/html/_sources/**/*.py
+shopt -s globstar
+jupytext --to=notebook src/_build/**/*.py
 ```
-
-Note that the `src` folder includes a local Sphinx extension that adds the ".ipynb" download button
-to the article header. Those are also the (eventual) targets for the "Downloand and Run" links on the [tutorials][tutorials] page. Note that opening those notebooks in Jupyter will dirty them up again, so
+That writes an unpaired ".ipynb" format into the `src/_build`. These files are the ones not
+git-ignoed. They are (eventual) targets for the "Downloand and Run" links on the [tutorials][tutorials] page.
+Note that opening those notebooks in Jupyter will dirty them up again, so
 do not include the changes introduced by opening the clean notebooks in any commit.
+
+The `src/_ext` folder includes a local Sphinx extension that adds the ".ipynb" download
+button to the article header buttons. It has no effect, however, when the `_templates` configration
+is uncommented, because the provided template removes all the buttons.
 
 **WIP**:
 
@@ -51,20 +53,8 @@ do not include the changes introduced by opening the clean notebooks in any comm
    - TODO: automate `shopt -s globstar`
    - TODO: fails for oci_install_ocssw because of `%conda` cell.
    - TODO: https://github.com/jupyter/nbconvert/issues/1125
+   - TODO: random cell ids, preserved id metadata from notebooks?
 
-```
-notebooks/
-src/**/*.py
-src/_config.yml
-src/_build/html/_sources/**/*.(ipynb|py)
-src/_build/jupyter_execute/
-```
-
-notebooks/
-docs/html/_sources/**/*.(ipynb|py)
-docs/jupyter_execute
-src/**/*.py
-src/_config.yml
 
 ## How to Cite
 
