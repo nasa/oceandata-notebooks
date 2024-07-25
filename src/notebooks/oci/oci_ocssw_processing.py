@@ -134,7 +134,7 @@ l2gen_ifile = paths[0]
 # the dataset's "observatin_data" group in the netCDF file using `xarray` to plot a "rhot_red"
 # wavelength.
 
-dataset = xr.open_dataset(paths[0], group="observation_data")
+dataset = xr.open_dataset(l2gen_ifile, group="observation_data")
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 
 # This tutorial will demonstrate processing this Level-1B granule into a Level-2 granule. Because that can
@@ -157,7 +157,7 @@ for item in results:
 paths = earthaccess.download(results, parent)
 paths
 
-# While we have the downloaded location stored in the list `paths`, write it to a text file for future use.
+# While we have the downloaded location stored in the list `paths`, write the list to a text file for future use.
 
 paths = [str(i) for i in paths]
 with open("l2bin_ifile.txt", "w") as file:
@@ -204,7 +204,7 @@ par = {
     "ofile": str(l2gen_ifile).replace("L1B", "L2"),
     "suite": "BGC",
     "l2prod": "chlor_a",
-    "atmocor": 1,
+    "atmocor": 0, # FOR DEMO ONLY!!
 }
 write_par("l2gen.par", par)
 

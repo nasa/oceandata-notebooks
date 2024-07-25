@@ -77,10 +77,6 @@
 
 import earthaccess
 
-# We also need `pathlib` for directory creation, at least until `earthaccess` version 0.9.1 is available.
-
-import pathlib
-
 # [back to top](#contents) <a name="auth"></a>
 
 # ## 2. NASA Earthdata Authentication
@@ -128,7 +124,7 @@ for item in results:
 # The short name can also be found on <a href="https://search.earthdata.nasa.gov/search?fi=SPEXone!HARP2!OCI" target="_blank"> Eartdata Search</a>, directly under the collection name, after clicking on the "i" button for a collection in any search result.
 # </div>
 #
-# The `count` argument limits the number of granules returned and stored in the `results` list, not the number of granules found.
+# The `count` argument limits the number of granules whose metadata is returned and stored in the `results` list.
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_BGC_NRT",
@@ -220,14 +216,11 @@ line
 #
 # Let's continue to downloading the list of granules!
 
-directory = pathlib.Path("L1B")
-directory.mkdir(exist_ok=True)
-paths = earthaccess.download(results, directory)
+paths = earthaccess.download(results, local_path="L1B")
+paths
 
 # The `paths` list now contains paths to actual files on the local
 # filesystem.
-
-paths
 
 # <div class="alert alert-block alert-warning">
 #
