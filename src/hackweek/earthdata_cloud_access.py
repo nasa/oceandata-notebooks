@@ -79,7 +79,6 @@
 import earthaccess
 import xarray as xr
 import h5netcdf
-import pathlib
 
 # [back to top](#contents) <a name="auth"></a>
 
@@ -128,7 +127,7 @@ for item in results:
 # The short name can also be found on <a href="https://search.earthdata.nasa.gov/search?fi=SPEXone!HARP2!OCI" target="_blank"> Eartdata Search</a>, directly under the collection name, after clicking on the "i" button for a collection in any search result.
 # </div>
 #
-# The `count` argument limits the number of granules returned and stored in the `results` list, not the number of granules found.
+# The `count` argument limits the number of granules whose metadata is returned and stored in the `results` list.
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_BGC_NRT",
@@ -180,6 +179,9 @@ results[2]
 # is the way to go.
 
 paths = earthaccess.open(results)
+
+# The `paths` list contains references to files on a remote filesystem.
+
 paths
 
 dataset = xr.open_dataset(paths[0])
@@ -196,7 +198,7 @@ dataset
 
 # Let's do a quick plot of the `chlor_a` variable. You'll do more plotting in the Multidimensional Data Visualization tutorial.
 
-dataset.chlor_a.plot(vmax=50)
+im = dataset.chlor_a.plot(vmax=5)
 
 # [back to top](#contents) <a name="download"></a>
 
@@ -222,16 +224,14 @@ results = earthaccess.search_data(
     cloud_cover=clouds,
 )
 
-directory = pathlib.Path("L2_BGC")
-directory.mkdir(exist_ok=True)
-paths = earthaccess.download(results, directory)
+paths = earthaccess.download(results, local_path="L2_BGC")
 
 # The `paths` list now contains paths to actual files on the local
 # filesystem.
 
 paths
 
-# We can open up that locally saved file using `xarray` as well
+# We can open up that locally saved file using `xarray` as well.
 
 dataset = xr.open_dataset(paths[0], group="geophysical_data")
 dataset
