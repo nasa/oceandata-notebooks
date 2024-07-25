@@ -1,4 +1,9 @@
 format: jb-book
 root: index
 chapters:
-- file: modis/modis_explore_l2
+- file: notebooks/oci/oci_data_access.py
+# - file: notebooks/oci/oci_file_structure.py
+# - file: notebooks/oci/oci_ocssw_install.py
+# - file: notebooks/oci/oci_ocssw_processing.py
+# - file: notebooks/harp2/harp2_basic_visualizations.py
+# - glob: notebooks/modis/*

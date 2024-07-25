@@ -1,0 +1,6 @@
+*.md
+*.ipynb
+/_build/*
+!/_build/html/
+/_build/html/*
+!/_build/html/_sources

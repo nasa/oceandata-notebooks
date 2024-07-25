@@ -22,11 +22,24 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 
 ## For Maintainers
 
-To prepare for a release, ensure that the clean notebooks are updated in the `docs/notebooks/` folder.
+In addition to the ".py" files paired to notebooks, the `src/` folder contains configuration
+for a [Jupyter Book][jb]. Building the tutorials as a static website allows for separation
+of each tutorial's content from the JavaScript and CSS, unlike standalone HTML files built with `nbconvert`. Run the following commands in an environment with all tutorial dependencies along
+with the jupyter-book package.
+
 ```
-jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --output-dir=docs/notebooks notebooks/**/*.ipynb
+#jb build --path-output=docs/ src
+jb build src
 ```
-Those are the (eventual) targets for the "Downloand and Run" links on the [tutorials][tutorials] page. Note that opening those notebooks in Jupyter will dirty them up again, so
+That populates the top level `docs/` folder. The next one overwrites the evaluated notebooks
+in the website `_sources` folder with unevaluated, clean notebooks.
+```
+#jupytext --to=notebook docs/_build/html/_sources/**/*.py
+jupytext --to=notebook src/_build/html/_sources/**/*.py
+```
+
+Note that the `src` folder includes a local Sphinx extension that adds the ".ipynb" download button
+to the article header. Those are also the (eventual) targets for the "Downloand and Run" links on the [tutorials][tutorials] page. Note that opening those notebooks in Jupyter will dirty them up again, so
 do not include the changes introduced by opening the clean notebooks in any commit.
 
 **WIP**:
@@ -34,13 +47,24 @@ do not include the changes introduced by opening the clean notebooks in any comm
 1. Curating dependencies without duplicating between pyproject.toml and environment.yml
 1. Formatting notebooks with black (although black does not format comments)
 1. Testing notebooks in isolated environments (e.g. using `jupyter execute ...`)
-1. Automatically generate HTML using:
-   ```
-   jupyter nbconvert --to=html --TemplateExporter.filters="{'markdown2html': 'nbconvert.filters.markdown.markdown2html_pandoc'}"  --execute notebooks/**/*.ipynb
-   ```
+1. jb building
    - TODO: automate `shopt -s globstar`
    - TODO: fails for oci_install_ocssw because of `%conda` cell.
    - TODO: https://github.com/jupyter/nbconvert/issues/1125
+
+```
+notebooks/
+src/**/*.py
+src/_config.yml
+src/_build/html/_sources/**/*.(ipynb|py)
+src/_build/jupyter_execute/
+```
+
+notebooks/
+docs/html/_sources/**/*.(ipynb|py)
+docs/jupyter_execute
+src/**/*.py
+src/_config.yml
 
 ## How to Cite
 
@@ -51,7 +75,9 @@ do not include the changes introduced by opening the clean notebooks in any comm
 ## Acknowledgements
 This repository has greatly benefited from works of multiple open-science projects, notably [Learn OLCI][learn-olci] and the [NASA EarthData Cloud Cookbook][cookbook].
 
-[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
-[jupyterlab]: https://jupyter.org/
+[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
+[jupyterlab]: https://jupyter.org
+[jb]: https://jupyterbook.org
+[hatch]: https://hatch.pypa.io
 [learn-olci]: https://github.com/wekeo/learn-olci/blob/main/README.md
-[cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook/
+[cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook

@@ -1,14 +1,14 @@
-title: My sample book
 only_build_toc_files: true
 execute:
-  execute_notebooks: off
+  timeout: -1
   run_in_temp: true
+  execute_notebooks: cache
 sphinx:
   local_extensions:
     source_button: _ext
   config:
-    templates_path:
-      - _templates
+    # templates_path:
+    #   - _templates
     nb_custom_formats:
       .py:
         - jupytext.reads

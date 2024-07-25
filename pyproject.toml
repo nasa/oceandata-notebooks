@@ -37,32 +37,4 @@ cell_metadata_filter = "-all,scrolled"
 
 [tool.jupytext.formats]
 "notebooks/" = "ipynb"
-"src/" = "py"
-
-[tool.hatch.envs.default]
-detached = true
-dependencies = [
-    "earthaccess",
-    "xarray"
-]
-
-[tool.hatch.envs.dev]
-extra-dependencies = [
-    "ipykernel",
-    "jupyter-book",
-    "jupytext"
-]
-
-[tool.hatch.envs.jb]
-detached = true
-system-site-packages = true
-dependencies = [
-    "jupyter-book"
-]
-
-[tool.hatch.envs.jb.scripts]
-build = """
-    jb build --path-output=. --config=src/_config-exec.yml src && \
-    jb build --path-output=docs src && \
-    rsync -a docs/_build/jupyter_execute/ _build/html/_sources/
-    """
+"src/notebooks/" = "py"
