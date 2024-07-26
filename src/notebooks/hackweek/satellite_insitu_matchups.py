@@ -1,3 +1,11 @@
+# ---
+# jupyter:
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
 # # Matchups of ocean color products with OCI
 #
 # **Authors:** Anna Windle (NASA, SSAI), James Allen (NASA, Morgan State University)

@@ -1,13 +1,5 @@
 # ---
 # jupyter:
-#   jupytext:
-#     cell_metadata_filter: -all,scrolled
-#     notebook_metadata_filter: kernelspec,jupytext
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.16.3
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
