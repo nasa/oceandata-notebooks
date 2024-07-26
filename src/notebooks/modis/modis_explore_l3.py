@@ -41,11 +41,9 @@
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 1. [Access Data](#access)
-# 1. [Plot Data](#plot)
-#
-# <a name="setup"></a>
+# 1. [Setup](#1.-Setup)
+# 2. [Access Data](#2.-Access-Data)
+# 3. [Plot Data](#3.-Plot-Data)
 
 # ## 1. Setup
 #
@@ -61,7 +59,7 @@ import xarray as xr
 
 auth = earthaccess.login(persist=True)
 
-# [back to top](#contents) <a name="access"></a>
+# [back to top](#Contents)
 
 # ## 2. Access Data
 #
@@ -104,7 +102,7 @@ paths = earthaccess.download(results, "data")
 dataset = xr.open_dataset(paths[0])
 dataset
 
-# [back to top](#contents) <a name="plot"></a>
+# [back to top](#Contents)
 
 # ## 3. Plot Data
 
@@ -119,7 +117,7 @@ crs_data = cartopy.crs.PlateCarree()
 
 fig = plt.figure(figsize=(10, 5))
 ax = fig.add_subplot(projection=crs_proj)
-array.plot(x="lon", y="lat", cmap="jet", ax=ax, robust=True, transform=crs_data)
+im = array.plot(x="lon", y="lat", cmap="jet", ax=ax, robust=True, transform=crs_data)
 ax.coastlines()
 ax.set_title(dataset.attrs["product_name"])
 plt.show()
@@ -139,14 +137,14 @@ dataset = xr.open_dataset(paths[0])
 
 fig = plt.figure(figsize=(10, 5))
 ax = plt.axes(projection=crs_proj)
-dataset["Rrs_412"].plot(
+im = dataset["Rrs_412"].plot(
     x="lon", y="lat", cmap="jet", robust=True, ax=ax, transform=crs_data
 )
 ax.coastlines()
 ax.set_title(dataset.attrs["product_name"])
 plt.show()
 
-# [back to top](#contents)
+# [back to top](#Contents)
 #
 # <div class="alert alert-info" role="alert">
 #

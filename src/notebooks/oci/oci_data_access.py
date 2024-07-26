@@ -1,3 +1,19 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all,scrolled
+#     notebook_metadata_filter: kernelspec,jupytext
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.16.3
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
 # # Access Data from the Ocean Color Instrument (OCI)
 #
 # **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
@@ -54,12 +70,10 @@
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 1. [NASA Earthdata Authentication](#auth)
-# 1. [Search for Data](#search)
-# 1. [Download Data](#download)
-#
-# <a name="setup"></a>
+# 1. [Setup](#1.-Setup)
+# 2. [NASA Earthdata Authentication](#2.-NASA-Earthdata-Authentication)
+# 3. [Search for Data](#3.-Search-for-Data)
+# 4. [Download Data](#4.-Download-Data)
 
 # ## 1. Setup
 #
@@ -67,17 +81,11 @@
 # have created an environment following the [guidance][tutorials]
 # provided with this tutorial, then the import will be successful.
 #
-# [codespaces]: https://github.blog/changelog/2022-11-09-using-codespaces-with-jupyterlab-public-beta/
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
-# [edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
-# [earthaccess-docs]: https://earthaccess.readthedocs.io/en/stable/
-# [cmr]: https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html
-# [conda]: https://anaconda.org/conda-forge/earthaccess
-# [pypi]: https://pypi.org/project/earthaccess/
 
 import earthaccess
 
-# [back to top](#contents) <a name="auth"></a>
+# [back to top](#Contents)
 
 # ## 2. NASA Earthdata Authentication
 #
@@ -93,14 +101,16 @@ import earthaccess
 # allow you to input credentials.
 #
 # <div class="alert alert-info" role="alert">
-# The <code>persist=True</code> argument ensures any discovered credentials are
-# stored in a <code>.netrc</code> file, so the argument is not necessary (but
-# it's also harmless) for subsequent calls to <code>earthaccess.login</code>.
+#     
+# The `persist=True` argument ensures any discovered credentials are
+# stored in a `.netrc` file, so the argument is not necessary (but
+# it's also harmless) for subsequent calls to `earthaccess.login`.
+#
 # </div>
 
 auth = earthaccess.login(persist=True)
 
-# [back to top](#contents) <a name="search"></a>
+# [back to top](#Contents)
 
 # ## 3. Search for Data
 #
@@ -121,7 +131,10 @@ for item in results:
 # search for granules accross collections too).
 #
 # <div class="alert alert-info" role="alert">
-# The short name can also be found on <a href="https://search.earthdata.nasa.gov/search?fi=SPEXone!HARP2!OCI" target="_blank"> Eartdata Search</a>, directly under the collection name, after clicking on the "i" button for a collection in any search result.
+#     
+# The short name can also be found on [Earthdata Search](https://search.earthdata.nasa.gov/search?fi=OCI),
+# directly under the collection name, after clicking on the "i" button for a collection in any search result.
+#
 # </div>
 #
 # The `count` argument limits the number of granules whose metadata is returned and stored in the `results` list.
@@ -165,7 +178,7 @@ results[1]
 
 results[2]
 
-# [back to top](#contents) <a name="download"></a>
+# [back to top](#Contents)
 
 # ## 4. Download Data
 #
@@ -217,20 +230,19 @@ line
 # Let's continue to downloading the list of granules!
 
 paths = earthaccess.download(results, local_path="L1B")
-paths
 
 # The `paths` list now contains paths to actual files on the local
 # filesystem.
 
+paths
+
 # <div class="alert alert-block alert-warning">
 #
-# Anywhere in any of [these notebooks][tutorials] where `paths = earthaccess.open(...)` is used to read data directly from the NASA Earthdata Cloud, you need to substitute `paths = earthaccess.download(..., local_path)` before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
+# Anywhere in any of [these notebooks](https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/) where `paths = earthaccess.open(...)` is used to read data directly from the NASA Earthdata Cloud, you need to substitute `paths = earthaccess.download(..., local_path)` before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
 #
 # </div>
-#
-# [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/"
 
-# [back to top](#contents)
+# [back to top](#Contents)
 #
 # <div class="alert alert-info" role="alert">
 #     

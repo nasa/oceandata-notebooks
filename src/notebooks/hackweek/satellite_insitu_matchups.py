@@ -39,10 +39,8 @@
 #
 # ## Contents 
 #
-# 1. [Setup](#setup)
-# 1. [XX]
-#
-# <a name="setup"></a>
+# 1. [Setup](#1.-Setup)
+# 2. [XX]
 
 # ## 1. Setup
 #
@@ -51,26 +49,23 @@
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
 # +
-import earthaccess
-
-import os
 import sys
-import pandas as pd
 import shutil
+
+import earthaccess
+import pandas as pd
 import numpy as np
 # -
 
 # The first thing we need to do is retrieve the tool kit itself. We can do this using the external ! git clone command. This will create a directory called ThoMaS in this path and make the code available for import.
 
-pwd
-
-os.path.join("shared", "pace-hackweek-2024", "ThoMaS", "main.py")
-
-
-if os.path.exists(os.path.join("shared", "pace-hackweek-2024", "ThoMaS", "main.py")):
+try:
+    from mainx import ThoMaS_main as ThoMaS
     print("ThoMaS is already installed.")
-else:
-    # ! git clone https://gitlab.eumetsat.int/eumetlab/oceans/ocean-science-studies/ThoMaS.git
+except:
+    # !git clone --filter=blob:none https://gitlab.eumetsat.int/eumetlab/oceans/ocean-science-studies/ThoMaS.git
+    sys.path.append("ThoMas")
+    from main import ThoMaS_main as ThoMaS
 
 # Before you use ThoMas, you must ensure that you have have completed the following two steps:
 # 1. Ensure that you have all the Python dependencies you need to run ThoMaS. If you have installed and activated the **cmts_learn_olci** environment then you are all set.
@@ -78,14 +73,13 @@ else:
 #
 # ThoMaS can be used from the [command line](https://gitlab.eumetsat.int/eumetlab/oceans/ocean-science-studies/ThoMaS/-/blob/main/README_examples.md), but here we will use it as a Python library. Lets import ThoMaS into our notebook.
 
-sys.path.append("ThoMaS")
 from main import ThoMaS_main as ThoMaS
 
 # Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
 
 auth = earthaccess.login(persist=True)
 
-# [back to top](#contents) <a name="l1b"></a>
+# [back to top](#Contents)
 
 # ## 2. Example: Full match-up exercise at the Chesapeake Bay AERONET-OC station
 #
@@ -96,4 +90,4 @@ auth = earthaccess.login(persist=True)
 # 4. Use ___ standard protocol for extractions and in situ-extraction comparisons. 
 #
 
-
+# [back to top](#Contents)

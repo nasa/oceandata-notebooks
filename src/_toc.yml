@@ -2,9 +2,13 @@ format: jb-book
 root: index
 chapters:
 - file: notebooks/hackweek/earthdata_cloud_access.py
+- file: notebooks/hackweek/satellite_insitu_matchups.py
 - file: notebooks/oci/oci_data_access.py
-# - file: notebooks/oci/oci_file_structure.py
+- file: notebooks/oci/oci_file_structure.py
 # - file: notebooks/oci/oci_ocssw_install.py
-# - file: notebooks/oci/oci_ocssw_processing.py
+#         FIXME: kernelspec deleted when saving ipynb b/c of global config
+#         FIXME: needs a data file from oci_data_access
+- file: notebooks/oci/oci_ocssw_processing.py
 # - file: notebooks/harp2/harp2_basic_visualizations.py
-# - glob: notebooks/modis/*
+# - file: notebooks/modis/modis_explore_l2.py
+- file: notebooks/modis/modis_explore_l3.py

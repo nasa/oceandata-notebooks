@@ -1,4 +1,4 @@
-# # Processing with OCSSW Tools: l2gen, l2bin, and l3mapgen
+# # Processing with OCSSW Command Line Interface (CLI)
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
 #
@@ -23,7 +23,7 @@
 #
 # ## Summary
 #
-# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There are also command line programs for the OCSSW libraries, which we can use to write processing scripts or notebooks.
+# [SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There is also a command line interface (CLI) for the OCSSW libraries, which we can use to write processing scripts and notebooks.
 #
 # This tutorial will show you how to process PACE OCI data using the sequence of OCSSW programs `l2gen`, `l2bin`, and `l3mapgen`.
 #
@@ -31,7 +31,6 @@
 #
 # ## Learning Objectives
 #
-# <a name="toc"></a>
 # At the end of this notebok you will know:
 # * How to process Level-1B data to Level-2 with `l2gen`
 # * How to merge two images with `l2bin`
@@ -39,13 +38,11 @@
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 1. [Get L1B Data](#data)
-# 1. [Process L1B Data with `l2gen`](#l2gen)
-# 1. [Composite L2 Data with `l2bin`](#l2bin)
-# 1. [Make a Map from Binned Data with `l3mapgen`](#l3mapgen)
-#      
-# <a name="setup"></a>
+# 1. [Setup](#1.-Setup)
+# 2. [Get L1B Data](#2.-Get-L1B-Data)
+# 3. [Process L1B Data with `l2gen`](#3.-Process-L1B-Data-with-l2gen)
+# 4. [Composite L2 Data with `l2bin`](#4.-Composite-L2-Data-with-l2bin)
+# 5. [Make a Map from Binned Data with `l3mapgen`](#5.-Make-a-Map-from-Binned-Data-with-l3mapgen)
 
 # ## 1. Setup
 #
@@ -56,7 +53,6 @@
 # +
 import csv
 import os
-import pathlib
 
 import cartopy.crs as ccrs
 import earthaccess
@@ -90,9 +86,9 @@ def write_par(path, par):
 
 help(write_par)
 
-# [back to top](#contents) <a name="data"></a>
+# [back to top](#Contents)
 
-# ## 2. Get OCI Data <a name="data"></a>
+# ## 2. Get L1B Data
 #
 #
 # Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
@@ -116,14 +112,9 @@ results = earthaccess.search_data(
 
 results[0]
 
-# Create a directory where you will store downloaded granules (nb. this step is unnecessary with earthaccess >= 0.9.1).
-
-parent = pathlib.Path("granules")
-parent.mkdir(exist_ok=True)
-
 # Download the granules found in the search.
 
-paths = earthaccess.download(results, parent)
+paths = earthaccess.download(results, local_path="L1B")
 
 # While we have the downloaded location stored in the list `paths`, store one in a variable we won't overwrite for future use.
 
@@ -154,7 +145,7 @@ results = earthaccess.search_data(
 for item in results:
     display(item)
 
-paths = earthaccess.download(results, parent)
+paths = earthaccess.download(results, "L2_BGC")
 paths
 
 # While we have the downloaded location stored in the list `paths`, write the list to a text file for future use.
@@ -163,13 +154,12 @@ paths = [str(i) for i in paths]
 with open("l2bin_ifile.txt", "w") as file:
     file.write("\n".join(paths))
 
-# [back to top](#contents) <a name="l2gen"></a>
+# [back to top](#Contents)
 
-# ## 3. Process L1B Data with `l2gen` <a name="l2gen"></a>
+# ## 3. Process L1B Data with `l2gen`
 #
-
 # At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters. 
-
+#
 # <div class="alert alert-warning">
 #
 # OCSSW programs are run from the command line in Bash, but we can have a Bash terminal-in-a-cell using the [IPython magic][magic] command `%%bash`. In the specific case of OCSSW programs, the Bash environment created for that cell must be set up by loading `$OCSSWROOT/OCSSW_bash.env`.
@@ -197,14 +187,14 @@ os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
 # To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the biogeochemical (BGC) suite that includes chlorophyll *a* estimates.
 #
 # Parameters can be passed to OCSSW programs through a text file. They can also be passed as arguments, but writing to a text file leaves a clear processing record. Define the parameters in a dictionary, then send it to the `write_par` function
-# defined in the [Setup](#setup) section.
+# defined in the [Setup](#1.-Setup) section.
 
 par = {
     "ifile": l2gen_ifile,
     "ofile": str(l2gen_ifile).replace("L1B", "L2"),
     "suite": "BGC",
     "l2prod": "chlor_a",
-    "atmocor": 0, # FOR DEMO ONLY!!
+    "atmocor": 1,
 }
 write_par("l2gen.par", par)
 
@@ -228,7 +218,7 @@ plot = dataset["chlor_a"].plot(cmap="viridis", robust=True)
 #
 # The next step for this tutorial is to merge multiple Level-2 granules together.
 #
-# [back to top](#contents) <a name="l2bin"></a>
+# [back to top](#Contents)
 
 # ## 4. Composite L2 Data with `l2bin`
 #
@@ -263,7 +253,7 @@ write_par("l2bin.par", par)
 # l2bin par=l2bin.par
 # -
 
-# [back to top](#contents) <a name="l3mapgen"></a>
+# [back to top](#Contents)
 
 # ## 5. Make a Map from Binned Data with `l3mapgen`
 #
@@ -305,11 +295,11 @@ dataset
 
 fig = plt.figure()
 ax = plt.axes(projection=ccrs.PlateCarree())
-ax.coastlines(linewidth=0.5)
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.3)
 plot = dataset["chlor_a"].plot(x="lon", y="lat", cmap="viridis", robust=True, ax=ax)
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.3)
+ax.coastlines(linewidth=0.5)
 
-# [back to top](#contents)
+# [back to top](#Contents)
 #
 # <div class="alert alert-info" role="alert">
 #

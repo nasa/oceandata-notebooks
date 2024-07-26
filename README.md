@@ -8,7 +8,7 @@ A repository for notebooks published as [oceandata tutorials and data recipes][t
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
 > - Create new notebooks within the `notebooks/` folder, starting from a a copy of "COPYME.ipynb".
 > - If a notebook is missing from the `notebooks/` folder, but its paired ".py" file is present in
->   the `src/` folder, open a terminal from the project root and run `jupytext --sync src/**/*.py`.
+>   the `src/` folder, open a terminal from the project root and run `jupytext --sync src/notebooks/**/*.py`.
 > - Nothing in the `docs/` folder should be manually edited.
 
 Keeping notebooks in a code repository presents challenges for collaboration and curation,
@@ -23,21 +23,24 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 ## For Maintainers
 
 In addition to the ".py" files paired to notebooks, the `src/` folder contains configuration
-for a [Jupyter Book][jb]. Building the notebooks as a static website allows for separation
+for a [Jupyter Book][jb]. Building the notebooks as one book allows for separation
 of content from the JavaScript and CSS, unlike standalone HTML files built with `nbconvert`. Run
-the following commands in an environment with all dependencies along with the jupyter-book package.
+the following commands in an environment with all dependencies along with the jupyter-book and jupytext packages.
+```
+shopt -s globstar
+```
+You'll need globstar (a.k.a. `**` patterns) enabled in bash.
 
 ```
 jb build src
 ```
-That populates the top (mostly) git-ignored `src/_build` folder.
+That populates the top `src/_build` folder. The folder is (mostly) ignored by git.
+
 ```
-shopt -s globstar
-jupytext --to=notebook src/_build/**/*.py
+jupytext --to=notebook src/_build/**/*.py # with metadata filter?
 ```
-That writes an unpaired ".ipynb" format into the `src/_build`. These files are the ones not
-git-ignoed. They are (eventual) targets for the "Downloand and Run" links on the [tutorials][tutorials] page.
-Note that opening those notebooks in Jupyter will dirty them up again, so
+That writes an unpaired ".ipynb" format to the ".py" format sources within `src/_build`. These files are not
+ignored by git. They are (will be, eventually) targets for the "Downloand and Run" links on the [tutorials][tutorials] page. Note that opening those notebooks in Jupyter will dirty them up again, so
 do not include the changes introduced by opening the clean notebooks in any commit.
 
 The `src/_ext` folder includes a local Sphinx extension that adds the ".ipynb" download
@@ -47,14 +50,12 @@ is uncommented, because the provided template removes all the buttons.
 **WIP**:
 
 1. Curating dependencies without duplicating between pyproject.toml and environment.yml
-1. Formatting notebooks with black (although black does not format comments)
-1. Testing notebooks in isolated environments (e.g. using `jupyter execute ...`)
-1. jb building
-   - TODO: automate `shopt -s globstar`
-   - TODO: fails for oci_install_ocssw because of `%conda` cell.
-   - TODO: https://github.com/jupyter/nbconvert/issues/1125
-   - TODO: random cell ids, preserved id metadata from notebooks?
-
+1. Formatting notebooks with black (although black does not format markdown)
+1. Building notebooks in an isolated environment
+1. Automate `shopt -s globstar`
+1. Fails for oci_install_ocssw because of `%conda` cell.
+1. https://github.com/jupyter/nbconvert/issues/1125
+1. random cell ids, preserved id metadata from notebooks?
 
 ## How to Cite
 
@@ -68,6 +69,5 @@ This repository has greatly benefited from works of multiple open-science projec
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 [jupyterlab]: https://jupyter.org
 [jb]: https://jupyterbook.org
-[hatch]: https://hatch.pypa.io
 [learn-olci]: https://github.com/wekeo/learn-olci/blob/main/README.md
 [cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook

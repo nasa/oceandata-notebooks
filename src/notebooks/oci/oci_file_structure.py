@@ -1,3 +1,18 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all,scrolled
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.16.3
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
 # # File Structure at Three Processing Levels for the Ocean Color Instrument (OCI)
 #
 # **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
@@ -39,12 +54,10 @@
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 1. [Explore L1B File Structure](#l1b)
-# 1. [Explore L2 File Structure](#l2)
-# 1. [Explore L3 File Structure](#l3)
-#
-# <a name="setup"></a>
+# 1. [Setup](#1.-Setup)
+# 2. [Explore L1B File Structure](#2.-Explore-L1B-File-Structure)
+# 3. [Explore L2 File Structure](#3.-Explore-L2-File-Structure)
+# 4. [Explore L3 File Structure](#4.-Explore-L3-File-Structure)
 
 # ## 1. Setup
 #
@@ -64,13 +77,12 @@ import pandas as pd
 
 auth = earthaccess.login(persist=True)
 
-# [back to top](#contents) <a name="l1b"></a>
+# [back to top](#Contents)
 
 # ## 2. Explore L1B File Structure
 #
 # Let's use `xarray` to open up a OCI L1B NetCDF file using `earthaccess`. We will use the same search method used in <a href="oci_data_access.html">OCI Data Access</a>. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
 
-# +
 tspan = ("2024-05-01", "2024-05-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 
@@ -79,7 +91,6 @@ results = earthaccess.search_data(
     temporal=tspan,
     bounding_box=bbox,
 )
-# -
 
 paths = earthaccess.open(results)
 
@@ -117,9 +128,9 @@ dataset["rhot_blue"].sizes
 
 # Let's plot the reflectance at postion 100 in the "blue_bands" dimension.
 
-plot = dataset["rhot_blue"].sel({"blue_bands": 100}).plot()
+im = dataset["rhot_blue"].sel({"blue_bands": 100}).plot()
 
-# [back to top](#contents) <a name="l2"></a>
+# [back to top](#Contents)
 
 # ## 3. Explore L2 File Structure
 #
@@ -151,7 +162,7 @@ rrs.sizes
 
 # The Rrs variable has length 184 in the wavelength dimension, so the blue, red, and SWIR wavelengths have been combined. Let's map the Rrs at "wavelength_3d" position 100.
 
-plot = rrs.sel({"wavelength_3d": 100}).plot(cmap="viridis", robust=True)
+im = rrs.sel({"wavelength_3d": 100}).plot(cmap="viridis", robust=True)
 
 # Right now, the scene is being plotted using `number_of_lines` and `pixels_per_line` as "x" and "y", respectively. We need to add latitude and longitude values to create a true map. To do this, we will create a merged `xarray.Dataset` that pulls in information from the "navigation_data" group.
 
@@ -166,7 +177,7 @@ dataset
 #
 # Let's make a scatter plot of the pixel locations so we can see the irregular spacing. By selecting a `slice` with a step size larger than one, we get a subset of the locations for better visualization.
 
-plot = dataset.sel(
+im = dataset.sel(
     {
         "number_of_lines": slice(None, None, 1720 // 20),
         "pixels_per_line": slice(None, None, 1272 // 20),
@@ -176,15 +187,15 @@ plot = dataset.sel(
 # Let's plot this new `xarray.Dataset` the same way as before, but add latitude and longitude.
 
 rrs_sel = dataset["Rrs"].sel({"wavelength_3d": 100})
-plot = rrs_sel.plot(x="longitude", y="latitude", cmap="viridis", robust=True)
+im = rrs_sel.plot(x="longitude", y="latitude", cmap="viridis", robust=True)
 
-# Now you can project the data onto a grid. If you wanna get fancy, add a coastline.
+# Now you can visualize the data projected onto a grid. If you wanna get fancy, add a coastline.
 
 fig = plt.figure()
 ax = plt.axes(projection=ccrs.PlateCarree())
-rrs_sel.plot(x="longitude", y="latitude", cmap="viridis", robust=True, ax=ax)
-ax.coastlines()
+im = rrs_sel.plot(x="longitude", y="latitude", cmap="viridis", robust=True, ax=ax)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
+ax.coastlines()
 plt.show()
 
 # Let's plot the full "Rrs" spectrum for individual pixels. A visualization with all the pixels
@@ -214,43 +225,54 @@ plot = rrs_stack.plot.line(hue="pixel")
 
 # We will go over how to plot Rrs spectra with accurate wavelength values on the x-axis in an upcoming notebook.
 #
-# [back to top](#contents) <a name="l3"></a>
+# [back to top](#Contents)
 
 # ## 4. Explore L3 File Structure
 #
 # At Level-3 there are binned (B) and mapped (M) products available for OCI. The L3M remote sensing reflectance (Rrs) files contain global maps of Rrs. We'll use the same `earthaccess` method to find the data.
 
-tspan = ("2024-05-01", "2024-05-8")
+tspan = ("2024-05-01", "2024-05-08")
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
     temporal=tspan,
-    count=1,
+#    count=1,
 )
 
 paths = earthaccess.open(results)
 
 # OCI L3 data do not have any groups, so we can open the dataset without the `group` argument.
-# Let's take a look at the first file.
+# Let's take a look at one of these files. Not just any one; we will search for the one that is a
+# high resolution map.
 
-dataset = xr.open_dataset(paths[0])
+for item in paths:
+    dataset = xr.open_dataset(item)
+    if dataset.sizes["lat"] == 4320:
+        break
 dataset
 
-# Notice that OCI L3M data has `lat` and `lon` coordinates, so it's easy to slice out a bounding box and map the "Rrs_442" variable.
+# Notice that OCI L3M data has `lat`, `lon`, and `wavelength` coordinates, so it's easy to slice
+# out a bounding box and map the "Rrs" variable at a given wavelength.
 
-rrs_442 = dataset["Rrs_442"].sel({"lat": slice(-25, -45), "lon": slice(10, 30)})
-rrs_442
+rrs_slice = dataset["Rrs"].sel({"lat": slice(-25, -45), "lon": slice(10, 30)})
+rrs_slice_442 = rrs_slice.sel({"wavelength": 442}, method="nearest")
+rrs_slice_442
 
 fig = plt.figure()
 ax = plt.axes(projection=ccrs.PlateCarree())
-ax.coastlines()
+im = rrs_slice_442.plot(cmap="viridis", robust=True, ax=ax)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
-rrs_442.plot(cmap="viridis", robust=True, ax=ax)
+ax.coastlines()
 plt.show()
 
 # Also becuase the L3M variables have `lat` and `lon` coordinates, it's possible to stack multiple granules along a new dimension that corresponds to time.
 # Instead of `xr.open_dataset`, we use `xr.open_mfdataset` to create a single `xarray.Dataset` (the "mf" in `open_mfdataset` stands for multiple files) from an array of paths.
 #
-# We also use a new search filter available in `search_data`: the `granule_name` argument accepts strings with the "*" wildcard. We need this to distinguish daily ("DAY") from eight-day ("8D") composites, as well as to get the 0.1 degree resolution projections.
+# Rather than searching through results for particular resolutions though, we need to augment the CMR query using information
+# build into the granule name. Take a look at the attribute on the previous dataset.
+
+dataset.attrs["product_name"]
+
+# We will use a new search filter available in `search_data`: the `granule_name` argument accepts strings with the "*" wildcard. We need this to distinguish daily ("DAY") from eight-day ("8D") composites, as well as to get the desired 0.1 degree resolution projections.
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_CHL_NRT",
@@ -283,19 +305,19 @@ chla.attrs.update(
         "units": f'log({dataset["chlor_a"].attrs["units"]})',
     }
 )
-plot = chla.sel(date = "2024-05-02").plot(aspect=2, size=4, cmap="GnBu_r")
+im = chla.sel(date = "2024-05-02").plot(aspect=2, size=4, cmap="GnBu_r")
 
 # ... to a map of average values, skipping "NaN" values that result from clouds and the OCI's tilt maneuver.
 
 chla_avg = chla.mean("date", keep_attrs=True)
-plot = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
+im = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
 
 # We can also create a time series of mean values over the whole region.
 
 chla_avg = chla.mean(dim=["lon", "lat"], keep_attrs=True)
-plot = chla_avg.plot(linestyle='-', marker='o', color='b')
+im = chla_avg.plot(linestyle='-', marker='o', color='b')
 
-# [back to top](#contents)
+# [back to top](#Contents)
 #
 # <div class="alert alert-info" role="alert">
 #

@@ -31,13 +31,11 @@
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 1. [NASA Earthdata Authentication](#auth)
-# 1. [Search for Data](#search)
-# 1. [Download Data](#download)
-# 1. [Plot Data](#plot)
-#
-# <a name="setup"></a>
+# 1. [Setup](#1.-Setup)
+# 2. [NASA Earthdata Authentication](#2.-NASA-Earthdata-Authentication)
+# 3. [Search for Data](#3.-Search-for-Data)
+# 4. [Download Data](#4.-Download-Data)
+# 5. [Plot Data](#5.-Plot-Data)
 
 # ## 1. Setup
 #
@@ -54,7 +52,7 @@ import numpy as np
 import xarray as xr
 
 
-# [back to top](#contents) <a name="auth"></a>
+# [back to top](#Contents)
 
 # ## 2. NASA Earthdata Authentication
 #
@@ -77,7 +75,7 @@ import xarray as xr
 
 auth = earthaccess.login(persist=True)
 
-# [back to top](#contents) <a name="search"></a>
+# [back to top](#Contents)
 
 # ## 3. Search for Data
 #
@@ -123,15 +121,15 @@ JSON(data_links, expanded=True)
 
 JSON(results)
 
-# [back to top](#contents) <a name="download"></a>
+# [back to top](#Contents)
 
 # ## 4. Download Data
 #
 # Since the data are not hosted in the Earthdata Cloud (see output from `results[0]` above), we need to download files. This will download the data in a folder called "data" in your working directory.
 
-paths = earthaccess.download(results, "data")
+paths = earthaccess.download(results, local_path="L2")
 
-# [back to top](#contents) <a name="plot"></a>
+# [back to top](#Contents)
 
 # ## 5. Plot Data
 #
@@ -165,7 +163,7 @@ array.attrs.update(
 # The `plot` method from XArray's plotting API is an easy way to take an `xr.Dataset` or `xr.DataArray` to
 # a `matplotlib` figure.
 
-plot = array.plot(
+im = array.plot(
     x="longitude", y="latitude", aspect=2, size=4, cmap="jet", robust=True
 )
 
@@ -173,13 +171,13 @@ plot = array.plot(
 
 fig = plt.figure(figsize=(10, 7))
 ax = plt.axes(projection=cartopy.crs.PlateCarree())
-array.plot(x="longitude", y="latitude", cmap="jet", robust=True, ax=ax)
+im = array.plot(x="longitude", y="latitude", cmap="jet", robust=True, ax=ax)
 ax.gridlines(draw_labels={"bottom": "x", "left": "y"})
 ax.add_feature(cartopy.feature.STATES, linewidth=0.5)
 ax.set_title(dataset.attrs["product_name"], loc="center")
 plt.show()
 
-# [back to top](#contents)
+# [back to top](#Contents)
 #
 # <div class="alert alert-info" role="alert">
 #

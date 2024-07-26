@@ -44,7 +44,6 @@
 # [earthaccess-docs]: https://earthaccess.readthedocs.io/en/latest/
 # [codespaces]: https://github.com/features/codespaces
 #
-#
 # ## Learning Objectives
 #
 # At the end of this notebook you will know:
@@ -55,32 +54,21 @@
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 1. [NASA Earthdata Authentication](#auth)
-# 1. [Search for Data](#search)
-# 1. [Download Data](#download)
-#
-# <a name="setup"></a>
-#
-#
+# 1. [Setup](#1.-Setup)
+# 2. [NASA Earthdata Authentication](#2.-NASA-Earthdata-Authentication)
+# 3. [Search for Data](#3.-Search-for-Data)
+# 4. [Open Data](#4.-Open-Data)
+# 5. [Download Data](#5.-Download-Data)
 
 # ## 1. Setup
 #
-# We begin by importing the packages used in this notebook. 
-#
-# [codespaces]: https://github.blog/changelog/2022-11-09-using-codespaces-with-jupyterlab-public-beta/
-# [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
-# [edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
-# [earthaccess-docs]: https://earthaccess.readthedocs.io/en/stable/
-# [cmr]: https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html
-# [conda]: https://anaconda.org/conda-forge/earthaccess
-# [pypi]: https://pypi.org/project/earthaccess/
+# We begin by importing the packages used in this notebook.
 
 import earthaccess
 import xarray as xr
 import h5netcdf
 
-# [back to top](#contents) <a name="auth"></a>
+# [back to top](#Contents)
 
 # ## 2. NASA Earthdata Authentication
 #
@@ -96,14 +84,16 @@ import h5netcdf
 # allow you to input credentials.
 #
 # <div class="alert alert-info" role="alert">
-# The <code>persist=True</code> argument ensures any discovered credentials are
-# stored in a <code>.netrc</code> file, so the argument is not necessary (but
-# it's also harmless) for subsequent calls to <code>earthaccess.login</code>.
+#     
+# The `persist=True` argument ensures any discovered credentials are
+# stored in a `.netrc` file, so the argument is not necessary (but
+# it's also harmless) for subsequent calls to `earthaccess.login`.
+#
 # </div>
 
 auth = earthaccess.login(persist=True)
 
-# [back to top](#contents) <a name="search"></a>
+# [back to top](#Contents)
 
 # ## 3. Search for Data
 #
@@ -170,6 +160,8 @@ results[1]
 
 results[2]
 
+# [back to top](#Contents)
+
 # ## 4. Open Data
 #
 # Let's go ahead and open a couple granules using `xarray`. The `earthaccess.open` function is used when you want to directly read
@@ -200,7 +192,7 @@ dataset
 
 im = dataset.chlor_a.plot(vmax=5)
 
-# [back to top](#contents) <a name="download"></a>
+# [back to top](#Contents)
 
 # ## 5. Download Data
 #
@@ -236,4 +228,4 @@ paths
 dataset = xr.open_dataset(paths[0], group="geophysical_data")
 dataset
 
-# [back to top](#contents) <a name="download"></a>
+# [back to top](#Contents)

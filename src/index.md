@@ -16,7 +16,7 @@ The **Earthdata Cloud** icon next to some notebooks indicates they are meant to 
 ### Python Environments
 
 The notebooks import Python packages that must be installed and discoverable on the host. Please use our
-[environment.yml](./environment.yml) file to [create a Conda environment][conda-env] that satisfies all the dependencies,
+[environment.yml](../environment.yml) file to [create a Conda environment][conda-env] that satisfies all the dependencies,
 or otherwise ensure your environment satisifes these dependencies. Note that the environment includes
 the `ipykernel` package in case your JupyterLab includes [nb_conda_kernels][nb_conda_kernels] or you want
 to manually [make the environment available to JupyterLab as a kernel][conda-kernel].
