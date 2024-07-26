@@ -6,7 +6,7 @@ A repository for notebooks published as [oceandata tutorials and data recipes][t
 
 > [!IMPORTANT]
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
-> - Create new notebooks under the `notebooks` folder, starting from a a copy of "COPYME.ipynb".
+> - Create new notebooks under the `notebooks` folder, starting from a a copy of `COPYME.ipynb`.
 > - If a notebook is missing from the `notebooks` folder, but its paired ".py" file is present under
 >   the `src/notebooks` folder, open a terminal from the project root and run `jupytext --sync src/notebooks/**/*.py`.
 
@@ -26,21 +26,20 @@ for a [Jupyter Book][jb]. Building the notebooks as one book allows for separati
 of content from the JavaScript and CSS, unlike standalone HTML files built with `nbconvert`. It also provides
 a way to test that all notebook are free of errors. Run the following commands in an environment with
 all dependencies along with the jupyter-book and jupytext packages.
-```
-shopt -s globstar
-```
-You'll need globstar (a.k.a. `**` patterns) enabled in bash.
 
 ```
 jb build src
 ```
 That populates the `src/_build` folder. The folder is (mostly) ignored by git.
 
+The second step needs globstar (a.k.a. `**` patterns) enabled in bash, so we do that first and then call jupytext.
 ```
+shopt -s globstar
 jupytext --to=notebook src/_build/**/*.py  # TODO: with metadata filter?
 ```
 That writes an unpaired ".ipynb" format to the ".py" format sources under `src/_build`. These files are not
-ignored by git. They are (will be, eventually) targets for the "Downloand and Run" links on the [tutorials][tutorials] page. Note that opening those notebooks in Jupyter will dirty them up again, so
+ignored by git. They are (will be, eventually) targets for the "Downloand and Run" links on the [tutorials][tutorials]
+page. Note that opening those notebooks in Jupyter will dirty them up again, so
 do not include the changes introduced by opening the clean notebooks in any commit.
 
 The `src/_ext` folder includes a local Sphinx extension that adds the ".ipynb" download
@@ -67,6 +66,7 @@ is uncommented, because the provided template removes all the buttons. TODO: kee
 This repository has greatly benefited from works of multiple open-science projects, notably [Learn OLCI][learn-olci] and the [NASA EarthData Cloud Cookbook][cookbook].
 
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
+[jupytext]: https://jupytext.readthedocs.io/
 [jupyterlab]: https://jupyter.org
 [jb]: https://jupyterbook.org
 [learn-olci]: https://github.com/wekeo/learn-olci/blob/main/README.md
