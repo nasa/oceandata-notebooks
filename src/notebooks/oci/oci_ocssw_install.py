@@ -1,3 +1,11 @@
+# ---
+# jupyter:
+#   kernelspec:
+#     display_name: Bash
+#     language: bash
+#     name: bash
+# ---
+
 # # Installing and Running OCSSW Command-line Tools
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
@@ -34,12 +42,10 @@
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 1. [Install OCSSW](#ocssw)
-# 1. [Process Data with `l2gen`](#l2gen)
-# 1. [All-in-One](#all) 
-#
-# <a name="setup"></a> 
+# 1. [Setup](#1.-Setup)
+# 2. [Install OCSSW](#2.-Install-OCSSW)
+# 3. [Process Data with `l2gen`](#3.-Process-Data-with-`l2gen`)
+# 4. [All-in-One](#4.-All-in-One)
 
 # ## 1. Setup
 #
@@ -49,7 +55,6 @@
 #
 # </div>
 #
-#
 # ### (Optional) Use a Bash Kernel
 #
 # <div class="alert alert-danger" role="alert">
@@ -58,9 +63,9 @@
 #
 # </div>
 #
-# Run the following command. If the terminal asks you to update conda, type Y to accept.
+# Convert the following cell from type "Raw" to "Code", using the notebook menu, and run it. If the terminal prompts you, enter "Y" to accept.
 
-# + scrolled=true
+# + scrolled=true active=""
 # %conda install bash_kernel
 # -
 
@@ -68,7 +73,7 @@
 #
 # Confirm the bash kernel is installed by starting a new Launcher. You should see the bash kernel along with Python and other kernels installed in your JupyterHub. You should now **change the kernel of the notebook** by clicking on the kernel name in the upper-right corner of the window and selecting the Bash kernel before moving on to the rest of the tutorial.
 #
-# [back to top](#contents) <a name="ocssw"></a>
+# [back to top](#Contents)
 
 # ## 2. Install OCSSW
 #
@@ -120,7 +125,7 @@ which install_ocssw
 
 # You are now ready to run `l2gen`, the Level-2 processing function for all ocean color instruments under the auspices of the GSFC Ocean Biology Processing Group!
 #
-# [back to top](#contents) <a name="l2gen"></a>
+# [back to top](#Contents)
 
 # ## 3. Process L1B Data with `l2gen`
 #
@@ -160,7 +165,7 @@ l2gen \
 #
 # </div>
 #
-# [back to top](#contents) <a name="all"></a>
+# [back to top](#Contents)
 
 # ## 4. All-in-One
 #
@@ -181,7 +186,7 @@ export OCSSWROOT=/tmp/ocssw
 ./install_ocssw --tag=T2024.19 --seadas --oci
 source $OCSSWROOT/OCSSW_bash.env
 
-# [back to top](#contents)
+# [back to top](#Contents)
 #
 # <div class="alert alert-info" role="alert">
 #

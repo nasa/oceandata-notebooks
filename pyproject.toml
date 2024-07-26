@@ -32,9 +32,9 @@ Repository = "https://github.com/gsfc-oel/oceandata-notebooks"
 Issues = "https://github.com/gsfc-oel/oceandata-notebooks/issues"
 
 [tool.jupytext]
-notebook_metadata_filter = "-all"
+notebook_metadata_filter = "-all,kernelspec"
 cell_metadata_filter = "-all,scrolled"
 
 [tool.jupytext.formats]
-"notebooks/" = "ipynb"
-"src/" = "py"
+"notebooks" = "ipynb"
+"src/notebooks" = "py"

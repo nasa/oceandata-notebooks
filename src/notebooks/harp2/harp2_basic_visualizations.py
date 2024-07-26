@@ -1,3 +1,11 @@
+# ---
+# jupyter:
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
 # # Visualize Data from the Hyper-Angular Rainbow Polarimeter (HARP2)
 #
 # **Authors:** Sean Foley (NASA, MSU), Meng Gao (NASA, SSAI), Ian Carroll (NASA, UMBC)
@@ -34,14 +42,12 @@
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 1. [Get Level-1C Data](#data)
-# 1. [Understanding Multi-Angle Data](#multiangle)
-# 1. [Understanding Polarimetry](#polarimetry)
-# 1. [Radiance to Reflectance](#reflectance)
-# 1. [Animating an Overpass](#animation)
-#
-# <a name="setup"></a>
+# 1. [Setup](#1.-Setup)
+# 2. [Get Level-1C Data](#2.-Get-Level-1C-Data)
+# 3. [Understanding Multi-Angle Data](#3.-Understanding-Multi-Angle-Data)
+# 4. [Understanding Polarimetry](#4.-Understanding-Polarimetry)
+# 5. [Radiance to Reflectance](#5.-Radiance-to-Reflectance)
+# 6. [Animating an Overpass](#6.-Animating-an-Overpass)
 
 # ## 1. Setup
 #
@@ -50,7 +56,6 @@
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/ 
 
 # +
-from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from scipy.ndimage import gaussian_filter1d
@@ -64,7 +69,7 @@ import xarray as xr
 
 # -
 
-# [back to top](#contents) <a name="data"></a>
+# [back to top](#Contents)
 
 # ## 2. Get Level-1C Data
 #
@@ -91,9 +96,9 @@ obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 dataset = xr.merge((prod, obs, geo))
 dataset
 
-# [back to top](#contents) <a name="multiangle"></a>
+# [back to top](#Contents)
 
-# ## 2. Understanding Multi-Angle Data
+# ## 3. Understanding Multi-Angle Data
 #
 # HARP2 is a multi-spectral sensor, like OCI, with 4 spectral bands. These roughly correspond to green, red, near infrared (NIR), and blue (in that order). HARP2 is also multi-angle. These angles are with respect to the satellite track. Essentially, HARP2 is always looking ahead, looking behind, and everywhere in between. The number of angles varies per sensor. The red band has 60 angles, while the green, blue, and NIR bands each have 10.
 #
@@ -136,9 +141,9 @@ ax_angle.legend()
 ax_wavelength.legend()
 plt.show()
 
-# [back to top](#contents) <a name="polarimetry"></a>
+# [back to top](#Contents)
 
-# ## 3. Understanding Polarimetry
+# ## 4. Understanding Polarimetry
 #
 # Both HARP2 and SPEXone conduct polarized measurements. Polarization describes the geometric orientation of the oscillation of light waves. Randomly polarized light (like light coming directly from the sun) has an approximately equal amount of waves in every orientation. When light reflects off certain surfaces or is scattered by small particles, it can become non-randomly polarized.
 #
@@ -254,9 +259,9 @@ ax.set_ylabel("DoLP")
 ax.set_title("Mean DoLP by View Angle")
 plt.show()
 
-# [back to top](#contents) <a name='reflectance'></a>
+# [back to top](#Contents)
 
-# ## 4. Radiance to Reflectance
+# ## 5. Radiance to Reflectance
 #
 # We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). This conversion compensates for the differences in appearance due to the viewing angle and sun angle.
 
@@ -320,9 +325,9 @@ ax.set_title("Mean Reflectance by View Angle")
 plt.show()
 # -
 
-# [back to top](#contents) <a name='animation'>
+# [back to top](#Contents)
 
-# ## 5. A Simple Animation
+# ## 6. Animating an Overpass
 #
 # <div class="alert alert-warning" role="alert">
 #
@@ -380,7 +385,7 @@ plt.close()
 #
 # Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By default, `matplotlib` will not display an animation. To view the animation, we saved it as a file and displayed the result in the next cell. Alternatively, you could change the default by executing `%matplotlib widget`. The `widget` setting, which works in Jupyter Lab but not on a static website, you can use `plt.show()` as well as `an.pause()` and `an.resume()`.
 
-# [back to top](#contents)
+# [back to top](#Contents)
 #
 # <div class="alert alert-info" role="alert">
 #     
