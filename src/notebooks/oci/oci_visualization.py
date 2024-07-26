@@ -6,7 +6,9 @@
 #     name: python3
 # ---
 
-# # Data visualization
+
+
+# # Title of the Tutorial
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
 #
@@ -70,6 +72,8 @@ from netCDF4 import Dataset
 import pandas as pd
 from PIL import Image, ImageEnhance # Pillow image enhancement library
 import warnings
+import matplotlib.pylab as pl
+from matplotlib.colors import ListedColormap
 
 # In this tutorial, we suppress runtime warnings that show up when calculating log for negative values, which is common with our datasets. 
 
@@ -91,9 +95,8 @@ warnings.simplefilter(action='ignore', category=RuntimeWarning)
 # ```
 
 # +
-nc_file = "/PACE_OCI.20240605T092137.L2.V2.nc"
+nc_file = "/home/jovyan/ocssw_test/granules/PACE_OCI.20240605T092137.L2.V2.nc"
 
-import h5netcdf
 with h5netcdf.File(nc_file, 'r') as nc:
     groups = list(nc)
 groups
@@ -123,7 +126,6 @@ print(df)
 
 dataset = xr.open_dataset(nc_file, group="navigation_data")
 dataset = dataset.set_coords(("longitude", "latitude"))
-#dataset = dataset.rename({"pixel_control_points": "pixels_per_line"})
 dataset = xr.merge((rhos, dataset.coords))
 dataset
 
@@ -137,27 +139,20 @@ plot = rhos.plot(x="longitude", y="latitude", cmap="viridis", vmin=0)
 red = dataset["rhos"].sel({"wavelength_3d": 25}) # 645 nm
 green = dataset["rhos"].sel({"wavelength_3d": 17}) # 555 nm
 blue = dataset["rhos"].sel({"wavelength_3d": 2}) # 368 nm
-
 rgb = np.dstack((red, green, blue))
+rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) # Normalize image
 
-# Normalize image
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) 
-
-plt.figure(figsize=(6, 6))
+plt.figure(figsize=(3, 3))
 plt.imshow(rgb)
-
-# +
-# Create a figure with a projection
-fig = plt.figure(figsize=(7, 7))
-ax = plt.subplot(projection=ccrs.PlateCarree())
-
-# Plot each channel as an RGB image with geographical coordinates
-ax.imshow(rgb,
-          extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max()),
-          origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
 # -
 
-# TALK ABOUT THE FACT YOU CAN DO IT EASY IN SEADAS
+# Create a figure with a projection
+fig = plt.figure(figsize=(5, 5))
+ax = plt.subplot(projection=ccrs.PlateCarree())
+extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
+ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+
+# DO IT EASY IN SEADAS
 
 # +
 # OCI True Color 1 band (SEADAS recipe for OCI RGB)
@@ -168,15 +163,13 @@ rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
 red = np.log(rhos_red/0.01)/np.log(1/0.01)
 green = np.log(rhos_green/0.01)/np.log(1/0.01)
 blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
-
 rgb = np.dstack((red, green, blue))
 rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb))
 
-fig = plt.figure(figsize=(7, 7))
+fig = plt.figure(figsize=(5, 5))
 ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-ax.imshow(rgb,
-          extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max()),
-          origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
+ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
 
 # +
 # OCI True Color 1 band -min/max adjusted
@@ -187,124 +180,104 @@ vmax = 1.04 # Above 1 because whites can be higher than 1
 rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
 rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
 rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
-
 red = np.log(rhos_red/0.01)/np.log(1/0.01)
 green = np.log(rhos_green/0.01)/np.log(1/0.01)
 blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
+red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
+green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
+blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
+rgb = np.dstack((red, green, blue))
+rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
 
+fig = plt.figure(figsize=(5, 5))
+ax = fig.add_subplot(projection=ccrs.PlateCarree())
+extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
+ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+
+# +
+# OCI True Color 1 band - Normalized by channel
+vmin = 0.0
+vmax = 1.03 #because whites are higher than 1
+
+rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
+rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
+rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
+red = np.log(rhos_red/0.01)/np.log(1/0.01)
+green = np.log(rhos_green/0.01)/np.log(1/0.01)
+blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
 red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
 green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
 blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
 
+red = (red - red.min()) / (red.max() - red.min()) # Normaling by channel
+green = (green - green.min()) / (green.max() - green.min())
+blue = (blue - blue.min()) / (blue.max() - blue.min())
+rgb = np.dstack((red, green, blue))
+rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
+
+fig = plt.figure(figsize=(5, 5))
+ax = plt.subplot(projection=ccrs.PlateCarree())
+extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
+ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
+
+
+# +
+# OCI True Color 1 band -min/max adjusted
+vmin = 0.01
+vmax = 1.04 # Above 1 because whites can be higher than 1
+#---- 
+
+rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
+rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
+rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
+red = np.log(rhos_red/0.01)/np.log(1/0.01)
+green = np.log(rhos_green/0.01)/np.log(1/0.01)
+blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
+red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
+green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
+blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
 rgb = np.dstack((red, green, blue))
 rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
 
 fig = plt.figure(figsize=(7, 7))
-ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-ax.imshow(rgb,
-          extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max()),
-          origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+ax = plt.subplot(projection=ccrs.PlateCarree())
+extent = (rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
+ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
 
 # +
 # Image adjustments: change values from 0 to 2, 1 being unchanged
-contrast = 1.3 
+contrast = 1.2 
 brightness = 1.1 
 sharpness = 2
 saturation = .8
-enhancement = .98
+gamma = .95
 #----
 
 normalized_image = (rgb - rgb.min()) / (rgb.max() - rgb.min())
-normalized_image = normalized_image** enhancement
-
+normalized_image = normalized_image** gamma
 normalized_image = (normalized_image* 255).astype(np.uint8)
-# Convert numpy array to Pillow Image
-image_pil = Image.fromarray(normalized_image)
+image_pil = Image.fromarray(normalized_image) # Convert numpy array to Pillow Image
 
 # Adjust contrast, brightness and sharpness using Pillow
 enhancer = ImageEnhance.Contrast(image_pil)
 image_enhanced = enhancer.enhance(contrast)  
-
 enhancer = ImageEnhance.Brightness(image_enhanced)
 image_enhanced = enhancer.enhance(brightness)  
-
 enhancer = ImageEnhance.Sharpness(image_enhanced)
 image_enhanced = enhancer.enhance(sharpness)
-
 enhancer = ImageEnhance.Color(image_enhanced)
 image_enhanced = enhancer.enhance(saturation)
-
-# Convert enhanced image back to numpy array
 enhanced_image_np = np.array(image_enhanced) / 255.0  # Normalize back to [0, 1] range
 
-# Create a figure with a specific projection
 fig = plt.figure(figsize=(7, 7))
 ax = plt.subplot(projection=ccrs.PlateCarree())
-ax.imshow(enhanced_image_np, extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max()),
-          origin='lower', transform=ccrs.PlateCarree(), alpha=1)
-
-# +
-# OCI True Color 1 band - Normalized by channel
-rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
-rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
-rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
-
-red = np.log(rhos_red/0.01)/np.log(1/0.01)
-green = np.log(rhos_green/0.01)/np.log(1/0.01)
-blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
-
-vmin = 0.0
-vmax = 1.03 #because whites are higher than 1
-red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
-green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
-blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
-
-#normaling by channel
-red = (red - red.min()) / (red.max() - red.min())
-green = (green - green.min()) / (green.max() - green.min())
-blue = (blue - blue.min()) / (blue.max() - blue.min())
-
-rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
-
-fig = plt.figure(figsize=(7, 7))
-ax = plt.subplot(projection=ccrs.PlateCarree())
-ax.imshow(rgb, extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max()),
-          origin='lower', transform=ccrs.PlateCarree(), alpha=1)
-
-
-# +
-# OCI True Color 1 band -min/max adjusted
-vmin = 0.01
-vmax = 1.04 # Above 1 because whites can be higher than 1
-#---- 
-
-rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
-rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
-rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
-
-red = np.log(rhos_red/0.01)/np.log(1/0.01)
-green = np.log(rhos_green/0.01)/np.log(1/0.01)
-blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
-
-red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
-green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
-blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
-
-rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
-
-fig = plt.figure(figsize=(7, 7))
-ax = plt.subplot(projection=ccrs.PlateCarree())
-
-ax.imshow(rgb,
-          extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max()),
-          origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+extent = (rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
+ax.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
 
 # +
 # OCI False-color for ice clouds
 vmin = 0.0
-vmax = 0.7
+vmax = 0.68
 
 # IR Bands to create false-color image that highlights ice clouds
 rhos_red = dataset["rhos"].sel({"wavelength_3d": 47})
@@ -314,22 +287,18 @@ rhos_blue = dataset["rhos"].sel({"wavelength_3d": 49})
 red = rhos_red.where((rhos_red >= vmin) & (rhos_red <= vmax), vmin, vmax)
 green = rhos_green.where((rhos_green >= vmin) & (rhos_green <= vmax), vmin, vmax)
 blue = rhos_blue.where((rhos_blue >= vmin) & (rhos_blue <= vmax), vmin, vmax)
-
-red = red[:,5:1264] # Cutting edge pixels to get same-size bands
+red = red[:,8:1267] # Cutting edge pixels to get same-size bands
 green = green[:,1:1260]
-
 rgb = np.dstack((red, green, blue))
 rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
 
 fig = plt.figure(figsize=(7, 7))
 ax = plt.subplot(projection=ccrs.PlateCarree())
-
-ax.imshow(rgb,
-          extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max()),
-          origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
+ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
 # -
 
-# ## Make image from L2 file processed with OCSSW
+# ## Make image from L3 file
 #
 # The best product to create a high-quality RGB image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a L1B file to L2 using l2gen, like we showed in the OCSSW data processing exercise. We will use the L2 file that was created for this exercise. 
 #
@@ -351,64 +320,32 @@ ax.imshow(rgb,
 # dataset = xr.open_dataset(paths[0])
 # dataset
 
-# nc_file = "/home/jovyan/ocssw_test/granules/PACE_OCI.20240715.L3m.DAY.SFREFL.V2_0.rhos.0p1deg.NRT.nc"
-#
-# import h5netcdf
-# with h5netcdf.File(nc_file, 'r') as nc:
-#     groups = list(nc)
-# groups
+# +
+nc_file = "/home/jovyan/ocssw_test/granules/PACE_OCI.20240715.L3m.DAY.SFREFL.V2_0.rhos.0p1deg.NRT.nc"
+
+import h5netcdf
+with h5netcdf.File(nc_file, 'r') as nc:
+    groups = list(nc)
+groups
+# -
 
 # When exploring the dataset, we find that the rhos bands are not identified by their respective wavelength. 
 
-dataset_rhos = xr.open_dataset(nc_file)
-rhos = dataset_rhos["rhos"]
+dataset = xr.open_dataset(nc_file)
+rhos = dataset["rhos"]
 rhos
 
+# + scrolled=true
 wavelength = rhos["wavelength"]
-wavelength
-
 df = pd.DataFrame({"Wavelengths": wavelength})
 print(df)
 
-# To find the wavelengths corresponding to the bands, we need to look in the sensor band parameters. 
+# -
 
-dataset = xr.open_dataset(nc_file)
+# To find the wavelengths corresponding to the bands, we need to look in the sensor band parameters. 
 
 rhos555 = dataset["rhos"].sel({"wavelength": 555})
 plot = rhos555.plot(x="lon", y="lat", cmap="viridis", vmin=0)
-
-# +
-# Natural colour single band
-red_rhos = dataset["rhos"].sel({"wavelength": 645}) # 645 nm
-green_rhos = dataset["rhos"].sel({"wavelength": 555}) # 555 nm
-blue_rhos = dataset["rhos"].sel({"wavelength": 465}) # 368 nm
-
-rgb = np.dstack((red_rhos, green_rhos, blue_rhos))
-
-# Normalize image
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) 
-
-plt.figure(figsize=(15,15))
-plt.imshow(rgb)
-plt.axis('off')
-
-# +
-# OCI True Color 1 band (SEADAS recipe for OCI RGB)
-rhos_red = dataset["rhos"].sel({"wavelength": 645}) # 645 nm
-rhos_green = dataset["rhos"].sel({"wavelength": 555}) # 555 nm
-rhos_blue = dataset["rhos"].sel({"wavelength": 465}) # 368 nm
-
-red = np.log(rhos_red/0.01)/np.log(1/0.01)
-green = np.log(rhos_green/0.01)/np.log(1/0.01)
-blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
-
-rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb))
-
-plt.figure(figsize=(15, 15))
-plt.imshow(rgb)
-plt.axis('off')
-plt.axis("image")  # gets rid of white border
 
 # +
 # OCI True Color 1 band -min/max adjusted
@@ -419,15 +356,12 @@ vmax = 1.02 # Above 1 because whites can be higher than 1
 rhos_red = dataset["rhos"].sel({"wavelength": 645}) # 645 nm
 rhos_green = dataset["rhos"].sel({"wavelength": 555}) # 555 nm
 rhos_blue = dataset["rhos"].sel({"wavelength": 465}) # 368 nm
-
 red = np.log(rhos_red/0.01)/np.log(1/0.01)
 green = np.log(rhos_green/0.01)/np.log(1/0.01)
 blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
-
 red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
 green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
 blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
-
 rgb = np.dstack((red, green, blue))
 rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb))
 
@@ -442,33 +376,23 @@ contrast = 1.5
 brightness = 1.02 
 sharpness = 2
 saturation = 1.1
-enhancement = .95
+gamma = .95
 #----
 
 normalized_image = (rgb - rgb.min()) / (rgb.max() - rgb.min())
-normalized_image = normalized_image** enhancement
-
+normalized_image = normalized_image** gamma
 normalized_image = (normalized_image* 255).astype(np.uint8)
-# Convert numpy array to Pillow Image
 image_pil = Image.fromarray(normalized_image)
-
-# Adjust contrast, brightness and sharpness using Pillow
 enhancer = ImageEnhance.Contrast(image_pil)
 image_enhanced = enhancer.enhance(contrast)  
-
 enhancer = ImageEnhance.Brightness(image_enhanced)
 image_enhanced = enhancer.enhance(brightness)  
-
 enhancer = ImageEnhance.Sharpness(image_enhanced)
 image_enhanced = enhancer.enhance(sharpness)
-
 enhancer = ImageEnhance.Color(image_enhanced)
 image_enhanced = enhancer.enhance(saturation)
+enhanced_image_np = np.array(image_enhanced) / 255.0
 
-# Convert enhanced image back to numpy array
-enhanced_image_np = np.array(image_enhanced) / 255.0  # Normalize back to [0, 1] range
-
-# Create a figure
 plt.figure(figsize=(10, 10))
 plt.imshow(enhanced_image_np)
 plt.axis('off')
@@ -482,34 +406,148 @@ plt.axis('off')
 plt.axis("image")
 plt.savefig('mapJuly152024.png')
 
-# ## 3. Style Notes
-#
-# Some recomendations for consistency between notebooks, and a good user experience:
-#
-# - avoid code cells much longer than twenty lines
-# - avoid code cells with blank lines (except where preferred by PEP 8)
-# - prefer a whole markdown cell, with full descriptions, over inline code comments
-# - avoid splitting markdown cells that are adjacent
-# - remove any empty cell at the end of the notebook
-#
-# Here are the two additional "alert" boxes used in some notebooks to help you choose between "success", "danger", "warning", and "info".
-#
-# <div class="alert alert-warning" role="alert">
-#
-# Anywhere in any of [these notebooks][tutorials] where `paths = earthaccess.open(...)` is used to read data directly from the NASA Earthdata Cloud, you need to substitute `paths = earthaccess.download(..., local_path)` before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
-#
-# </div>
-#
-# <div class="alert alert-danger" role="alert">
-#     
-# Conda uses a lot of memory while configuring your environment. Choose an option with more than about 5GB of RAM from the JupyterHub Control Panel, or your install will fail.
-#
-# </div>
+# ### MOANA
 
-# [back to top](#contents)
-#
-# <div class="alert alert-info" role="alert">
-#
-# You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on ...
-#
-# </div>
+# +
+nc_file = "/home/jovyan/PACE_OCI.20240309T115927.L2.BGC.nc"
+
+import h5netcdf
+with h5netcdf.File(nc_file, 'r') as nc:
+    groups = list(nc)
+groups
+# -
+
+dataset_geo = xr.open_dataset(nc_file, group="geophysical_data")
+dataset_geo
+
+# +
+rhos_465 = dataset_geo["rhos_465"]
+rhos_555 = dataset_geo["rhos_555"]
+rhos_645 = dataset_geo["rhos_645"]
+syn = dataset_geo["syncoccus_moana"]
+pro = dataset_geo["prococcus_moana"]
+pico = dataset_geo["picoeuk_moana"]
+
+dataset = xr.open_dataset(nc_file, group="navigation_data")
+dataset = dataset.set_coords(("longitude", "latitude"))
+dataset = xr.merge((rhos_465, rhos_555, rhos_645, syn, pro, pico, dataset.coords))
+dataset
+# -
+
+plot = dataset["rhos_555"].plot(x="longitude", y="latitude", cmap="viridis", vmin=0)
+
+# +
+# OCI True Color 1 band -min/max adjusted
+vmin = 0.01
+vmax = 1.04 # Above 1 because whites can be higher than 1
+#---- 
+
+rhos_red = dataset["rhos_645"]
+rhos_green = dataset["rhos_555"]
+rhos_blue = dataset["rhos_465"]
+red = np.log(rhos_red/0.01)/np.log(1/0.01)
+green = np.log(rhos_green/0.01)/np.log(1/0.01)
+blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
+red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
+green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
+blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
+rgb = np.dstack((red, green, blue))
+rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
+
+fig = plt.figure(figsize=(5, 5))
+ax = fig.add_subplot(projection=ccrs.PlateCarree())
+ax.imshow(rgb,
+          extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max()),
+          origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+
+# +
+# Image adjustments: change values from 0 to 2, 1 being unchanged
+contrast = 1.72
+brightness = 1 
+sharpness = 2
+saturation = 1.3
+gamma = .43
+#----
+
+normalized_image = (rgb - rgb.min()) / (rgb.max() - rgb.min())
+normalized_image = normalized_image** gamma
+normalized_image = (normalized_image* 255).astype(np.uint8)
+image_pil = Image.fromarray(normalized_image)
+enhancer = ImageEnhance.Contrast(image_pil)
+image_enhanced = enhancer.enhance(contrast)  
+enhancer = ImageEnhance.Brightness(image_enhanced)
+image_enhanced = enhancer.enhance(brightness)  
+enhancer = ImageEnhance.Sharpness(image_enhanced)
+image_enhanced = enhancer.enhance(sharpness)
+enhancer = ImageEnhance.Color(image_enhanced)
+image_enhanced = enhancer.enhance(saturation)
+enhanced_image_np = np.array(image_enhanced) / 255.0  # Normalize back to [0, 1] range
+
+fig = plt.figure(figsize=(5, 5))
+ax = plt.subplot(projection=ccrs.PlateCarree())
+extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
+ax.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
+# -
+
+
+
+fig = plt.figure(figsize=(5, 5))
+ax = fig.add_subplot(projection=ccrs.PlateCarree())
+extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
+ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap="Reds", vmin=0, vmax=35000, alpha = 1)
+
+# Create transparent color maps for MOANA products
+
+# +
+cmap_greens = pl.cm.Greens # Get original color map
+my_cmap_greens = cmap_greens(np.arange(cmap_greens.N)) 
+my_cmap_greens[:,-1] = np.linspace(0, 1, cmap_greens.N) # Set alpha for transparency
+my_cmap_greens = ListedColormap(my_cmap_greens) # Create new colormap
+cmap_reds = pl.cm.Reds
+my_cmap_reds = cmap_reds(np.arange(cmap_reds.N))
+my_cmap_reds[:,-1] = np.linspace(0, 1, cmap_reds.N)
+my_cmap_reds = ListedColormap(my_cmap_reds)
+cmap_blues = pl.cm.Blues
+my_cmap_blues = cmap_blues(np.arange(cmap_blues.N))
+my_cmap_blues[:,-1] = np.linspace(0, 1, cmap_blues.N)
+my_cmap_blues = ListedColormap(my_cmap_blues)
+
+fig = plt.figure(figsize=(5, 5))
+ax = fig.add_subplot(projection=ccrs.PlateCarree())
+extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
+ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=35000, alpha = 1)
+
+# +
+# Image adjustments: change values from 0 to 2, 1 being unchanged
+contrast = 1.9 
+brightness = 1 
+sharpness = 2
+saturation = 1.4
+gamma = .48
+#----
+
+normalized_image = (rgb - rgb.min()) / (rgb.max() - rgb.min())
+normalized_image = normalized_image** gamma
+normalized_image = (normalized_image* 255).astype(np.uint8)
+image_pil = Image.fromarray(normalized_image)
+enhancer = ImageEnhance.Contrast(image_pil)
+image_enhanced = enhancer.enhance(contrast)  
+enhancer = ImageEnhance.Brightness(image_enhanced)
+image_enhanced = enhancer.enhance(brightness)  
+enhancer = ImageEnhance.Sharpness(image_enhanced)
+image_enhanced = enhancer.enhance(sharpness)
+enhancer = ImageEnhance.Color(image_enhanced)
+image_enhanced = enhancer.enhance(saturation)
+enhanced_image_np = np.array(image_enhanced) / 255.0  # Normalize back to [0, 1] range
+
+fig = plt.figure(figsize=(7, 7))
+ax = plt.subplot(projection=ccrs.PlateCarree())
+extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
+ax.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
+ax.imshow(dataset["prococcus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_blues, vmin=0, vmax=300000, alpha = .5)
+ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=20000, alpha = .5)
+ax.imshow(dataset["picoeuk_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_greens, vmin=0, vmax=50000, alpha = .5)
+plt.show()
+# -
+
+
