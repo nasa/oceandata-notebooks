@@ -58,6 +58,7 @@ dependencies:
   # some more information
   - gh-scoped-creds
   ## JupyterLab extensions and helpers
+  - bash_kernel
   - dask-labextension
   - ipykernel
   - jupyterlab-geojson
