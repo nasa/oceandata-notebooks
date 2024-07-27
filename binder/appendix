@@ -6,6 +6,10 @@ ENV OCSSWROOT=${OCSSWROOT}
 # Prepare for system installs
 USER root
 
+# FIXME: line 1241 of /home/dshea/ocssw/src/l2bin/l2bin.cpp: Permission denied
+RUN /usr/bin/install  -o  ${NB_USER} -g ${NB_USER} -d ${OCSSWROOT}
+USER ${NB_USER}
+
 # Install OCSSW core files (i.e. without $OCSSWROOT/share)
 RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw && \
     wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py && \
@@ -13,6 +17,8 @@ RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw && \
     ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt && \
     ln -s ${OCDATAROOT} ${OCSSWROOT} && \
     rm install_ocssw manifest.py
+
+USER root
 
 # Override repo2docker use of start (so we can remove $REPO_DIR)
 ENV R2D_ENTRYPOINT=/usr/local/bin/repo2docker-start
