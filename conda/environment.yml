@@ -47,6 +47,8 @@ dependencies:
   - cdsapi
   - ephem
   - eumdac
+  # Other science packages
+  - pvlib
   ## File formats and file management, download, dataset caching
   - earthaccess
   - h5netcdf
