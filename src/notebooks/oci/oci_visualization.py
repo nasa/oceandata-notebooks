@@ -118,7 +118,7 @@ wavelengths_bands = dataset_band_pars["wavelength_3d"]
 wavelengths_bands
 
 # + scrolled=true
-df = pd.DataFrame({"Wavelength_bands": wavelength_3d})
+df = pd.DataFrame({"Wavelength_bands": wavelengths_bands})
 print(df)
 # -
 
@@ -157,7 +157,6 @@ ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), inte
 rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
 rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
 rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
-
 red = np.log(rhos_red/0.01)/np.log(1/0.01)
 green = np.log(rhos_green/0.01)/np.log(1/0.01)
 blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
@@ -165,47 +164,15 @@ rgb = np.dstack((red, green, blue))
 rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb))
 
 fig = plt.figure(figsize=(5, 5))
-ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
-ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
-
-# +
-# OCI True Color 1 band -min/max adjusted
-vmin = 0.01
-vmax = 1.04 # Above 1 because whites can be higher than 1
-#---- 
-
-rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
-rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
-rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
-red = np.log(rhos_red/0.01)/np.log(1/0.01)
-green = np.log(rhos_green/0.01)/np.log(1/0.01)
-blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
-red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
-green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
-blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
-rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
-
-fig = plt.figure(figsize=(5, 5))
-ax = fig.add_subplot(projection=ccrs.PlateCarree())
+ax = plt.subplot(projection=ccrs.PlateCarree())
 extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
 ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
 
 # +
 # OCI True Color 1 band - Normalized by channel
-vmin = 0.0
-vmax = 1.03 #because whites are higher than 1
-
 rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
 rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
 rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
-red = np.log(rhos_red/0.01)/np.log(1/0.01)
-green = np.log(rhos_green/0.01)/np.log(1/0.01)
-blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
-red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
-green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
-blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
 
 red = (red - red.min()) / (red.max() - red.min()) # Normaling by channel
 green = (green - green.min()) / (green.max() - green.min())
@@ -220,7 +187,7 @@ ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alph
 
 
 # +
-# OCI True Color 1 band -min/max adjusted
+# OCI True Color 1 band - log and min/max adjusted
 vmin = 0.01
 vmax = 1.04 # Above 1 because whites can be higher than 1
 #---- 
@@ -278,9 +245,9 @@ vmin = 0.0
 vmax = 0.68
 
 # IR Bands to create false-color image that highlights ice clouds
-rhos_red = dataset["rhos"].sel({"wavelength_3d": 47})
-rhos_green = dataset["rhos"].sel({"wavelength_3d": 48})
-rhos_blue = dataset["rhos"].sel({"wavelength_3d": 49})
+rhos_red = dataset["rhos"].sel({"wavelength_3d": 47}) # 1618.0 nm
+rhos_green = dataset["rhos"].sel({"wavelength_3d": 48}) # 2131.0 nm
+rhos_blue = dataset["rhos"].sel({"wavelength_3d": 49}) # 2258.0 nm
 
 red = rhos_red.where((rhos_red >= vmin) & (rhos_red <= vmax), vmin, vmax)
 green = rhos_green.where((rhos_green >= vmin) & (rhos_green <= vmax), vmin, vmax)
@@ -304,14 +271,14 @@ ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), inte
 
 auth = earthaccess.login(persist=True)
 
-# +
+# + scrolled=true
 tspan = ("2024-07-15", "2024-07-15")
-bbox = (-76.75, 36.97, -75.74, 39.01)
+#bbox = (-76.75, 36.97, -75.74, 39.01)
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_SFREFL_NRT",
     temporal=tspan,
-    bounding_box=bbox,
+#    bounding_box=bbox,
 )
 # -
 
@@ -367,8 +334,6 @@ rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb))
 
 plt.figure(figsize=(15, 15))
 plt.imshow(rgb)
-plt.axis('off')
-plt.axis("image")
 
 # +
 # Image adjustments: change values from 0 to 2, 1 being unchanged
@@ -488,9 +453,6 @@ ax = plt.subplot(projection=ccrs.PlateCarree())
 extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
 ax.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
 # -
-
-
-
 fig = plt.figure(figsize=(5, 5))
 ax = fig.add_subplot(projection=ccrs.PlateCarree())
 extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
