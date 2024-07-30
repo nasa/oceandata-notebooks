@@ -172,8 +172,7 @@ artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
 # +
 nc_file = "/home/jovyan/ocssw_test/granules/PACE_OCI.20240605T092137.L2.V2.nc"
 
-with h5netcdf.File(nc_file, 'r') as nc:
-    groups = list(nc)
+groups = list(open_datatree(nc_file))
 groups
 # -
 
@@ -365,9 +364,7 @@ dataset
 # +
 nc_file = "/home/jovyan/ocssw_test/granules/PACE_OCI.20240715.L3m.DAY.SFREFL.V2_0.rhos.0p1deg.NRT.nc"
 
-import h5netcdf
-with h5netcdf.File(nc_file, 'r') as nc:
-    groups = list(nc)
+groups = list(open_datatree(nc_file))
 groups
 # -
 
@@ -451,9 +448,7 @@ plt.savefig('mapJuly152024.png')
 # +
 nc_file = "/home/jovyan/PACE_OCI.20240309T115927.L2.BGC.nc"
 
-import h5netcdf
-with h5netcdf.File(nc_file, 'r') as nc:
-    groups = list(nc)
+groups = list(open_datatree(nc_file))
 groups
 # -
 
