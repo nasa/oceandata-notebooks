@@ -25,6 +25,7 @@ dependencies:
   ## Core visualization packages
   - bokeh
   - cartopy
+  - cmocean
   - geoviews
   - hvplot
   - ipyleaflet
