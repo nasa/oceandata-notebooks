@@ -6,8 +6,6 @@
 #     name: python3
 # ---
 
-
-
 # # Title of the Tutorial
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
@@ -44,15 +42,16 @@
 # - How to create a true-color image from OCI data processed with OCSSW
 # - How to make a false color image to look at clouds or smoke
 # - How to make an interactive tool to explore OCI data
+# - What goes into an animation of multi-angular HARP2 data
 # - What ...
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 1. [Section Title](#section-name)
-# 1. [Style Notes](#other-name)
-#
-# <a name="setup"></a>
+# 1. [Setup](#1.-Setup)
+# 2. [Global Oceans in True Color](#2.-Global-Oceans-in-True-Color)
+# 3. [Full Scene in True Color](#3.-Full-Scene-in-True-Color)
+# 4. [MOANA](4.-MOANA) # how does this support multi-dim vis?
+# 5. 
 
 # ## 1. Setup
 #
@@ -60,26 +59,46 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
+# +
 import os
-import earthaccess
-from pathlib import Path
-import cartopy.crs as ccrs
-import h5netcdf
-import matplotlib.pyplot as plt
-import numpy as np
-import xarray as xr
-from netCDF4 import Dataset
-import pandas as pd
-from PIL import Image, ImageEnhance # Pillow image enhancement library
-import warnings
-import matplotlib.pylab as pl
+
+from PIL import Image, ImageEnhance
+from xarray.backends.api import open_datatree
 from matplotlib.colors import ListedColormap
+import cartopy.crs as ccrs
+import earthaccess
+import matplotlib.pyplot as plt
+import matplotlib.pylab as pl
+import numpy as np
+import pandas as pd
+import xarray as xr
+# -
 
 # In this tutorial, we suppress runtime warnings that show up when calculating log for negative values, which is common with our datasets. 
 
-warnings.simplefilter(action='ignore', category=RuntimeWarning)
+# +
+#warnings.simplefilter(action='ignore', category=RuntimeWarning)
+# -
 
 # [back to top](#contents) <a name="other-name"></a>
+
+# ## 2. Global True Color
+
+# The L3M files are the nicest files, use them to introduce the "dimensions" and "coordinates" parts of an XArray dataset.
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_RRS_NRT",
+    granule_name="*
+)
+paths = earthaccess.open(results[:1])
+dataset = xr.open_dataset(paths[0])
+dataset
+
+rrs_rgb = dataset["Rrs"].sel({"wavelength": [645, 555, 368]}, method="nearest").to_dataarray()
+rrs_rgb
+
+fig, axs = plt.subplots(1, 3, figsize=(9, 3))
+for i in 
 
 # ## Make image from L2 file processed with OCSSW
 #
