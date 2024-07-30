@@ -17,7 +17,7 @@
 # * satellite data acquisition
 # * mini file extraction
 # * in situ data management
-# * Bidirectional reflectance distribution function (BRDF) correction
+# * bidirectional reflectance distribution function (BRDF) correction
 #
 # ThoMaS is written in Python and is made available through a [EUMETSAT Gitlab repository](https://gitlab.eumetsat.int/eumetlab/oceans/ocean-science-studies/ThoMaS). The package can be used from the command line, or imported as a Python library, as done here. This notebook contains an example of how to use ThoMaS, but the capability shown is not exhaustive. Many more command-line examples are included in the repository, and we encourage users to familiarise themselves with both the [project README](https://gitlab.eumetsat.int/eumetlab/oceans/ocean-science-studies/ThoMaS/-/blob/main/README.md) and  [example README](https://gitlab.eumetsat.int/eumetlab/oceans/ocean-science-studies/ThoMaS/-/blob/main/README_examples.md) for more information.
 #
