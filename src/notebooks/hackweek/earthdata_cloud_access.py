@@ -74,7 +74,10 @@
 
 import earthaccess
 import xarray as xr
-import h5netcdf
+from xarray.backends.api import open_datatree
+
+# The last import provides a preview of the `DataTree` object. Once it is fully integrated into XArray,
+# the additional import won't be needed, as the function will be available as `xr.open_datree`.
 
 # [back to top](#Contents)
 
@@ -188,18 +191,17 @@ paths
 dataset = xr.open_dataset(paths[0])
 dataset
 
-# Notice that this `xarray.Dataset` has nothing but "Attributes". We cannot use `xarray` to open multi-group hierarchies or list groups within a NetCDF file, but it can open a specific group if you know its path. The `xarray-datatree` package is going to be merged into `xarray` in the not too distant future, which will allow `xarray` to open the entire hieerarchy. In the meantime, we can use a lower level reader to see the top-level groups.
+# Notice that this `xarray.Dataset` has nothing but "Attributes". The NetCDF data model includes multi-group hierarchies within a single file, where each group maps to an `xarray.Dataset`. The whole file maps to a `DataTree`, which we will only use lightly because the implementation in XArray remains under development.
 
-with h5netcdf.File(paths[0]) as file:
-    groups = list(file)
-groups
+datatree = open_datatree(paths[0])
+datatree
 
-dataset = xr.open_dataset(paths[0], group="geophysical_data")
+dataset = xr.merge((datatree[i].to_dataset() for i in datatree.groups))
 dataset
 
 # Let's do a quick plot of the `chlor_a` variable. You'll do more plotting in the Multidimensional Data Visualization tutorial.
 
-im = dataset.chlor_a.plot(vmax=5)
+artist = dataset["chlor_a"].plot(vmax=5)
 
 # [back to top](#Contents)
 
@@ -233,8 +235,7 @@ paths
 
 # We can open up that locally saved file using `xarray` as well.
 
-dataset = xr.open_dataset(paths[0], group="geophysical_data")
-dataset
+open_datatree(paths[0])
 
 # [back to top](#Contents)
 
