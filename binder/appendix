@@ -1,6 +1,7 @@
 ARG OCSSWTAG=V2024.1
-ARG OCDATAROOT=${HOME}/shared/pace-hackweek-2024/ocssw/share
 ARG OCSSWROOT=/opt/ocssw
+ARG OCVARROOT=${HOME}/shared/pace-hackweek-2024/ocssw/var
+ARG OCDATAROOT=${HOME}/shared/pace-hackweek-2024/ocssw/share
 ENV OCSSWROOT=${OCSSWROOT}
 
 # Override repo2docker use of start (so we can remove $REPO_DIR)
@@ -19,4 +20,5 @@ RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw && \
     chmod +x install_ocssw && \
     ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt && \
     ln -s ${OCDATAROOT} ${OCSSWROOT} && \
+    ln -s ${OCVARROOT} ${OCSSWROOT} && \
     rm install_ocssw manifest.py
