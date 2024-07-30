@@ -307,6 +307,20 @@ ax.coastlines(linewidth=0.5)
 
 # ## Process L1B data to obtain MOANA phytoplankton products
 
+tspan = ("2024-03-09", "2024-03-09")
+location = (-30, 25)
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L1B_SCI",
+    temporal=tspan,
+    point=location,
+)
+results[0]
+
+# Download the granules found in the search.
+
+paths = earthaccess.download(results, local_path="L1B")
+
 l2gen_ifile = "/home/jovyan/oceandata-notebooks/notebooks/oci/PACE_OCI.20240309T115927.L1B.V2.nc"
 
 # The Level-1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
