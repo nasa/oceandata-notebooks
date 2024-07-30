@@ -107,17 +107,14 @@ auth = earthaccess.login(persist=True)
 # do not include cloud coverage metadata, so we cannot use that filter. In this search, the spatial filter is
 # performed on a location given as a point represented by a tuple of latitude and longitude in decimal degrees.
 
-tspan = ("2024-04-27", "2024-04-27")
-location = (-56.5, 49.8)
-
-# The `search_data` method accepts a `point` argument for this type of location.
+tspan = ("2024-06-05", "2024-06-05")
+location = (40, 45)
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L1B_SCI",
     temporal=tspan,
     point=location,
 )
-
 results[0]
 
 # Download the granules found in the search.
@@ -139,6 +136,7 @@ plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 # This tutorial will demonstrate processing this Level-1B granule into a Level-2 granule. Because that can
 # take several minutes, we'll also download a couple of Level-2 granules to save time for the next step of compositing multiple Level-2 granules into a single granule.
 
+tspan = ("2024-04-27", "2024-04-27")
 location = [(-56.5, 49.8), (-55.0, 49.8)]
 
 # Searching on a location defined as a line, rather than a point, is a good way to get granules that are
@@ -227,23 +225,6 @@ plot = dataset["rhos"].sel({"wavelength_3d": 25}).plot(cmap="viridis", robust=Tr
 #
 # [back to top](#Contents)
 
-par = {
-    "ifile": l2gen_ifile,
-    "ofile": str(l2gen_ifile).replace("L1B", "L2_BGC"),
-    "suite": "BGC",
-    "atmocor": 1,
-}
-write_par("l2gen.par", par)
-
-# + scrolled=true language="bash"
-# source $OCSSWROOT/OCSSW_bash.env
-#
-# l2gen par=l2gen.par
-# -
-
-dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
-plot = dataset["chlor_a"].plot(cmap="viridis", robust=True)
-
 # ## 4. Composite L2 Data with `l2bin`
 #
 # It can be useful to merge adjacent scenes to create a single, larger image. The OCSSW program that performs merging, also known as "compositing" of remote sensing images, is called `l2bin`. Take a look at the program's options.
@@ -268,6 +249,15 @@ par = {
     "rowgroup": 2000,
 }
 write_par("l2bin.par", par)
+
+# + language="bash"
+# source $OCSSWROOT/OCSSW_bash.env
+#
+# l2bin par=l2bin.par
+# -
+
+dataset = xr.open_dataset(par["ofile"])
+dataset
 
 # [back to top](#Contents)
 
