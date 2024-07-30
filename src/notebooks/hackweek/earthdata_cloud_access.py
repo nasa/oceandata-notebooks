@@ -42,8 +42,8 @@
 # running**. There are three cases to distinguish:
 #
 # 1. The notebook is running on the local host. For instance, you started a Jupyter server on your laptop.
-# 1. The notebook is running on a remote host, but it does not have direct access to the NASA Earthdata Cloud. For instance, you are running in [GitHub Codespaces][codespaces].
-# 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud. This is the case for the PACE Hackweek. 
+# 1. The notebook is running on a remote host, but it does not have direct access to the AWS us-west-2 region. For instance, you are running in [GitHub Codespaces][codespaces], which is run on Microsoft Azure. 
+# 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud (AWS us-west-2 region). This is the case for the PACE Hackweek. 
 #
 # [pypi]: https://pypi.org/
 # [conda]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-data-access/
@@ -116,14 +116,15 @@ for item in results:
     summary = item.summary()
     print(summary["short-name"])
 
-# Next, we use the `search_data` function to find granules within a
-# collection. Let's use the `short_name` for the PACE/OCI Level-2
-# quick-look, or near real time (NRT), product for biogeochemical properties (although you can
-# search for granules accross collections too).
-#
 # <div class="alert alert-info" role="alert">
 # The short name can also be found on <a href="https://search.earthdata.nasa.gov/search?fi=SPEXone!HARP2!OCI" target="_blank"> Eartdata Search</a>, directly under the collection name, after clicking on the "i" button for a collection in any search result.
 # </div>
+#
+# Next, we use the `search_data` function to find granules within a
+# collection. Let's use the `short_name` for the PACE/OCI Level-2 near real time (NRT), product for biogeochemical properties (although you can
+# search for granules accross collections too).
+#
+#
 #
 # The `count` argument limits the number of granules whose metadata is returned and stored in the `results` list.
 
@@ -224,11 +225,10 @@ results = earthaccess.search_data(
     cloud_cover=clouds,
 )
 
-paths = earthaccess.download(results, local_path="L2_BGC")
-
 # The `paths` list now contains paths to actual files on the local
 # filesystem.
 
+paths = earthaccess.download(results, local_path="data")
 paths
 
 # We can open up that locally saved file using `xarray` as well.
@@ -237,3 +237,9 @@ dataset = xr.open_dataset(paths[0], group="geophysical_data")
 dataset
 
 # [back to top](#Contents)
+
+Lessons learned?
+
+# + active=""
+# present on file structure? difference btwn short names and what will have coordinates/what not. L3- show how to use granule name filter 
+#
