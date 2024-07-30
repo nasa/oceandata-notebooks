@@ -12,7 +12,7 @@ RUN cp ${REPO_DIR}/binder/start ${R2D_ENTRYPOINT} && \
 
 # Install OCSSW core files (i.e. without $OCSSWROOT/share)
 USER root
-RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} ${OCSSWROOT}
+RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d ${OCSSWROOT}
 USER ${NB_USER}
 RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw && \
     wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py && \
