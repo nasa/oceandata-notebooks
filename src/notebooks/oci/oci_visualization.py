@@ -6,8 +6,6 @@
 #     name: python3
 # ---
 
-
-
 # # Title of the Tutorial
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
@@ -44,15 +42,17 @@
 # - How to create a true-color image from OCI data processed with OCSSW
 # - How to make a false color image to look at clouds or smoke
 # - How to make an interactive tool to explore OCI data
+# - What goes into an animation of multi-angular HARP2 data
 # - What ...
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 1. [Section Title](#section-name)
-# 1. [Style Notes](#other-name)
-#
-# <a name="setup"></a>
+# 1. [Setup](#1.-Setup)
+# 2. [Global Oceans in True Color](#2.-Global-Oceans-in-True-Color)
+# 3. [Complete Scene in True Color](#3.-Full-Scene-in-True-Color)
+# 4. [Phytoplankton in False Color](4.-Phytoplankton-in-False-Color)
+# 5. [Full Spectra from Global Oceans](5.-Full-Spectra-from-Global-Oceans)
+# 6. [Animation from Multiple Angles](6.-Animation-from-Multiple-Angles)
 
 # ## 1. Setup
 #
@@ -60,28 +60,103 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
+# +
 import os
-import earthaccess
-from pathlib import Path
-import cartopy.crs as ccrs
-import h5netcdf
-import matplotlib.pyplot as plt
-import numpy as np
-import xarray as xr
-from netCDF4 import Dataset
-import pandas as pd
-from PIL import Image, ImageEnhance # Pillow image enhancement library
-import warnings
-import matplotlib.pylab as pl
+
+from PIL import Image, ImageEnhance
+from xarray.backends.api import open_datatree
 from matplotlib.colors import ListedColormap
+import cartopy.crs as ccrs
+import earthaccess
+import matplotlib.pyplot as plt
+import matplotlib.pylab as pl
+import numpy as np
+import pandas as pd
+import xarray as xr
+# -
+
+options = xr.set_options(display_expand_attrs=False)
 
 # In this tutorial, we suppress runtime warnings that show up when calculating log for negative values, which is common with our datasets. 
 
-warnings.simplefilter(action='ignore', category=RuntimeWarning)
+# +
+#warnings.simplefilter(action='ignore', category=RuntimeWarning)
+# -
 
 # [back to top](#contents) <a name="other-name"></a>
 
-# ## Make image from L2 file processed with OCSSW
+# ## 2. Global True Color
+
+# The L3M files are the nicest files, use them to introduce the "dimensions" and "coordinates" parts of an XArray dataset.
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_RRS_NRT",
+    granule_name="*.MO.*.1deg.*",
+)
+paths = earthaccess.open(results)
+
+# The Level-3 Mapped files have no groups and have variables that XArray recognizes as "coordinates":
+# variables that are named after their only dimension.
+
+dataset = xr.open_dataset(paths[-1])
+dataset
+
+# For a true color image, choose three wavelengths to represent the "Red", "Green", and "Blue"
+# channels used to make true color images.
+
+rrs_rgb = dataset["Rrs"].sel({"wavelength": [645, 555, 368]})
+rrs_rgb
+
+# It is always a good practice to build your labels into the dataset, and we'll see next
+# that it can be very useful as we learn to use metadata while creating visuzalizations.
+#
+# For this case, we can attach another variable called "channel" and then swap it with
+# "wavelength" to become the third dimension of the data array.
+
+rrs_rgb["channel"] = ("wavelength", ["Reds", "Greens", "Blues"])
+rrs_rgb = rrs_rgb.swap_dims({"wavelength": "channel"})
+rrs_rgb
+
+# Without worrying about matplotlib's terrible defaults for annotation, let's see what we have.
+
+fig, axs = plt.subplots(3, 1)
+for i, item in enumerate(rrs_rgb["channel"]):
+    array = rrs_rgb.sel({"channel": item})
+    array.plot.imshow(x="lon", y="lat", cmap=item.item(), ax=axs[i], robust=True)
+
+
+# Define a function to apply enhancements, our own plus generic image enhancements from the Pillow package.
+
+def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.02, gamma=0.95, contrast=1.5, brightness=1.02, sharpness=2, saturation=1.1):
+    rgb = rgb.where(rgb > 0)
+    rgb = np.log(rgb/scale)/np.log(1/scale)
+    # TODO don't understand using of vmin and vmax (i.e. doing it wrong)
+    # rgb = rgb.where(rgb > vmin, vmin)
+    # rgb = rgb.where(rgb < vmax, vmax)
+    rgb = (rgb -  rgb.min()) / (rgb.max() - rgb.min())
+    rgb = rgb * gamma
+    img = rgb * 255
+    img = img.where(img.notnull(), 0).astype("uint8")
+    img = Image.fromarray(img.data)
+    enhancer = ImageEnhance.Contrast(img)
+    img = enhancer.enhance(contrast)
+    enhancer = ImageEnhance.Brightness(img)
+    img = enhancer.enhance(brightness)
+    enhancer = ImageEnhance.Sharpness(img)
+    img = enhancer.enhance(sharpness)
+    enhancer = ImageEnhance.Color(img)
+    img = enhancer.enhance(saturation)
+    rgb[:] = np.array(img) / 255
+    return rgb
+
+
+rrs_rgb_enhanced = enhance(rrs_rgb)
+
+artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
+
+# ## 3. Complete Scene in True Color
+
+# ### Make image from L2 file processed with OCSSW
 #
 # The best product to create a high-quality RGB image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a L1B file to L2 using l2gen, like we showed in the OCSSW data processing exercise. We will use the L2 file that was created for this exercise. 
 #
@@ -97,8 +172,7 @@ warnings.simplefilter(action='ignore', category=RuntimeWarning)
 # +
 nc_file = "/home/jovyan/ocssw_test/granules/PACE_OCI.20240605T092137.L2.V2.nc"
 
-with h5netcdf.File(nc_file, 'r') as nc:
-    groups = list(nc)
+groups = list(open_datatree(nc_file))
 groups
 # -
 
@@ -263,7 +337,7 @@ extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.la
 ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
 # -
 
-# ## Make image from L3 file
+# ### Make image from L3 file
 #
 # The best product to create a high-quality RGB image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a L1B file to L2 using l2gen, like we showed in the OCSSW data processing exercise. We will use the L2 file that was created for this exercise. 
 #
@@ -290,9 +364,7 @@ dataset
 # +
 nc_file = "/home/jovyan/ocssw_test/granules/PACE_OCI.20240715.L3m.DAY.SFREFL.V2_0.rhos.0p1deg.NRT.nc"
 
-import h5netcdf
-with h5netcdf.File(nc_file, 'r') as nc:
-    groups = list(nc)
+groups = list(open_datatree(nc_file))
 groups
 # -
 
@@ -371,14 +443,12 @@ plt.axis('off')
 plt.axis("image")
 plt.savefig('mapJuly152024.png')
 
-# ### MOANA
+# ## 4. Phytoplankton in False Color
 
 # +
 nc_file = "/home/jovyan/PACE_OCI.20240309T115927.L2.BGC.nc"
 
-import h5netcdf
-with h5netcdf.File(nc_file, 'r') as nc:
-    groups = list(nc)
+groups = list(open_datatree(nc_file))
 groups
 # -
 
