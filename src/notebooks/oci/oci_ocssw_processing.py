@@ -107,7 +107,7 @@ auth = earthaccess.login(persist=True)
 # do not include cloud coverage metadata, so we cannot use that filter. In this search, the spatial filter is
 # performed on a location given as a point represented by a tuple of latitude and longitude in decimal degrees.
 
-tspan = ("2024-04-27", "2024-04-28")
+tspan = ("2024-04-27", "2024-04-27")
 location = (-56.5, 49.8)
 
 # The `search_data` method accepts a `point` argument for this type of location.
@@ -199,10 +199,9 @@ os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
 
 par = {
     "ifile": l2gen_ifile,
-    "ofile": str(l2gen_ifile).replace("L1B", "L2"),
-    "suite": "BGC",
-    "l2prod": "chlor_a",
-    "atmocor": 1,
+    "ofile": str(l2gen_ifile).replace("L1B", "L2_BGC"),
+    "suite": "SFREFL",
+    "atmocor": 0,
 }
 write_par("l2gen.par", par)
 
@@ -217,7 +216,7 @@ write_par("l2gen.par", par)
 # If successful, the `l2gen` program created a netCDF file at the `ofile` path. The contents should include the `chlor_a` product from the `BGC` suite of products. Once this process is done, you are ready to visualize your "custom" L2 data. Use the `robust=True` option to ignore outlier chl a values.
 
 dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
-plot = dataset["chlor_a"].plot(cmap="viridis", robust=True)
+plot = dataset["rhos"].sel({"wavelength_3d": 25}).plot(cmap="viridis", robust=True)
 
 # Feel free to explore `l2gen` options to produce the Level-2 dataset you need! The documentation
 # for `l2gen` is kind of interactive, because so much depends on the data product being processed.

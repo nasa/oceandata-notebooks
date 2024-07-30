@@ -61,8 +61,8 @@
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 import os
-#import earthaccess
-#from pathlib import Path
+import earthaccess
+from pathlib import Path
 import cartopy.crs as ccrs
 import h5netcdf
 import matplotlib.pyplot as plt
@@ -113,14 +113,12 @@ bands
 
 # To find the wavelengths corresponding to the bands, we need to look in the sensor band parameters. 
 
-# +
 dataset_band_pars = xr.open_dataset(nc_file, group="sensor_band_parameters")
-
-wavelength_3d = dataset_band_pars["wavelength_3d"]
-wavelength_3d
+wavelengths_bands = dataset_band_pars["wavelength_3d"]
+wavelengths_bands
 
 # + scrolled=true
-df = pd.DataFrame({"Wavelengths": wavelength_3d})
+df = pd.DataFrame({"Wavelength_bands": wavelength_3d})
 print(df)
 # -
 
@@ -304,21 +302,23 @@ ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), inte
 #
 # Open the L2 netcdf file you created in the previous exercise in read-mode with netCDF4 and look at the information in the file. 
 
-# auth = earthaccess.login(persist=True)
+auth = earthaccess.login(persist=True)
 
-# tspan = ("2024-07-15", "2024-07-15")
-# bbox = (-76.75, 36.97, -75.74, 39.01)
-#
-# results = earthaccess.search_data(
-#     short_name="PACE_OCI_L3M_SFREFL_NRT",
-#     temporal=tspan,
-#     bounding_box=bbox,
-# )
+# +
+tspan = ("2024-07-15", "2024-07-15")
+bbox = (-76.75, 36.97, -75.74, 39.01)
 
-# paths = earthaccess.open(results)
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_SFREFL_NRT",
+    temporal=tspan,
+    bounding_box=bbox,
+)
+# -
 
-# dataset = xr.open_dataset(paths[0])
-# dataset
+paths = earthaccess.open(results)
+
+dataset = xr.open_dataset(paths[0])
+dataset
 
 # +
 nc_file = "/home/jovyan/ocssw_test/granules/PACE_OCI.20240715.L3m.DAY.SFREFL.V2_0.rhos.0p1deg.NRT.nc"
