@@ -8,7 +8,6 @@
 
 # # Orientation to Earthdata Cloud Access
 #
-#
 # **Tutorial Lead:** Anna Windle (NASA, SSAI)
 #
 # <div class="alert alert-info" role="alert">
@@ -242,5 +241,5 @@ open_datatree(paths[0])
 Lessons learned?
 
 # + active=""
-# present on file structure? difference btwn short names and what will have coordinates/what not. L3- show how to use granule name filter 
+# present on file structure? difference btwn short names and what will have coordinates/what not. L3- show how to use granule name filter, and spatial (point, line, etc.) filter.
 #

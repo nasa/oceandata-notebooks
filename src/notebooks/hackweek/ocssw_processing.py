@@ -8,26 +8,16 @@
 
 # # Processing with OCSSW Command Line Interface (CLI)
 #
-# **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
+# **Tutorial Lead:** Carina Poulin (NASA, SSAI)
 #
 # <div class="alert alert-success" role="alert">
 #
-# The following notebooks are **prerequisites** for this tutorial.
+# The following notebooks are **prerequisites** for this tutorial:
 #
-# - Learn with OCI: [Data Access][oci-data-access]
-# - Learn with OCI: [Installing and Running OCSSW Command-line Tools][ocssw_install]
-#
-# </div>
-#
-# <div class="alert alert-info" role="alert">
-#
-# An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+# - [Earthdata Cloud Access](../earthdata_cloud_access)
+# - [Satellite Data Visualization](../satdata_vizualization)
 #
 # </div>
-#
-# [edl]: https://urs.earthdata.nasa.gov/
-# [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
-# [ocssw_install]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_ocssw_install/
 #
 # ## Summary
 #
@@ -51,6 +41,7 @@
 # 3. [Process L1B Data with `l2gen`](#3.-Process-L1B-Data-with-l2gen)
 # 4. [Composite L2 Data with `l2bin`](#4.-Composite-L2-Data-with-l2bin)
 # 5. [Make a Map from Binned Data with `l3mapgen`](#5.-Make-a-Map-from-Binned-Data-with-l3mapgen)
+# 6. [MOANA Phytoplankton Product](#6.-MOANA-Phytoplankton-Product)
 
 # ## 1. Setup
 #
@@ -119,7 +110,7 @@ results[0]
 
 # Download the granules found in the search.
 
-paths = earthaccess.download(results, local_path="L1B")
+paths = earthaccess.download(results, local_path="data")
 
 # While we have the downloaded location stored in the list `paths`, store one in a variable we won't overwrite for future use.
 
@@ -131,7 +122,7 @@ l2gen_ifile = paths[0]
 # wavelength.
 
 dataset = xr.open_dataset(l2gen_ifile, group="observation_data")
-plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
+artist = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 
 # This tutorial will demonstrate processing this Level-1B granule into a Level-2 granule. Because that can
 # take several minutes, we'll also download a couple of Level-2 granules to save time for the next step of compositing multiple Level-2 granules into a single granule.
@@ -151,8 +142,7 @@ results = earthaccess.search_data(
 for item in results:
     display(item)
 
-paths = earthaccess.download(results, "L2_BGC")
-paths
+paths = earthaccess.download(results, "data")
 
 # While we have the downloaded location stored in the list `paths`, write the list to a text file for future use.
 
@@ -197,7 +187,7 @@ os.environ.setdefault("OCSSWROOT", "/opt/ocssw")
 
 par = {
     "ifile": l2gen_ifile,
-    "ofile": str(l2gen_ifile).replace("L1B", "L2_BGC"),
+    "ofile": str(l2gen_ifile).replace(".L1B.", ".L2_SFREFL."),
     "suite": "SFREFL",
     "atmocor": 0,
 }
@@ -214,11 +204,11 @@ write_par("l2gen.par", par)
 # If successful, the `l2gen` program created a netCDF file at the `ofile` path. The contents should include the `chlor_a` product from the `BGC` suite of products. Once this process is done, you are ready to visualize your "custom" L2 data. Use the `robust=True` option to ignore outlier chl a values.
 
 dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
-plot = dataset["rhos"].sel({"wavelength_3d": 25}).plot(cmap="viridis", robust=True)
+artist = dataset["rhos"].sel({"wavelength_3d": 25}).plot(cmap="viridis", robust=True)
 
 # Feel free to explore `l2gen` options to produce the Level-2 dataset you need! The documentation
 # for `l2gen` is kind of interactive, because so much depends on the data product being processed.
-# For example, try `l2gen ifile=granules/PACE_OCI.20240427T161654.L1B.nc dump_options=true` to get
+# For example, try `l2gen ifile=data/PACE_OCI.20240605T092137.L1B.V2.nc dump_options=true` to get
 # a lot of information about the specifics of what the `l2gen` program generates.
 #
 # The next step for this tutorial is to merge multiple Level-2 granules together.
@@ -235,11 +225,11 @@ plot = dataset["rhos"].sel({"wavelength_3d": 25}).plot(cmap="viridis", robust=Tr
 # l2bin help
 # -
 
-# Write a parameter file with the previously saved list of Level-2 files standing in
+# Write a parameter file with the previously saved list of Level-2 BGC files standing in
 # for the usual "ifile" value. We can leave the datetime out of the "ofile" name rather than extracing a
 # time period from the granules chosen for binning.
 
-ofile = "granules/PACE_OCI.L3B.nc"
+ofile = "data/PACE_OCI.L3B.nc"
 par = {
     "ifile": "l2bin_ifile.txt",
     "ofile": ofile,
@@ -256,7 +246,7 @@ write_par("l2bin.par", par)
 # l2bin par=l2bin.par
 # -
 
-dataset = xr.open_dataset(par["ofile"])
+dataset = xr.open_dataset(par["ofile"], group="level-3_binned_data")
 dataset
 
 # [back to top](#Contents)
@@ -273,7 +263,7 @@ dataset
 
 # Run `l3mapgen` to make a 9km map with a Plate Carree projection.
 
-ifile = "granules/PACE_OCI.L3B.nc"
+ifile = "data/PACE_OCI.L3B.nc"
 ofile = ifile.replace(".L3B.", ".L3M.")
 par = {
     "ifile": ifile,
@@ -292,23 +282,27 @@ write_par("l3mapgen.par", par)
 # l3mapgen par=l3mapgen.par
 # -
 
-# Open the output with XArray, note that there is no group anymore.
+# Open the output with XArray, note that there is no group anymore and that `lat` and `lon` are coordinates as well as indexes.
 
 dataset = xr.open_dataset(par["ofile"])
 dataset
 
-# Now that we have projected data, we can make a map with coastines and gridlines.
+# Now that we have projected chlorophyll data, we can make a map with coastines and gridlines provided by Cartopy.
 
-fig = plt.figure()
-ax = plt.axes(projection=ccrs.PlateCarree())
-plot = dataset["chlor_a"].plot(x="lon", y="lat", cmap="viridis", robust=True, ax=ax)
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.3)
+fig = plt.figure(figsize=(10, 3))
+ax = plt.axes(projection=ccrs.AlbersEqualArea(-45))
+artist = dataset["chlor_a"].plot(x="lon", y="lat", cmap="viridis", robust=True, ax=ax, transform=ccrs.PlateCarree())
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.2)
 ax.coastlines(linewidth=0.5)
+plt.show()
 
-# ## Process L1B data to obtain MOANA phytoplankton products
+# ## 6. MOANA Phytoplankton Product
+
+# One of the new algorithms for the ocean color community is the MOANA algorithm for partitioning
+# the amount of chlorophyll by the type phytoplankton.
 
 tspan = ("2024-03-09", "2024-03-09")
-location = (-30, 25)
+location = (20, -30)
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L1B_SCI",
@@ -319,30 +313,29 @@ results[0]
 
 # Download the granules found in the search.
 
-paths = earthaccess.download(results, local_path="L1B")
-
-l2gen_ifile = "/home/jovyan/oceandata-notebooks/notebooks/oci/PACE_OCI.20240309T115927.L1B.V2.nc"
+paths = earthaccess.download(results, local_path="data")
 
 # The Level-1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
 # On OCI, the reflectances are grouped into blue, red, and short-wave infrared (SWIR) wavelengths. Open
 # the dataset's "observatin_data" group in the netCDF file using `xarray` to plot a "rhot_red"
 # wavelength.
 
-dataset = xr.open_dataset(l2gen_ifile, group="observation_data")
-plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
+dataset = xr.open_dataset(paths[0], group="observation_data")
+artist = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 
 # + scrolled=true
+ifile = paths[0]
 par = {
-    "ifile": l2gen_ifile,
-    "ofile": str(l2gen_ifile).replace("L1B", "L2_BGC_test"),
+    "ifile": ifile,
+    "ofile": str(ifile).replace(".L1B.", ".L2_MOANA."),
     "suite": "BGC",
     "l2prod": "chlor_a picoeuk_moana prococcus_moana rhos_465 rhos_555 rhos_645 syncoccus_moana chlor_a poc",
     "atmocor": 1,
 }
-write_par("l2gen.par", par)
+write_par("l2gen-moana.par", par)
 # -
 
-# Now run `l2bin` using your chosen parameters:
+# Now run `l2bin` using your chosen parameters. Be very patient.
 
 # + scrolled=true language="bash"
 # source $OCSSWROOT/OCSSW_bash.env
@@ -351,7 +344,7 @@ write_par("l2gen.par", par)
 # -
 
 dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
-plot = dataset["chlor_a"].plot(cmap="viridis", robust=True)
+artist = dataset["picoeuk_moana"].plot(cmap="viridis", robust=True)
 
 # [back to top](#Contents)
 #

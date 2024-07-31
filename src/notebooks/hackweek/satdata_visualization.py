@@ -6,29 +6,17 @@
 #     name: python3
 # ---
 
-# # Title of the Tutorial
+# # Satellite Data Visualization
 #
-# **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
+# **Tutorial Lead:** Carina Poulin (NASA, SSAI)
 #
 # <div class="alert alert-success" role="alert">
 #
-# **PREREQUISITES**
-#  This notebook has the following prerequisites:
-#  - An **<a href="https://urs.earthdata.nasa.gov/" target="_blank">**
-#    account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-#  - Learn with OCI: <a href="https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_ocssw_processing_bash/" target="_blank">Installing and Running OCSSW Command-line Tools
+# The following notebooks are **prerequisites** for this tutorial:
 #
+# - [Earthdata Cloud Access](../earthdata_cloud_access)
 #
 # </div>
-#
-# <div class="alert alert-info" role="alert">
-#
-# An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-#
-# </div>
-#
-# [edl]: https://urs.earthdata.nasa.gov/
-# [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 #
 # ## Summary
 #
@@ -49,10 +37,10 @@
 #
 # 1. [Setup](#1.-Setup)
 # 2. [Global Oceans in True Color](#2.-Global-Oceans-in-True-Color)
-# 3. [Complete Scene in True Color](#3.-Full-Scene-in-True-Color)
-# 4. [Phytoplankton in False Color](4.-Phytoplankton-in-False-Color)
-# 5. [Full Spectra from Global Oceans](5.-Full-Spectra-from-Global-Oceans)
-# 6. [Animation from Multiple Angles](6.-Animation-from-Multiple-Angles)
+# 3. [Complete Scene in True Color](#3.-Complete-Scene-in-True-Color)
+# 4. [Phytoplankton in False Color](#4.-Phytoplankton-in-False-Color)
+# 5. [Full Spectra from Global Oceans](#5.-Full-Spectra-from-Global-Oceans)
+# 6. [Animation from Multiple Angles](#6.-Animation-from-Multiple-Angles)
 
 # ## 1. Setup
 #
@@ -83,9 +71,9 @@ options = xr.set_options(display_expand_attrs=False)
 #warnings.simplefilter(action='ignore', category=RuntimeWarning)
 # -
 
-# [back to top](#contents) <a name="other-name"></a>
+# [back to top](#Contents)
 
-# ## 2. Global True Color
+# ## 2. Global Oceans in True Color
 
 # The L3M files are the nicest files, use them to introduce the "dimensions" and "coordinates" parts of an XArray dataset.
 
@@ -107,22 +95,27 @@ dataset
 rrs_rgb = dataset["Rrs"].sel({"wavelength": [645, 555, 368]})
 rrs_rgb
 
-# It is always a good practice to build your labels into the dataset, and we'll see next
+# It is always a good practice to build meaningful labels into the dataset, and we'll see next
 # that it can be very useful as we learn to use metadata while creating visuzalizations.
 #
 # For this case, we can attach another variable called "channel" and then swap it with
-# "wavelength" to become the third dimension of the data array.
+# "wavelength" to become the third dimension of the data array. We'll actually use these
+# values for a choice of `cmap` below, just for fun.
 
 rrs_rgb["channel"] = ("wavelength", ["Reds", "Greens", "Blues"])
 rrs_rgb = rrs_rgb.swap_dims({"wavelength": "channel"})
 rrs_rgb
 
-# Without worrying about matplotlib's terrible defaults for annotation, let's see what we have.
+# A complicated figure can be assembled fairly easily using the `Dataset.plot` method,
+# which draws on the matplotlib package.
 
-fig, axs = plt.subplots(3, 1)
+fig, axs = plt.subplots(3, 1, figsize=(8, 7))
 for i, item in enumerate(rrs_rgb["channel"]):
     array = rrs_rgb.sel({"channel": item})
     array.plot.imshow(x="lon", y="lat", cmap=item.item(), ax=axs[i], robust=True)
+    axs[i].set_aspect("equal")
+fig.tight_layout()
+plt.show()
 
 
 # Define a function to apply enhancements, our own plus generic image enhancements from the Pillow package.
@@ -153,6 +146,9 @@ def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.02, gamma=0.95, contrast=1.
 rrs_rgb_enhanced = enhance(rrs_rgb)
 
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
+plt.gca().set_aspect("equal")
+
+# [back to top](#Contents)
 
 # ## 3. Complete Scene in True Color
 
@@ -443,6 +439,8 @@ plt.axis('off')
 plt.axis("image")
 plt.savefig('mapJuly152024.png')
 
+# [back to top](#Contents)
+
 # ## 4. Phytoplankton in False Color
 
 # +
@@ -581,5 +579,38 @@ ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=c
 ax.imshow(dataset["picoeuk_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_greens, vmin=0, vmax=50000, alpha = .5)
 plt.show()
 # -
+# [back to top](#Contents)
+
+# ## 5. Full Spectra from Global Oceans
 
 
+# +
+import holoviews as hv
+
+hv.extension("bokeh")
+# -
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_RRS_NRT",
+    granule_name="*.MO.*.1deg.*",
+)
+paths = earthaccess.open(results)
+
+# + scrolled=true
+rrs_rgb_enhanced
+
+
+# -
+
+def hvlines(x, y):
+    return hv.VLine(x) * hv.HLine(y)
+
+
+# +
+rgb = hv.RGB(rrs_rgb_enhanced, kdims=["lon", "lat"]).opts(aspect=2)
+click_marker = hv.DynamicMap(hvlines, kdims=["lon", "lat"])
+
+rgb * click_marker
+# -
+
+# [back to top](#Contents)
