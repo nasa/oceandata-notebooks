@@ -195,7 +195,7 @@ dataset
 datatree = open_datatree(paths[0])
 datatree
 
-dataset = xr.merge((datatree[i].to_dataset() for i in datatree.groups))
+dataset = xr.merge(datatree.to_dict().values())
 dataset
 
 # Let's do a quick plot of the `chlor_a` variable. You'll do more plotting in the Multidimensional Data Visualization tutorial.

@@ -287,7 +287,9 @@ write_par("l3mapgen.par", par)
 dataset = xr.open_dataset(par["ofile"])
 dataset
 
-# Now that we have projected chlorophyll data, we can make a map with coastines and gridlines provided by Cartopy.
+# Now that we have projected chlorophyll data, we can make a map with coastines and gridlines provided by Cartopy. The `projection` argument to `plt.axes` indicates the projection we want to have in the visualization. The `transform`
+# argument in the `Dataset.plot` call indicates the projection the data are in. Cartopy does reprojection easilly
+# between two projected coordinate reference systems.
 
 fig = plt.figure(figsize=(10, 3))
 ax = plt.axes(projection=ccrs.AlbersEqualArea(-45))
@@ -317,7 +319,7 @@ paths = earthaccess.download(results, local_path="data")
 
 # The Level-1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
 # On OCI, the reflectances are grouped into blue, red, and short-wave infrared (SWIR) wavelengths. Open
-# the dataset's "observatin_data" group in the netCDF file using `xarray` to plot a "rhot_red"
+# the dataset's "observatin_data" group in the NetCDF file using `xarray` to plot a "rhot_red"
 # wavelength.
 
 dataset = xr.open_dataset(paths[0], group="observation_data")
@@ -329,7 +331,7 @@ par = {
     "ifile": ifile,
     "ofile": str(ifile).replace(".L1B.", ".L2_MOANA."),
     "suite": "BGC",
-    "l2prod": "chlor_a picoeuk_moana prococcus_moana rhos_465 rhos_555 rhos_645 syncoccus_moana chlor_a poc",
+    "l2prod": "chlor_a picoeuk_moana prococcus_moana syncoccus_moana rhos_465 rhos_555 rhos_645 poc",
     "atmocor": 1,
 }
 write_par("l2gen-moana.par", par)
@@ -340,16 +342,10 @@ write_par("l2gen-moana.par", par)
 # + scrolled=true language="bash"
 # source $OCSSWROOT/OCSSW_bash.env
 #
-# l2gen par=l2gen.par
+# l2gen par=l2gen-moana.par
 # -
 
 dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
 artist = dataset["picoeuk_moana"].plot(cmap="viridis", robust=True)
 
 # [back to top](#Contents)
-#
-# <div class="alert alert-info" role="alert">
-#
-# You have completed the notebook on using OCCSW to process PACE data. More notebooks are comming soon!
-#
-# </div>

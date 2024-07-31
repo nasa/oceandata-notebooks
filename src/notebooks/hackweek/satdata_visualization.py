@@ -51,15 +51,17 @@
 # +
 import os
 
+from holoviews.streams import Tap
 from PIL import Image, ImageEnhance
 from xarray.backends.api import open_datatree
 from matplotlib.colors import ListedColormap
 import cartopy.crs as ccrs
 import earthaccess
+import holoviews as hv
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
 import numpy as np
-import pandas as pd
+import panel.widgets as pnw
 import xarray as xr
 # -
 
@@ -79,7 +81,7 @@ options = xr.set_options(display_expand_attrs=False)
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
-    granule_name="*.MO.*.1deg.*",
+    granule_name="*.MO.*.0p1deg.*",
 )
 paths = earthaccess.open(results)
 
@@ -109,7 +111,7 @@ rrs_rgb
 # A complicated figure can be assembled fairly easily using the `Dataset.plot` method,
 # which draws on the matplotlib package.
 
-fig, axs = plt.subplots(3, 1, figsize=(8, 7))
+fig, axs = plt.subplots(3, 1, figsize=(8, 7), sharex=True)
 for i, item in enumerate(rrs_rgb["channel"]):
     array = rrs_rgb.sel({"channel": item})
     array.plot.imshow(x="lon", y="lat", cmap=item.item(), ax=axs[i], robust=True)
@@ -122,7 +124,7 @@ plt.show()
 
 def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.02, gamma=0.95, contrast=1.5, brightness=1.02, sharpness=2, saturation=1.1):
     rgb = rgb.where(rgb > 0)
-    rgb = np.log(rgb/scale)/np.log(1/scale)
+    rgb = np.log(rgb / scale) / np.log(1 / scale)
     # TODO don't understand using of vmin and vmax (i.e. doing it wrong)
     # rgb = rgb.where(rgb > vmin, vmin)
     # rgb = rgb.where(rgb < vmax, vmax)
@@ -584,11 +586,7 @@ plt.show()
 # ## 5. Full Spectra from Global Oceans
 
 
-# +
-import holoviews as hv
-
 hv.extension("bokeh")
-# -
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
@@ -596,21 +594,32 @@ results = earthaccess.search_data(
 )
 paths = earthaccess.open(results)
 
-# + scrolled=true
-rrs_rgb_enhanced
+dataset = xr.open_dataset(paths[-1])
+def single_band(w):
+    array = dataset.sel({"wavelength": w})
+    return hv.Image(array, kdims=["lon", "lat"], vdims=["Rrs"]).opts(aspect="equal")
 
 
-# -
-
-def hvlines(x, y):
-    return hv.VLine(x) * hv.HLine(y)
+single_band(368)
 
 
-# +
-rgb = hv.RGB(rrs_rgb_enhanced, kdims=["lon", "lat"]).opts(aspect=2)
-click_marker = hv.DynamicMap(hvlines, kdims=["lon", "lat"])
+def spectrum(x, y):
+    array = dataset.sel({"lon": x, "lat": y}, method="nearest")
+    return hv.Curve(array, kdims=["wavelength"]).redim.range(Rrs=(-0.01, 0.04))
 
-rgb * click_marker
-# -
+
+spectrum(0, 0)
+
+points = hv.Points([])
+tap = Tap(source=points, x=0, y=0)
+
+slider = pnw.DiscreteSlider(name="wavelength", options=list(dataset["wavelength"].data))
+band_dmap = hv.DynamicMap(single_band, streams={"w": slider.param.value})
+
+spectrum_dmap = hv.DynamicMap(spectrum, streams=[tap])
+
+slider
+
+(band_dmap * points + spectrum_dmap).opts(shared_axes=False)
 
 # [back to top](#Contents)

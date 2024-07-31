@@ -2,3 +2,5 @@
 !/_build/html/
 /_build/html/*
 !/_build/html/_sources
+/_build/html/_sources/**/*.py
+/_build/html/_sources/**/*.md
