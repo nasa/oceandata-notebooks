@@ -27,6 +27,7 @@ dependencies:
   - cartopy
   - cmocean
   - geoviews
+  - holoviews
   - hvplot
   - ipyleaflet
   - ipympl
