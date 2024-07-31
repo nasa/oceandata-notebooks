@@ -113,6 +113,31 @@ def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.04, gamma=0.95, contrast=1.
     rgb[:] = np.array(img) / 255
     return rgb
 
+def enhancel3(rgb, scale = 0.01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1.5, brightness=1.02, sharpness=2, saturation=1.1):
+   
+    rgb = rgb.where(rgb > 0)
+    rgb = np.log(rgb / scale) / np.log(1 / scale)
+    
+    #rgb_min = rgb.min(("lat", "lon"))
+    #rgb_max = rgb.max(("lat", "lon"))
+    #rgb = (rgb - rgb_min) / (rgb_max - rgb_min)
+    rgb = (rgb -  rgb.min()) / (rgb.max() - rgb.min())
+    rgb = rgb * gamma
+    img = rgb * 255
+    img = img.where(img.notnull(), 0).astype("uint8")
+    img = Image.fromarray(img.data)
+    enhancer = ImageEnhance.Contrast(img)
+    img = enhancer.enhance(contrast)
+    enhancer = ImageEnhance.Brightness(img)
+    img = enhancer.enhance(brightness)
+    enhancer = ImageEnhance.Sharpness(img)
+    img = enhancer.enhance(sharpness)
+    enhancer = ImageEnhance.Color(img)
+    img = enhancer.enhance(saturation)
+    rgb[:] = np.array(img) / 255
+    rgb = rgb.where(rgb >= vmin, vmin)
+    rgb = rgb.where(rgb <= vmax, vmax)    
+    return rgb
 
 def pcolormesh(rgb):
     fig = plt.figure()
@@ -154,7 +179,7 @@ rrs_rgb = dataset["Rrs"].sel({"wavelength": [645, 555, 368]})
 rrs_rgb
 
 # It is always a good practice to build meaningful labels into the dataset, and we'll see next
-# that it can be very useful as we learn to use metadata while creating visuzalizations.
+# that it can be very useful as we learn to use metadata while creating visualizations.
 #
 # For this case, we can attach another variable called "channel" and then swap it with
 # "wavelength" to become the third dimension of the data array. We'll actually use these
@@ -176,7 +201,7 @@ for i, item in enumerate(rrs_rgb["channel"]):
 fig.tight_layout()
 plt.show()
 
-rrs_rgb_enhanced = enhance(rrs_rgb)
+rrs_rgb_enhanced = enhancel3(rrs_rgb)
 
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
 plt.gca().set_aspect("equal")
@@ -223,7 +248,6 @@ rhos_rgb_enhanced = np.log(rhos_rgb_enhanced / 0.01) / np.log(1 / 0.01)
 rhos_rgb_max = rhos_rgb_enhanced.max()
 rhos_rgb_min = rhos_rgb_enhanced.min()
 rhos_rgb_enhanced = (rhos_rgb_enhanced - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
-
 pcolormesh(rhos_rgb_enhanced)
 
 # Perhaps it is better to do the unit normalization independently for each channel? We can use
@@ -232,7 +256,6 @@ pcolormesh(rhos_rgb_enhanced)
 rhos_rgb_max = rhos_rgb.max(("number_of_lines", "pixels_per_line"))
 rhos_rgb_min = rhos_rgb.min(("number_of_lines", "pixels_per_line"))
 rhos_rgb_enhanced = (rhos_rgb - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
-
 pcolormesh(rhos_rgb_enhanced)
 
 rhos_rgb_enhanced = rhos_rgb.where(rhos_rgb > 0, np.nan)
@@ -266,33 +289,8 @@ pcolormesh(rhos_rgb_enhanced)
 
 rhos_ice = dataset["rhos"].sel({"wavelength_3d": [1618, 2131, 2258]})
 
-rhos_ice_enhanced = enhance(rhos_ice, vmin=0, vmax=0.68)
-
+rhos_ice_enhanced = enhance(rhos_ice, vmin=0, vmax=0.9, scale=.1, gamma =1, contrast=1, brightness=1, saturation=1)
 pcolormesh(rhos_ice_enhanced)
-
-# +
-# OCI False-color for ice clouds
-vmin = 0.0
-vmax = 0.68
-
-# IR Bands to create false-color image that highlights ice clouds
-rhos_red = dataset["rhos"].sel({"wavelength_3d": 47}) # 1618.0 nm
-rhos_green = dataset["rhos"].sel({"wavelength_3d": 48}) # 2131.0 nm
-rhos_blue = dataset["rhos"].sel({"wavelength_3d": 49}) # 2258.0 nm
-
-red = rhos_red.where((rhos_red >= vmin) & (rhos_red <= vmax), vmin, vmax)
-green = rhos_green.where((rhos_green >= vmin) & (rhos_green <= vmax), vmin, vmax)
-blue = rhos_blue.where((rhos_blue >= vmin) & (rhos_blue <= vmax), vmin, vmax)
-red = red[:,8:1267] # Cutting edge pixels to get same-size bands
-green = green[:,1:1260]
-rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
-
-fig = plt.figure(figsize=(7, 7))
-ax = plt.subplot(projection=ccrs.PlateCarree())
-extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
-ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
-# -
 
 # [back to top](#Contents)
 
@@ -322,7 +320,7 @@ dataset = xr.merge((rhos_465, rhos_555, rhos_645, syn, pro, pico, dataset.coords
 dataset
 # -
 
-plot = dataset["rhos_555"].plot(x="longitude", y="latitude", cmap="viridis", vmin=0)
+plot = dataset["picoeuk_moana"].plot(x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true")
 
 # +
 # OCI True Color 1 band -min/max adjusted

@@ -33,6 +33,7 @@
 # * How to process Level-1B data to Level-2 with `l2gen`
 # * How to merge two images with `l2bin`
 # * How to create a map with `l3mapgen`
+# * How to make MOANA phytoplankton community products with L2gen
 #
 # ## Contents
 #
@@ -298,7 +299,7 @@ ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.2)
 ax.coastlines(linewidth=0.5)
 plt.show()
 
-# ## 6. MOANA Phytoplankton Product
+# ## 6. Make MOANA Phytoplankton Community Products with `l2gen`
 
 # One of the new algorithms for the ocean color community is the MOANA algorithm for partitioning
 # the amount of chlorophyll by the type phytoplankton.
@@ -343,9 +344,14 @@ write_par("l2gen-moana.par", par)
 # source $OCSSWROOT/OCSSW_bash.env
 #
 # l2gen par=l2gen-moana.par
-# -
 
+# + scrolled=true
 dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
 artist = dataset["picoeuk_moana"].plot(cmap="viridis", robust=True)
+
+# + scrolled=true
+dataset = xr.open_dataset("home/joyvan/oceandata-notebooks/src/notebooks/oci/PACE_OCI.20240309T115927.L2_BGC.V2.nc", group="geophysical_data")
+artist = dataset["picoeuk_moana"].plot(cmap="viridis", robust=True)
+# -
 
 # [back to top](#Contents)
