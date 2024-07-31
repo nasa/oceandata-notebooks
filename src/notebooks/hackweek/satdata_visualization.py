@@ -38,9 +38,10 @@
 # 1. [Setup](#1.-Setup)
 # 2. [Global Oceans in True Color](#2.-Global-Oceans-in-True-Color)
 # 3. [Complete Scene in True Color](#3.-Complete-Scene-in-True-Color)
-# 4. [Phytoplankton in False Color](#4.-Phytoplankton-in-False-Color)
-# 5. [Full Spectra from Global Oceans](#5.-Full-Spectra-from-Global-Oceans)
-# 6. [Animation from Multiple Angles](#6.-Animation-from-Multiple-Angles)
+# 4. [False Color for Ice Clouds](#4.-False-Color-for-Ice-Clouds)
+# 5. [Phytoplankton in False Color](#5.-Phytoplankton-in-False-Color)
+# 6. [Full Spectra from Global Oceans](#6.-Full-Spectra-from-Global-Oceans)
+# 7. [Animation from Multiple Angles](#7.-Animation-from-Multiple-Angles)
 
 # ## 1. Setup
 #
@@ -67,10 +68,65 @@ import xarray as xr
 
 options = xr.set_options(display_expand_attrs=False)
 
+
 # In this tutorial, we suppress runtime warnings that show up when calculating log for negative values, which is common with our datasets. 
 
+# Define a function to apply enhancements, our own plus generic image enhancements from the Pillow package.
+
 # +
-#warnings.simplefilter(action='ignore', category=RuntimeWarning)
+def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.04, gamma=0.95, contrast=1.2, brightness=1.02, sharpness=2, saturation=1.1):
+    """The SeaDAS recipe for RGB images from Ocean Color missions.
+
+    Args:
+        rgb: a data array with three dimensions, having 3 or 4 bands in the third dimension
+        scale:
+        vmin:
+        vmax:
+        gamma:
+        contrast:
+        brightness:
+        sharpness:
+        saturation:
+
+    Returns:
+       a transformed data array better for RGB display
+    """
+    rgb = rgb.where(rgb > 0)
+    rgb = np.log(rgb / scale) / np.log(1 / scale)
+    rgb = rgb.where(rgb >= vmin, vmin)
+    rgb = rgb.where(rgb <= vmax, vmax)    
+    rgb_min = rgb.min(("number_of_lines", "pixels_per_line"))
+    rgb_max = rgb.max(("number_of_lines", "pixels_per_line"))
+    rgb = (rgb - rgb_min) / (rgb_max - rgb_min)
+    rgb = rgb * gamma
+    img = rgb * 255
+    img = img.where(img.notnull(), 0).astype("uint8")
+    img = Image.fromarray(img.data)
+    enhancer = ImageEnhance.Contrast(img)
+    img = enhancer.enhance(contrast)
+    enhancer = ImageEnhance.Brightness(img)
+    img = enhancer.enhance(brightness)
+    enhancer = ImageEnhance.Sharpness(img)
+    img = enhancer.enhance(sharpness)
+    enhancer = ImageEnhance.Color(img)
+    img = enhancer.enhance(saturation)
+    rgb[:] = np.array(img) / 255
+    return rgb
+
+
+def pcolormesh(rgb):
+    fig = plt.figure()
+    axes = plt.subplot()
+    artist = axes.pcolormesh(
+        rgb["longitude"],
+        rgb["latitude"],
+        rgb,
+        shading="nearest",
+        rasterized=True,
+    )
+    axes.set_aspect("equal")
+
+
 # -
 
 # [back to top](#Contents)
@@ -108,8 +164,9 @@ rrs_rgb["channel"] = ("wavelength", ["Reds", "Greens", "Blues"])
 rrs_rgb = rrs_rgb.swap_dims({"wavelength": "channel"})
 rrs_rgb
 
-# A complicated figure can be assembled fairly easily using the `Dataset.plot` method,
-# which draws on the matplotlib package.
+# A complicated figure can be assembled fairly easily using the `xarray.Dataset.plot` method,
+# which draws on the matplotlib package. For Level-3 data, we can specifically use `imshow`
+# to visualize the RGB image on the `lat` and `lon` coordinates.
 
 fig, axs = plt.subplots(3, 1, figsize=(8, 7), sharex=True)
 for i, item in enumerate(rrs_rgb["channel"]):
@@ -118,32 +175,6 @@ for i, item in enumerate(rrs_rgb["channel"]):
     axs[i].set_aspect("equal")
 fig.tight_layout()
 plt.show()
-
-
-# Define a function to apply enhancements, our own plus generic image enhancements from the Pillow package.
-
-def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.02, gamma=0.95, contrast=1.5, brightness=1.02, sharpness=2, saturation=1.1):
-    rgb = rgb.where(rgb > 0)
-    rgb = np.log(rgb / scale) / np.log(1 / scale)
-    # TODO don't understand using of vmin and vmax (i.e. doing it wrong)
-    # rgb = rgb.where(rgb > vmin, vmin)
-    # rgb = rgb.where(rgb < vmax, vmax)
-    rgb = (rgb -  rgb.min()) / (rgb.max() - rgb.min())
-    rgb = rgb * gamma
-    img = rgb * 255
-    img = img.where(img.notnull(), 0).astype("uint8")
-    img = Image.fromarray(img.data)
-    enhancer = ImageEnhance.Contrast(img)
-    img = enhancer.enhance(contrast)
-    enhancer = ImageEnhance.Brightness(img)
-    img = enhancer.enhance(brightness)
-    enhancer = ImageEnhance.Sharpness(img)
-    img = enhancer.enhance(sharpness)
-    enhancer = ImageEnhance.Color(img)
-    img = enhancer.enhance(saturation)
-    rgb[:] = np.array(img) / 255
-    return rgb
-
 
 rrs_rgb_enhanced = enhance(rrs_rgb)
 
@@ -154,162 +185,90 @@ plt.gca().set_aspect("equal")
 
 # ## 3. Complete Scene in True Color
 
-# ### Make image from L2 file processed with OCSSW
+# The best product to create a high-quality true-color image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a Level-1B file to Level-2 using l2gen, like we will show in the OCSSW data processing exercise.
 #
-# The best product to create a high-quality RGB image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a L1B file to L2 using l2gen, like we showed in the OCSSW data processing exercise. We will use the L2 file that was created for this exercise. 
-#
-# Open the L2 netcdf file you created in the previous exercise in read-mode with netCDF4 and look at the information in the file. 
-#
-# If you do not have the file, download it with the following code:
-#
-# ```
-# # %%bash
-# wget https://oceancolor.gsfc.nasa.gov/fileshare/carina_poulin/PACE_OCI.20240501T165311.L2.SFREFL.nc
-# ```
+# All files created by a PACE Hackweek tutorial can be found in the `/shared/pace-hackweek-2024/` folder accessible from the JupyterLab file browser. In this tutorial, we'll use a Level-2 file created in advance. Note that the JupyterLab file browser treats `/home/jovyan` (that's your home directory, Jovyan) as the root of the browsable file system.
 
-# +
-nc_file = "/home/jovyan/ocssw_test/granules/PACE_OCI.20240605T092137.L2.V2.nc"
-
-groups = list(open_datatree(nc_file))
-groups
-# -
-
-# When exploring the dataset, we find that the rhos bands are not identified by their respective wavelength. 
-
-dataset_geo = xr.open_dataset(nc_file, group="geophysical_data")
-rhos = dataset_geo["rhos"]
-rhos
-
-bands = rhos["wavelength_3d"]
-bands
-
-# To find the wavelengths corresponding to the bands, we need to look in the sensor band parameters. 
-
-dataset_band_pars = xr.open_dataset(nc_file, group="sensor_band_parameters")
-wavelengths_bands = dataset_band_pars["wavelength_3d"]
-wavelengths_bands
-
-# + scrolled=true
-df = pd.DataFrame({"Wavelength_bands": wavelengths_bands})
-print(df)
-# -
-
-dataset = xr.open_dataset(nc_file, group="navigation_data")
-dataset = dataset.set_coords(("longitude", "latitude"))
-dataset = xr.merge((rhos, dataset.coords))
+path = "/home/jovyan/shared/pace-hackweek-2024/PACE_OCI.20240605T092137.L2_SFREFL.V2.nc"
+datatree = open_datatree(path)
+dataset = xr.merge(datatree.to_dict().values())
 dataset
 
-rhos = dataset["rhos"].sel({"wavelength_3d": 25})
-rhos
+# The longitude and latitude variables are geolocation arrays, and while they are spatial
+# coordinates they cannot be set as an index on the dataset because each array is itself
+# two-dimensional. The rhos are not on a rectangular grid, but it is still useful to tell
+# XArray what will become axis labels.
 
-plot = rhos.plot(x="longitude", y="latitude", cmap="viridis", vmin=0)
+dataset = dataset.set_coords(("longitude", "latitude"))
+dataset
+
+rhos_rgb = dataset["rhos"].sel({"wavelength_3d": [645, 555, 368]})
+rhos_rgb
+
+# The most simple adjustment is normalization of the range across the three RGB channels.
+
+rhos_rgb_max = rhos_rgb.max()
+rhos_rgb_min = rhos_rgb.min()
+rhos_rgb_enhanced = (rhos_rgb - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
+
+# To visualize these data, we have to use the fairly smart `pcolormesh` artists, which interprets
+# the geolocation arrays as pixel centers. TODO: why the warning, though?
+
+pcolormesh(rhos_rgb_enhanced)
+
+# Another type of enhancement involves a logarithmic transform of the data before normalizing to the unit range.
+
+rhos_rgb_enhanced = rhos_rgb.where(rhos_rgb > 0, np.nan)
+rhos_rgb_enhanced = np.log(rhos_rgb_enhanced / 0.01) / np.log(1 / 0.01)
+rhos_rgb_max = rhos_rgb_enhanced.max()
+rhos_rgb_min = rhos_rgb_enhanced.min()
+rhos_rgb_enhanced = (rhos_rgb_enhanced - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
+
+pcolormesh(rhos_rgb_enhanced)
+
+# Perhaps it is better to do the unit normalization independently for each channel? We can use
+# XArray's ability to use and align labelled dimensions for the calculation.
+
+rhos_rgb_max = rhos_rgb.max(("number_of_lines", "pixels_per_line"))
+rhos_rgb_min = rhos_rgb.min(("number_of_lines", "pixels_per_line"))
+rhos_rgb_enhanced = (rhos_rgb - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
+
+pcolormesh(rhos_rgb_enhanced)
+
+rhos_rgb_enhanced = rhos_rgb.where(rhos_rgb > 0, np.nan)
+rhos_rgb_enhanced = np.log(rhos_rgb_enhanced / 0.01) / np.log(1 / 0.01)
 
 # +
-# Natural colour single band
-red = dataset["rhos"].sel({"wavelength_3d": 25}) # 645 nm
-green = dataset["rhos"].sel({"wavelength_3d": 17}) # 555 nm
-blue = dataset["rhos"].sel({"wavelength_3d": 2}) # 368 nm
-rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) # Normalize image
+vmin = 0.01
+vmax = 1.04
 
-plt.figure(figsize=(3, 3))
-plt.imshow(rgb)
+rhos_rgb_enhanced = rhos_rgb_enhanced.where(rhos_rgb_enhanced <= vmax, vmax)
+rhos_rgb_enhanced = rhos_rgb_enhanced.where(rhos_rgb_enhanced >= vmin, vmin)
 # -
 
-# Create a figure with a projection
-fig = plt.figure(figsize=(5, 5))
-ax = plt.subplot(projection=ccrs.PlateCarree())
-extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
-ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+rhos_rgb_max = rhos_rgb.max(("number_of_lines", "pixels_per_line"))
+rhos_rgb_min = rhos_rgb.min(("number_of_lines", "pixels_per_line"))
+rhos_rgb_enhanced = (rhos_rgb_enhanced - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
 
-# DO IT EASY IN SEADAS
+pcolormesh(rhos_rgb_enhanced)
 
-# +
-# OCI True Color 1 band (SEADAS recipe for OCI RGB)
-rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
-rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
-rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
-red = np.log(rhos_red/0.01)/np.log(1/0.01)
-green = np.log(rhos_green/0.01)/np.log(1/0.01)
-blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
-rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb))
+# Everything we've been trying is already built into the `enhance` function, including extra goodies from the Pillow package of generic image processing filters.
 
-fig = plt.figure(figsize=(5, 5))
-ax = plt.subplot(projection=ccrs.PlateCarree())
-extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
-ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+rhos_rgb_enhanced = enhance(rhos_rgb)
+pcolormesh(rhos_rgb_enhanced)
 
-# +
-# OCI True Color 1 band - Normalized by channel
-rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
-rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
-rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
+rhos_rgb_enhanced = enhance(rhos_rgb, contrast=1.2, brightness=1.1, saturation=0.8)
+pcolormesh(rhos_rgb_enhanced)
 
-red = (red - red.min()) / (red.max() - red.min()) # Normaling by channel
-green = (green - green.min()) / (green.max() - green.min())
-blue = (blue - blue.min()) / (blue.max() - blue.min())
-rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
+# [back to top](#Contents)
 
-fig = plt.figure(figsize=(5, 5))
-ax = plt.subplot(projection=ccrs.PlateCarree())
-extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
-ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
+# ## 4. False Color for Ice Clouds
 
+rhos_ice = dataset["rhos"].sel({"wavelength_3d": [1618, 2131, 2258]})
 
-# +
-# OCI True Color 1 band - log and min/max adjusted
-vmin = 0.01
-vmax = 1.04 # Above 1 because whites can be higher than 1
-#---- 
+rhos_ice_enhanced = enhance(rhos_ice, vmin=0, vmax=0.68)
 
-rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
-rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
-rhos_blue = dataset["rhos"].sel({"wavelength_3d": 2})
-red = np.log(rhos_red/0.01)/np.log(1/0.01)
-green = np.log(rhos_green/0.01)/np.log(1/0.01)
-blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
-red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
-green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
-blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
-rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
-
-fig = plt.figure(figsize=(7, 7))
-ax = plt.subplot(projection=ccrs.PlateCarree())
-extent = (rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
-ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
-
-# +
-# Image adjustments: change values from 0 to 2, 1 being unchanged
-contrast = 1.2 
-brightness = 1.1 
-sharpness = 2
-saturation = .8
-gamma = .95
-#----
-
-normalized_image = (rgb - rgb.min()) / (rgb.max() - rgb.min())
-normalized_image = normalized_image** gamma
-normalized_image = (normalized_image* 255).astype(np.uint8)
-image_pil = Image.fromarray(normalized_image) # Convert numpy array to Pillow Image
-
-# Adjust contrast, brightness and sharpness using Pillow
-enhancer = ImageEnhance.Contrast(image_pil)
-image_enhanced = enhancer.enhance(contrast)  
-enhancer = ImageEnhance.Brightness(image_enhanced)
-image_enhanced = enhancer.enhance(brightness)  
-enhancer = ImageEnhance.Sharpness(image_enhanced)
-image_enhanced = enhancer.enhance(sharpness)
-enhancer = ImageEnhance.Color(image_enhanced)
-image_enhanced = enhancer.enhance(saturation)
-enhanced_image_np = np.array(image_enhanced) / 255.0  # Normalize back to [0, 1] range
-
-fig = plt.figure(figsize=(7, 7))
-ax = plt.subplot(projection=ccrs.PlateCarree())
-extent = (rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
-ax.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
+pcolormesh(rhos_ice_enhanced)
 
 # +
 # OCI False-color for ice clouds
@@ -334,112 +293,6 @@ ax = plt.subplot(projection=ccrs.PlateCarree())
 extent=(rhos.longitude.min(), rhos.longitude.max(), rhos.latitude.min(), rhos.latitude.max())
 ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
 # -
-
-# ### Make image from L3 file
-#
-# The best product to create a high-quality RGB image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a L1B file to L2 using l2gen, like we showed in the OCSSW data processing exercise. We will use the L2 file that was created for this exercise. 
-#
-# Open the L2 netcdf file you created in the previous exercise in read-mode with netCDF4 and look at the information in the file. 
-
-auth = earthaccess.login(persist=True)
-
-# + scrolled=true
-tspan = ("2024-07-15", "2024-07-15")
-#bbox = (-76.75, 36.97, -75.74, 39.01)
-
-results = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_SFREFL_NRT",
-    temporal=tspan,
-#    bounding_box=bbox,
-)
-# -
-
-paths = earthaccess.open(results)
-
-dataset = xr.open_dataset(paths[0])
-dataset
-
-# +
-nc_file = "/home/jovyan/ocssw_test/granules/PACE_OCI.20240715.L3m.DAY.SFREFL.V2_0.rhos.0p1deg.NRT.nc"
-
-groups = list(open_datatree(nc_file))
-groups
-# -
-
-# When exploring the dataset, we find that the rhos bands are not identified by their respective wavelength. 
-
-dataset = xr.open_dataset(nc_file)
-rhos = dataset["rhos"]
-rhos
-
-# + scrolled=true
-wavelength = rhos["wavelength"]
-df = pd.DataFrame({"Wavelengths": wavelength})
-print(df)
-
-# -
-
-# To find the wavelengths corresponding to the bands, we need to look in the sensor band parameters. 
-
-rhos555 = dataset["rhos"].sel({"wavelength": 555})
-plot = rhos555.plot(x="lon", y="lat", cmap="viridis", vmin=0)
-
-# +
-# OCI True Color 1 band -min/max adjusted
-vmin = 0.01
-vmax = 1.02 # Above 1 because whites can be higher than 1
-#---- 
-
-rhos_red = dataset["rhos"].sel({"wavelength": 645}) # 645 nm
-rhos_green = dataset["rhos"].sel({"wavelength": 555}) # 555 nm
-rhos_blue = dataset["rhos"].sel({"wavelength": 465}) # 368 nm
-red = np.log(rhos_red/0.01)/np.log(1/0.01)
-green = np.log(rhos_green/0.01)/np.log(1/0.01)
-blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
-red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
-green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
-blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
-rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb))
-
-plt.figure(figsize=(15, 15))
-plt.imshow(rgb)
-
-# +
-# Image adjustments: change values from 0 to 2, 1 being unchanged
-contrast = 1.5 
-brightness = 1.02 
-sharpness = 2
-saturation = 1.1
-gamma = .95
-#----
-
-normalized_image = (rgb - rgb.min()) / (rgb.max() - rgb.min())
-normalized_image = normalized_image** gamma
-normalized_image = (normalized_image* 255).astype(np.uint8)
-image_pil = Image.fromarray(normalized_image)
-enhancer = ImageEnhance.Contrast(image_pil)
-image_enhanced = enhancer.enhance(contrast)  
-enhancer = ImageEnhance.Brightness(image_enhanced)
-image_enhanced = enhancer.enhance(brightness)  
-enhancer = ImageEnhance.Sharpness(image_enhanced)
-image_enhanced = enhancer.enhance(sharpness)
-enhancer = ImageEnhance.Color(image_enhanced)
-image_enhanced = enhancer.enhance(saturation)
-enhanced_image_np = np.array(image_enhanced) / 255.0
-
-plt.figure(figsize=(10, 10))
-plt.imshow(enhanced_image_np)
-plt.axis('off')
-plt.axis("image")
-# -
-
-# Create a large figure and export to png
-plt.figure(figsize=(25, 25))
-plt.imshow(enhanced_image_np)
-plt.axis('off')
-plt.axis("image")
-plt.savefig('mapJuly152024.png')
 
 # [back to top](#Contents)
 
@@ -610,12 +463,11 @@ def spectrum(x, y):
 
 spectrum(0, 0)
 
-points = hv.Points([])
-tap = Tap(source=points, x=0, y=0)
-
 slider = pnw.DiscreteSlider(name="wavelength", options=list(dataset["wavelength"].data))
 band_dmap = hv.DynamicMap(single_band, streams={"w": slider.param.value})
 
+points = hv.Points([])
+tap = Tap(source=points, x=0, y=0)
 spectrum_dmap = hv.DynamicMap(spectrum, streams=[tap])
 
 slider
