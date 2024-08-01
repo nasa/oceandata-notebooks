@@ -117,10 +117,6 @@ def enhancel3(rgb, scale = 0.01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1
    
     rgb = rgb.where(rgb > 0)
     rgb = np.log(rgb / scale) / np.log(1 / scale)
-    
-    #rgb_min = rgb.min(("lat", "lon"))
-    #rgb_max = rgb.max(("lat", "lon"))
-    #rgb = (rgb - rgb_min) / (rgb_max - rgb_min)
     rgb = (rgb -  rgb.min()) / (rgb.max() - rgb.min())
     rgb = rgb * gamma
     img = rgb * 255
@@ -134,9 +130,7 @@ def enhancel3(rgb, scale = 0.01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1
     img = enhancer.enhance(sharpness)
     enhancer = ImageEnhance.Color(img)
     img = enhancer.enhance(saturation)
-    rgb[:] = np.array(img) / 255
-    rgb = rgb.where(rgb >= vmin, vmin)
-    rgb = rgb.where(rgb <= vmax, vmax)    
+    rgb[:] = np.array(img) / 255    
     return rgb
 
 def pcolormesh(rgb):
@@ -205,6 +199,20 @@ rrs_rgb_enhanced = enhancel3(rrs_rgb)
 
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
 plt.gca().set_aspect("equal")
+
+
+# Let's add a grid and coastlines to the map with cartopy. 
+
+# +
+import cartopy.crs as ccrs
+
+fig = plt.figure(figsize=(10, 3))
+ax = plt.axes(projection=ccrs.PlateCarree())
+artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, color="white", linewidth=0.3)
+ax.coastlines(color="white", linewidth=1)
+plt.show()
+# -
 
 # [back to top](#Contents)
 
