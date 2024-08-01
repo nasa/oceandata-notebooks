@@ -280,7 +280,6 @@ rhos_rgb_enhanced = rhos_rgb_enhanced.where(rhos_rgb_enhanced >= vmin, vmin)
 rhos_rgb_max = rhos_rgb.max(("number_of_lines", "pixels_per_line"))
 rhos_rgb_min = rhos_rgb.min(("number_of_lines", "pixels_per_line"))
 rhos_rgb_enhanced = (rhos_rgb_enhanced - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
-
 pcolormesh(rhos_rgb_enhanced)
 
 # Everything we've been trying is already built into the `enhance` function, including extra goodies from the Pillow package of generic image processing filters.
@@ -445,7 +444,11 @@ plt.show()
 # ## 5. Full Spectra from Global Oceans
 
 
+# The holoview library and its bokeh extension allow us to explore datasets interactively.
+
 hv.extension("bokeh")
+
+# Let's open a level 3 Rrs map. 
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
@@ -453,14 +456,18 @@ results = earthaccess.search_data(
 )
 paths = earthaccess.open(results)
 
+# We can create a map from a single band in the dataset and see the Rrs value by hovering over the map. 
+
 dataset = xr.open_dataset(paths[-1])
 def single_band(w):
     array = dataset.sel({"wavelength": w})
-    return hv.Image(array, kdims=["lon", "lat"], vdims=["Rrs"]).opts(aspect="equal")
+    return hv.Image(array, kdims=["lon", "lat"], vdims=["Rrs"]).opts(aspect="equal", frame_width=450, frame_height=250, tools=['hover'])
 
 
 single_band(368)
 
+
+# In order to explore the hyperspectral datasets from PACE, we can have a look at the Rrs Spectrum at a certain location. 
 
 def spectrum(x, y):
     array = dataset.sel({"lon": x, "lat": y}, method="nearest")
@@ -469,12 +476,18 @@ def spectrum(x, y):
 
 spectrum(0, 0)
 
+# Now we can build a truly interactive map with a slider to change the mapped band and a capability to show the spectrum where we click on the map. First, we build the slider and its interactivity with the map:
+
 slider = pnw.DiscreteSlider(name="wavelength", options=list(dataset["wavelength"].data))
 band_dmap = hv.DynamicMap(single_band, streams={"w": slider.param.value})
+
+# Then we build the capability to show the Rrs spectrum at the point where we click on the map.
 
 points = hv.Points([])
 tap = Tap(source=points, x=0, y=0)
 spectrum_dmap = hv.DynamicMap(spectrum, streams=[tap])
+
+# Now try it!
 
 slider
 
