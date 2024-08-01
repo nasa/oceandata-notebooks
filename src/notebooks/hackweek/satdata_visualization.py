@@ -201,12 +201,12 @@ artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
 plt.gca().set_aspect("equal")
 
 
-# Let's add a grid and coastlines to the map with cartopy. 
+# Let's add a grid and coastlines to the map with cartopy tools. 
 
 # +
 import cartopy.crs as ccrs
 
-fig = plt.figure(figsize=(10, 3))
+fig = plt.figure(figsize=(7, 5))
 ax = plt.axes(projection=ccrs.PlateCarree())
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, color="white", linewidth=0.3)
@@ -313,19 +313,10 @@ groups
 dataset_geo = xr.open_dataset(nc_file, group="geophysical_data")
 dataset_geo
 
-# +
-rhos_465 = dataset_geo["rhos_465"]
-rhos_555 = dataset_geo["rhos_555"]
-rhos_645 = dataset_geo["rhos_645"]
-syn = dataset_geo["syncoccus_moana"]
-pro = dataset_geo["prococcus_moana"]
-pico = dataset_geo["picoeuk_moana"]
-
 dataset = xr.open_dataset(nc_file, group="navigation_data")
 dataset = dataset.set_coords(("longitude", "latitude"))
-dataset = xr.merge((rhos_465, rhos_555, rhos_645, syn, pro, pico, dataset.coords))
+dataset = xr.merge((dataset_geo["rhos_465"], dataset_geo["rhos_555"], dataset_geo["rhos_645"], dataset_geo["syncoccus_moana"], dataset_geo["prococcus_moana"], dataset_geo["picoeuk_moana"], dataset.coords))
 dataset
-# -
 
 plot = dataset["picoeuk_moana"].plot(x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true")
 
