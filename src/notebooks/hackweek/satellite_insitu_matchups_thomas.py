@@ -39,16 +39,10 @@
 #
 # Begin by importing all of the packages used in this notebook. 
 
-# +
 import sys
 import os
 
-import earthaccess
-import pandas as pd
-import numpy as np
-# -
-
-# The first thing we need to do is retrieve the toolkit itself. For the hackweek, we have already saved the ThoMaS toolkit under `shared/pace-hackweek-2024/lib/ThoMaS`.
+# We also need to retrieve the toolkit itself. For the hackweek, we have already saved the ThoMaS toolkit under `shared/pace-hackweek-2024/lib/ThoMaS`.
 #
 # ThoMaS can be used from the [command line](https://gitlab.eumetsat.int/eumetlab/oceans/ocean-science-studies/ThoMaS/-/blob/main/README_examples.md), but here we will use it as a Python library. Lets import ThoMaS into our notebook.
 
@@ -84,8 +78,6 @@ if not os.path.exists(output_path):
 
 # Let's now define out configuration file.
 
-TODO: change brdf to Lee 
-
 # +
 path_to_config_file = os.path.join(output_path, 'config_file.ini')
 config_params = {}
@@ -111,7 +103,7 @@ config_params['insitu']['insitu_data2OCDBfile'] = 'AERONETOC'
 config_params['insitu']['insitu_input'] = os.path.join(output_path, 'Chesapeake_Bay_OCDB.csv')
 config_params['insitu']['insitu_satelliteTimeToleranceSeconds'] = 3600
 config_params['insitu']['insitu_getAncillary'] = False 
-config_params['insitu']['insitu_BRDF'] = 'M02' 
+config_params['insitu']['insitu_BRDF'] = 'L11' 
 
 # satellite
 config_params['satellite'] = {}
@@ -120,7 +112,7 @@ config_params['satellite']['satellite_source'] = 'NASA_OBPG'
 config_params['satellite']['satellite_collections'] = 'operational'
 config_params['satellite']['satellite_platforms'] = 'PACE'
 config_params['satellite']['satellite_resolutions'] = 'FR'
-config_params['satellite']['satellite_BRDF'] = 'M02'
+config_params['satellite']['satellite_BRDF'] = 'L11'
 
 # minifiles
 config_params['minifiles'] = {}
