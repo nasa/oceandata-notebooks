@@ -79,14 +79,14 @@ def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.04, gamma=0.95, contrast=1.
 
     Args:
         rgb: a data array with three dimensions, having 3 or 4 bands in the third dimension
-        scale:
-        vmin:
-        vmax:
-        gamma:
-        contrast:
-        brightness:
-        sharpness:
-        saturation:
+        scale: scale value for the log transform
+        vmin: minimum pixel value for the image
+        vmax: maximum pixel value for the image
+        gamma: exponential factor for gamma correction
+        contrast: amount of pixel value differentiation 
+        brightness: pixel values (intensity)
+        sharpness: amount of detail
+        saturation: color intensity
 
     Returns:
        a transformed data array better for RGB display
@@ -113,7 +113,7 @@ def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.04, gamma=0.95, contrast=1.
     rgb[:] = np.array(img) / 255
     return rgb
 
-def enhancel3(rgb, scale = 0.01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1.5, brightness=1.02, sharpness=2, saturation=1.1):
+def enhancel3(rgb, scale = .01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1.5, brightness=1.02, sharpness=2, saturation=1.1):
    
     rgb = rgb.where(rgb > 0)
     rgb = np.log(rgb / scale) / np.log(1 / scale)
@@ -150,9 +150,27 @@ def pcolormesh(rgb):
 
 # [back to top](#Contents)
 
+# ## 2. Easy Global Chlorophyll-a Map
+
+# Let's start with the most basic visualization. First, get level-3 chlorophyll map product, which is already gridded on latitudes and longitudes. 
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_CHL_NRT",
+    granule_name="*.MO.*.0p1deg.*",
+)
+paths = earthaccess.open(results)
+
+dataset = xr.open_dataset(paths[-1])
+chla = dataset["chlor_a"]
+
+# Now we can already create a global map. Let's use a special colormap from `cmocean` to be fancy, but this is not necessary to make a basic map. Use the `robust="true"` option to remove outliers. 
+
+import cmocean
+chla.plot(cmap=cmocean.cm.algae, robust="true")
+
 # ## 2. Global Oceans in True Color
 
-# The L3M files are the nicest files, use them to introduce the "dimensions" and "coordinates" parts of an XArray dataset.
+# True color images use three bands to create a RGB image. Let's still use a level-3 mapped product, this time we use the remote-sensing reflectance (Rrs) product. 
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
@@ -164,7 +182,12 @@ paths = earthaccess.open(results)
 # variables that are named after their only dimension.
 
 dataset = xr.open_dataset(paths[-1])
-dataset
+
+# Look at all the wavelentghs available!
+
+# + scrolled=true
+dataset["wavelength"].values
+# -
 
 # For a true color image, choose three wavelengths to represent the "Red", "Green", and "Blue"
 # channels used to make true color images.
@@ -195,13 +218,17 @@ for i, item in enumerate(rrs_rgb["channel"]):
 fig.tight_layout()
 plt.show()
 
+# We use the `enhancel3` function defined at the start of the tutorial to make adjusments to the image. 
+
 rrs_rgb_enhanced = enhancel3(rrs_rgb)
+
+# And we create the image using the `imshow` function. 
 
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
 plt.gca().set_aspect("equal")
 
 
-# Let's add a grid and coastlines to the map with cartopy tools. 
+# Finally, we can add a grid and coastlines to the map with `cartopy` tools. 
 
 # +
 import cartopy.crs as ccrs
