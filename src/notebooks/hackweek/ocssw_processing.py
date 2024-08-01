@@ -348,10 +348,6 @@ write_par("l2gen-moana.par", par)
 # + scrolled=true
 dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
 artist = dataset["picoeuk_moana"].plot(cmap="viridis", robust=True)
-
-# + scrolled=true
-dataset = xr.open_dataset("home/joyvan/oceandata-notebooks/src/notebooks/oci/PACE_OCI.20240309T115927.L2_BGC.V2.nc", group="geophysical_data")
-artist = dataset["picoeuk_moana"].plot(cmap="viridis", robust=True)
 # -
 
 # [back to top](#Contents)
