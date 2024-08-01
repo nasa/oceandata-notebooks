@@ -8,7 +8,7 @@
 
 # # Satellite Data Visualization
 #
-# **Tutorial Lead:** Carina Poulin (NASA, SSAI)
+# **Tutorial Leads:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC) and Sean Foley (NASA, MSU)
 #
 # <div class="alert alert-success" role="alert">
 #
@@ -20,28 +20,29 @@
 #
 # ## Summary
 #
-# Succinct description of the tutorial ...
+# This is an introductory tutorial to the visualization possibilities arising from PACE data, meant to give you ideas and tools to develop your own scientific data visualizations
+# . 
 #
 # ## Learning Objectives
 #
 # At the end of this notebook you will know:
 #
-# - How to create a true-color image from OCI data from the cloud *WHOLE GLOBE L3!
+# - How to create an easy global map from OCI data from the cloud
 # - How to create a true-color image from OCI data processed with OCSSW
-# - How to make a false color image to look at clouds or smoke
+# - How to make a false color image to look at clouds
 # - How to make an interactive tool to explore OCI data
 # - What goes into an animation of multi-angular HARP2 data
-# - What ...
 #
 # ## Contents
 #
 # 1. [Setup](#1.-Setup)
-# 2. [Global Oceans in True Color](#2.-Global-Oceans-in-True-Color)
-# 3. [Complete Scene in True Color](#3.-Complete-Scene-in-True-Color)
-# 4. [False Color for Ice Clouds](#4.-False-Color-for-Ice-Clouds)
-# 5. [Phytoplankton in False Color](#5.-Phytoplankton-in-False-Color)
-# 6. [Full Spectra from Global Oceans](#6.-Full-Spectra-from-Global-Oceans)
-# 7. [Animation from Multiple Angles](#7.-Animation-from-Multiple-Angles)
+# 2. [Easy Global Chlorophyll-a Map](#2.-Easy-Global-Chlorophyll-a-Map)
+# 3. [Global Oceans in Quasi True Color](#3.-Global-Oceans-Quasi-in-True-Color)
+# 4. [Complete Scene in True Color](#4.-Complete-Scene-in-True-Color)
+# 5. [False Color for Ice Clouds](#4.-False-Color-for-Ice-Clouds)
+# 6. [Phytoplankton in False Color](#5.-Phytoplankton-in-False-Color)
+# 7. [Full Spectra from Global Oceans](#6.-Full-Spectra-from-Global-Oceans)
+# 8. [Animation from Multiple Angles](#7.-Animation-from-Multiple-Angles)
 
 # ## 1. Setup
 #
@@ -117,7 +118,11 @@ def enhancel3(rgb, scale = .01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1.
    
     rgb = rgb.where(rgb > 0)
     rgb = np.log(rgb / scale) / np.log(1 / scale)
-    rgb = (rgb -  rgb.min()) / (rgb.max() - rgb.min())
+    rgb = (rgb -  rgb.mincontrast = 1.9 
+brightness = 1 
+sharpness = 2
+saturation = 1.4
+gamma = .48()) / (rgb.max() - rgb.min())
     rgb = rgb * gamma
     img = rgb * 255
     img = img.where(img.notnull(), 0).astype("uint8")
@@ -168,7 +173,7 @@ chla = dataset["chlor_a"]
 import cmocean
 chla.plot(cmap=cmocean.cm.algae, robust="true")
 
-# ## 2. Global Oceans in True Color
+# ## 3. Global Oceans in Quasi True Color
 
 # True color images use three bands to create a RGB image. Let's still use a level-3 mapped product, this time we use the remote-sensing reflectance (Rrs) product. 
 
@@ -243,7 +248,7 @@ plt.show()
 
 # [back to top](#Contents)
 
-# ## 3. Complete Scene in True Color
+# ## 4. Complete Scene in True Color
 
 # The best product to create a high-quality true-color image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a Level-1B file to Level-2 using l2gen, like we will show in the OCSSW data processing exercise.
 #
@@ -262,10 +267,12 @@ dataset
 dataset = dataset.set_coords(("longitude", "latitude"))
 dataset
 
+# We then select the three wavelenghts that will become the red, green and blue chanels in our image. 
+
 rhos_rgb = dataset["rhos"].sel({"wavelength_3d": [645, 555, 368]})
 rhos_rgb
 
-# The most simple adjustment is normalization of the range across the three RGB channels.
+# We are ready to have a look at our image. The most simple adjustment is normalization of the range across the three RGB channels.
 
 rhos_rgb_max = rhos_rgb.max()
 rhos_rgb_min = rhos_rgb.min()
@@ -275,6 +282,10 @@ rhos_rgb_enhanced = (rhos_rgb - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
 # the geolocation arrays as pixel centers. TODO: why the warning, though?
 
 pcolormesh(rhos_rgb_enhanced)
+
+# Let's have a look at the image's histogram that shows the pixel intensity value distribution across the image. Here, we can see that the values are skewed towards the low intensities, which makes the image dark. 
+
+rhos_rgb_enhanced.plot.hist()
 
 # Another type of enhancement involves a logarithmic transform of the data before normalizing to the unit range.
 
@@ -293,6 +304,8 @@ rhos_rgb_min = rhos_rgb.min(("number_of_lines", "pixels_per_line"))
 rhos_rgb_enhanced = (rhos_rgb - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
 pcolormesh(rhos_rgb_enhanced)
 
+# Let's go back to the log-transformed image, but this time adjust the minimum and maximum pixel values `vmin` and `vmax`. 
+
 rhos_rgb_enhanced = rhos_rgb.where(rhos_rgb > 0, np.nan)
 rhos_rgb_enhanced = np.log(rhos_rgb_enhanced / 0.01) / np.log(1 / 0.01)
 
@@ -309,26 +322,42 @@ rhos_rgb_min = rhos_rgb.min(("number_of_lines", "pixels_per_line"))
 rhos_rgb_enhanced = (rhos_rgb_enhanced - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
 pcolormesh(rhos_rgb_enhanced)
 
+# This image looks much more balanced. The histogram is also going to indicate this:
+
+rhos_rgb_enhanced.plot.hist()
+
 # Everything we've been trying is already built into the `enhance` function, including extra goodies from the Pillow package of generic image processing filters.
 
 rhos_rgb_enhanced = enhance(rhos_rgb)
 pcolormesh(rhos_rgb_enhanced)
+
+# Since every image is unique, we can further adjust the parameters. 
 
 rhos_rgb_enhanced = enhance(rhos_rgb, contrast=1.2, brightness=1.1, saturation=0.8)
 pcolormesh(rhos_rgb_enhanced)
 
 # [back to top](#Contents)
 
-# ## 4. False Color for Ice Clouds
+# ## 5. False Color for Ice Clouds
+
+# We can use the same RGB image method, this time with different bands, to create false-color images that highlight specific elements in an image. 
+#
+# For example, using a combination of infrared bands can highlight ice clouds in the atmosphere, versus regular water vapor clouds. Let's try it:
 
 rhos_ice = dataset["rhos"].sel({"wavelength_3d": [1618, 2131, 2258]})
 
 rhos_ice_enhanced = enhance(rhos_ice, vmin=0, vmax=0.9, scale=.1, gamma =1, contrast=1, brightness=1, saturation=1)
 pcolormesh(rhos_ice_enhanced)
 
+# Here, the ice clouds are purple and water vapor clouds are white, like we can see in the northwestern region of the scene. 
+
 # [back to top](#Contents)
 
-# ## 4. Phytoplankton in False Color
+# ## 6. Phytoplankton in False Color
+
+# A uniquely innovative type of product from PACE is the phytoplankton community composition, using the MOANA algorithm. It gives the abundance of three types of plankton: picoeucaryotes, prochlorococcus and synechococcus. These products were used to create the first light image for PACE. Let's see how. 
+#
+# We first open the dataset that is created with l2gen. This will be covered in the OCSSW tutorial. 
 
 # +
 nc_file = "/home/jovyan/PACE_OCI.20240309T115927.L2.BGC.nc"
@@ -337,15 +366,28 @@ groups = list(open_datatree(nc_file))
 groups
 # -
 
+# We can see the MOANA products, RGB bands and other level-2 products in the dataset. 
+
 dataset_geo = xr.open_dataset(nc_file, group="geophysical_data")
 dataset_geo
+
+# We then set the coordinates of the dataset. 
 
 dataset = xr.open_dataset(nc_file, group="navigation_data")
 dataset = dataset.set_coords(("longitude", "latitude"))
 dataset = xr.merge((dataset_geo["rhos_465"], dataset_geo["rhos_555"], dataset_geo["rhos_645"], dataset_geo["syncoccus_moana"], dataset_geo["prococcus_moana"], dataset_geo["picoeuk_moana"], dataset.coords))
 dataset
 
+dataset = xr.open_dataset(nc_file, group="navigation_data")
+dataset = dataset.set_coords(("longitude", "latitude"))
+dataset = xr.merge((dataset_geo["rhos_465"], dataset_geo["rhos_555"], dataset_geo["rhos_645"], dataset_geo["syncoccus_moana"], dataset_geo["prococcus_moana"], dataset_geo["picoeuk_moana"], dataset.coords))
+dataset_rgb
+
+# Let's make a quick MOANA product plot to see if everything looks normal. 
+
 plot = dataset["picoeuk_moana"].plot(x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true")
+
+# Now we create a RGB image using our three rhos bands and the usual log-transform, vmin/vmax adjustments and normalization. We also project the map using cartopy. 
 
 # +
 # OCI True Color 1 band -min/max adjusted
@@ -370,6 +412,9 @@ ax = fig.add_subplot(projection=ccrs.PlateCarree())
 ax.imshow(rgb,
           extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max()),
           origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+# -
+
+# We then enhance the image. 
 
 # +
 # Image adjustments: change values from 0 to 2, 1 being unchanged
@@ -399,12 +444,14 @@ ax = plt.subplot(projection=ccrs.PlateCarree())
 extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
 ax.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
 # -
+# We then project the MOANA products on the same grid. We can look at Synechococcus as an example. 
+
 fig = plt.figure(figsize=(5, 5))
 ax = fig.add_subplot(projection=ccrs.PlateCarree())
 extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
 ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap="Reds", vmin=0, vmax=35000, alpha = 1)
 
-# Create transparent color maps for MOANA products
+# To layer the three products on our true-color image, we will add transparency to our colormaps for the three plankton products. Look at the Synechococcus product again.
 
 # +
 cmap_greens = pl.cm.Greens # Get original color map
@@ -424,29 +471,9 @@ fig = plt.figure(figsize=(5, 5))
 ax = fig.add_subplot(projection=ccrs.PlateCarree())
 extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
 ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=35000, alpha = 1)
+# -
 
-# +
-# Image adjustments: change values from 0 to 2, 1 being unchanged
-contrast = 1.9 
-brightness = 1 
-sharpness = 2
-saturation = 1.4
-gamma = .48
-#----
-
-normalized_image = (rgb - rgb.min()) / (rgb.max() - rgb.min())
-normalized_image = normalized_image** gamma
-normalized_image = (normalized_image* 255).astype(np.uint8)
-image_pil = Image.fromarray(normalized_image)
-enhancer = ImageEnhance.Contrast(image_pil)
-image_enhanced = enhancer.enhance(contrast)  
-enhancer = ImageEnhance.Brightness(image_enhanced)
-image_enhanced = enhancer.enhance(brightness)  
-enhancer = ImageEnhance.Sharpness(image_enhanced)
-image_enhanced = enhancer.enhance(sharpness)
-enhancer = ImageEnhance.Color(image_enhanced)
-image_enhanced = enhancer.enhance(saturation)
-enhanced_image_np = np.array(image_enhanced) / 255.0  # Normalize back to [0, 1] range
+# We finally assemble the image using the plankton layers and the true-color base layer. 
 
 fig = plt.figure(figsize=(7, 7))
 ax = plt.subplot(projection=ccrs.PlateCarree())
@@ -456,10 +483,9 @@ ax.imshow(dataset["prococcus_moana"], extent=extent, origin='lower', transform=c
 ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=20000, alpha = .5)
 ax.imshow(dataset["picoeuk_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_greens, vmin=0, vmax=50000, alpha = .5)
 plt.show()
-# -
 # [back to top](#Contents)
 
-# ## 5. Full Spectra from Global Oceans
+# ## 7. Full Spectra from Global Oceans
 
 
 # The holoview library and its bokeh extension allow us to explore datasets interactively.
@@ -512,3 +538,135 @@ slider
 (band_dmap * points + spectrum_dmap).opts(shared_axes=False)
 
 # [back to top](#Contents)
+
+# ## 8. Animation from Multiple Angles
+#
+# Let's look at the multi-angular datasets from HARP2. First, download some HARP2 Level-1C data using the short_name value "PACE_HARP2_L1C_SCI" in earthaccess.search_data. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface.
+#
+
+tspan = ("2024-05-20", "2024-05-20")
+results = earthaccess.search_data(
+    short_name="PACE_HARP2_L1C_SCI",
+    temporal=tspan,
+    count=1,
+)
+
+paths = earthaccess.open(results)
+
+prod = xr.open_dataset(paths[0])
+view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
+geo = xr.open_dataset(paths[0], group="geolocation_data").set_coords(["longitude", "latitude"])
+obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
+
+# The `prod` dataset, as usual for OB.DAAC products, contains attributes but no variables. Merge it with the "observation_data" and "geolocation_data", setting latitude and longitude as auxiliary (e.e. non-index) coordinates, to get started.
+
+dataset = xr.merge((prod, obs, geo))
+dataset
+
+# ### Understanding Multi-Angle Data
+#
+# HARP2 is a multi-spectral sensor, like OCI, with 4 spectral bands. These roughly correspond to green, red, near infrared (NIR), and blue (in that order). HARP2 is also multi-angle. These angles are with respect to the satellite track. Essentially, HARP2 is always looking ahead, looking behind, and everywhere in between. The number of angles varies per sensor. The red band has 60 angles, while the green, blue, and NIR bands each have 10.
+#
+# In the HARP2 data, the angles and the spectral bands are combined into one axis. I'll refer to this combined axis as HARP2's "channels." Below, we'll make a quick plot both the viewing angles and the wavelengths of HARP2's channels. In both plots, the x-axis is simply the channel index.
+#
+# Pull out the view angles and wavelengths.
+
+angles = view["sensor_view_angle"]
+wavelengths = view["intensity_wavelength"]
+
+
+# ### Radiance to Reflectance
+#
+# We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). This conversion compensates for the differences in appearance due to the viewing angle and sun angle. Write the conversion as a function, because you may need to repeat it.
+
+def rad_to_refl(rad, f0, sza, r):
+    """Convert radiance to reflectance.
+    
+    Args:
+        rad: Radiance.
+        f0: Solar irradiance.
+        sza: Solar zenith angle.
+        r: Sun-Earth distance (in AU).
+
+    Returns: Reflectance.
+    """
+    return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) / f0
+
+
+# The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
+
+refl = rad_to_refl(
+    rad=dataset["i"],
+    f0=view["intensity_f0"],
+    sza=dataset["solar_zenith_angle"],
+    r=float(dataset.attrs["sun_earth_distance"]),
+)
+
+# ### Animating an Overpass
+#
+# <div class="alert alert-warning" role="alert">
+#
+# WARNING: there is some flickering in the animation displayed in this section.
+#
+# </div>
+#
+# All that is great for looking at a single angle at a time, but it doesn't capture the multi-angle nature of the instrument. Multi-angle data innately captures information about 3D structure. To get a sense of that, we'll make an animation of the scene with the 60 viewing angles available for the red band.
+#
+# We are going to generate this animation without using the latitude and longitude coordinates. If you use XArray's `plot` as above with coordinates, you could use a projection. However, that can be a little slow for all animation "frames" available with HARP2. This means there will be some stripes of what seems like missing data at certain angles. These stripes actually result from the gridding of the multi-angle data, and are not a bug.
+
+# Get the reflectances of just the red channel, and normalize the reflectance to lie between 0 and 1.
+
+refl_red = refl[..., 10:70]
+refl_pretty = (refl_red - refl_red.min()) / (refl_red.max() - refl_red.min())
+
+# A very mild Gaussian filter over the angular axis will improve the animation's smoothness.
+
+from scipy.ndimage import gaussian_filter1d
+refl_pretty.data = gaussian_filter1d(refl_pretty, sigma=0.5, truncate=2, axis=2)
+
+# Raising the image to the power 2/3 will brighten it a little bit.
+
+refl_pretty = refl_pretty ** (2 / 3)
+
+# Append all but the first and last frame in reverse order, to get a 'bounce' effect.
+
+frames = np.arange(refl_pretty.sizes["number_of_views"])
+frames = np.concatenate((frames, frames[-1::-1]))
+frames
+
+# In order to display an animation in a Jupyter notebook, the "backend" for matplotlib has to be explicitly set to "widget".
+
+# Now we can use `matplotlib.animation` to create an initial plot, define a function to update that plot for each new frame, and show the resulting animation. When we create the inital plot, we get back the object called `im` below. This object is an instance of `matplotlib.artist.Artist` and is responsible for rendering data on the axes. Our `update` function uses that artist's `set_data` method to leave everything in the plot the same other than the data used to make the image.
+
+# +
+from matplotlib import animation
+
+fig, ax = plt.subplots()
+im = ax.imshow(refl_pretty[{"number_of_views": 0}], cmap="gray")
+
+
+def update(i):
+    im.set_data(refl_pretty[{"number_of_views": i}])
+    return im
+
+an = animation.FuncAnimation(fig=fig, func=update, frames=frames, interval=30)
+filename = f'harp2_red_anim_{dataset.attrs["product_name"].split(".")[1]}.gif'
+an.save(filename, writer="pillow")
+plt.close()
+# -
+
+# This scene is a great example of multi-layer clouds. You can use the parallax effect to distinguish between these layers.
+#
+# The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
+#
+# ![A multi-angle HARP2 animation](harp2_red_anim_20240519T235950.gif)
+#
+# Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By default, `matplotlib` will not display an animation. To view the animation, we saved it as a file and displayed the result in the next cell. Alternatively, you could change the default by executing `%matplotlib widget`. The `widget` setting, which works in Jupyter Lab but not on a static website, you can use `plt.show()` as well as `an.pause()` and `an.resume()`.
+
+# [back to top](#Contents)
+#
+# <div class="alert alert-info" role="alert">
+#     
+# You have completed the notebook giving a first look at HARP2 data. More notebooks are comming soon!
+#
+# </div>
