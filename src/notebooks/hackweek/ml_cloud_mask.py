@@ -6,27 +6,17 @@
 #     name: python3
 # ---
 
-# <a name="top"></a>
 # # Machine Learning Tutorial
 #
-# **Authors:** Sean Foley (NASA GSFC, GESTAR II, Morgan State University)
+# **Tutorial Lead:** Sean Foley (NASA, MSU)
 #
 # <div class="alert alert-success" role="alert">
 #
-# The following notebooks are **prerequisites** for this tutorial.
+# The following notebooks are **prerequisites** for this tutorial:
 #
-# - Learn with OCI: [Data Access][oci-data-access]
-#
-# </div>
-#
-# <div class="alert alert-info" role="alert">
-#
-# An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+# - [Earthdata Cloud Access](../earthdata_cloud_access)
 #
 # </div>
-#
-# [edl]: https://urs.earthdata.nasa.gov/
-# [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 #
 # ## Summary
 #
@@ -40,7 +30,7 @@
 # - The meaning of training, validation, and test sets
 # - How to construct a simple neural network in Pytorch
 # - How the backpropagation algorithm works
-# - How to construct a simple training loop in Pytorch
+# - How to construct a training loop in Pytorch
 #   
 # Stretch goals:
 # - How to use a GPU to speed up training
@@ -49,19 +39,18 @@
 #
 # ## Contents
 #
-# 1. [Setup](#setup)
-# 2. [Cloud Masking](#cloud-masking)
-# 3. [Training, Validation, and Test Sets](#train-val-test)
-# 4. [Datasets and DataLoaders](#data-loading)
-# 5. [A Simple Multi-Layer Perceptron](#simple-mlp)
-# 6. [Optimization](#optimization)
-# 7. [A Simple Training Loop](#training-loop)
-# 8. [Running on GPU/CUDA](#gpu-cuda)
-# 9. [Convolutional Neural Networks](#convnets)
-# 10. [Putting It All Together](#put-it-all-together)
-# 11. [Want More?](#want-more)
+# 1. [Setup](#1.-Setup)
+# 2. [Cloud Masking](#2.-Cloud-Masking)
+# 3. [Training, Validation, and Test Sets](#3.-Training,-Validation,-and-Test-Sets)
+# 4. [Datasets and DataLoaders](#4.-Datasets-and-DataLoaders)
+# 5. [A Simple Multi-Layer Perceptron](#5.-A-Simple-Multi-Layer-Perceptron)
+# 6. [Optimization](#6.-Optimization)
+# 7. [A Minimal Training Loop](#7.-A-Minimal-Training-Loop)
+# 8. [Running on GPU/CUDA](#8.-Running-on-GPU-/-CUDA)
+# 9. [Convolutional Neural Networks](#9.-Convolutional-Neural-Networks)
+# 10. [Putting It All Together](#10.-Putting-It-All-Together)
+# 11. [Want More?](#11.-Want-More?)
 
-# <a name="setup"></a>
 # ## 1. Setup
 #
 # As usual, we will begin by importing some libraries. Some of the more notable ones include:
@@ -70,8 +59,6 @@
 # - PIL: Python Image Library, aka Pillow, will let us easily open image files.
 # - torch: Short for [Pytorch](https://pytorch.org/), this is the machine learning library of choice for this tutorial. This is the most popular machine learning library among researchers as it represents a good balance between flexibility and ease-of-use.
 # - tqdm: For progress bars on loops
-#
-# [back to top](#top)
 
 # +
 from functools import cache
@@ -92,7 +79,8 @@ from tqdm.notebook import tqdm
 CLDMASK_PATH = pathlib.Path('shared/pace-hackweek-2024/cldmask_dataset')
 # -
 
-# <a name="cloud-masking"></a>
+# [back to top](#Contents)
+
 # ## 2. Cloud Masking
 #
 # Cloud masking refers to the task of assigning a binary value to each pixel in a satellite image, according to whether or not that location is covered by a cloud. It is essential to many other data products. For non-atmospheric scientists, this is usually useful to know what pixels to ignore, or 'mask out', in processing. For atmospheric scientists, it is often the opposite: we may exclusively wish to study the clouds.
@@ -102,8 +90,6 @@ CLDMASK_PATH = pathlib.Path('shared/pace-hackweek-2024/cldmask_dataset')
 # We have pre-processed the cloud mask data and associated OCI imagery into an easy-to-use dataset. We have taken OCI granules and chopped them up into 64x64 patches. The inputs include 11 of the OCI bands from the visible to the near-infrared: 413, 442, 470, 550, 650, 865, 940, 1249, 1378, 1618, and 2131 nm. The inputs also include a land vs. sea mask, which will be useful information for our model. The output is the binary cloud mask. Since there are 12 inputs, we have split each image into 3-channel groups to be able to save them as PNG files. Along with the inputs and output, we include the associated validity mask, which indicates whether each pixel is valid for processing. These files are all already stored here on the server, located in the path specified above in the CLDMASK_PATH variable.
 #
 # Let's look at an example. The next cell will open and display the images for a single instance.
-#
-# [back to top](#top)
 
 # +
 ex_img_idx = 57  # this image index displays a meaningful cloud mask and 
@@ -137,8 +123,9 @@ len(list((CLDMASK_PATH / 'output').glob('*.png')))
 
 
 # Wow! That's a lot. And this represents a small fraction of the available data since PACE has launched. With PACE, we truly are drowning in data. This is why machine learning is such a valuable tool for us. Next, let's talk about how we're going to use that data.
+#
+# [back to top](#Contents)
 
-# <a name="train-val-test"></a>
 # ## 3. Training, Validation, and Test Sets
 #
 # When training a machine learning algorithm, it's important to understand how your model generalizes to data it hasn't been directly trained on. It's also important to understand how your particular choices of designing that model will generalize to data that you haven't tuned those choices for. For that reason, it is standard practice to divide your data into a training, validation, and test sets. The purpose of the training set is to fit your model. Your model will be directly supervised on that data. The purpose of the validation set is to allow you to figure out how to improve your model's design. The model parameters should NOT be fit to the validation data. Your hyperparameters (e.g. how many layers in your neural network, the learning rate, the type of data augmentation) are optimized with respect to the validation set. In other words, while you're making decisions about how to design your model, the validation set is what you base those decisions on. Finally, the test set is the last thing you use. You shouldn't make any changes (to parameters or hyperparameters) after seeing your results on the test set. Oftentimes, the maintainers of benchmark datasets will not provide labels for the testing set. To get their results, participants will send their predictions to maintainers of the benchmark, who will themselves evaluate the results.
@@ -149,9 +136,7 @@ len(list((CLDMASK_PATH / 'output').glob('*.png')))
 #
 # Another common practice which we will ignore is called "cross validation", where you generate multiple train/val splits, fitting your model independently to each one, to get an understanding of the variance between different splits of the data.
 #
-# `generate_split` will generate a random training/validation/test "split" and save it to a JSON file. Go ahead and run it. Careful, as if you've already run this function before with the same split name, it will throw a ValueError, unless you add "replace=True" to the function call. 
-#
-# [back to top](#top)
+# `generate_split` will generate a random training/validation/test "split" and save it to a JSON file. Go ahead and run it. Careful, as if you've already run this function before with the same split name, it will throw a ValueError, unless you add "replace=True" to the function call.
 
 # +
 def generate_split(name: str, replace: bool = False) -> None:
@@ -191,7 +176,9 @@ def generate_split(name: str, replace: bool = False) -> None:
 generate_split('default_split')
 # -
 
-# <a name="data-loading"></a>
+#
+# [back to top](#Contents)
+
 # ## 4. Datasets and DataLoaders
 #
 # Next, we need to write a little code to load our data. Torch gives us a nice framework to do this.  A [`torch.utils.Dataset`](https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset) is responsible for getting a single instance of data associated with a specific index. To implement a `Dataset`, we implement `__init__` (as with all classes), `__len__`, and `__getitem__`.
@@ -199,8 +186,6 @@ generate_split('default_split')
 # Usually, `__getitem__` is where most of the work happens. In `CloudMaskDataset.__getitem__`, we construct the appropriate filepaths and load the PNG files with the PIL library. We concatenate the four 3-channel input images into one 12-channel array. We return the inputs, the validity mask, and the cloud mask labels. In the case where one of the images won't load, we return arrays filled with zeros. Since the validity mask will be all zero, our code will be able to handle this appropriately later.
 #
 # Run the next cell to define `CloudMaskDataset` and to create a dataset for each of the training, validation, and test sets.
-#
-# [back to top](#top)
 
 from io import BytesIO
 
@@ -270,14 +255,13 @@ for inp, validity, labels in train_loader:
 print(inp.shape, validity.shape, labels.shape)
 # -
 
-# <a name="simple-mlp"></a>
+# [back to top](#Contents)
+
 # ## 5. A Simple Multi-Layer Perceptron
 #
 # Next, let's design a simple multi-layer perceptron (MLP), the simplest form of neural network. MLPs consist of fully-connected layers, also known as [linear layers](https://pytorch.org/docs/stable/generated/torch.nn.Linear.html), separated by activation functions. Fully-connected simply means that, within a layer, every input is connected to every output. Let $M$ be the number of inputs to a linear layer, and let $N$ be the number of outputs. Let $W\in\mathbb{R}^{M\times N}$ be the weight matrix. Let $b\in \mathbb{R}^{N}$ be an optional bias vector. The output $y\in\mathbb{R}^N$ of a linear layer, given input $x\in\mathbb{R}^M$, is defined as $y=xW + b$.
 #
 # An MLP consists of several linear layers. The output of one layer is processed by an activation function before feeding into the next layer. This activation function must be a non-linear function! Otherwise, no matter how many layers we add to our network, it will always be reducible to a single linear layer. Historically, the activation function of choice was sigmoid, as it (loosely) resembles the activation patterns of human neurons, and it constraints output to lie between 0 and 1. In practice, researchers discovered that this doesn't work well in deeper networks, and it contributes to the [vanishing gradient problem](https://en.wikipedia.org/wiki/Vanishing_gradient_problem). In practice, the [rectified linear unit (ReLU)](https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html), or variants, works better. Let's plot both below:
-#
-# [back to top](#top)
 
 # +
 x = torch.linspace(-4, 4, 200)  # notice how similar the torch and numpy APIs are!
@@ -342,16 +326,15 @@ for i in range(16):
 plt.subplots_adjust(wspace=None, hspace=None);
 # -
 
-# <a name="optimization"></a>
+# [back to top](#Contents)
+
 # ## 6. Optimization
 #
 # It doesn't seem like our model is doing much. Well, that makes sense, because we haven't trained it yet! Currently our model is full of random numbers and the output is likely to look pretty similar to a garbled version of the input. So... how do we train it to do better?
 #
 # First, we need to decide what loss function (a.k.a. objective function) to use. This function will measure how wrong our model is, and we will optimize our model to minimize this function. Our task, cloud masking, is an example of classification (as opposed to regression). We are attempting to classify each pixel into one of two categories: cloud, or not cloud. Therefore, let's use the most typical loss function for classification tasks: the [Cross Entropy Loss](https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html).
 #
-# Cross entropy is a measure of the difference between two probability distributions. Since our task only has two classes, we'll use the binary cross entropy loss. Normally, binary cross entropy loss expects our predictions to probabilities, and thus constrained to lie between 0 and 1. Our outputs are not probabilities, and are instead logits (they can take any value, and must be mapped to probabilities). Therefore, we will use the [BCEWithLogitsLoss](https://pytorch.org/docs/stable/generated/torch.nn.BCEWithLogitsLoss.html). 
-#
-# [back to top](#top)
+# Cross entropy is a measure of the difference between two probability distributions. Since our task only has two classes, we'll use the binary cross entropy loss. Normally, binary cross entropy loss expects our predictions to probabilities, and thus constrained to lie between 0 and 1. Our outputs are not probabilities, and are instead logits (they can take any value, and must be mapped to probabilities). Therefore, we will use the [BCEWithLogitsLoss](https://pytorch.org/docs/stable/generated/torch.nn.BCEWithLogitsLoss.html).
 
 objective = torch.nn.BCEWithLogitsLoss()
 loss = objective(preds[:, 0], labels.view(-1).float())
@@ -379,15 +362,14 @@ optimizer.zero_grad()  # zero out the optimizer for next time (don't forget to d
 # That was so easy! You might be asking, how does `loss.backward()` magically know all of the gradients of all of the functions we called several cells ago? Well, that's because torch has automatic differentiation built in. Torch functions will set up the backward pass as it computes the forward pass. Under the hood, torch will build a computation graph for the operations you use. [More details about autograd here.](https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html) This is also why torch arrays are called "tensors." A tensor is like an array, but its storage can also keep track of its gradient. Torch keeps the gradient computation hidden under the hood, and allows us to operate on tensors in almost exactly the same way as numpy arrays.
 #
 # In practice, there are much better alternatives to SGD. A great default optimizer which will work fine in 99% of cases is called [Adam](https://pytorch.org/docs/stable/generated/torch.optim.Adam.html) (no, that's not an acronym). For the rest of the tutorial we'll use Adam instead of SGD.
+#
+# [back to top](#Contents)
 
-# <a name="training-loop"></a>
-# ## 7. A Simple Training Loop
+# ## 7. A Minimal Training Loop
 #
 # Let's put it all together. We'll loop over some batches, train our model, and take a look at what happens over time to the loss function. We won't run all the way through the training set, as that would take too long for demonstration purposes. Normally your model would loop over the training set multiple times, with each full pass of the training set called an "epoch." This should code should take a few minutes to run on the default value of `NUM_BATCHES=1000`.
 #
 # While we run, we're going to track our training loss and training accuracy. Accuracy is simply the number of correctly classified pixels divided by the total number of pixels. At the end we'll display the loss, the running mean of the loss, and the accuracy in a plot.
-#
-# [back to top](#top)
 
 # +
 BATCH_SIZE = 16
@@ -485,8 +467,9 @@ plt.subplots_adjust(wspace=None, hspace=None);
 # If you want to check out more examples, you can rerun the cell to get a new batch every time.
 #
 # You might notice some problems with our predictions. You might see quite a few examples of the model misclassifying small clouds. Large clouds will dominate the data, and the model can achieve a high accuracy without accurately masking these smaller clouds. You might even see occasional images where the model is totally wrong - predicting all cloud or all no-cloud when the scene is actually partly cloudy. We can do better!
+#
+# [back to top](#Contents)
 
-# <a name="gpu-cuda"></a>
 # ## 8. Running on GPU / CUDA
 #
 # Until now, all the code we've run has been on just the central processing unit (CPU). This has restricted the capacity of neural network we can effectively train. During training, we need memory for the model's parameters, the gradient of those parameters, and for the intermediate tensors computed along the forward and backward passes. If we were to use too big of a network or too big of a batch size, we'd run out of memory. You may have noticed this if you tried increasing the batch size and your notebook crashed as a result.
@@ -498,24 +481,28 @@ plt.subplots_adjust(wspace=None, hspace=None);
 # </div>
 #
 # If you're unsure about whether you're currently running in an instance with a GPU, you can easily check if CUDA is available from torch with the following:
-#
-#
-# [back to top](#top)
 
 torch.cuda.is_available()
 
+# <div class="alert alert-warning" role="alert">
+#
+# The remaining cells in this notebook are set to "Raw" cell type, to prevent errors from attempting to run without CUDA. Change them to "Code" if CUDA is available.
+#
+# </div>
+#
 # So, now that we've ensured you have access to a GPU via CUDA, how do we convert our code to use CUDA? Well, converting a single torch tensor to CUDA is as easy as adding `.cuda()` after it. We can also convert our model with `.cuda()`. Another way to move a tensor between devices is to use the `.to(device=...)` syntax, which allows you to be a little smarter with your allocation, especially in cases where you're using multiple GPUs at the same time. The following cell illustrates the basic functionality:
 
-# +
-print(f'Available device count: {torch.cuda.device_count()}\nCurrent device ID: {torch.cuda.current_device()}')
-
-rand_cpu = torch.randn(10)
-rand_gpu1 = rand_cpu.cuda()
-rand_gpu2 = rand_cpu.to(device=torch.cuda.current_device())
-print(f'Device IDs | rand_cpu: {rand_cpu.device} | rand_gpu1: {rand_gpu1.device} | rand_gpu2: {rand_gpu2.device}')
+# + active=""
+# print(f'Available device count: {torch.cuda.device_count()}\nCurrent device ID: {torch.cuda.current_device()}')
+#
+# rand_cpu = torch.randn(10)
+# rand_gpu1 = rand_cpu.cuda()
+# rand_gpu2 = rand_cpu.to(device=torch.cuda.current_device())
+# print(f'Device IDs | rand_cpu: {rand_cpu.device} | rand_gpu1: {rand_gpu1.device} | rand_gpu2: {rand_gpu2.device}')
 # -
 
-# <a name="convnets"></a>
+# [back to top](#Contents)
+
 # ## 9. Convolutional Neural Networks
 #
 # Our simple MLP has a big problem: it operates independently on every pixel. This means it is incapable of incorporating any _spatial context_ into its understanding of a scene. But we know that adjacent pixels are _not_ independent, and that spatial context is likely to be useful. For example, a pixel is more likely to be cloudy if many of its neighbors are cloudy. On the other hand, if a scene contains reflective surfaces (like snow and ice), then bright values might be less likely to imply that a pixel is cloudy. By allowing our network to operate on an entire image at once, we allow it to model this context.
@@ -527,29 +514,27 @@ print(f'Device IDs | rand_cpu: {rand_cpu.device} | rand_gpu1: {rand_gpu1.device}
 # $f * g(t) = \int_{-\inf}^{\inf}f(\tau)g(t-\tau)d\tau$
 #
 # The [wikipedia article](https://en.wikipedia.org/wiki/Convolution) is a great resource to further understand convolution, but we've also provided you an example of (discrete) convolution below:
+
+# + active=""
+# # define some interesting looking functions
+# x = np.linspace(-1, 1, 100)
+# f_x = np.cos(x * np.pi * 2)
+# f_x[x < -1/4] = 0
+# f_x[x > 1/4] = 0
+# g_x = x * 2 * (x > 0) * (x < 0.5)
 #
-# [back to top](#top)
-
-# +
-# define some interesting looking functions
-x = np.linspace(-1, 1, 100)
-f_x = np.cos(x * np.pi * 2)
-f_x[x < -1/4] = 0
-f_x[x > 1/4] = 0
-g_x = x * 2 * (x > 0) * (x < 0.5)
-
-# normalize them
-f_x /= np.sum(np.abs(f_x))
-g_x /= np.sum(g_x)
-
-# convolve them
-conv_fg_x = np.convolve(f_x, g_x, mode='same')
-
-plt.figure(figsize=(8, 4))
-plt.plot(x, f_x, label='f(x)', linestyle='dotted')
-plt.plot(x, g_x, label='g(x)', linestyle='dashed')
-plt.plot(x, conv_fg_x, label='f * g')
-plt.legend();
+# # normalize them
+# f_x /= np.sum(np.abs(f_x))
+# g_x /= np.sum(g_x)
+#
+# # convolve them
+# conv_fg_x = np.convolve(f_x, g_x, mode='same')
+#
+# plt.figure(figsize=(8, 4))
+# plt.plot(x, f_x, label='f(x)', linestyle='dotted')
+# plt.plot(x, g_x, label='g(x)', linestyle='dashed')
+# plt.plot(x, conv_fg_x, label='f * g')
+# plt.legend();
 # -
 
 # Convolution generalizes to multiple dimensions. Two-dimensional convolution is extremely useful for image processing. [This graphic](https://en.wikipedia.org/wiki/Convolution#/media/File:2D_Convolution_Animation.gif) is a great visualization of how it works. Its as simple as multiplying where our kernel overlaps our image and summing the values, then repeating that in a sliding window fashion across the whole image.
@@ -558,60 +543,58 @@ plt.legend();
 #
 # Below you'll see what happens when we apply these filters to an image of a checkerboard. You can mostly ignore the code in this next cell (unless you're curious), but pay attention to the plots.
 
-# +
-# make a checkerboard pattern
-img_checkers = np.zeros((64, 64))
-mask_alt = (np.mgrid[:64] // 8) % 2 == 1  # alternates 0 -> 1
-img_checkers[mask_alt] = 1
-img_checkers[:, mask_alt] = 1 - img_checkers[:, mask_alt]
-
-# First, get a 1D discrete gaussian w. mean=0 stdev=2 over [-3, 3]
-gaussian1d = np.exp(-((np.mgrid[-3:4] / 2) ** 2) / 2) / (np.sqrt(2 * np.pi) * 2)
-# Get a 2D gaussian by taking the outer product of our 1D gaussian
-gaussian2d = gaussian1d[:, None] @ gaussian1d[None]  
-
-# make 2D sobel filters
-sobel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]]).astype(float)
-sobel_y = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]]).astype(float)
-
-def conv_from_kernel_array(kernel: np.ndarray) -> nn.Conv2d:
-    """Take a 2D array of shape (N, N) where N is odd and turn it into a torch Conv2D."""
-    assert isinstance(kernel, np.ndarray)
-    assert len(kernel.shape) == 2 and kernel.shape[0] == kernel.shape[1] and kernel.shape[0] % 2 == 1
-    conv = nn.Conv2d(1, 1, kernel.shape[0], padding=(kernel.shape[0] - 1) // 2, bias=False)
-    conv.weight = nn.Parameter(torch.from_numpy(kernel[None, None]))
-    return conv
-
-# get the conv2ds for each kernel
-conv_gaussian = conv_from_kernel_array(gaussian2d)
-conv_sobel_x = conv_from_kernel_array(sobel_x)
-conv_sobel_y = conv_from_kernel_array(sobel_y)
-
-# apply conv2ds to checkerboard image
-img_torch = torch.from_numpy(img_checkers)[None, None]
-img_checkers_blur = conv_gaussian(img_torch)[0, 0].detach().numpy()
-img_checkers_sobel_x = conv_sobel_x(img_torch)[0, 0].detach().numpy()
-img_checkers_sobel_y = conv_sobel_y(img_torch)[0, 0].detach().numpy()
-
-# plot everything
-fig, ax = plt.subplots(1, 1, figsize=(3, 3))
-ax.imshow(img_checkers, cmap='gray')
-ax.set_title('Checkerboard pattern')
-ax.set_xticks([]), ax.set_yticks([])
-
-fig, axs = plt.subplots(2, 4, figsize=(12, 6))
-axs[0][0].imshow(gaussian2d, cmap='gray'), axs[0][0].set_title('Gaussian kernel')
-axs[0][1].imshow(sobel_x, cmap='gray'), axs[0][1].set_title('Sobel filter (x)')
-axs[0][2].imshow(sobel_y, cmap='gray'), axs[0][2].set_title('Sobel filter (y)')
-axs[0][3].imshow(np.zeros((1, 1)), cmap='gray')
-axs[1][0].imshow(img_checkers_blur, cmap='gray'), axs[1][0].set_title('Checkerboard * Gaussian')
-axs[1][1].imshow(img_checkers_sobel_x, cmap='gray'), axs[1][1].set_title('Checkerboard * Sobel_x')
-axs[1][2].imshow(img_checkers_sobel_y, cmap='gray'), axs[1][2].set_title('Checkerboard * Sobel_y')
-axs[1][3].imshow(np.abs(img_checkers_sobel_x + img_checkers_sobel_y), cmap='gray')
-axs[1][3].set_title('|Sobel_x + Sobel_y|')
-[(a.set_xticks([]), a.set_yticks([])) for ax in axs for a in ax];
-
-
+# + active=""
+# # make a checkerboard pattern
+# img_checkers = np.zeros((64, 64))
+# mask_alt = (np.mgrid[:64] // 8) % 2 == 1  # alternates 0 -> 1
+# img_checkers[mask_alt] = 1
+# img_checkers[:, mask_alt] = 1 - img_checkers[:, mask_alt]
+#
+# # First, get a 1D discrete gaussian w. mean=0 stdev=2 over [-3, 3]
+# gaussian1d = np.exp(-((np.mgrid[-3:4] / 2) ** 2) / 2) / (np.sqrt(2 * np.pi) * 2)
+# # Get a 2D gaussian by taking the outer product of our 1D gaussian
+# gaussian2d = gaussian1d[:, None] @ gaussian1d[None]  
+#
+# # make 2D sobel filters
+# sobel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]]).astype(float)
+# sobel_y = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]]).astype(float)
+#
+# def conv_from_kernel_array(kernel: np.ndarray) -> nn.Conv2d:
+#     """Take a 2D array of shape (N, N) where N is odd and turn it into a torch Conv2D."""
+#     assert isinstance(kernel, np.ndarray)
+#     assert len(kernel.shape) == 2 and kernel.shape[0] == kernel.shape[1] and kernel.shape[0] % 2 == 1
+#     conv = nn.Conv2d(1, 1, kernel.shape[0], padding=(kernel.shape[0] - 1) // 2, bias=False)
+#     conv.weight = nn.Parameter(torch.from_numpy(kernel[None, None]))
+#     return conv
+#
+# # get the conv2ds for each kernel
+# conv_gaussian = conv_from_kernel_array(gaussian2d)
+# conv_sobel_x = conv_from_kernel_array(sobel_x)
+# conv_sobel_y = conv_from_kernel_array(sobel_y)
+#
+# # apply conv2ds to checkerboard image
+# img_torch = torch.from_numpy(img_checkers)[None, None]
+# img_checkers_blur = conv_gaussian(img_torch)[0, 0].detach().numpy()
+# img_checkers_sobel_x = conv_sobel_x(img_torch)[0, 0].detach().numpy()
+# img_checkers_sobel_y = conv_sobel_y(img_torch)[0, 0].detach().numpy()
+#
+# # plot everything
+# fig, ax = plt.subplots(1, 1, figsize=(3, 3))
+# ax.imshow(img_checkers, cmap='gray')
+# ax.set_title('Checkerboard pattern')
+# ax.set_xticks([]), ax.set_yticks([])
+#
+# fig, axs = plt.subplots(2, 4, figsize=(12, 6))
+# axs[0][0].imshow(gaussian2d, cmap='gray'), axs[0][0].set_title('Gaussian kernel')
+# axs[0][1].imshow(sobel_x, cmap='gray'), axs[0][1].set_title('Sobel filter (x)')
+# axs[0][2].imshow(sobel_y, cmap='gray'), axs[0][2].set_title('Sobel filter (y)')
+# axs[0][3].imshow(np.zeros((1, 1)), cmap='gray')
+# axs[1][0].imshow(img_checkers_blur, cmap='gray'), axs[1][0].set_title('Checkerboard * Gaussian')
+# axs[1][1].imshow(img_checkers_sobel_x, cmap='gray'), axs[1][1].set_title('Checkerboard * Sobel_x')
+# axs[1][2].imshow(img_checkers_sobel_y, cmap='gray'), axs[1][2].set_title('Checkerboard * Sobel_y')
+# axs[1][3].imshow(np.abs(img_checkers_sobel_x + img_checkers_sobel_y), cmap='gray')
+# axs[1][3].set_title('|Sobel_x + Sobel_y|')
+# [(a.set_xticks([]), a.set_yticks([])) for ax in axs for a in ax];
 # -
 
 # You can see how with some very simple kernels, we are able to achieve interesting transformations of the input image. Hopefully you can imagine how, with a variety of kernels, you could extract quite a lot of useful information out of an image.
@@ -628,144 +611,144 @@ axs[1][3].set_title('|Sobel_x + Sobel_y|')
 #
 # You'll notice we're also adding our ReLU activations, like before, and also batch normalization layers. The original [batchnorm paper](https://arxiv.org/abs/1502.03167) is a good read, but the TL;DR is that it will make our training faster.
 
-class SimpleCNN(nn.Module):
-    def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        num_layers: int,
-        feature_depth: int
-    ) -> None:
-        """Initialize a SimpleCNN. This CNN uses padding to keep the image dimensions of its inputs unchanged.
-        
-        Args:
-            in_channels: The number of input channels.
-            out_channels: The number of output channels.
-            num_layers: How many convolutional layers to include in the CNN.
-            feature_depth: The channel depth of the intermediate layers.
-        """
-        super().__init__()
-        assert num_layers > 2
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.num_layers = num_layers
-        self.feature_depth = feature_depth
-        self.first_layer = nn.Conv2d(self.in_channels, self.feature_depth, 3, padding=1)
-        mid_convs = [nn.Conv2d(self.feature_depth, self.feature_depth, 3, padding=1) for _ in range(self.num_layers - 2)]
-        # interleave our middle convs, batchnorms every 2 layers, and ReLUs
-        mid_layers = []
-        for i, c in enumerate(mid_convs):
-            mid_layers.append(c)
-            if i % 2 == 1:
-                mid_layers.append(nn.BatchNorm2d(self.feature_depth))
-            mid_layers.append(nn.ReLU())
-        self.mid_layers = nn.Sequential(*mid_layers)
-        self.last_layer = nn.Conv2d(self.feature_depth, self.out_channels, 3, padding=1)
+# + active=""
+# class SimpleCNN(nn.Module):
+#     def __init__(
+#         self,
+#         in_channels: int,
+#         out_channels: int,
+#         num_layers: int,
+#         feature_depth: int
+#     ) -> None:
+#         """Initialize a SimpleCNN. This CNN uses padding to keep the image dimensions of its inputs unchanged.
+#         
+#         Args:
+#             in_channels: The number of input channels.
+#             out_channels: The number of output channels.
+#             num_layers: How many convolutional layers to include in the CNN.
+#             feature_depth: The channel depth of the intermediate layers.
+#         """
+#         super().__init__()
+#         assert num_layers > 2
+#         self.in_channels = in_channels
+#         self.out_channels = out_channels
+#         self.num_layers = num_layers
+#         self.feature_depth = feature_depth
+#         self.first_layer = nn.Conv2d(self.in_channels, self.feature_depth, 3, padding=1)
+#         mid_convs = [nn.Conv2d(self.feature_depth, self.feature_depth, 3, padding=1) for _ in range(self.num_layers - 2)]
+#         # interleave our middle convs, batchnorms every 2 layers, and ReLUs
+#         mid_layers = []
+#         for i, c in enumerate(mid_convs):
+#             mid_layers.append(c)
+#             if i % 2 == 1:
+#                 mid_layers.append(nn.BatchNorm2d(self.feature_depth))
+#             mid_layers.append(nn.ReLU())
+#         self.mid_layers = nn.Sequential(*mid_layers)
+#         self.last_layer = nn.Conv2d(self.feature_depth, self.out_channels, 3, padding=1)
+#
+#     def forward(self, x: torch.Tensor) -> torch.Tensor:
+#         x = F.relu(self.first_layer(x))
+#         x = self.mid_layers(x)
+#         x = self.last_layer(x)
+#         return x
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = F.relu(self.first_layer(x))
-        x = self.mid_layers(x)
-        x = self.last_layer(x)
-        return x
-
-
-# +
-# initialize the network and move it to the GPU
-simple_cnn = SimpleCNN(
-    in_channels=12,   # 12 input features, as discussed above
-    out_channels=1,   # 1 output, which is the cloud mask logit
-    num_layers=10,     # Let's try 10 layers to start
-    feature_depth=16  # 16 is probably more than enough of a feature depth since there are only 12 inputs
-).cuda()
-print(simple_cnn)
-
-# test it out on some random numbers to check everything works
-test_input = torch.randn(8, 12, 64, 64).cuda()
-test_output = simple_cnn(test_input)
-print(f'Should be (8, 1, 64, 64): {test_output.shape}')
+# + active=""
+# # initialize the network and move it to the GPU
+# simple_cnn = SimpleCNN(
+#     in_channels=12,   # 12 input features, as discussed above
+#     out_channels=1,   # 1 output, which is the cloud mask logit
+#     num_layers=10,     # Let's try 10 layers to start
+#     feature_depth=16  # 16 is probably more than enough of a feature depth since there are only 12 inputs
+# ).cuda()
+# print(simple_cnn)
+#
+# # test it out on some random numbers to check everything works
+# test_input = torch.randn(8, 12, 64, 64).cuda()
+# test_output = simple_cnn(test_input)
+# print(f'Should be (8, 1, 64, 64): {test_output.shape}')
 # -
 
-# <a name="putting-it-all-together"></a>
+# [back to top](#Contents)
+
 # ## 10. Putting It All Together
 #
 # Now we can put it all together to train our CNN on the same data! We can crank the batch size way up and see what changes. Feel free to try bigger models. The GPU on this instance can handle much heavier loads than we are currently putting it through. Try playing around with these settings and see what you learn!
 #
 # You'll also probably notice that this script isn't that much faster than the CPU-only training from above. The data loading is currently the bottleneck. This is very often the case in practice.
+
+# + active=""
+# # hyperparameters
+# NUM_EPOCHS = 5      # we'll go through the whole training set 5 times
+# BATCH_SIZE = 256    # A bigger batch size since we're running on GPU
+# NUM_LAYERS = 10     # Let's try 10 layers to start
+# FEATURE_DEPTH = 16  # 16 is probably more than enough of a feature depth since there are only 12 inputs
 #
-# [back to top](#top)
+# split = json.load(open('default_split.json'))
+# train_dataset = CloudMaskDataset(CLDMASK_PATH, 'train', split)
+# val_dataset = CloudMaskDataset(CLDMASK_PATH, 'val', split)
+#
+# train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+# val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+#
+# model = SimpleCNN(
+#     in_channels=12,  # 12 input features, as discussed above
+#     out_channels=1,  # 1 output, which is the cloud mask logit
+#     num_layers=NUM_LAYERS,
+#     feature_depth=FEATURE_DEPTH,
+# ).cuda()
+# objective = torch.nn.BCEWithLogitsLoss(reduction='none')
+# optimizer = torch.optim.Adam(model.parameters())  # can use Adam with the default parameters
+#
+# train_losses, val_losses = [], []
+# train_accs, val_accs = [], []
+#
+# for epoch in range(NUM_EPOCHS):
+#     print(f'Starting epoch {epoch + 1}/{NUM_EPOCHS} training:')
+#     model.train()
+#     for batch_idx, (inp, valid, labels) in tqdm(enumerate(train_loader), total=len(train_loader)):
+#         inp, valid, labels = inp.cuda(), valid.cuda(), labels.cuda()
+#         inp = inp.float() / 255  # uint8 to float
+#         preds = model(inp.permute(0, 3, 1, 2))  # have to change the order to (batch, channel, Y, X)
+#         # have to ignore invalid locations in the loss
+#         loss = objective(preds[:, 0], labels.float())[valid].sum() / valid.numel()
+#         optimizer.zero_grad()       # zero out the optimizer
+#         loss.backward()             # backwards pass
+#         optimizer.step()            # update the model
+#         train_losses.append(loss.item())  # keep track of the loss over time
+#
+#         # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
+#         num_valid = valid.sum()
+#         train_accs.append((((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item())  # compute accuracy
+#
+#     print(f'Starting epoch {epoch + 1}/{NUM_EPOCHS} validation:')
+#     model.eval()
+#     with torch.no_grad():  # don't require gradients for validation!
+#         for batch_idx, (inp, valid, labels) in tqdm(enumerate(val_loader), total=len(val_loader)):
+#             inp, valid, labels = inp.cuda(), valid.cuda(), labels.cuda()
+#             preds = model(inp.permute(0, 3, 1, 2))
+#             loss = objective(preds[:, 0], labels.float())[valid].sum() / valid.numel()
+#             val_losses.append(loss.item())
+#             # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
+#             num_valid = valid.sum()
+#             val_accs.append((((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item())  # compute accuracy
 
-# +
-# hyperparameters
-NUM_EPOCHS = 5      # we'll go through the whole training set 5 times
-BATCH_SIZE = 256    # A bigger batch size since we're running on GPU
-NUM_LAYERS = 10     # Let's try 10 layers to start
-FEATURE_DEPTH = 16  # 16 is probably more than enough of a feature depth since there are only 12 inputs
-
-split = json.load(open('default_split.json'))
-train_dataset = CloudMaskDataset(CLDMASK_PATH, 'train', split)
-val_dataset = CloudMaskDataset(CLDMASK_PATH, 'val', split)
-
-train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
-val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
-
-model = SimpleCNN(
-    in_channels=12,  # 12 input features, as discussed above
-    out_channels=1,  # 1 output, which is the cloud mask logit
-    num_layers=NUM_LAYERS,
-    feature_depth=FEATURE_DEPTH,
-).cuda()
-objective = torch.nn.BCEWithLogitsLoss(reduction='none')
-optimizer = torch.optim.Adam(model.parameters())  # can use Adam with the default parameters
-
-train_losses, val_losses = [], []
-train_accs, val_accs = [], []
-
-for epoch in range(NUM_EPOCHS):
-    print(f'Starting epoch {epoch + 1}/{NUM_EPOCHS} training:')
-    model.train()
-    for batch_idx, (inp, valid, labels) in tqdm(enumerate(train_loader), total=len(train_loader)):
-        inp, valid, labels = inp.cuda(), valid.cuda(), labels.cuda()
-        inp = inp.float() / 255  # uint8 to float
-        preds = model(inp.permute(0, 3, 1, 2))  # have to change the order to (batch, channel, Y, X)
-        # have to ignore invalid locations in the loss
-        loss = objective(preds[:, 0], labels.float())[valid].sum() / valid.numel()
-        optimizer.zero_grad()       # zero out the optimizer
-        loss.backward()             # backwards pass
-        optimizer.step()            # update the model
-        train_losses.append(loss.item())  # keep track of the loss over time
-
-        # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
-        num_valid = valid.sum()
-        train_accs.append((((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item())  # compute accuracy
-
-    print(f'Starting epoch {epoch + 1}/{NUM_EPOCHS} validation:')
-    model.eval()
-    with torch.no_grad():  # don't require gradients for validation!
-        for batch_idx, (inp, valid, labels) in tqdm(enumerate(val_loader), total=len(val_loader)):
-            inp, valid, labels = inp.cuda(), valid.cuda(), labels.cuda()
-            preds = model(inp.permute(0, 3, 1, 2))
-            loss = objective(preds[:, 0], labels.float())[valid].sum() / valid.numel()
-            val_losses.append(loss.item())
-            # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
-            num_valid = valid.sum()
-            val_accs.append((((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item())  # compute accuracy
-
-# +
-plt.figure(figsize=(12, 4))
-plt.plot(np.arange(len(train_losses)), np.array(train_losses), label='Train Loss')
-plt.plot(np.arange(len(train_accs)), train_accs, label='Train Accuracy')
-plt.legend()
-plt.xlabel('batch index')
-
-plt.figure(figsize=(12, 4))
-plt.plot(np.arange(len(val_losses)), np.array(val_losses), label='Val Loss')
-plt.plot(np.arange(len(val_accs)), val_accs, label='Val Accuracy')
-plt.legend()
-plt.xlabel('batch index');
+# + active=""
+# plt.figure(figsize=(12, 4))
+# plt.plot(np.arange(len(train_losses)), np.array(train_losses), label='Train Loss')
+# plt.plot(np.arange(len(train_accs)), train_accs, label='Train Accuracy')
+# plt.legend()
+# plt.xlabel('batch index')
+#
+# plt.figure(figsize=(12, 4))
+# plt.plot(np.arange(len(val_losses)), np.array(val_losses), label='Val Loss')
+# plt.plot(np.arange(len(val_accs)), val_accs, label='Val Accuracy')
+# plt.legend()
+# plt.xlabel('batch index');
 # -
 
-# <a name="want-more"></a>
-# ## 11. Want more?
+# [back to top](#Contents)
+
+# ## 11. Want More?
 #
 # This notebook is already massive, although there are many more topics we wish we could cover. If you'd like to continue your learning journey, we have some suggestions for you:
 # - learn about [data augmentation](https://pytorch.org/vision/stable/transforms.html) to get more bang for your buck out of your training data
@@ -777,4 +760,4 @@ plt.xlabel('batch index');
 # - check out [transformers](https://arxiv.org/abs/1706.03762) and [vision transformers](https://arxiv.org/abs/2010.11929) for a newer, fancier alternative to CNNs
 # - play around with [tensorboard](https://pytorch.org/tutorials/recipes/recipes/tensorboard_with_pytorch.html) to track your model's progress in real time
 #
-# [back to top](#top)
+# [back to top](#Contents)
