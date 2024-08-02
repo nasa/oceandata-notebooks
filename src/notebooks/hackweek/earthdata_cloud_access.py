@@ -8,7 +8,6 @@
 
 # # Orientation to Earthdata Cloud Access
 #
-#
 # **Tutorial Lead:** Anna Windle (NASA, SSAI)
 #
 # <div class="alert alert-info" role="alert">
@@ -75,6 +74,9 @@
 import earthaccess
 import xarray as xr
 from xarray.backends.api import open_datatree
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import numpy as np
 
 # The last import provides a preview of the `DataTree` object. Once it is fully integrated into XArray,
 # the additional import won't be needed, as the function will be available as `xr.open_datree`.
@@ -136,8 +138,6 @@ results = earthaccess.search_data(
     count=1,
 )
 
-results
-
 # We can refine our search by passing more parameters that describe
 # the spatiotemporal domain of our use case. Here, we use the
 # `temporal` parameter to request a date range and the `bounding_box`
@@ -174,17 +174,16 @@ results[2]
 
 # [back to top](#Contents)
 
-# ## 4. Open Data
+# ## 4. Open L2 Data
 #
-# Let's go ahead and open a couple granules using `xarray`. The `earthaccess.open` function is used when you want to directly read
-# a bytes from a remote filesystem, but not download a whole file. When
+# Let's go ahead and open a couple granules using `xarray`. The `earthaccess.open` function is used when you want to directly read bytes from a remote filesystem, but not download a whole file. When
 # running code on a host with direct access to the NASA Earthdata
 # Cloud, you don't need to download the data and `earthaccess.open`
 # is the way to go.
 
 paths = earthaccess.open(results)
 
-# The `paths` list contains references to files on a remote filesystem.
+# The `paths` list contains references to files on a remote filesystem. The ob-cumulus-prod-public is the S3 Bucket in AWS us-west-2 region.
 
 paths
 
@@ -196,16 +195,82 @@ dataset
 datatree = open_datatree(paths[0])
 datatree
 
-dataset = xr.merge((datatree[i].to_dataset() for i in datatree.groups))
+dataset = xr.merge(datatree.to_dict().values())
 dataset
 
-# Let's do a quick plot of the `chlor_a` variable. You'll do more plotting in the Multidimensional Data Visualization tutorial.
+# Let's do a quick plot of the `chlor_a` variable. 
 
 artist = dataset["chlor_a"].plot(vmax=5)
 
+# Let's plot with latitude and longitude so we can project the data onto a grid.
+
+dataset = dataset.set_coords(("longitude", "latitude"))
+plot = dataset["chlor_a"].plot(x="longitude", y="latitude", cmap="viridis", vmax=5)
+
+# And if we want to get fancy, we can add the coastline.
+
+fig = plt.figure()
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.coastlines()
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
+plot = dataset["chlor_a"].plot(x="longitude", y="latitude", cmap="viridis", vmax=5, ax=ax)
+
 # [back to top](#Contents)
 
-# ## 5. Download Data
+# ## 5. Open L3M Data
+#
+# Let's use `earthaccess` to open some L3 mapped chlorophyll a granules. We will use a new search filter available in earthaccess.search_data: the granule_name argument accepts strings with the "*" wildcard. We need this to distinguish daily ("DAY") from eight-day ("8D") composites, as well as to get the 0.1 degree resolution projections.
+
+# +
+tspan = ("2024-04-12", "2024-04-24")
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_CHL_NRT",
+    temporal=tspan,
+    granule_name="*.DAY.*.0p1deg.*",
+)
+
+paths = earthaccess.open(results)
+# -
+
+# Let's open the first file using `xarray`.
+
+dataset = xr.open_dataset(paths[0])
+dataset
+
+# Becuase the L3M variables have lat and lon coordinates, it's possible to stack multiple granules along a new dimension that corresponds to time. Instead of xr.open_dataset, we use xr.open_mfdataset to create a single xarray.Dataset (the "mf" in open_mfdataset stands for multiple files) from an array of paths.
+#
+# The paths list is sorted temporally by default, which means the shape of the paths array specifies the way we need to tile the files together into larger arrays. We specify combine="nested" to combine the files according to the shape of the array of files (or file-like objects), even though paths is not a "nested" list in this case. The concat_dim="date" argument generates a new dimension in the combined dataset, because "date" is not an existing dimension in the individual files.
+
+dataset = xr.open_mfdataset(
+    paths,
+    combine="nested",
+    concat_dim="date",
+)
+dataset
+
+# A common reason to generate a single dataset from multiple, daily images is to create a composite. Compare the map from a single day ...
+
+chla = np.log10(dataset["chlor_a"])
+chla.attrs.update(
+    {
+        "units": f'lg({dataset["chlor_a"].attrs["units"]})',
+    }
+)
+plot = chla.sel({"date": 0}).plot(aspect=2, size=4, cmap="GnBu_r")
+
+# ... to a map of average values, skipping "NaN" values that result from clouds.
+
+chla_avg = chla.mean("date")
+chla_avg.attrs.update(
+    {
+        "long_name": chla.attrs["long_name"],
+        "units": f'lg({chla.attrs["units"]})',
+    }
+)
+plot = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
+
+# ## 6. Download Data
 #
 # Let's go ahead and download a couple granules. 
 
@@ -239,8 +304,4 @@ open_datatree(paths[0])
 
 # [back to top](#Contents)
 
-Lessons learned?
 
-# + active=""
-# present on file structure? difference btwn short names and what will have coordinates/what not. L3- show how to use granule name filter 
-#
