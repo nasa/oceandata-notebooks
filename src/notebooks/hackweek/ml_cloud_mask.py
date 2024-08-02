@@ -75,8 +75,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from tqdm.notebook import tqdm
 
-
-CLDMASK_PATH = pathlib.Path('shared/pace-hackweek-2024/cldmask_dataset')
+CLDMASK_PATH = pathlib.Path('/home/jovyan/shared/pace-hackweek-2024/cldmask_dataset')
 # -
 
 # [back to top](#Contents)
@@ -105,10 +104,11 @@ for i in range(4):
 axs[4].imshow(validity)
 axs[5].imshow(cld_mask)
 axs[4].set_title('Validity')
-axs[5].set_title('Cloud Mask');
+axs[5].set_title('Cloud Mask')
 for i in [4, 5]:
     axs[i].set_xticks([])
-    axs[i].set_yticks([]);
+    axs[i].set_yticks([])
+plt.show()
 # -
 
 # Take note of a few things:
@@ -273,7 +273,8 @@ ax.plot(x.numpy(), y_sigmoid.numpy(), label='sigmoid')
 ax.plot(x.numpy(), y_relu.numpy(), label='relu')
 ax.set_ylim(-0.1, 2)
 ax.set_title('Activation functions')
-ax.legend();
+ax.legend()
+plt.show()
 # -
 
 # If you're curious to see more activation functions, [this table](https://en.wikipedia.org/wiki/Activation_function#:~:text=is%20often%20used.-,Table%20of%20activation%20functions,-%5Bedit%5D) is a good place to start.
@@ -323,7 +324,8 @@ for i in range(16):
     axs[i // 4][i % 4 + 4].imshow(outp_img[i].detach().numpy())
     axs[i // 4][i % 4 + 4].set_xticks([])
     axs[i // 4][i % 4 + 4].set_yticks([])
-plt.subplots_adjust(wspace=None, hspace=None);
+plt.subplots_adjust(wspace=None, hspace=None)
+plt.show()
 # -
 
 # [back to top](#Contents)
@@ -424,14 +426,15 @@ for batch_idx, (inp, valid, labels) in tqdm(enumerate(train_loader), total=NUM_B
 
 # compute the running mean of the losses so far
 running_loss_mean = np.array(losses).cumsum() / (np.arange(len(losses)) + 1)
+# -
 
 plt.figure(figsize=(12, 4))
 plt.plot(np.arange(len(losses)), np.array(losses), label='Train Loss')
 plt.plot(np.arange(len(losses)), running_loss_mean, label='Train Loss: running mean')
 plt.plot(np.arange(len(accs)), accs, label='Train Accuracy')
 plt.legend()
-plt.xlabel('batch index');
-# -
+plt.xlabel('batch index')
+plt.show()
 
 # You should be seeing that the training loss goes down, while the accuracy goes up. That's what we want. The model's skill seems to plateau very quickly, and it seems like our accuracy is quite high! Unfortunately, this is a little misleading. Let's take a qualitative look at some examples to see why:
 
@@ -461,7 +464,8 @@ legend_elements = [Patch(facecolor=np.clip(color1 + color2, 0, 255) / 255,
                    Patch(facecolor=color2 / 255, edgecolor=color2 / 255, label='False Negative'),
                    Patch(facecolor=np.array([0, 0, 0]), edgecolor=np.array([0, 0, 0]), label='True Negative')]
 axs[0][0].legend(handles=legend_elements, loc='center')
-plt.subplots_adjust(wspace=None, hspace=None);
+plt.subplots_adjust(wspace=None, hspace=None)
+plt.show()
 # -
 
 # If you want to check out more examples, you can rerun the cell to get a new batch every time.
@@ -534,7 +538,8 @@ torch.cuda.is_available()
 # plt.plot(x, f_x, label='f(x)', linestyle='dotted')
 # plt.plot(x, g_x, label='g(x)', linestyle='dashed')
 # plt.plot(x, conv_fg_x, label='f * g')
-# plt.legend();
+# plt.legend()
+# plt.show()
 # -
 
 # Convolution generalizes to multiple dimensions. Two-dimensional convolution is extremely useful for image processing. [This graphic](https://en.wikipedia.org/wiki/Convolution#/media/File:2D_Convolution_Animation.gif) is a great visualization of how it works. Its as simple as multiplying where our kernel overlaps our image and summing the values, then repeating that in a sliding window fashion across the whole image.
@@ -594,7 +599,8 @@ torch.cuda.is_available()
 # axs[1][2].imshow(img_checkers_sobel_y, cmap='gray'), axs[1][2].set_title('Checkerboard * Sobel_y')
 # axs[1][3].imshow(np.abs(img_checkers_sobel_x + img_checkers_sobel_y), cmap='gray')
 # axs[1][3].set_title('|Sobel_x + Sobel_y|')
-# [(a.set_xticks([]), a.set_yticks([])) for ax in axs for a in ax];
+# [(a.set_xticks([]), a.set_yticks([])) for ax in axs for a in ax]
+# plt.show()
 # -
 
 # You can see how with some very simple kernels, we are able to achieve interesting transformations of the input image. Hopefully you can imagine how, with a variety of kernels, you could extract quite a lot of useful information out of an image.
@@ -743,7 +749,9 @@ torch.cuda.is_available()
 # plt.plot(np.arange(len(val_losses)), np.array(val_losses), label='Val Loss')
 # plt.plot(np.arange(len(val_accs)), val_accs, label='Val Accuracy')
 # plt.legend()
-# plt.xlabel('batch index');
+# plt.xlabel('batch index')
+#
+# plt.show()
 # -
 
 # [back to top](#Contents)
