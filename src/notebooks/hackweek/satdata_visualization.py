@@ -36,12 +36,12 @@
 #
 # 1. [Setup](#1.-Setup)
 # 2. [Easy Global Chlorophyll-a Map](#2.-Easy-Global-Chlorophyll-a-Map)
-# 3. [Global Oceans in Quasi True Color](#3.-Global-Oceans-Quasi-in-True-Color)
+# 3. [Global Oceans in Quasi True Color](#3.-Global-Oceans-in-Quasi-True-Color)
 # 4. [Complete Scene in True Color](#4.-Complete-Scene-in-True-Color)
-# 5. [False Color for Ice Clouds](#4.-False-Color-for-Ice-Clouds)
-# 6. [Phytoplankton in False Color](#5.-Phytoplankton-in-False-Color)
-# 7. [Full Spectra from Global Oceans](#6.-Full-Spectra-from-Global-Oceans)
-# 8. [Animation from Multiple Angles](#7.-Animation-from-Multiple-Angles)
+# 5. [False Color for Ice Clouds](#5.-False-Color-for-Ice-Clouds)
+# 6. [Phytoplankton in False Color](#6.-Phytoplankton-in-False-Color)
+# 7. [Full Spectra from Global Oceans](#7.-Full-Spectra-from-Global-Oceans)
+# 8. [Animation from Multiple Angles](#8.-Animation-from-Multiple-Angles)
 
 # ## 1. Setup
 #
@@ -474,6 +474,15 @@ plt.show()
 # ## 7. Full Spectra from Global Oceans
 
 
+# <div class="alert alert-warning" role="alert">
+#
+# This section contains **interactive** plots that require a live Python kernel. Not all the widgets will work
+# when viewing the notebook; the cells have to be executed and the kernel still running. Download the notebook
+# and give it a try!
+#
+# </div>
+#
+#
 # The holoview library and its bokeh extension allow us to explore datasets interactively.
 
 hv.extension("bokeh")
