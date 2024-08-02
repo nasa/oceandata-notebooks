@@ -36,5 +36,5 @@ notebook_metadata_filter = "-all,kernelspec"
 cell_metadata_filter = "-all,scrolled"
 
 [tool.jupytext.formats]
-"notebooks" = "ipynb"
-"src/notebooks" = "py"
+"/notebooks" = "ipynb"
+"/src/notebooks" = "py"
