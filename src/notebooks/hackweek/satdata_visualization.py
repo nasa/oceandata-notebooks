@@ -20,8 +20,7 @@
 #
 # ## Summary
 #
-# This is an introductory tutorial to the visualization possibilities arising from PACE data, meant to give you ideas and tools to develop your own scientific data visualizations
-# . 
+# This is an introductory tutorial to the visualization possibilities arising from PACE data, meant to give you ideas and tools to develop your own scientific data visualizations.
 #
 # ## Learning Objectives
 #
@@ -167,7 +166,8 @@ chla = dataset["chlor_a"]
 
 # Now we can already create a global map. Let's use a special colormap from `cmocean` to be fancy, but this is not necessary to make a basic map. Use the `robust="true"` option to remove outliers. 
 
-chla.plot(cmap=cmocean.cm.algae, robust="true")
+artist = chla.plot(cmap=cmocean.cm.algae, robust="true")
+plt.gca().set_aspect("equal")
 
 # ## 3. Global Oceans in Quasi True Color
 
@@ -187,7 +187,7 @@ dataset = xr.open_dataset(paths[-1])
 # Look at all the wavelentghs available!
 
 # + scrolled=true
-dataset["wavelength"].values
+dataset["wavelength"].data
 # -
 
 # For a true color image, choose three wavelengths to represent the "Red", "Green", and "Blue"
@@ -231,16 +231,12 @@ plt.gca().set_aspect("equal")
 
 # Finally, we can add a grid and coastlines to the map with `cartopy` tools. 
 
-# +
-import cartopy.crs as ccrs
-
 fig = plt.figure(figsize=(7, 5))
 ax = plt.axes(projection=ccrs.PlateCarree())
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, color="white", linewidth=0.3)
 ax.coastlines(color="white", linewidth=1)
 plt.show()
-# -
 
 # [back to top](#Contents)
 
@@ -356,32 +352,21 @@ pcolormesh(rhos_ice_enhanced)
 # We first open the dataset that is created with l2gen. This will be covered in the OCSSW tutorial. 
 
 # +
-nc_file = "/home/jovyan/PACE_OCI.20240309T115927.L2.BGC.nc"
+path = "/home/jovyan/shared/pace-hackweek-2024/PACE_OCI.20240309T115927.L2_MOANA.V2.nc"
 
-groups = list(open_datatree(nc_file))
-groups
+datatree = open_datatree(path)
+dataset = xr.merge(datatree.to_dict().values())
+dataset
 # -
 
-# We can see the MOANA products, RGB bands and other level-2 products in the dataset. 
+# We can see the MOANA products, RGB bands and other level-2 products in the dataset. We still need to set the spatial variables as coordinates of the dataset. 
 
-dataset_geo = xr.open_dataset(nc_file, group="geophysical_data")
-dataset_geo
-
-# We then set the coordinates of the dataset. 
-
-dataset = xr.open_dataset(nc_file, group="navigation_data")
 dataset = dataset.set_coords(("longitude", "latitude"))
-dataset = xr.merge((dataset_geo["rhos_465"], dataset_geo["rhos_555"], dataset_geo["rhos_645"], dataset_geo["syncoccus_moana"], dataset_geo["prococcus_moana"], dataset_geo["picoeuk_moana"], dataset.coords))
-dataset
-
-dataset = xr.open_dataset(nc_file, group="navigation_data")
-dataset = dataset.set_coords(("longitude", "latitude"))
-dataset = xr.merge((dataset_geo["rhos_465"], dataset_geo["rhos_555"], dataset_geo["rhos_645"], dataset_geo["syncoccus_moana"], dataset_geo["prococcus_moana"], dataset_geo["picoeuk_moana"], dataset.coords))
-dataset_rgb
 
 # Let's make a quick MOANA product plot to see if everything looks normal. 
 
-plot = dataset["picoeuk_moana"].plot(x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true")
+artist = dataset["picoeuk_moana"].plot(x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true")
+plt.gca().set_aspect("equal")
 
 # Now we create a RGB image using our three rhos bands and the usual log-transform, vmin/vmax adjustments and normalization. We also project the map using cartopy. 
 
@@ -404,10 +389,14 @@ rgb = np.dstack((red, green, blue))
 rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
 
 fig = plt.figure(figsize=(5, 5))
-ax = fig.add_subplot(projection=ccrs.PlateCarree())
-ax.imshow(rgb,
-          extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max()),
-          origin='lower', transform=ccrs.PlateCarree(), interpolation='none')
+axes = fig.add_subplot(projection=ccrs.PlateCarree())
+artist = axes.imshow(
+    rgb,
+    extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max()),
+    origin='lower',
+    transform=ccrs.PlateCarree(),
+    interpolation='none',
+)
 # -
 
 # We then enhance the image. 
@@ -436,16 +425,16 @@ image_enhanced = enhancer.enhance(saturation)
 enhanced_image_np = np.array(image_enhanced) / 255.0  # Normalize back to [0, 1] range
 
 fig = plt.figure(figsize=(5, 5))
-ax = plt.subplot(projection=ccrs.PlateCarree())
+axes = plt.subplot(projection=ccrs.PlateCarree())
 extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
-ax.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
+artist = axes.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
 # -
 # We then project the MOANA products on the same grid. We can look at Synechococcus as an example. 
 
 fig = plt.figure(figsize=(5, 5))
-ax = fig.add_subplot(projection=ccrs.PlateCarree())
+axes = fig.add_subplot(projection=ccrs.PlateCarree())
 extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
-ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap="Reds", vmin=0, vmax=35000, alpha = 1)
+artist = axes.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap="Reds", vmin=0, vmax=35000, alpha = 1)
 
 # To layer the three products on our true-color image, we will add transparency to our colormaps for the three plankton products. Look at the Synechococcus product again.
 
@@ -464,21 +453,22 @@ my_cmap_blues[:,-1] = np.linspace(0, 1, cmap_blues.N)
 my_cmap_blues = ListedColormap(my_cmap_blues)
 
 fig = plt.figure(figsize=(5, 5))
-ax = fig.add_subplot(projection=ccrs.PlateCarree())
+axes = fig.add_subplot(projection=ccrs.PlateCarree())
 extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
-ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=35000, alpha = 1)
+artist = axes.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=35000, alpha = 1)
 # -
 
 # We finally assemble the image using the plankton layers and the true-color base layer. 
 
 fig = plt.figure(figsize=(7, 7))
-ax = plt.subplot(projection=ccrs.PlateCarree())
+axes = plt.subplot(projection=ccrs.PlateCarree())
 extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
-ax.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
-ax.imshow(dataset["prococcus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_blues, vmin=0, vmax=300000, alpha = .5)
-ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=20000, alpha = .5)
-ax.imshow(dataset["picoeuk_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_greens, vmin=0, vmax=50000, alpha = .5)
+axes.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
+axes.imshow(dataset["prococcus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_blues, vmin=0, vmax=300000, alpha = .5)
+axes.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=20000, alpha = .5)
+axes.imshow(dataset["picoeuk_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_greens, vmin=0, vmax=50000, alpha = .5)
 plt.show()
+
 # [back to top](#Contents)
 
 # ## 7. Full Spectra from Global Oceans
