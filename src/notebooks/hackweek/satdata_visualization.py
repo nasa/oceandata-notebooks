@@ -58,6 +58,7 @@ from PIL import Image, ImageEnhance
 from xarray.backends.api import open_datatree
 from matplotlib.colors import ListedColormap
 import cartopy.crs as ccrs
+import cmocean
 import earthaccess
 import holoviews as hv
 import matplotlib.pyplot as plt
@@ -118,11 +119,7 @@ def enhancel3(rgb, scale = .01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1.
    
     rgb = rgb.where(rgb > 0)
     rgb = np.log(rgb / scale) / np.log(1 / scale)
-    rgb = (rgb -  rgb.mincontrast = 1.9 
-brightness = 1 
-sharpness = 2
-saturation = 1.4
-gamma = .48()) / (rgb.max() - rgb.min())
+    rgb = (rgb -  rgb.min()) / (rgb.max() - rgb.min())
     rgb = rgb * gamma
     img = rgb * 255
     img = img.where(img.notnull(), 0).astype("uint8")
@@ -170,7 +167,6 @@ chla = dataset["chlor_a"]
 
 # Now we can already create a global map. Let's use a special colormap from `cmocean` to be fancy, but this is not necessary to make a basic map. Use the `robust="true"` option to remove outliers. 
 
-import cmocean
 chla.plot(cmap=cmocean.cm.algae, robust="true")
 
 # ## 3. Global Oceans in Quasi True Color
