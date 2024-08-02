@@ -52,6 +52,7 @@ dependencies:
   # Other science packages
   - pvlib
   ## File formats and file management, download, dataset caching
+  - awscli
   - earthaccess
   - h5netcdf
   - kerchunk
