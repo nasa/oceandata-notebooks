@@ -238,9 +238,3 @@ paths
 open_datatree(paths[0])
 
 # [back to top](#Contents)
-
-Lessons learned?
-
-# + active=""
-# present on file structure? difference btwn short names and what will have coordinates/what not. L3- show how to use granule name filter 
-#
