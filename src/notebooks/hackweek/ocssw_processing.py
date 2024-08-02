@@ -30,7 +30,7 @@
 # ## Learning Objectives
 #
 # At the end of this notebok you will know:
-# * How to process Level-1B data to Level-2 with `l2gen`
+# * How to process Level-1B data to Level-2 with `l2gen` to make different products including surface reflectances and MOANA phytoplankton products
 # * How to merge two images with `l2bin`
 # * How to create a map with `l3mapgen`
 #
@@ -38,10 +38,10 @@
 #
 # 1. [Setup](#1.-Setup)
 # 2. [Get L1B Data](#2.-Get-L1B-Data)
-# 3. [Process L1B Data with `l2gen`](#3.-Process-L1B-Data-with-l2gen)
-# 4. [Composite L2 Data with `l2bin`](#4.-Composite-L2-Data-with-l2bin)
-# 5. [Make a Map from Binned Data with `l3mapgen`](#5.-Make-a-Map-from-Binned-Data-with-l3mapgen)
-# 6. [MOANA Phytoplankton Product](#6.-MOANA-Phytoplankton-Product)
+# 3. [Process L1B Data to L2 Surface Reflectances with `l2gen`](#3.-Process-L1B-Data-with-l2gen)
+# 4. [Process L1B Data to L2 MOANA Phytoplankton products with `l2gen`](#4.-L1B-Data-to-L2-MOANA) 
+# 5. [Composite L2 Data with `l2bin`](#4.-Composite-L2-Data-with-l2bin)
+# 6. [Make a Map from Binned Data with `l3mapgen`](#5.-Make-a-Map-from-Binned-Data-with-l3mapgen)
 
 # ## 1. Setup
 #
@@ -118,43 +118,19 @@ l2gen_ifile = paths[0]
 
 # The Level-1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
 # On OCI, the reflectances are grouped into blue, red, and short-wave infrared (SWIR) wavelengths. Open
-# the dataset's "observatin_data" group in the netCDF file using `xarray` to plot a "rhot_red"
+# the dataset's "observation_data" group in the netCDF file using `xarray` to plot a "rhot_red"
 # wavelength.
 
 dataset = xr.open_dataset(l2gen_ifile, group="observation_data")
 artist = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 
-# This tutorial will demonstrate processing this Level-1B granule into a Level-2 granule. Because that can
-# take several minutes, we'll also download a couple of Level-2 granules to save time for the next step of compositing multiple Level-2 granules into a single granule.
-
-tspan = ("2024-04-27", "2024-04-27")
-location = [(-56.5, 49.8), (-55.0, 49.8)]
-
-# Searching on a location defined as a line, rather than a point, is a good way to get granules that are
-# adjacent to eachother. Pass a list of latitude and longitude tuples to the `line` argument of `search_data`.
-
-results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_BGC_NRT",
-    temporal=tspan,
-    line=location,
-)
-
-for item in results:
-    display(item)
-
-paths = earthaccess.download(results, "data")
-
-# While we have the downloaded location stored in the list `paths`, write the list to a text file for future use.
-
-paths = [str(i) for i in paths]
-with open("l2bin_ifile.txt", "w") as file:
-    file.write("\n".join(paths))
-
 # [back to top](#Contents)
 
 # ## 3. Process L1B Data with `l2gen`
 #
-# At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters. 
+# At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. `l2gen` also allows you to customize products in a way that allows you to get products you cannot directly download from earthdata, like you will see from the following two examples. The first shows how to produce surface reflectances to make true-color images. The second covers the upcoming MOANA phytoplankton community composition products. 
+#
+# This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters. 
 #
 # <div class="alert alert-warning">
 #
@@ -215,9 +191,83 @@ artist = dataset["rhos"].sel({"wavelength_3d": 25}).plot(cmap="viridis", robust=
 #
 # [back to top](#Contents)
 
-# ## 4. Composite L2 Data with `l2bin`
+# ## 4. Make MOANA Phytoplankton Community Products with `l2gen`
+
+# One of the most exciting new PACE algorithms for the ocean color community is the MOANA algorithm that produces phytoplankton abundances for three different groups: Synechococcus, Prochlorococcus and picoeukaryotes. 
+
+tspan = ("2024-03-09", "2024-03-09")
+location = (20, -30)
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L1B_SCI",
+    temporal=tspan,
+    point=location,
+)
+results[0]
+
+# Download the granules found in the search.
+
+paths = earthaccess.download(results, local_path="data")
+
+# The Level-1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
+# On OCI, the reflectances are grouped into blue, red, and short-wave infrared (SWIR) wavelengths. Open
+# the dataset's "observatin_data" group in the NetCDF file using `xarray` to plot a "rhot_red"
+# wavelength.
+
+dataset = xr.open_dataset(paths[0], group="observation_data")
+artist = dataset["rhot_red"].sel({"red_bands": 100}).plot()
+
+# + scrolled=true
+ifile = paths[0]
+par = {
+    "ifile": ifile,
+    "ofile": str(ifile).replace(".L1B.", ".L2_MOANA."),
+    "suite": "BGC",
+    "l2prod": "picoeuk_moana prococcus_moana syncoccus_moana rhos_465 rhos_555 rhos_645 poc chlor_a ",
+    "atmocor": 1,
+}
+write_par("l2gen-moana.par", par)
+# -
+
+# Now run `l2bin` using your chosen parameters. Be very patient.
+
+# + scrolled=true language="bash"
+# source $OCSSWROOT/OCSSW_bash.env
 #
-# It can be useful to merge adjacent scenes to create a single, larger image. The OCSSW program that performs merging, also known as "compositing" of remote sensing images, is called `l2bin`. Take a look at the program's options.
+# l2gen par=l2gen-moana.par
+
+# + scrolled=true
+dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
+artist = dataset["picoeuk_moana"].plot(cmap="viridis", robust=True)
+# -
+
+# ## 5. Composite L2 Data with `l2bin`
+#
+# It can be useful to merge adjacent scenes to create a single, larger image. Let's do it with a chlorophyll product. 
+
+# Searching on a location defined as a line, rather than a point, is a good way to get granules that are
+# adjacent to eachother. Pass a list of latitude and longitude tuples to the `line` argument of `search_data`.
+
+tspan = ("2024-04-27", "2024-04-27")
+location = [(-56.5, 49.8), (-55.0, 49.8)]
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L2_BGC_NRT",
+    temporal=tspan,
+    line=location,
+)
+for item in results:
+    display(item)
+
+paths = earthaccess.download(results, "data")
+
+# While we have the downloaded location stored in the list `paths`, write the list to a text file for future use.
+
+paths = [str(i) for i in paths]
+with open("l2bin_ifile.txt", "w") as file:
+    file.write("\n".join(paths))
+
+# The OCSSW program that performs merging, also known as "compositing" of remote sensing images, is called `l2bin`. Take a look at the program's options.
 
 # + scrolled=true language="bash"
 # source $OCSSWROOT/OCSSW_bash.env
@@ -297,55 +347,5 @@ artist = dataset["chlor_a"].plot(x="lon", y="lat", cmap="viridis", robust=True, 
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.2)
 ax.coastlines(linewidth=0.5)
 plt.show()
-
-# ## 6. MOANA Phytoplankton Product
-
-# One of the new algorithms for the ocean color community is the MOANA algorithm for partitioning
-# the amount of chlorophyll by the type phytoplankton.
-
-tspan = ("2024-03-09", "2024-03-09")
-location = (20, -30)
-
-results = earthaccess.search_data(
-    short_name="PACE_OCI_L1B_SCI",
-    temporal=tspan,
-    point=location,
-)
-results[0]
-
-# Download the granules found in the search.
-
-paths = earthaccess.download(results, local_path="data")
-
-# The Level-1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
-# On OCI, the reflectances are grouped into blue, red, and short-wave infrared (SWIR) wavelengths. Open
-# the dataset's "observatin_data" group in the NetCDF file using `xarray` to plot a "rhot_red"
-# wavelength.
-
-dataset = xr.open_dataset(paths[0], group="observation_data")
-artist = dataset["rhot_red"].sel({"red_bands": 100}).plot()
-
-# + scrolled=true
-ifile = paths[0]
-par = {
-    "ifile": ifile,
-    "ofile": str(ifile).replace(".L1B.", ".L2_MOANA."),
-    "suite": "BGC",
-    "l2prod": "chlor_a picoeuk_moana prococcus_moana syncoccus_moana rhos_465 rhos_555 rhos_645 poc",
-    "atmocor": 1,
-}
-write_par("l2gen-moana.par", par)
-# -
-
-# Now run `l2bin` using your chosen parameters. Be very patient.
-
-# + scrolled=true language="bash"
-# source $OCSSWROOT/OCSSW_bash.env
-#
-# l2gen par=l2gen-moana.par
-# -
-
-dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
-artist = dataset["picoeuk_moana"].plot(cmap="viridis", robust=True)
 
 # [back to top](#Contents)

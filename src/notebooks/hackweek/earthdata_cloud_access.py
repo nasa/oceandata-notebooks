@@ -8,6 +8,7 @@
 
 # # Orientation to Earthdata Cloud Access
 #
+#
 # **Tutorial Lead:** Anna Windle (NASA, SSAI)
 #
 # <div class="alert alert-info" role="alert">
@@ -195,7 +196,7 @@ dataset
 datatree = open_datatree(paths[0])
 datatree
 
-dataset = xr.merge(datatree.to_dict().values())
+dataset = xr.merge((datatree[i].to_dataset() for i in datatree.groups))
 dataset
 
 # Let's do a quick plot of the `chlor_a` variable. You'll do more plotting in the Multidimensional Data Visualization tutorial.
@@ -241,5 +242,5 @@ open_datatree(paths[0])
 Lessons learned?
 
 # + active=""
-# present on file structure? difference btwn short names and what will have coordinates/what not. L3- show how to use granule name filter, and spatial (point, line, etc.) filter.
+# present on file structure? difference btwn short names and what will have coordinates/what not. L3- show how to use granule name filter 
 #
