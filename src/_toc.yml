@@ -3,9 +3,10 @@ root: index
 chapters:
 - file: notebooks/hackweek/earthdata_cloud_access
 - file: notebooks/hackweek/satdata_visualization
-# # - file: notebooks/hackweek/satellite_insitu_matchups.py
-# #   FIXME: needs mathup_utils functions built it
-# - file: notebooks/hackweek/ocssw_processing
+- file: notebooks/hackweek/satellite_insitu_matchups.py
+- file: notebooks/hackweek/ocssw_processing
+# - file: notebooks/hackweek/dask_gridding
+- file: notebooks/hackweek/ml_cloud_mask
 # - file: notebooks/oci/oci_data_access
 # - file: notebooks/oci/oci_file_structure
 # # - file: notebooks/oci/oci_ocssw_install
