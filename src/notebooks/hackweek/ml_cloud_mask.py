@@ -488,21 +488,15 @@ plt.show()
 
 torch.cuda.is_available()
 
-# <div class="alert alert-warning" role="alert">
-#
-# The remaining cells in this notebook are set to "Raw" cell type, to prevent errors from attempting to run without CUDA. Change them to "Code" if CUDA is available.
-#
-# </div>
-#
 # So, now that we've ensured you have access to a GPU via CUDA, how do we convert our code to use CUDA? Well, converting a single torch tensor to CUDA is as easy as adding `.cuda()` after it. We can also convert our model with `.cuda()`. Another way to move a tensor between devices is to use the `.to(device=...)` syntax, which allows you to be a little smarter with your allocation, especially in cases where you're using multiple GPUs at the same time. The following cell illustrates the basic functionality:
 
-# + active=""
-# print(f'Available device count: {torch.cuda.device_count()}\nCurrent device ID: {torch.cuda.current_device()}')
-#
-# rand_cpu = torch.randn(10)
-# rand_gpu1 = rand_cpu.cuda()
-# rand_gpu2 = rand_cpu.to(device=torch.cuda.current_device())
-# print(f'Device IDs | rand_cpu: {rand_cpu.device} | rand_gpu1: {rand_gpu1.device} | rand_gpu2: {rand_gpu2.device}')
+# + tags=["skip-execution"]
+print(f'Available device count: {torch.cuda.device_count()}\nCurrent device ID: {torch.cuda.current_device()}')
+
+rand_cpu = torch.randn(10)
+rand_gpu1 = rand_cpu.cuda()
+rand_gpu2 = rand_cpu.to(device=torch.cuda.current_device())
+print(f'Device IDs | rand_cpu: {rand_cpu.device} | rand_gpu1: {rand_gpu1.device} | rand_gpu2: {rand_gpu2.device}')
 # -
 
 # [back to top](#Contents)
@@ -519,27 +513,27 @@ torch.cuda.is_available()
 #
 # The [wikipedia article](https://en.wikipedia.org/wiki/Convolution) is a great resource to further understand convolution, but we've also provided you an example of (discrete) convolution below:
 
-# + active=""
-# # define some interesting looking functions
-# x = np.linspace(-1, 1, 100)
-# f_x = np.cos(x * np.pi * 2)
-# f_x[x < -1/4] = 0
-# f_x[x > 1/4] = 0
-# g_x = x * 2 * (x > 0) * (x < 0.5)
-#
-# # normalize them
-# f_x /= np.sum(np.abs(f_x))
-# g_x /= np.sum(g_x)
-#
-# # convolve them
-# conv_fg_x = np.convolve(f_x, g_x, mode='same')
-#
-# plt.figure(figsize=(8, 4))
-# plt.plot(x, f_x, label='f(x)', linestyle='dotted')
-# plt.plot(x, g_x, label='g(x)', linestyle='dashed')
-# plt.plot(x, conv_fg_x, label='f * g')
-# plt.legend()
-# plt.show()
+# + tags=["skip-execution"]
+# define some interesting looking functions
+x = np.linspace(-1, 1, 100)
+f_x = np.cos(x * np.pi * 2)
+f_x[x < -1/4] = 0
+f_x[x > 1/4] = 0
+g_x = x * 2 * (x > 0) * (x < 0.5)
+
+# normalize them
+f_x /= np.sum(np.abs(f_x))
+g_x /= np.sum(g_x)
+
+# convolve them
+conv_fg_x = np.convolve(f_x, g_x, mode='same')
+
+plt.figure(figsize=(8, 4))
+plt.plot(x, f_x, label='f(x)', linestyle='dotted')
+plt.plot(x, g_x, label='g(x)', linestyle='dashed')
+plt.plot(x, conv_fg_x, label='f * g')
+plt.legend()
+plt.show()
 # -
 
 # Convolution generalizes to multiple dimensions. Two-dimensional convolution is extremely useful for image processing. [This graphic](https://en.wikipedia.org/wiki/Convolution#/media/File:2D_Convolution_Animation.gif) is a great visualization of how it works. Its as simple as multiplying where our kernel overlaps our image and summing the values, then repeating that in a sliding window fashion across the whole image.
@@ -548,59 +542,59 @@ torch.cuda.is_available()
 #
 # Below you'll see what happens when we apply these filters to an image of a checkerboard. You can mostly ignore the code in this next cell (unless you're curious), but pay attention to the plots.
 
-# + active=""
-# # make a checkerboard pattern
-# img_checkers = np.zeros((64, 64))
-# mask_alt = (np.mgrid[:64] // 8) % 2 == 1  # alternates 0 -> 1
-# img_checkers[mask_alt] = 1
-# img_checkers[:, mask_alt] = 1 - img_checkers[:, mask_alt]
-#
-# # First, get a 1D discrete gaussian w. mean=0 stdev=2 over [-3, 3]
-# gaussian1d = np.exp(-((np.mgrid[-3:4] / 2) ** 2) / 2) / (np.sqrt(2 * np.pi) * 2)
-# # Get a 2D gaussian by taking the outer product of our 1D gaussian
-# gaussian2d = gaussian1d[:, None] @ gaussian1d[None]  
-#
-# # make 2D sobel filters
-# sobel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]]).astype(float)
-# sobel_y = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]]).astype(float)
-#
-# def conv_from_kernel_array(kernel: np.ndarray) -> nn.Conv2d:
-#     """Take a 2D array of shape (N, N) where N is odd and turn it into a torch Conv2D."""
-#     assert isinstance(kernel, np.ndarray)
-#     assert len(kernel.shape) == 2 and kernel.shape[0] == kernel.shape[1] and kernel.shape[0] % 2 == 1
-#     conv = nn.Conv2d(1, 1, kernel.shape[0], padding=(kernel.shape[0] - 1) // 2, bias=False)
-#     conv.weight = nn.Parameter(torch.from_numpy(kernel[None, None]))
-#     return conv
-#
-# # get the conv2ds for each kernel
-# conv_gaussian = conv_from_kernel_array(gaussian2d)
-# conv_sobel_x = conv_from_kernel_array(sobel_x)
-# conv_sobel_y = conv_from_kernel_array(sobel_y)
-#
-# # apply conv2ds to checkerboard image
-# img_torch = torch.from_numpy(img_checkers)[None, None]
-# img_checkers_blur = conv_gaussian(img_torch)[0, 0].detach().numpy()
-# img_checkers_sobel_x = conv_sobel_x(img_torch)[0, 0].detach().numpy()
-# img_checkers_sobel_y = conv_sobel_y(img_torch)[0, 0].detach().numpy()
-#
-# # plot everything
-# fig, ax = plt.subplots(1, 1, figsize=(3, 3))
-# ax.imshow(img_checkers, cmap='gray')
-# ax.set_title('Checkerboard pattern')
-# ax.set_xticks([]), ax.set_yticks([])
-#
-# fig, axs = plt.subplots(2, 4, figsize=(12, 6))
-# axs[0][0].imshow(gaussian2d, cmap='gray'), axs[0][0].set_title('Gaussian kernel')
-# axs[0][1].imshow(sobel_x, cmap='gray'), axs[0][1].set_title('Sobel filter (x)')
-# axs[0][2].imshow(sobel_y, cmap='gray'), axs[0][2].set_title('Sobel filter (y)')
-# axs[0][3].imshow(np.zeros((1, 1)), cmap='gray')
-# axs[1][0].imshow(img_checkers_blur, cmap='gray'), axs[1][0].set_title('Checkerboard * Gaussian')
-# axs[1][1].imshow(img_checkers_sobel_x, cmap='gray'), axs[1][1].set_title('Checkerboard * Sobel_x')
-# axs[1][2].imshow(img_checkers_sobel_y, cmap='gray'), axs[1][2].set_title('Checkerboard * Sobel_y')
-# axs[1][3].imshow(np.abs(img_checkers_sobel_x + img_checkers_sobel_y), cmap='gray')
-# axs[1][3].set_title('|Sobel_x + Sobel_y|')
-# [(a.set_xticks([]), a.set_yticks([])) for ax in axs for a in ax]
-# plt.show()
+# + tags=["skip-execution"]
+# make a checkerboard pattern
+img_checkers = np.zeros((64, 64))
+mask_alt = (np.mgrid[:64] // 8) % 2 == 1  # alternates 0 -> 1
+img_checkers[mask_alt] = 1
+img_checkers[:, mask_alt] = 1 - img_checkers[:, mask_alt]
+
+# First, get a 1D discrete gaussian w. mean=0 stdev=2 over [-3, 3]
+gaussian1d = np.exp(-((np.mgrid[-3:4] / 2) ** 2) / 2) / (np.sqrt(2 * np.pi) * 2)
+# Get a 2D gaussian by taking the outer product of our 1D gaussian
+gaussian2d = gaussian1d[:, None] @ gaussian1d[None]  
+
+# make 2D sobel filters
+sobel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]]).astype(float)
+sobel_y = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]]).astype(float)
+
+def conv_from_kernel_array(kernel: np.ndarray) -> nn.Conv2d:
+    """Take a 2D array of shape (N, N) where N is odd and turn it into a torch Conv2D."""
+    assert isinstance(kernel, np.ndarray)
+    assert len(kernel.shape) == 2 and kernel.shape[0] == kernel.shape[1] and kernel.shape[0] % 2 == 1
+    conv = nn.Conv2d(1, 1, kernel.shape[0], padding=(kernel.shape[0] - 1) // 2, bias=False)
+    conv.weight = nn.Parameter(torch.from_numpy(kernel[None, None]))
+    return conv
+
+# get the conv2ds for each kernel
+conv_gaussian = conv_from_kernel_array(gaussian2d)
+conv_sobel_x = conv_from_kernel_array(sobel_x)
+conv_sobel_y = conv_from_kernel_array(sobel_y)
+
+# apply conv2ds to checkerboard image
+img_torch = torch.from_numpy(img_checkers)[None, None]
+img_checkers_blur = conv_gaussian(img_torch)[0, 0].detach().numpy()
+img_checkers_sobel_x = conv_sobel_x(img_torch)[0, 0].detach().numpy()
+img_checkers_sobel_y = conv_sobel_y(img_torch)[0, 0].detach().numpy()
+
+# plot everything
+fig, ax = plt.subplots(1, 1, figsize=(3, 3))
+ax.imshow(img_checkers, cmap='gray')
+ax.set_title('Checkerboard pattern')
+ax.set_xticks([]), ax.set_yticks([])
+
+fig, axs = plt.subplots(2, 4, figsize=(12, 6))
+axs[0][0].imshow(gaussian2d, cmap='gray'), axs[0][0].set_title('Gaussian kernel')
+axs[0][1].imshow(sobel_x, cmap='gray'), axs[0][1].set_title('Sobel filter (x)')
+axs[0][2].imshow(sobel_y, cmap='gray'), axs[0][2].set_title('Sobel filter (y)')
+axs[0][3].imshow(np.zeros((1, 1)), cmap='gray')
+axs[1][0].imshow(img_checkers_blur, cmap='gray'), axs[1][0].set_title('Checkerboard * Gaussian')
+axs[1][1].imshow(img_checkers_sobel_x, cmap='gray'), axs[1][1].set_title('Checkerboard * Sobel_x')
+axs[1][2].imshow(img_checkers_sobel_y, cmap='gray'), axs[1][2].set_title('Checkerboard * Sobel_y')
+axs[1][3].imshow(np.abs(img_checkers_sobel_x + img_checkers_sobel_y), cmap='gray')
+axs[1][3].set_title('|Sobel_x + Sobel_y|')
+[(a.set_xticks([]), a.set_yticks([])) for ax in axs for a in ax]
+plt.show()
 # -
 
 # You can see how with some very simple kernels, we are able to achieve interesting transformations of the input image. Hopefully you can imagine how, with a variety of kernels, you could extract quite a lot of useful information out of an image.
@@ -617,61 +611,61 @@ torch.cuda.is_available()
 #
 # You'll notice we're also adding our ReLU activations, like before, and also batch normalization layers. The original [batchnorm paper](https://arxiv.org/abs/1502.03167) is a good read, but the TL;DR is that it will make our training faster.
 
-# + active=""
-# class SimpleCNN(nn.Module):
-#     def __init__(
-#         self,
-#         in_channels: int,
-#         out_channels: int,
-#         num_layers: int,
-#         feature_depth: int
-#     ) -> None:
-#         """Initialize a SimpleCNN. This CNN uses padding to keep the image dimensions of its inputs unchanged.
-#         
-#         Args:
-#             in_channels: The number of input channels.
-#             out_channels: The number of output channels.
-#             num_layers: How many convolutional layers to include in the CNN.
-#             feature_depth: The channel depth of the intermediate layers.
-#         """
-#         super().__init__()
-#         assert num_layers > 2
-#         self.in_channels = in_channels
-#         self.out_channels = out_channels
-#         self.num_layers = num_layers
-#         self.feature_depth = feature_depth
-#         self.first_layer = nn.Conv2d(self.in_channels, self.feature_depth, 3, padding=1)
-#         mid_convs = [nn.Conv2d(self.feature_depth, self.feature_depth, 3, padding=1) for _ in range(self.num_layers - 2)]
-#         # interleave our middle convs, batchnorms every 2 layers, and ReLUs
-#         mid_layers = []
-#         for i, c in enumerate(mid_convs):
-#             mid_layers.append(c)
-#             if i % 2 == 1:
-#                 mid_layers.append(nn.BatchNorm2d(self.feature_depth))
-#             mid_layers.append(nn.ReLU())
-#         self.mid_layers = nn.Sequential(*mid_layers)
-#         self.last_layer = nn.Conv2d(self.feature_depth, self.out_channels, 3, padding=1)
-#
-#     def forward(self, x: torch.Tensor) -> torch.Tensor:
-#         x = F.relu(self.first_layer(x))
-#         x = self.mid_layers(x)
-#         x = self.last_layer(x)
-#         return x
+# + tags=["skip-execution"]
+class SimpleCNN(nn.Module):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        num_layers: int,
+        feature_depth: int
+    ) -> None:
+        """Initialize a SimpleCNN. This CNN uses padding to keep the image dimensions of its inputs unchanged.
+        
+        Args:
+            in_channels: The number of input channels.
+            out_channels: The number of output channels.
+            num_layers: How many convolutional layers to include in the CNN.
+            feature_depth: The channel depth of the intermediate layers.
+        """
+        super().__init__()
+        assert num_layers > 2
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.num_layers = num_layers
+        self.feature_depth = feature_depth
+        self.first_layer = nn.Conv2d(self.in_channels, self.feature_depth, 3, padding=1)
+        mid_convs = [nn.Conv2d(self.feature_depth, self.feature_depth, 3, padding=1) for _ in range(self.num_layers - 2)]
+        # interleave our middle convs, batchnorms every 2 layers, and ReLUs
+        mid_layers = []
+        for i, c in enumerate(mid_convs):
+            mid_layers.append(c)
+            if i % 2 == 1:
+                mid_layers.append(nn.BatchNorm2d(self.feature_depth))
+            mid_layers.append(nn.ReLU())
+        self.mid_layers = nn.Sequential(*mid_layers)
+        self.last_layer = nn.Conv2d(self.feature_depth, self.out_channels, 3, padding=1)
 
-# + active=""
-# # initialize the network and move it to the GPU
-# simple_cnn = SimpleCNN(
-#     in_channels=12,   # 12 input features, as discussed above
-#     out_channels=1,   # 1 output, which is the cloud mask logit
-#     num_layers=10,     # Let's try 10 layers to start
-#     feature_depth=16  # 16 is probably more than enough of a feature depth since there are only 12 inputs
-# ).cuda()
-# print(simple_cnn)
-#
-# # test it out on some random numbers to check everything works
-# test_input = torch.randn(8, 12, 64, 64).cuda()
-# test_output = simple_cnn(test_input)
-# print(f'Should be (8, 1, 64, 64): {test_output.shape}')
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = F.relu(self.first_layer(x))
+        x = self.mid_layers(x)
+        x = self.last_layer(x)
+        return x
+
+# + tags=["skip-execution"]
+# initialize the network and move it to the GPU
+simple_cnn = SimpleCNN(
+    in_channels=12,   # 12 input features, as discussed above
+    out_channels=1,   # 1 output, which is the cloud mask logit
+    num_layers=10,     # Let's try 10 layers to start
+    feature_depth=16  # 16 is probably more than enough of a feature depth since there are only 12 inputs
+).cuda()
+print(simple_cnn)
+
+# test it out on some random numbers to check everything works
+test_input = torch.randn(8, 12, 64, 64).cuda()
+test_output = simple_cnn(test_input)
+print(f'Should be (8, 1, 64, 64): {test_output.shape}')
 # -
 
 # [back to top](#Contents)
@@ -682,76 +676,76 @@ torch.cuda.is_available()
 #
 # You'll also probably notice that this script isn't that much faster than the CPU-only training from above. The data loading is currently the bottleneck. This is very often the case in practice.
 
-# + active=""
-# # hyperparameters
-# NUM_EPOCHS = 5      # we'll go through the whole training set 5 times
-# BATCH_SIZE = 256    # A bigger batch size since we're running on GPU
-# NUM_LAYERS = 10     # Let's try 10 layers to start
-# FEATURE_DEPTH = 16  # 16 is probably more than enough of a feature depth since there are only 12 inputs
-#
-# split = json.load(open('default_split.json'))
-# train_dataset = CloudMaskDataset(CLDMASK_PATH, 'train', split)
-# val_dataset = CloudMaskDataset(CLDMASK_PATH, 'val', split)
-#
-# train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
-# val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
-#
-# model = SimpleCNN(
-#     in_channels=12,  # 12 input features, as discussed above
-#     out_channels=1,  # 1 output, which is the cloud mask logit
-#     num_layers=NUM_LAYERS,
-#     feature_depth=FEATURE_DEPTH,
-# ).cuda()
-# objective = torch.nn.BCEWithLogitsLoss(reduction='none')
-# optimizer = torch.optim.Adam(model.parameters())  # can use Adam with the default parameters
-#
-# train_losses, val_losses = [], []
-# train_accs, val_accs = [], []
-#
-# for epoch in range(NUM_EPOCHS):
-#     print(f'Starting epoch {epoch + 1}/{NUM_EPOCHS} training:')
-#     model.train()
-#     for batch_idx, (inp, valid, labels) in tqdm(enumerate(train_loader), total=len(train_loader)):
-#         inp, valid, labels = inp.cuda(), valid.cuda(), labels.cuda()
-#         inp = inp.float() / 255  # uint8 to float
-#         preds = model(inp.permute(0, 3, 1, 2))  # have to change the order to (batch, channel, Y, X)
-#         # have to ignore invalid locations in the loss
-#         loss = objective(preds[:, 0], labels.float())[valid].sum() / valid.numel()
-#         optimizer.zero_grad()       # zero out the optimizer
-#         loss.backward()             # backwards pass
-#         optimizer.step()            # update the model
-#         train_losses.append(loss.item())  # keep track of the loss over time
-#
-#         # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
-#         num_valid = valid.sum()
-#         train_accs.append((((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item())  # compute accuracy
-#
-#     print(f'Starting epoch {epoch + 1}/{NUM_EPOCHS} validation:')
-#     model.eval()
-#     with torch.no_grad():  # don't require gradients for validation!
-#         for batch_idx, (inp, valid, labels) in tqdm(enumerate(val_loader), total=len(val_loader)):
-#             inp, valid, labels = inp.cuda(), valid.cuda(), labels.cuda()
-#             preds = model(inp.permute(0, 3, 1, 2))
-#             loss = objective(preds[:, 0], labels.float())[valid].sum() / valid.numel()
-#             val_losses.append(loss.item())
-#             # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
-#             num_valid = valid.sum()
-#             val_accs.append((((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item())  # compute accuracy
+# + tags=["skip-execution"]
+# hyperparameters
+NUM_EPOCHS = 5      # we'll go through the whole training set 5 times
+BATCH_SIZE = 256    # A bigger batch size since we're running on GPU
+NUM_LAYERS = 10     # Let's try 10 layers to start
+FEATURE_DEPTH = 16  # 16 is probably more than enough of a feature depth since there are only 12 inputs
 
-# + active=""
-# plt.figure(figsize=(12, 4))
-# plt.plot(np.arange(len(train_losses)), np.array(train_losses), label='Train Loss')
-# plt.plot(np.arange(len(train_accs)), train_accs, label='Train Accuracy')
-# plt.legend()
-# plt.xlabel('batch index')
-#
-# plt.figure(figsize=(12, 4))
-# plt.plot(np.arange(len(val_losses)), np.array(val_losses), label='Val Loss')
-# plt.plot(np.arange(len(val_accs)), val_accs, label='Val Accuracy')
-# plt.legend()
-# plt.xlabel('batch index')
-#
-# plt.show()
+split = json.load(open('default_split.json'))
+train_dataset = CloudMaskDataset(CLDMASK_PATH, 'train', split)
+val_dataset = CloudMaskDataset(CLDMASK_PATH, 'val', split)
+
+train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+
+model = SimpleCNN(
+    in_channels=12,  # 12 input features, as discussed above
+    out_channels=1,  # 1 output, which is the cloud mask logit
+    num_layers=NUM_LAYERS,
+    feature_depth=FEATURE_DEPTH,
+).cuda()
+objective = torch.nn.BCEWithLogitsLoss(reduction='none')
+optimizer = torch.optim.Adam(model.parameters())  # can use Adam with the default parameters
+
+train_losses, val_losses = [], []
+train_accs, val_accs = [], []
+
+for epoch in range(NUM_EPOCHS):
+    print(f'Starting epoch {epoch + 1}/{NUM_EPOCHS} training:')
+    model.train()
+    for batch_idx, (inp, valid, labels) in tqdm(enumerate(train_loader), total=len(train_loader)):
+        inp, valid, labels = inp.cuda(), valid.cuda(), labels.cuda()
+        inp = inp.float() / 255  # uint8 to float
+        preds = model(inp.permute(0, 3, 1, 2))  # have to change the order to (batch, channel, Y, X)
+        # have to ignore invalid locations in the loss
+        loss = objective(preds[:, 0], labels.float())[valid].sum() / valid.numel()
+        optimizer.zero_grad()       # zero out the optimizer
+        loss.backward()             # backwards pass
+        optimizer.step()            # update the model
+        train_losses.append(loss.item())  # keep track of the loss over time
+
+        # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
+        num_valid = valid.sum()
+        train_accs.append((((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item())  # compute accuracy
+
+    print(f'Starting epoch {epoch + 1}/{NUM_EPOCHS} validation:')
+    model.eval()
+    with torch.no_grad():  # don't require gradients for validation!
+        for batch_idx, (inp, valid, labels) in tqdm(enumerate(val_loader), total=len(val_loader)):
+            inp, valid, labels = inp.cuda(), valid.cuda(), labels.cuda()
+            preds = model(inp.permute(0, 3, 1, 2))
+            loss = objective(preds[:, 0], labels.float())[valid].sum() / valid.numel()
+            val_losses.append(loss.item())
+            # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
+            num_valid = valid.sum()
+            val_accs.append((((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item())  # compute accuracy
+
+# + tags=["skip-execution"]
+plt.figure(figsize=(12, 4))
+plt.plot(np.arange(len(train_losses)), np.array(train_losses), label='Train Loss')
+plt.plot(np.arange(len(train_accs)), train_accs, label='Train Accuracy')
+plt.legend()
+plt.xlabel('batch index')
+
+plt.figure(figsize=(12, 4))
+plt.plot(np.arange(len(val_losses)), np.array(val_losses), label='Val Loss')
+plt.plot(np.arange(len(val_accs)), val_accs, label='Val Accuracy')
+plt.legend()
+plt.xlabel('batch index')
+
+plt.show()
 # -
 
 # [back to top](#Contents)
