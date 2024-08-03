@@ -53,9 +53,11 @@
 import os
 
 from holoviews.streams import Tap
-from PIL import Image, ImageEnhance
-from xarray.backends.api import open_datatree
+from matplotlib import animation
 from matplotlib.colors import ListedColormap
+from PIL import Image, ImageEnhance
+from scipy.ndimage import gaussian_filter1d
+from xarray.backends.api import open_datatree
 import cartopy.crs as ccrs
 import cmocean
 import earthaccess
@@ -616,7 +618,6 @@ refl_pretty = (refl_red - refl_red.min()) / (refl_red.max() - refl_red.min())
 
 # A very mild Gaussian filter over the angular axis will improve the animation's smoothness.
 
-from scipy.ndimage import gaussian_filter1d
 refl_pretty.data = gaussian_filter1d(refl_pretty, sigma=0.5, truncate=2, axis=2)
 
 # Raising the image to the power 2/3 will brighten it a little bit.
@@ -634,11 +635,8 @@ frames
 # Now we can use `matplotlib.animation` to create an initial plot, define a function to update that plot for each new frame, and show the resulting animation. When we create the inital plot, we get back the object called `im` below. This object is an instance of `matplotlib.artist.Artist` and is responsible for rendering data on the axes. Our `update` function uses that artist's `set_data` method to leave everything in the plot the same other than the data used to make the image.
 
 # +
-from matplotlib import animation
-
 fig, ax = plt.subplots()
 im = ax.imshow(refl_pretty[{"number_of_views": 0}], cmap="gray")
-
 
 def update(i):
     im.set_data(refl_pretty[{"number_of_views": i}])
@@ -654,14 +652,8 @@ plt.close()
 #
 # The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
 #
-# ![A multi-angle HARP2 animation](harp2_red_anim_20240519T235950.gif)
+# ![A multi-angle HARP2 animation](../../img/harp2_red_anim_20240519T235950.gif)
 #
 # Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By default, `matplotlib` will not display an animation. To view the animation, we saved it as a file and displayed the result in the next cell. Alternatively, you could change the default by executing `%matplotlib widget`. The `widget` setting, which works in Jupyter Lab but not on a static website, you can use `plt.show()` as well as `an.pause()` and `an.resume()`.
 
 # [back to top](#Contents)
-#
-# <div class="alert alert-info" role="alert">
-#     
-# You have completed the notebook giving a first look at HARP2 data. More notebooks are comming soon!
-#
-# </div>

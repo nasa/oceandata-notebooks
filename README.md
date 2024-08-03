@@ -72,6 +72,7 @@ is uncommented, because the provided template removes all the buttons. TODO: kee
 1. Fails for oci_install_ocssw because of `%conda` cell.
 1. https://github.com/jupyter/nbconvert/issues/1125
 1. random cell ids, preserved id metadata from notebooks? (https://github.com/mwouts/jupytext/issues/1263)
+1. stop doing manual copy of animation to ../../img 
 
 ## How to Cite
 
