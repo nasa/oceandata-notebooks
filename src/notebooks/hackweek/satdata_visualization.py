@@ -188,7 +188,7 @@ dataset = xr.open_dataset(paths[-1])
 
 # Look at all the wavelentghs available!
 
-# + scrolled=true
+# + scrolled=true tags=["scroll-output"]
 dataset["wavelength"].data
 # -
 

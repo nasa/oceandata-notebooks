@@ -1149,7 +1149,7 @@ aoc_cb.head()
 #
 # We will use the function `process_satellite` to search for `PACE_OCI_L2_AOP_NRT` data using `earthacces` within the specified time range and at the (lat,lon) coordinate of the Casablanca_Platform AERONET-OC site. This function finds the closest pixel and extracts all data within a 5x5 pixel window, excludes pixels based on L2 flags, calculates the mean to retrive a single Rrs spectra, and computes matchup statistics. The function outputs a pandas dataframe of every `PACE_OCI_L2_AOP_NRT` Rrs spectra for the specified time range. We'll also include an optional list of unique date strings from the AERONET-OC dataframe to "skip" the granules that don't have any field data associated with them.
 
-# + tags=[]
+# + scrolled=true tags=["scroll-output"]
 # Pull out coordinates 
 aoc_lat = aoc_cb["aoc_latitude"][0]
 aoc_lon = aoc_cb["aoc_longitude"][0]
@@ -1161,6 +1161,8 @@ unique_days_str = [day.strftime('%Y-%m-%d') for day in unique_days]
 sat_cb = process_satellite(start_date="2024-06-01", end_date="2024-07-31",
                   latitude=aoc_lat, longitude=aoc_lon, sat="PACE",
                   selected_dates=unique_days_str)
+# -
+
 sat_cb.head()
 
 # + [markdown] tags=[]
@@ -1171,9 +1173,11 @@ sat_cb.head()
 
 # ?match_data
 
+# + scrolled=true tags=["scroll-output"]
 matchups = match_data(sat_cb, aoc_cb, cv_max=0.60, senz_max=60.0, 
                       min_percent_valid=55.0, max_time_diff=180, std_max=1.5)
 matchups 
+# -
 
 # Pull out wavelengths and Rrs data from matchups
 
@@ -1185,7 +1189,6 @@ rrs_aoc = matchups[dict_aoc["rrs"]["columns"]].to_numpy()
 dict_sat = get_column_prods(matchups, "oci")
 waves_sat = np.array(dict_sat["rrs"]["wavelengths"])
 rrs_sat = matchups[dict_sat["rrs"]["columns"]].to_numpy()
-
 # -
 
 # ## 4. Make plots
@@ -1226,5 +1229,3 @@ df_stats.set_index('wavelength', inplace=True)
 df_stats = df_stats.fillna(-999)
 df_stats
 # -
-
-
