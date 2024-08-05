@@ -86,7 +86,7 @@ import numpy as np
 # ## 2. NASA Earthdata Authentication
 #
 # Next, we authenticate using our Earthdata Login
-# credentials. Authentication is not needed to search publicaly
+# credentials. Authentication is not needed to search publicly
 # available collections in Earthdata, but is always needed to access
 # data. We can use the `login` method from the `earthaccess`
 # package. This will create an authenticated session when we provide a
@@ -127,7 +127,7 @@ for item in results:
 #
 # Next, we use the `search_data` function to find granules within a
 # collection. Let's use the `short_name` for the PACE/OCI Level-2 near real time (NRT), product for biogeochemical properties (although you can
-# search for granules accross collections too).
+# search for granules across collections too).
 #
 #
 #
@@ -238,7 +238,7 @@ paths = earthaccess.open(results)
 dataset = xr.open_dataset(paths[0])
 dataset
 
-# Becuase the L3M variables have lat and lon coordinates, it's possible to stack multiple granules along a new dimension that corresponds to time. Instead of xr.open_dataset, we use xr.open_mfdataset to create a single xarray.Dataset (the "mf" in open_mfdataset stands for multiple files) from an array of paths.
+# Because the L3M variables have lat and lon coordinates, it's possible to stack multiple granules along a new dimension that corresponds to time. Instead of xr.open_dataset, we use xr.open_mfdataset to create a single xarray.Dataset (the "mf" in open_mfdataset stands for multiple files) from an array of paths.
 #
 # The paths list is sorted temporally by default, which means the shape of the paths array specifies the way we need to tile the files together into larger arrays. We specify combine="nested" to combine the files according to the shape of the array of files (or file-like objects), even though paths is not a "nested" list in this case. The concat_dim="date" argument generates a new dimension in the combined dataset, because "date" is not an existing dimension in the individual files.
 
