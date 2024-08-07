@@ -19,33 +19,24 @@
 #
 # </div>
 #
-# <div class="alert alert-info" role="alert">
-#
-# An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-#
-# </div>
-#
 # ## Summary
 #
-# Processing the whole collection of Ocean Color Instrument (OCI) granules, or even big subsets of that collection,
-# requires breaking up one big job into many small jobs. That and putting the pieces back together again. We put
-# this type of pipeline in the "split-apply-combine" category. In this notebook, we are going to:
+# Processing a whole collection of Ocean Color Instrument (OCI) granules, or even big subsets of that collection,
+# requires breaking up one big job into many small jobs. That and putting the pieces back together again. The reason we
+# break up big jobs has to do with computational resources, specifically memory (i.e. RAM) and processors (i.e. CPUs or GPUs).
+# That big collection of OCI granules can't all fit in memory; and even if it could, your computation might only use one
+# of several available processors.
 #
-# 1. split a collection of Level-2 granules into groups by latitude and longitude
-# 2. apply an interpolation method returning the Level-2 variables on a projected coordinate reference system
-# 3. combine the gridded variables into one dataset with shared coordinates
-#
-# The "apply" step equates to a lot of small jobs that do not, or cannot for a large enough amount of data, be carried
-# out on a computer simultaneously. Any computer has a limit on resources for processing and memory, but there are
-# many tools designed to perform "split-apply-combine" pipelines that both maximize the use of these resources and can
-# automatically scale the pipeline to computers, or even many computers, with a lot of resources.
-#
-# A tool tightly integrated with XArray that perfectly suits our needs is [Dask: a Python library for parallel and distributed computing][dask].
+# This notebook works towards a better understanding of a tool tightly integrated with XArray that is designed to handle the
+# challenges of effectively creating and managing these jobs. The tool is [Dask: a Python library for parallel and distributed computing][dask].
+# Before diving into Dask, the notebook gets started with an even more foundational concept for performant computing: using
+# compiled functions that are typically not even written in Python.
 #
 # ## Learning Objectives
 #
 # At the end of this notebook you will know:
 #
+# - The importance of using high-performance functions to do array operations
 # - How to start a `dask` client for parallel and larger-than-memory pipelines
 # - One method for interpolating Level-2 "swath" data to a map projection
 #
@@ -57,7 +48,6 @@
 # 4. [Dask Workers]
 # 5. [Griddata]
 #
-# [edl]: https://urs.earthdata.nasa.gov
 # [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access
 # [oci-ocssw-processing]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-ocssw-processing
 # [dask]: https://docs.dask.org
@@ -68,97 +58,86 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
-# +
-import csv
-
-from dask.distributed import Client
 import dask.array as da
+from   dask.distributed import Client
+import cartopy.crs as ccrs
 import earthaccess
+from   matplotlib.patches import Rectangle
+import matplotlib.pyplot as plt
 import numba
 import numpy as np
+import pyproj
+from   scipy.interpolate import griddata
 import xarray as xr
+from   xarray.backends.api import open_datatree
 
-
-# -
-
-def write_par(path, par):
-    """
-    Prepare a "par file" to be read by one of the OCSSW tools, as an
-    alternative to specifying each parameter on the command line.
-
-    Args:
-        path (str): where to write the parameter file
-        par (dict): the parameter names and values included in the file
-    """
-    with open(path, "w") as file:
-        writer = csv.writer(file, delimiter="=")
-        values = writer.writerows(par.items())
-
-
-# Use a fixed but unique seed, such as the result of `secrets.randbits(64)`.
-
-random = np.random.default_rng(seed=5179916885778238210)
-
-# <div class="alert alert-info" role="alert">
-#     
-# The `persist=True` argument ensures any discovered credentials are
-# stored in a `.netrc` file, so the argument is not necessary (but
-# it's also harmless) for subsequent calls to `earthaccess.login`.
+# We will discuss `dask` in more detail below, but we use several additional packages that are worth their own tutorials:
+# - `scipy` is a massive collection of useful numerical methods, including a function that resamples irregularly spaced values onto regular (i.e. gridded) coordinates
+# - `numba` can convert many Python functions to make them run faster
+# - `pyproj` is a database and suite of algorithms for converting between geospatial coordinate reference systems
 #
-# </div>
+# [SatPy](https://satpy.readthedocs.io/) is another Python package that could be useful for the processing demonstrated in this notebok, especially through its [Pyresample](https://pyresample.readthedocs.io/) toolking. SatPy requires dedicated readers for any given instrument, however, and no readers have been created for PACE.
+#
+# Yet another package we are skipping over is [rasterio](https://rasterio.readthedocs.io/), which is a high-level wrapper for GDAL. Unfortuneately, the GDAL tooling for using "warp" with geolocation arrays has not been released in `rasterio.warp`.
+#
+# The data used in the demonstration is the `chlor_a` product found in the BGC suite of Level-2 ocean color products from OCI.
 
-auth = earthaccess.login(persist=True)
-
-tspan = ("2024-06", "2024-06")
-bbox = (-76.75, 37, -75.75, 39)
+bbox = (-77, 36, -73, 41)
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_BGC_NRT",
-    temporal=tspan,
+    temporal=(None, "2024-07"),
     bounding_box=bbox,
 )
+len(results)
 
-# - show a single chlor_a L2 example
-# - show the L2 example processed with l2bin and l3mapgen
+# The search results include all granules from launch through July of 2024 that intersect a bounding box around the Chesapeake and Delaware Bays. The region is much smaller than an OCI swath, so we do not use the cloud cover search filter which considers the whole swath.
 
-local_paths = earthaccess.download(results[:1], local_path="data")
+results[0]
 
-ifile = str(local_paths[0])
-ofile = ifile.replace("L2", "L3B")
-par = {
-    "ifile": ifile,
-    "ofile": ofile,
-    "prodtype": "regional",
-    "l3bprod": "chlor_a",
-    "flaguse": "NONE",
-}
-write_par("l2bin-chlor_a.par", par)
+paths = earthaccess.open(results[:1])
 
-# + scrolled=true language="bash"
-# source $OCSSWROOT/OCSSW_bash.env
-#
-# l2bin par=l2bin-chlor_a.par
-# -
-
-ifile = ofile
-ofile = ifile.replace("L3B", "L3M")
-par = {
-    "ifile": ifile,
-    "ofile": ofile,
-}
-common.write_par("l3mapgen-chlor_a.par", par)
-
-# + scrolled=true language="bash"
-# source $OCSSWROOT/OCSSW_bash.env
-#
-# l3mapgen par=l3mapgen-chlor_a.par
-# -
-
-dataset = xr.open_dataset(ofile)
+datatree = open_datatree(paths[0])
+dataset = xr.merge(datatree.to_dict().values())
+dataset = dataset.set_coords(("latitude", "longitude"))
 dataset
 
-# No need to use Cartopy to define axes, because the data are already projected.
+# As a reminder, the Level-2 data has latitude and longitude arrays that give the geolocation of every pixel. The `number_of_line` and `pixels_per_line` dimensions don't have any meaningful coordinates that would be useful for stacking Level-2 files over time.  In a lot of the granules, like the one visualized here, there will be a tiny amount of data within the box. But we don't want to lose a single pixel (if we can help it)!
 
-artist = dataset["chlor_a"].plot.imshow(x="lon", y="lat", cmap="viridis", robust=True)
+fig = plt.figure(figsize=(8, 4))
+axes = fig.add_subplot()
+artist = dataset["chlor_a"].plot.pcolormesh(x="longitude", y="latitude", robust=True, ax=axes)
+axes.add_patch(Rectangle(bbox[:2], bbox[2]-bbox[0], bbox[3]-bbox[1], edgecolor="red", facecolor="none"))
+axes.set_aspect("equal")
+plt.show()
+
+
+# When we get to opening mulitple datasets, we will use a helper function to prepare the datasets for concatenation.
+
+# +
+def time_from_attr(ds):
+    """Set the time attribute as a dataset variable
+
+    Args:
+        ds: a dataset corresponding to a Level-2 granule
+
+    Returns:
+        the dataset with a scalar "time" coordinate
+    """
+    datetime = ds.attrs["time_coverage_start"].replace("Z", "")
+    ds["time"] = ((), np.datetime64(datetime, "ns"))
+    ds = ds.set_coords("time")
+    return ds
+
+def trim_number_of_lines(ds):
+    ds = ds.isel({"number_of_lines": slice(0, 1709)})
+    return ds
+
+
+# -
+
+# Before we get to data, we will play with some random numbers. Whenever you use random numbers, a good practice is to set a fixed but unique seed, such as the result of `secrets.randbits(64)`.
+
+random = np.random.default_rng(seed=5179916885778238210)
 
 # [back to top](#contents) <a name="section-name"></a>
 
@@ -167,11 +146,14 @@ artist = dataset["chlor_a"].plot.imshow(x="lon", y="lat", cmap="viridis", robust
 # Before diving in to OCI data, we should discuss two important considerations for when you are trying to improve performance (a.k.a. your processing is taking longer than you would like).
 #
 # 1. Am I using compiled functions?
-# 2. Can I use the compiled functions in a split-apply-combine pipeline?
+# 2. Can I use compiled functions in a split-apply-combine pipeline?
 #
-# Use the [IPython %%timeit magic][timeit] as a quick and easy way to keep track of relative performance. Begin any cell
-# with `%%timeit` on a line by itself to trigger that cell to run multiple times with a timer and print a summary
-# of how long it takes the cell to run.
+# When you wrie a function in Python, there is not usually any compilation step like you encounter when writing functions in C/C++ or Fortran. Compilation converts code written in a human-readable language to a machine-readable language. It does this once, and then you use the resulting compiled function
+# repeatedly. That does not happen in Python for added flexibility and ease of programming, but it has a performance cost.
+#
+# A simple way to measure performance (i.e. speed) in notebooks is to use the [IPython %%timeit magic][timeit]. Begin any cell
+# with `%%timeit` on a line by itself to trigger that cell to run many times under a timer and print a summary
+# of how long it takes the cell to run on average.
 #
 # [timeit]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-timeit
 
@@ -218,8 +200,8 @@ def mean_and_std(x):
 
 
 # Confirm the function is working; it should return approximations to
-# the mean and standard deviation parameters of a sample from a normal
-# distribution.
+# the mean and standard deviation parameters of the normal
+# distribution we use to generate the sample.
 
 array = random.normal(1, 2, size=100)
 mean_and_std(array)
@@ -233,29 +215,53 @@ array = random.normal(1, 2, size=10_000)
 # %%timeit
 mean_and_std(array)
 
-# On this system, the baseline implementation takes between 2 and 3 milliseconds.
+# On this system, the baseline implementation takes between 2 and 3 milliseconds. The `numba.njit` method
+# will attempt to compile a Python function and raise an error if it can't. The argument to `numba.njit`
+# is the Python function, and the return value is the compiled function.
 
 compiled_mean_and_std = numba.njit(mean_and_std)
 
+# The actual compilation does not occur until the function is called with an argument. This is how mahine-language works, it needs to
+# know the type of data coming in before any performance improvements can be realized. As a result, the first call to `compiled_mean_and_std`
+# will not seem very fast.
+
 compiled_mean_and_std(array)
+
+# But now look at that function go!
 
 # %%timeit
 compiled_mean_and_std(array)
 
-# Don't write your own though, if an existing compiled function can do what you
-# need well enough!
+# But why write your own functions when an existing compiled function can do what you need well enough?
 
 # %%timeit
 array.mean(), array.std(ddof=1)
 
-# lessons learned
-# - numpy is fast because it uses efficient, compiled code to do array operations
-# - sure, you might be able to beat numpy with numba ... was it worth the coding time, and can you write a numerically stable algorithm (the one above is not).
-# - numba is not going to help us with larger-than-memory computations
-
-# ## 3. Task Graph
+# The takeaway message from this brief introduction is:
+# - `numpy` is fast because it uses efficient, compiled code to do array operations
+# - `numpy` may not have a function that does exactly what you want, so you do have `numba.njit` as a fallback
 #
-# A task graph is a collection of functions (nodes) linked through input and output data (edges).
+# Living with what `numpy` can already do is usually good enough, even if a custom function could have a small edge in performance. Moreover, what you
+# can do with `numpy` you can do with `dask.array`, and that opens up a lot of opportunity for processing large amounts of data without
+# writing your own numerical methods.
+
+# ## 3. Split-Apply-Combine
+#
+# The split-apply-combine framework is everywhere in data processing. A simple case is computing group-wise means on a dataset where one variable defines the group and another variable is what you need to average for each group.
+#
+# 1. **split**: divide the array into smaller arrays, one for each group
+# 2. **apply**: calculte the mean
+# 3. **combine**: reassemble the results into a single (smaller due to aggregation) dataset
+#
+# The same framework is also used without a natural group by which a dataset should be divided. The split is on equal-sized slices of the original dataset, which we call "chunks". Rather than a group-wise mean, you could use "chunk-apply-combine" to calculate the grand mean in chunks
+#
+# 1. **chunk**: divide the array into smaller arrays, or "chunks"
+# 2. **apply**: calculate the mean and sample size of each chunk (i.e. skipping missing values)
+# 3. **combine**: combine the size-weighted means to compute the mean of the whole array
+#
+# The apply and combine steps have to be capable of calculating results on a slice that can be combined to equal the result you would have gotten on the full array. If a computation can be shoved through "chunk-apply-combine" (see also "map-reduce"), then we can process an array that is too big to read into memory at once. We can also distribute the computation across processors or across a cluster of computers.
+#
+# We can represent the framework visually using a task graph, a collection of functions (nodes) linked through input and output data (edges).
 
 # ```mermaid
 # flowchart LR
@@ -263,24 +269,40 @@ array.mean(), array.std(ddof=1)
 # A(random.normal) -->|array| B(mean_and_std)
 # ```
 
-# The output of the `random.normal` function becomes the input to the `mean_and_std` function.
+# The output of the `random.normal` function becomes the input to the `mean_and_std` function. We can decide to use chunk-apply-combine
+# if either:
 #
-# When we think about performance, we have to consider
-# 1. the amount of data
-# 1. the resources available (typically memory and processing cores)
+# 1. `array` is going to be larger than available memory
+# 1. `mean_and_std` can be accurately calculated from intermediate results on slices of `array`
 
-# We usually think about the amount of data in two categories, "small" means we can fit all the data in memory on the current system. "Big" means we cannot. Obviously this depends on the system in use, so you can't consider these two things separately!
-#
-# In this case, the amount of data is less than the available memory, so it's "small".
+# By the way, `numpy` arrays have an `nbytes` attribute that helps you understand how much memory you may need. Note tha most computations require several times the size of an input array to do the math.
 
 f"{array.nbytes / 2**20} MiB"
 
-# The other resource we have to consider is how many calculations we can do concurrently, i.e. at the same time.
+# That's not a big array. Here's a "big" 1.0 GiB array.
+
+array = random.normal(1, 2, size=2**27)
+print(f"{array.nbytes / 2**30} GiB")
+
+# It's still not too big to fit in memory on most laptops. For demonstration, let's assume we could fit a 1.0 GiB array into memory, but not a 3 GiB array. We will calculate the mean of a 3 GiB array, using 3 splits each of size 1 GiB in a serial pipeline. (Simultaneously calculating the standard deviation is left as an exercise for the reader.)
 #
-# Actually, this is all so interrelated, it's hard to describe.
+# On this system, the serial approach takes between 8 and 9 seconds.
+
+# +
+# %%timeit
+
+n = 3
+s = 0
+for _ in range(n):
+    array = random.normal(1, 2, size=2**27)
+    s += array.mean()
+mean = s / n
+# -
+
+# All we were able to implement was serial computation, but we have multiple processors availble. When we visualize the task graph for the computation, it's apparent that running the calculation serially might not have been the most performant strategy.
 
 # ```mermaid
-# %%{ init: { 'flowchart': { 'curve': 'linear' } } }%%
+# %%{ init: { 'flowchart': { 'curve': 'monotoneY' } } }%%
 #
 # flowchart LR
 #
@@ -293,50 +315,20 @@ f"{array.nbytes / 2**20} MiB"
 # C1
 # C2
 # end
-# C0 ---|result_0| X[ ]:::hide
-# C1 ---|result_1| X
-# C2 ---|result_2| X
-# X --> D(combine-mean_and_std)
-#
-# classDef hide width:0px
+# C0 -->|result_0| D(combine-mean_and_std)
+# C1 -->|result_1| D
+# C2 -->|result_2| D
 # ```
 
-# The split-apply-combine framework is everywhere in data processing; usually used for some form of group-wise calculation. Same idea here, but the split is just on slices and the apply and combine steps have to be capable of calculating results on a slice that can be combined to equal the result you would have gotten on the full array.
-#
-# If a computation can be put into a task graph with `spit`, `apply` and `combine`, then we can process "big" data using concurrency.
-#
-# If you start trying to logic through the trade-offs though, why would you do big data concurrently. That implies chopping up your big data into chunks small enough to fit in memory ... and then you can only do one chunk at a time.
-#
-# That's correct! But what if you had access to a distributed system?
-#
-# Or what if there is latency in getting the data? Ugh, I have to think more about this.
+# In this task graph, the `mean_and_std` deviation function is never used! Somehow, the `apply-mean_and_std` function and `combine-mean_and_std` deviation functions have to be defined. This is another part of what Dask provides.
 
-array = random.normal(1, 2, size=2**27)
-print(f"{array.nbytes / 2**30} GiB")
-del array
-
-# Calculate the mean of a 4 GiB array, using 4 splits of 1 GiB arrays. Simultaneously calculating
-# the standard deviation is left as an exercise for the reader.
-
-# +
-# %%timeit
-
-n = 4
-s = 0
-for _ in range(n):
-    array = random.normal(1, 2, size=2**27)
-    s += array.mean()
-    del array
-mean = s / n
-# -
-
-client = Client(processes=False, memory_limit="1 GiB")
+client = Client(processes=False, memory_limit="3 GiB")
 client
 
 dask_random = da.random.default_rng(random)
 
 # + scrolled=true
-dask_array = dask_random.normal(1, 2, size=2**29, chunks="16 MiB")
+dask_array = dask_random.normal(1, 2, size=3*2**27, chunks="32 MiB")
 dask_array
 # -
 
@@ -347,106 +339,43 @@ mean = dask_array.mean().compute()
 
 # We just demonstrated two ways of doing larger-than-memory calculations.
 #
-# Our synchronous implemenation (using a for loop) took the strategy of maximizing the use of available memory while processing one chunk: so we used 1 GiB chunks, requiring 4 chunks to get to a 4 GiB array.
+# Our synchronous implemenation (using a for loop) took the strategy of maximizing the use of available memory while processing one chunk: so we used 1 GiB chunks, requiring 3 chunks to get to a 3 GiB array.
 #
-# Our concurrent implementation (using `dask.array`), took the strategy of maximizing the use of available processors: so we used small chunks of 16 MiB, requiring 256 chunks to get to a 4 GiB array.
+# Our concurrent implementation (using `dask.array`), took the strategy of maximizing the use of available processors: so we used small chunks of 32 MiB, requiring many chunks to get to a 3 GiB array.
 #
-# The concurrent implementation was about twice as fast.
+# The concurrent implementation was a little more than twice as fast.
 
 client.close()
 
-# ## 4. Griddata
+# ## 4. Stacking Level-2 Granules
 #
-# Enough hokey examples, lets process some data ...
+# The integration of XArray and Dask is designed to let you work without doing very much different. Of course, there is still a lot of work to do when writing any processing
+# pipeline on a collection of Level-2 granules. Stacking them over time, for instance, may
+# sound easy but requires resampling the data to a common grid. This section demonstrates
+# one method for stacking Level-2 granules.
+#
+# 1. Choose a projection for a common grid
+# 1. Get geographic coordinates that correspond to the projected coordinates
+# 1. Resample each granule to the new coordinate
+# 1. Stack results along the time dimension
+#
+# Use `pyproj` for the first two steps, noting that the EPSG code of the coordinate reference system (CRS) of the Level-2 files is not recorded in the files. Know that it is the universal default for a CRS with latitudes and longitudes: "EPSG:4326".
 
-# ## Scratch
+aoi = pyproj.aoi.AreaOfInterest(*bbox)
 
-# ### ocssw tools projection
+pyproj.CRS.from_epsg(4326)
 
-# +
-import os
+# The `pyproj` database contains all the UTM grids and helps us choose the best one for our AOI.
 
-from pyproj import CRS, Transformer
-from pyproj.aoi import AreaOfInterest
-from scipy.interpolate import griddata
-import earthaccess
-import import_ipynb
-import matplotlib.pyplot as plt
-import numpy as np
-import xarray as xr
-
-import common
-# -
-
-??common.write_par
-
-os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
-
-tspan = ("2024-07-01", "2024-07-31")
-bbox = (-76.75, 36.97, -75.74, 39.01)
-clouds = (0, 50)
-results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_BGC_NRT",
-    temporal=tspan,
-    bounding_box=bbox,
-    cloud_cover=clouds,
-)
-
-results[1]
-
-paths = earthaccess.open(results[1:2])
-
-dataset = xr.open_dataset(paths[0])
-dataset
-
-tmp = axes.get_extent()
-
-# ### using scipy griddata
-
-# Do this with `griddata`, but note that the development release of rasterio includes
-# reprojection using geolocation arrays. This is already in GDAL, but that's fairly low level.
-# Possibly the way to go in the future once released in rasterio.
-
-# +
-from dask.distributed import Client
-
-client = Client(processes=False)
-client
-# -
-
-groups = (None, "geophysical_data", "navigation_data")
-dataset = xr.merge(
-    (xr.open_dataset(paths[0], group=i, chunks={}) for i in groups)
-)
-dataset
-
-swath_pixels = dataset.stack({"pixels": ["number_of_lines", "pixels_per_line"]}, create_index=False)
-swath_pixels
-
-aoi = AreaOfInterest(
-    west_lon_degree=dataset.attrs["westernmost_longitude"],
-    south_lat_degree=dataset.attrs["southernmost_latitude"],
-    east_lon_degree=dataset.attrs["easternmost_longitude"],
-    north_lat_degree=dataset.attrs["northernmost_latitude"],
-)
-
-from pyproj.database import query_utm_crs_info
-
-# + scrolled=true
-crs_list = query_utm_crs_info(area_of_interest=aoi, contains=True)
+crs_list = pyproj.database.query_utm_crs_info(datum_name="WGS 84", area_of_interest=aoi, contains=True)
 for i in crs_list:
-    print(i.auth_name, i.code, str(i))
-    print()
-# -
+    print(i.auth_name, i.code, ": ", i.name)
 
-len(i)
+pyproj.CRS.from_epsg(32618)
 
-CRS.from_epsg(4326)
+# Note that the axis order for EPSG:4326 is ("Lat", "Lon"), which is "backwards" from the "X", "Y" used by EPSG:32618. When we use a CRS transformer, this defines the order of arguments.
 
-CRS.from_epsg(3408)
-
-t = Transformer.from_crs("EPSG:4326", "EPSG:3408") #, area_of_interest=aoi
-t
+t = pyproj.Transformer.from_crs("EPSG:4326", "EPSG:32618", area_of_interest=aoi)
 
 x_min, y_min = t.transform(aoi.south_lat_degree, aoi.west_lon_degree)
 x_min, y_min
@@ -454,99 +383,89 @@ x_min, y_min
 x_max, y_max = t.transform(aoi.north_lat_degree, aoi.east_lon_degree)
 x_max, y_max
 
-# Create a dataset that has the coordinates we want, but no data (yet!).
+# Create x, y grid as a new `xarray.Dataset` but then `stack` it into a 1D array of points.
 
-x_size = 752 # TODO: how to choose
-y_size = 468
-grid_pixels = xr.Dataset({
+x_size = int((x_max - x_min) // 1000)
+y_size = int((y_max - y_min) // 1000)
+grid_point = xr.Dataset({
     "x": ("x", np.linspace(x_min, x_max, x_size)),
     "y": ("y", np.linspace(y_min, y_max, y_size))
 })
-grid_pixels = grid_pixels.stack({"pixels": ["x", "y"]})
-grid_pixels
+grid_point = grid_point.stack({"point": ["x", "y"]})
+grid_point
 
-lat, lon = t.transform(grid_pixels["x"], grid_pixels["y"], direction="INVERSE")
+# To find corresponding latitudes and longitudes in "EPSG:4326", do the inverse transformation paying attention to the order of arguments and outputs.
 
-grid_pixels["lat"] = ("pixels", lat)
-grid_pixels["lon"] = ("pixels", lon)
-grid_pixels
+lat, lon = t.transform(grid_point["x"], grid_point["y"], direction="INVERSE")
 
-grid_latlon = grid_pixels[["lat", "lon"]].to_dataarray().transpose()
+grid_point["lat"] = ("point", lat)
+grid_point["lon"] = ("point", lon)
+grid_point
 
-swath_latlon = swath_pixels[["latitude", "longitude"]].to_dataarray().transpose()
+grid_latlon = grid_point.to_dataarray("axis").transpose("point", ...)
 
-values = swath_pixels["chlor_a"] # of course, we have a lot more variables, or higher dim ones
+# Instead of opening a single granule with `xr.open_dataset`, open all of the granules with `xr.open_mfdataset`. Use the `time_from_attr` function defined above to populate a `time` coordinate from the attributes on each granule.
 
-grid_values = griddata(swath_latlon, values, grid_latlon)
+paths = earthaccess.open(results[10:20])
 
-grid_pixels["chlor_a"] = ("pixels", grid_values)
-grid_pixels
+kwargs = {"combine": "nested", "concat_dim": "time"}
+prod = xr.open_mfdataset(paths, preprocess=time_from_attr, **kwargs)
+nav = xr.open_mfdataset(paths, preprocess=trim_number_of_lines, group="navigation_data", **kwargs)
+sci = xr.open_mfdataset(paths, preprocess=trim_number_of_lines, group="geophysical_data", **kwargs)
+dataset = xr.merge((prod, nav, sci))
+dataset
 
-grid = grid_pixels.unstack()
-grid
+# Notice that using `xr.open_mfdataset` automatically triggers the use of `dask.array` instead of `numpy` for the variables. To get a dashboard, load up the Dask client.
 
-artist = grid["chlor_a"].plot.imshow(x="x", y="y", robust=True)
+client = Client(processes=False)
+client
 
-t.target_crs
+# Disclaimer: the most generic function that we have available to resample the dataset is `scipy.interpolate.griddata`. This is not specialized for geospatial resampling, so there is likely a better way to do this using `pyresample` or `rasterio.warp`.
+#
+# Due to limitations of `griddata` however, we have to work in a loop. For each slice over the time dimension (i.e. each file), the loop is going to collect that latitudesa and longitudes as `swath_latlon`, resample to `grid_latlon` (which has regular spacing in the projected CRS), and store the result in a list of `xr.DataArray`.
+
+groups = []
+for key, value in dataset.groupby("time"):
+    value = value.squeeze("time")
+    swath_pixel = value.stack({"point": ["number_of_lines", "pixels_per_line"]}, create_index=False)
+    swath_latlon = swath_pixel[["latitude", "longitude"]].to_dataarray("axis").transpose("point", ...)
+    gridded = griddata(swath_latlon, swath_pixel["chlor_a"], grid_latlon)
+    gridded = xr.DataArray(gridded, dims="point")
+    gridded = gridded.expand_dims({"time": [key]})
+    groups.append(gridded)
+
+groups[-1]
+
+# Then there is the final step of getting the whole collection concatenated together and associated with the projected CRS (the `x` and `y` coordinates).
+
+grid_point["chlor_a"] = xr.concat(groups, dim="time")
+dataset = grid_point.unstack()
+dataset
+
+# After viewing a map at individual time slices in projected coordinates, you can decide what to do for your next step of analysis. Some of the granules will have good coverage, free of clouds.
+
+dataset_t = dataset.isel({"time": 4})
 
 fig = plt.figure()
-data_proj = ccrs.UTM(17, southern_hemisphere=False)
-axes = plt.axes(projection=data_proj)
-artist = grid["chlor_a"].plot.imshow(x="x", y="y", robust=True, ax=axes)
-axes.set_extent((x_min, x_max, y_min, y_max), crs=data_proj)
-# axes.set_extent(tmp)
+crs = ccrs.UTM(18, southern_hemisphere=False)
+axes = plt.axes(projection=crs)
+artist = dataset_t["chlor_a"].plot.imshow(x="x", y="y", robust=True, ax=axes)
 axes.gridlines(draw_labels={"left": "y", "bottom": "x"})
 axes.coastlines()
 plt.show()
 
-grid
+# Many will not, either because of clouds or because only some portion of the specified bounding box is within the given swath.
 
-# gdalwarp using control point array, osgeo?
+# +
+dataset_t = dataset.isel({"time": 8})
 
-# ah, so the geoloc arrays for rasterio is unreleased, great
-
-# but going all the way to gdal seems really hard. also, seems like it wants something on disk, so that's going to make dask hard.
-
-# just try to use KDTree on my own? maybe go back to satPy? idea
-# there was to do resampling on viirs_sdr, then replicate without satpy.
-
-
-
-# To get a regular grid at "full resolution", we have to resample.
-
-from scipy.spatial import KDTree
-
-lonlat = (
-    dataset[["latitude", "longitude"]]
-    .reset_coords()
-    .to_dataarray("coordinate")
-    .stack({"pixel": ["number_of_lines", "pixels_per_line"]}, create_index=False)
-    .transpose("pixel", ...)
-)
-
-index = KDTree(lonlat)
-
-# need a grid
-# need to get the lat lon of a point in the grid
-# use the index on those lat lon points
-# ... good lord this is tricky. and now there is 
-
-from rasterio.warp import reproject
-
-reproject(
-    src,
-    dst=None,
-    src_geoloc_array, # the x and y arrays
-    
-    src_crs={"init": "EPSG:4326"}, # Geographic CRS
-    dst_crs={"init": "EPSG:3857"}, # Projected CRS
-)
-# but how do I use this on 180 bands? only need to do the lookups once
+fig = plt.figure()
+crs = ccrs.UTM(18, southern_hemisphere=False)
+axes = plt.axes(projection=crs)
+artist = dataset_t["chlor_a"].plot.imshow(x="x", y="y", robust=True, ax=axes)
+axes.gridlines(draw_labels={"left": "y", "bottom": "x"})
+axes.coastlines()
+plt.show()
+# -
 
 # [back to top](#contents)
-#
-# <div class="alert alert-info" role="alert">
-#
-# You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on ...
-#
-# </div>
