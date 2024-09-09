@@ -1,3 +1,40 @@
+[project]
+name = "oceandata-notebooks"
+version = "0.1.0"
+description = "Oceandata Jupyter Notebook Tutorials"
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+
+[[project.authors]]
+name = "Anna Windle DiPaola"
+email = "anna.windledipaola@nasa.gov"
+
+[[project.authors]]
+name = "Ian Carroll"
+email = "ian.t.carroll@nasa.gov"
+
+[[project.authors]]
+name = "Guoqing Wang"
+email = "guoqing.wang@nasa.gov"
+
+[[project.authors]]
+name = "Carina Poulin"
+email = "carina.poulin@nasa.gov"
+
+[[project.authors]]
+name = "Sean Foley"
+email = "sean.r.foley@nasa.gov"
+
+[project.urls]
+Homepage = "https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/"
+Repository = "https://github.com/gsfc-oel/oceandata-notebooks"
+Issues = "https://github.com/gsfc-oel/oceandata-notebooks/issues"
+
+[tool.jupytext]
+notebook_metadata_filter = "-all,kernelspec"
+cell_metadata_filter = "-all,scrolled,tags"
+
 [tool.jupytext.formats]
-"notebooks/" = "ipynb"
-"src/" = "py"
+"notebooks" = "ipynb"
+"src/notebooks" = "py"

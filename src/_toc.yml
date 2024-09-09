@@ -1,0 +1,19 @@
+format: jb-book
+root: index
+chapters:
+- file: notebooks/hackweek/earthdata_cloud_access
+- file: notebooks/hackweek/satdata_visualization
+- file: notebooks/hackweek/satellite_insitu_matchups.py
+- file: notebooks/hackweek/ocssw_processing
+# - file: notebooks/hackweek/dask_gridding
+- file: notebooks/hackweek/ml_cloud_mask
+# - file: notebooks/oci/oci_data_access
+# - file: notebooks/oci/oci_file_structure
+# # - file: notebooks/oci/oci_ocssw_install
+# #         FIXME: kernelspec deleted when saving ipynb b/c of global config
+# #         FIXME: needs a data file from oci_data_access
+# # - file: notebooks/oci/oci_ocssw_processing
+# #         FIXME: permission denied. trying to overwrite previous file?
+# # - file: notebooks/harp2/harp2_basic_visualizations
+# # - file: notebooks/modis/modis_explore_l2
+# - file: notebooks/modis/modis_explore_l3
