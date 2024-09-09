@@ -6,16 +6,16 @@ A repository for notebooks published as [oceandata tutorials and data recipes][t
 
 > [!IMPORTANT]
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
-> - Create new notebooks under the `notebooks` folder, starting from a a copy of `COPYME.ipynb`.
+> - Create new notebooks under the `notebooks` folder, starting from a copy of `COPYME.ipynb`.
 > - If a notebook is missing from the `notebooks` folder, but its paired ".py" file is present under
 >   the `src/notebooks` folder, open a terminal from the project root and run `jupytext --sync src/notebooks/**/*.py`.
 
 Keeping notebooks in a code repository presents challenges for collaboration and curation,
-because notebooks can contain very large blobs of binary outputs and they also include
+because notebooks can contain very large blobs of binary outputs and include
 constantly changing metadata. This repository contains ".py" files that the [Jupytext extension][jupytext]
-synchronizes with notebooks (".ipynb" files). The ".py" files live
+synchronizes with notebooks (".ipynb" files) in your clone. The ".py" files live
 in the `src/notebooks` folder and are commited to the repository. The paired ".ipynb" files live
-in the `notebooks` folder and are ignored by the repository. Other than the steps above,
+in the `notebooks` folder and are ignored by git. Other than the steps above,
 just work on the ".ipynb" files, save your changes, and commit normally (well, almost ... git
 only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the ".py" files).
 
