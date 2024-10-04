@@ -21,6 +21,13 @@ or otherwise ensure your environment satisifes these dependencies. Note that the
 the `ipykernel` package in case your JupyterLab includes [nb_conda_kernels][nb_conda_kernels] or you want
 to manually [make the environment available to JupyterLab as a kernel][conda-kernel].
 
+The notebooks import Python packages that must be installed. You can run
+a setup script ([](setup.py)) using `pipx` to create a Jupyter kernel with all
+packages installed. Open the Terminal in JupyterLab and execute
+`pipx run setup.py --user --name oc`. For more on the arguments, which customize the
+kernel location and name, execute `pipx run setup.py --help`.
+
+
 ## Notebooks
 
 ### Learn with OCI

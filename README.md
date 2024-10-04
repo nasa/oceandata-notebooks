@@ -21,6 +21,78 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 
 ## For Maintainers
 
+TODO:
+  - consider GitHub CI as the "pipeline" to string together uv commands and others
+  - or pre-commit, using repo: local for some stuff, but also
+    - ruff lint and fmt
+    - uv pip compile
+
+
+### Dependencies
+
+For packages imported into notebooks:
+```
+$ uv add scipy
+```
+For packages that need an upper limit for
+```
+$ uv add xyz<999 --optional=conda scipy
+```
+
+
+```
+$ uv run --all-extras jupyter-book build src
+```
+
+Create or update the uv.lock file that pins all top-level packages and their
+dependencies.
+```
+$ uv lock
+```
+Modify the virtual environment to match the lockfile.
+```
+$ uv sync --all-extras
+```
+Build the `requirements.txt` file.
+```
+$ uv pip compile --all-extras -o src/requirements.txt pyproject.toml
+```
+
+<!-- Check that conda can solve it.
+```
+$ conda create --name=oc --file=requirements.txt
+```
+
+FIXME: and this is where we fail b/c we need to specify that some packages come from
+pypi not conda-forge
+- conda create -n oc pip; conda run -n oc pip install -r requirements
+- keep environment.yml and pip freeze?
+- pipx script with locked requirements? <- works! but need a way to embed requirements. -->
+
+okay, so let's try to get this all as a book,
+with requirements.txt "built" into the insall script that
+is referenced in the index.html (is an asset).
+
+need to get jb build to run custom script.
+
+uv pip compile ... could be a pre-commit?
+
+### Repo2docker Image
+
+first environment definition
+- add dependencies to pyproject (sole source, will need pins for conda-forge)
+- uv pip compile ... to get requirements.txt
+- commands described for (non image) use should be
+  - conda create --name=oc --file=requirements.txt, then conda run --name=oc python -m ipykernel install ...
+  - (ugh) python -m venv , then venv/bin/pip install -r requirements.txt, then venv/bin/python -m ipykernel install ...
+  - add pipenv or some other "one-liner" way too?
+
+now image definition for binderhub, oss (using repo2docker subdir)
+
+
+
+### Building HTML
+
 In addition to the ".py" files paired to notebooks, the `src` folder contains configuration
 for a [Jupyter Book][jb]. Building the notebooks as one book allows for separation
 of content from the JavaScript and CSS, unlike standalone HTML files built with `nbconvert`. It also provides
@@ -72,7 +144,7 @@ is uncommented, because the provided template removes all the buttons. TODO: kee
 1. Fails for oci_install_ocssw because of `%conda` cell.
 1. https://github.com/jupyter/nbconvert/issues/1125
 1. random cell ids, preserved id metadata from notebooks? (https://github.com/mwouts/jupytext/issues/1263)
-1. stop doing manual copy of animation to ../../img 
+1. stop doing manual copy of animation to ../../img
 
 ## How to Cite
 

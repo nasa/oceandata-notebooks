@@ -6,10 +6,10 @@ repos:
       - id: pip-compile
         args: [pyproject.toml, -o, src/requirements.txt]
         files: pyproject.toml
-  # - repo: local
-  #   hooks:
-  #   - id: update-setup-py
-  #     name: update setup.py
-  #     language: system
-  #     entry: python update-setup.py
-  #     files: [src/requirements.txt]
+  - repo: local
+    hooks:
+    - id: update-setup-py
+      name: update-setup-py
+      language: system
+      entry: python update-setup.py
+      files: src/requirements.txt
