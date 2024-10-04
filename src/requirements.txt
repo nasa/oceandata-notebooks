@@ -46,6 +46,8 @@ cloudpickle==3.0.0
     # via
     #   dask
     #   distributed
+cmocean==4.0.3
+    # via oceandata-notebooks (pyproject.toml)
 colorcet==3.1.0
     # via
     #   holoviews
@@ -145,6 +147,7 @@ matplotlib==3.9.2
     # via
     #   oceandata-notebooks (pyproject.toml)
     #   cartopy
+    #   cmocean
 matplotlib-inline==0.1.7
     # via
     #   ipykernel
@@ -170,6 +173,7 @@ numpy==2.1.1
     #   bokeh
     #   cartopy
     #   cftime
+    #   cmocean
     #   contourpy
     #   earthaccess
     #   h5py
@@ -185,6 +189,7 @@ packaging==24.1
     # via
     #   bokeh
     #   cartopy
+    #   cmocean
     #   dask
     #   distributed
     #   h5netcdf

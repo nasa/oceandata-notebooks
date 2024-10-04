@@ -9,6 +9,7 @@ readme = "README.md"
 license = { text = "Apache-2.0" }
 dependencies = [
     "cartopy>=0.22.0",
+    "cmocean>=4.0.3",
     "dask[distributed]>=2024.4.1",
     "earthaccess>=0.10.0",
     "h5netcdf>=1.3.0",

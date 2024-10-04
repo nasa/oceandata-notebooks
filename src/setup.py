@@ -18,6 +18,7 @@
 #     'charset-normalizer==3.3.2',
 #     'click==8.1.7',
 #     'cloudpickle==3.0.0',
+#     'cmocean==4.0.3',
 #     'colorcet==3.1.0',
 #     'comm==0.2.2',
 #     'contourpy==1.3.0',
