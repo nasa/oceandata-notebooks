@@ -31,14 +31,18 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 ## For Maintainers
 
 TODO:
-  - src/jupytext.toml makes sync from initial clone difficult
+  - src/jupytext.toml makes manual sync annoying
   - pre-commit
-    - ruff lint and fmt
+    - ruff lint and fmt or black
+  - failing for oci_install_ocssw because of `%conda` cell.
+  - random cell ids, preserved id metadata from notebooks? (see https://github.com/mwouts/jupytext/issues/1263)
+  - stop doing manual copy of animation to ../../img
+   fill in "How to Cite" once on Zenodo
 
 ### Dependencies
 
-If you are adding an import for a new package, make sure you add it to the `pyproject.toml`.
-You can do so manually or using `uv` as in
+If you add an `import` for a new package, make sure the package is listed under
+`dependencies` in `pyproject.toml`. You can add entries manually or using `uv`, as in
 ```
 $ uv add scipy
 ```
@@ -61,29 +65,22 @@ $ uv sync --extra dev
 $ source .venv/bin/activate
 (oceandata-notebooks) $ jb build src
 ```
-
-```
-jb build src
-```
-That populates the `src/_build` folder. The folder is (mostly) ignored by git.
-
-The second step needs globstar (a.k.a. `**` patterns) enabled in bash, so we do that first and then call jupytext.
-```
-shopt -s globstar
-jupytext --to=notebook src/_build/**/*.py  # TODO: with metadata filter?
-```
-That writes an unpaired ".ipynb" format to the ".py" format sources under `src/_build`. These files are not
-ignored by git. They are (will be, eventually) targets for the "Downloand and Run" links on the [tutorials][tutorials]
+That populates the `src/_build` folder. The folder is (mostly) ignored by git. Note that
+the `jupytext` pre-commit check might update the "clean" notebooks under `src/_build/html/_sources`
+and report "Failed". That's okay, just commit the "clean" notebooks and try again. They
+are committed to the repository as targets for the "Downloand and Run" links on the [tutorials][tutorials]
 page. Note that opening those notebooks in Jupyter will dirty them up again, so
 do not include the changes introduced by opening the clean notebooks in any commit.
 
-FIXME: seems to be a bug in the chain from jb build src that does not add the reader to the jcache.
+
+<!--
+FIXME: seems to be (have been? can't get missing outputs now ...) a bug in the chain from jb build src that does not add the reader to the jcache.
 ```
-cd src
-jcache notebook -p _build/.jupyter_cache list
+jcache notebook -p src/_build/.jupyter_cache list
 ```
 Add notebooks to the jupyter cache with something like this:
 ```
+cd src
 jcache notebook -p _build/.jupyter_cache add -r jupytext notebooks/hackweek/<new_notebook>.py
 ```
 After builds that use the case, merge the cache output into the notebook (do this for all notebooks).
@@ -91,29 +88,14 @@ After builds that use the case, merge the cache output into the notebook (do thi
 for f in notebooks/hackweek/*.py; do
   jcache notebook -p _build/.jupyter_cache merge ${f} _build/jupyter_execute/${f%.*}.ipynb
 done
-```
+``` -->
 
 
 The `src/_ext` folder includes a local Sphinx extension that adds the ".ipynb" download
 button to the article header buttons. It has no effect, however, when the `_templates` configration
 is uncommented, because the provided template removes all the buttons. TODO: keep desired buttons.
 
-**WIP**:
-
-1. Curating dependencies without duplicating between pyproject.toml and environment.yml
-1. Formatting notebooks with black (although black does not format markdown)
-1. Building notebooks in an isolated environment
-1. Automate `shopt -s globstar`
-1. Fails for oci_install_ocssw because of `%conda` cell.
-1. https://github.com/jupyter/nbconvert/issues/1125
-1. random cell ids, preserved id metadata from notebooks? (https://github.com/mwouts/jupytext/issues/1263)
-1. stop doing manual copy of animation to ../../img
-
 ## How to Cite
-
-**WIP**:
-
-1. fill in once on Zenodo
 
 ## Acknowledgements
 This repository has greatly benefited from works of multiple open-science projects, notably [Learn OLCI][learn-olci] and the [NASA EarthData Cloud Cookbook][cookbook].

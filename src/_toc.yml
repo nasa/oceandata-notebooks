@@ -7,7 +7,7 @@ chapters:
 # - file: notebooks/hackweek/ocssw_processing
 # # - file: notebooks/hackweek/dask_gridding
 # - file: notebooks/hackweek/ml_cloud_mask
-# # - file: notebooks/oci/oci_data_access
+- file: notebooks/oci/oci_data_access
 # # - file: notebooks/oci/oci_file_structure
 # # # - file: notebooks/oci/oci_ocssw_install
 # # #         FIXME: kernelspec deleted when saving ipynb b/c of global config
