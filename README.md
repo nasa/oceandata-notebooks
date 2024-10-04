@@ -7,8 +7,6 @@ A repository for notebooks published as [oceandata tutorials and data recipes][t
 > [!IMPORTANT]
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
 > - Create new notebooks under the `notebooks` folder, starting from a copy of `COPYME.ipynb`.
-> - If a notebook is missing from the `notebooks` folder, but its paired ".py" file is present under
->   the `src/notebooks` folder, open a terminal from the project root and run `jupytext --sync src/notebooks/**/*.py`.
 
 Keeping notebooks in a code repository presents challenges for collaboration and curation,
 because notebooks can contain very large blobs of binary outputs and include
@@ -19,45 +17,31 @@ in the `notebooks` folder and are ignored by git. Other than the steps above,
 just work on the ".ipynb" files, save your changes, and commit normally (well, almost ... git
 only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the ".py" files).
 
+> [!IMPORTANT]
+> Right after you clone this repository, the `notebooks` folder will be empty. Any time
+> a notebook is missing (i.e. the ".py" file exists but not the ".ipynb" file) open a
+> terminal at the project root and do the following.
+>
+> ```
+> $ rm src/jupytext.toml
+> $ jupytext --sync src/notebooks/**/*.py
+> $ git restore src/jupytext.toml
+> ```
+
 ## For Maintainers
 
 TODO:
+  - src/jupytext.toml makes sync from initial clone difficult
   - pre-commit
     - ruff lint and fmt
 
-For building the HTML
-```
-$ uv sync --extra dev
-$ source .venv/activate
-(oceandata-notebooks) $ jb build src
-```
-
 ### Dependencies
 
-For packages imported into notebooks:
+If you are adding an import for a new package, make sure you add it to the `pyproject.toml`.
+You can do so manually or using `uv` as in
 ```
 $ uv add scipy
 ```
-
-
-<!-- Check that conda can solve it.
-```
-$ conda create --name=oc --file=requirements.txt
-```
-
-FIXME: and this is where we fail b/c we need to specify that some packages come from
-pypi not conda-forge
-- conda create -n oc pip; conda run -n oc pip install -r requirements
-- keep environment.yml and pip freeze?
-- pipx script with locked requirements? <- works! but need a way to embed requirements. -->
-
-okay, so let's try to get this all as a book,
-with requirements.txt "built" into the insall script that
-is referenced in the index.html (is an asset).
-
-need to get jb build to run custom script.
-
-uv pip compile ... could be a pre-commit?
 
 ### Repo2docker Image
 
@@ -70,6 +54,13 @@ for a [Jupyter Book][jb]. Building the notebooks as one book allows for separati
 of content from the JavaScript and CSS, unlike standalone HTML files built with `nbconvert`. It also provides
 a way to test that all notebook are free of errors. Run the following commands in an environment with
 all dependencies along with the jupyter-book and jupytext packages.
+
+For building the HTML
+```
+$ uv sync --extra dev
+$ source .venv/bin/activate
+(oceandata-notebooks) $ jb build src
+```
 
 ```
 jb build src

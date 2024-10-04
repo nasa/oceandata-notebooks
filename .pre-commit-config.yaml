@@ -19,8 +19,3 @@ repos:
         language: system
         entry: python update-setup.py
         files: src/requirements.txt
-    # - id: jupytext-sync
-    #   name: jupytext-sync
-    #   language: system
-    #   entry: jupytext --pre-commit-mode --sync
-    #   files: ^src/notebooks/.*\.py$
