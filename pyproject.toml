@@ -21,11 +21,7 @@ dependencies = [
     "scipy>=1.13.1",
     "xarray>=2024.3.0",
 ]
-optional-dependencies.dev = [
-    "jupyter-book>=1.0.2",
-    "pre-commit>=3.8.0",
-    "tomlkit>=0.13.2",
-]
+optional-dependencies.dev = ["jupyter-book>=1.0.2", "tomlkit>=0.13.2"]
 
 [[project.authors]]
 name = "Ian Carroll"
