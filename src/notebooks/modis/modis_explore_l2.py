@@ -1,11 +1,3 @@
-# ---
-# jupyter:
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
 # # Explore Level-2 Ocean Color Data from the Moderate Resolution Imaging Spectroradiometer (MODIS)
 #
 # **Authors:** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)

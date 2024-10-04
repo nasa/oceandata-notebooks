@@ -1,11 +1,3 @@
-# ---
-# jupyter:
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
 # # Matchups of in situ data with satellite data using the ThoMaS match-up toolkit
 # **Authors:** Anna Windle (NASA, SSAI), James Allen (NASA, Morgan State University), Juan Ignacio Gossn (EUMETSAT), Ben Loveday (EUMETSAT)
 #

@@ -1270,6 +1270,23 @@ wheels = [
 ]
 
 [[package]]
+name = "jupytext"
+version = "1.16.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown-it-py" },
+    { name = "mdit-py-plugins" },
+    { name = "nbformat" },
+    { name = "packaging" },
+    { name = "pyyaml" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a1/ba/81097573072b165772b71298c339d5da46dfeec53c1c354ce282109967ea/jupytext-1.16.4.tar.gz", hash = "sha256:28e33f46f2ce7a41fb9d677a4a2c95327285579b64ca104437c4b9eb1e4174e9", size = 3724368 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/90/a3/285eb1e79dbbd8e9513a3bb1bb2bb3d4c7c22c8a92efb8449baface0b864/jupytext-1.16.4-py3-none-any.whl", hash = "sha256:76989d2690e65667ea6fb411d8056abe7cd0437c07bd774660b83d62acf9490a", size = 153540 },
+]
+
+[[package]]
 name = "kiwisolver"
 version = "1.4.7"
 source = { registry = "https://pypi.org/simple" }
@@ -1843,6 +1860,7 @@ dependencies = [
 [package.optional-dependencies]
 dev = [
     { name = "jupyter-book" },
+    { name = "jupytext" },
     { name = "tomlkit" },
 ]
 
@@ -1856,6 +1874,7 @@ requires-dist = [
     { name = "ipykernel", specifier = ">=6.29.3" },
     { name = "ipywidgets", specifier = ">=8.1.2" },
     { name = "jupyter-book", marker = "extra == 'dev'", specifier = ">=1.0.2" },
+    { name = "jupytext", marker = "extra == 'dev'", specifier = ">=1.16.4" },
     { name = "matplotlib", specifier = ">=3.8.4" },
     { name = "netcdf4", specifier = ">=1.6.5" },
     { name = "pandas", specifier = ">=2.2.1" },

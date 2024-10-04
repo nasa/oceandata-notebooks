@@ -1,11 +1,3 @@
-# ---
-# jupyter:
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
 # # Access Data from the Ocean Color Instrument (OCI)
 #
 # **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
@@ -93,7 +85,7 @@ import earthaccess
 # allow you to input credentials.
 #
 # <div class="alert alert-info" role="alert">
-#     
+#
 # The `persist=True` argument ensures any discovered credentials are
 # stored in a `.netrc` file, so the argument is not necessary (but
 # it's also harmless) for subsequent calls to `earthaccess.login`.
@@ -123,7 +115,7 @@ for item in results:
 # search for granules accross collections too).
 #
 # <div class="alert alert-info" role="alert">
-#     
+#
 # The short name can also be found on [Earthdata Search](https://search.earthdata.nasa.gov/search?fi=OCI),
 # directly under the collection name, after clicking on the "i" button for a collection in any search result.
 #
@@ -237,7 +229,7 @@ paths
 # [back to top](#Contents)
 #
 # <div class="alert alert-info" role="alert">
-#     
+#
 # You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on File Structure at Three Processing Levels.
 #
 # </div>

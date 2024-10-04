@@ -1,11 +1,3 @@
-# ---
-# jupyter:
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
 # + [markdown] tags=[]
 # # Processing with OCSSW Command Line Interface (CLI)
 #
@@ -59,6 +51,7 @@ import cartopy.crs as ccrs
 import earthaccess
 import xarray as xr
 import matplotlib.pyplot as plt
+
 
 # + [markdown] tags=[]
 # We are also going to define a function to help write OCSSW parameter files, which

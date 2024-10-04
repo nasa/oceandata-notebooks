@@ -1,11 +1,3 @@
-# ---
-# jupyter:
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
 # # Machine Learning Tutorial
 #
 # **Tutorial Lead:** Sean Foley (NASA, MSU)

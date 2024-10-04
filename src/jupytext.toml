@@ -1,0 +1,6 @@
+notebook_metadata_filter = "-all"
+cell_metadata_filter = "-all,scrolled,tags"
+
+[formats]
+"notebooks" = "py"
+"_build/html/_sources/notebooks" = "ipynb"

@@ -22,11 +22,15 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 ## For Maintainers
 
 TODO:
-  - consider GitHub CI as the "pipeline" to string together uv commands and others
-  - or pre-commit, using repo: local for some stuff, but also
+  - pre-commit
     - ruff lint and fmt
-    - uv pip compile
 
+For building the HTML
+```
+$ uv sync --extra dev
+$ source .venv/activate
+(oceandata-notebooks) $ jb build src
+```
 
 ### Dependencies
 
@@ -34,29 +38,7 @@ For packages imported into notebooks:
 ```
 $ uv add scipy
 ```
-For packages that need an upper limit for
-```
-$ uv add xyz<999 --optional=conda scipy
-```
 
-
-```
-$ uv run --all-extras jupyter-book build src
-```
-
-Create or update the uv.lock file that pins all top-level packages and their
-dependencies.
-```
-$ uv lock
-```
-Modify the virtual environment to match the lockfile.
-```
-$ uv sync --all-extras
-```
-Build the `requirements.txt` file.
-```
-$ uv pip compile --all-extras -o src/requirements.txt pyproject.toml
-```
 
 <!-- Check that conda can solve it.
 ```
@@ -79,17 +61,7 @@ uv pip compile ... could be a pre-commit?
 
 ### Repo2docker Image
 
-first environment definition
-- add dependencies to pyproject (sole source, will need pins for conda-forge)
-- uv pip compile ... to get requirements.txt
-- commands described for (non image) use should be
-  - conda create --name=oc --file=requirements.txt, then conda run --name=oc python -m ipykernel install ...
-  - (ugh) python -m venv , then venv/bin/pip install -r requirements.txt, then venv/bin/python -m ipykernel install ...
-  - add pipenv or some other "one-liner" way too?
-
 now image definition for binderhub, oss (using repo2docker subdir)
-
-
 
 ### Building HTML
 

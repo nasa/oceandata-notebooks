@@ -13,20 +13,19 @@ The **Earthdata Cloud** icon next to some notebooks indicates they are meant to 
 
 **Can I use an existing AWS platform?** You may already have access to the AWS platform through your institution or research community. For example, JupyterHubs maintained by [Openscapes][openscapes-hub], [Cryo in the Cloud][cryocloud], [MAAP][maap], and NASA Goddard's [Open Science Studio][oss] are running on AWS in the same "us-west-2" region that hosts the NASA Earthdata Cloud. If that is not the case, you may want to learn about [getting started with AWS for NASA Earthdata Cloud][edcloud].
 
-### Python Environments
+### Jupyter Kernel
 
-The notebooks import Python packages that must be installed and discoverable on the host. Please use our
-[environment.yml](../environment.yml) file to [create a Conda environment][conda-env] that satisfies all the dependencies,
-or otherwise ensure your environment satisifes these dependencies. Note that the environment includes
-the `ipykernel` package in case your JupyterLab includes [nb_conda_kernels][nb_conda_kernels] or you want
-to manually [make the environment available to JupyterLab as a kernel][conda-kernel].
-
-The notebooks import Python packages that must be installed. You can run
-a setup script ([](setup.py)) using `pipx` to create a Jupyter kernel with all
-packages installed. Open the Terminal in JupyterLab and execute
-`pipx run setup.py --user --name oc`. For more on the arguments, which customize the
-kernel location and name, execute `pipx run setup.py --help`.
-
+Download our setup script ({download}`setup.py`) and run it under `pipx` to create a
+Jupyter kernel ready for use with the notebooks. For example, in a Terminal within your
+JupyterLab, execute the following.
+```
+pipx run setup.py --user --name oc
+```
+Your JupyterLab should soon include "oc" as a kernel choice for notebooks and consoles.
+For more on the provided arguments, which customize the kernel location and name,
+execute `pipx run setup.py --help`. The `pipx` documenation provides
+[install instructions](https://pipx.pypa.io/stable/installation/) that include the
+simple approach of `pip install --user pipx`.
 
 ## Notebooks
 

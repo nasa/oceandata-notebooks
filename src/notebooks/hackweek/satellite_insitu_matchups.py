@@ -1,11 +1,3 @@
-# ---
-# jupyter:
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
 # + [markdown] tags=[]
 # # Matchups of in situ data with satellite data
 #
@@ -1228,4 +1220,3 @@ df_stats = pd.DataFrame(stats_list)
 df_stats.set_index('wavelength', inplace=True)
 df_stats = df_stats.fillna(-999)
 df_stats
-# -

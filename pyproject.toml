@@ -21,7 +21,11 @@ dependencies = [
     "scipy>=1.13.1",
     "xarray>=2024.3.0",
 ]
-optional-dependencies.dev = ["jupyter-book>=1.0.2", "tomlkit>=0.13.2"]
+optional-dependencies.dev = [
+    "jupyter-book>=1.0.2",
+    "jupytext>=1.16.4",
+    "tomlkit>=0.13.2",
+]
 
 [[project.authors]]
 name = "Ian Carroll"
@@ -44,7 +48,7 @@ name = "Guoqing Wang"
 email = "guoqing.wang@nasa.gov"
 
 [tool.jupytext]
-notebook_metadata_filter = "-all,kernelspec"
+notebook_metadata_filter = "-all"
 cell_metadata_filter = "-all,scrolled,tags"
 
 [tool.jupytext.formats]
