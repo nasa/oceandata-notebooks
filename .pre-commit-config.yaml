@@ -5,3 +5,4 @@ repos:
       - id: uv-lock
       - id: pip-compile
         args: [pyproject.toml, -o, src/requirements.txt]
+        files: pyproject.toml
