@@ -8,7 +8,9 @@ chapters:
 # - file: notebooks/hackweek/satellite_insitu_matchups_thomas.ipynb
 #         FIXME: dependencies on eumetsat conda channel
 # - file: notebooks/hackweek/ocssw_processing
+#         TODO: try with image
 # - file: notebooks/hackweek/dask_gridding
+#         TODO: try again!
 # - file: notebooks/hackweek/ml_cloud_mask
 #         FIXME: cannot get torch installation right with uv (without conda)
 #         NB: requires data on cryocloud at ~/shared/pace-hackweek-2024/
@@ -24,3 +26,4 @@ chapters:
 #         FIXME: permission denied. trying to overwrite previous file?
 - file: notebooks/harp2/harp2_basic_visualizations
 #       TODO: WARNING: image file not readable: notebooks/harp2/harp2_red_anim_20240519T235950.gif
+#             current workaround is manual copying of animation to ../../img

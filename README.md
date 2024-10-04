@@ -31,14 +31,12 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 ## For Maintainers
 
 TODO:
+  - image definition for binderhub, oss (using repo2docker, how handles conda-lock?)
   - src/jupytext.toml makes manual sync annoying
-  - pre-commit
-    - ruff lint and fmt or black
-  - notebooks failing in `jb build src/`
-    - oci_install_ocssw because of `%conda` cell.
-    - ml_cloud_mask because of `torch` and `torchvision` installation trouble
+  - in pre-commit
+    - ruff lint and fmt or black, hopefully comments too
+  - notebooks failing in `jb build src/`, see `src/_toc.yml`
   - random cell ids, preserved id metadata from notebooks? (see https://github.com/mwouts/jupytext/issues/1263)
-  - stop doing manual copy of animation to ../../img
   - fill in "How to Cite" once on Zenodo
 
 ### Dependencies
@@ -50,8 +48,6 @@ $ uv add scipy
 ```
 
 ### Repo2docker Image
-
-now image definition for binderhub, oss (using repo2docker subdir)
 
 ### Building HTML
 
