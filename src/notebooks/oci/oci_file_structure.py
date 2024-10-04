@@ -21,13 +21,14 @@
 #
 # ## Summary
 #
-# In this example we will use the `earthaccess` package to access OCI Level-1B (L1B), Level-2 (L2), and Level-3 (L3) NetCDF files and open them using `xarray`.
+# In this example we will use the `earthaccess` package to access OCI Level-1B (L1B), Level-2 (L2), and Level-3 (L3) NetCDF files and open them using `xarray`. While you can learn alot exploring the datasets in this way, be ready to refer to the full [dataset documentation][user-guides] for details about the data products and processing.
 #
 # **NetCDF** ([Network Common Data Format][netcdf]) is a binary file format for storing multidimensional scientific data (variables). It is optimized for array-oriented data access and support a machine-independent format for representing scientific data. Files ending in `.nc` are NetCDF files.
 #
 # **XArray** is a [package][xarray] that supports the use of multi-dimensional arrays in Python. It is widely used to handle Earth observation data, which often involves multiple dimensions — for instance, longitude, latitude, time, and channels/bands.
 #
 # [netcdf]: https://www.unidata.ucar.edu/software/netcdf/
+# [user-guides]: https://oceancolor.gsfc.nasa.gov/resources/docs/technical/#UG
 # [xarray]: https://docs.xarray.dev/
 #
 # ## Learning Objectives
