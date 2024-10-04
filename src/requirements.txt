@@ -90,7 +90,9 @@ fsspec==2024.9.0
 h5netcdf==1.3.0
     # via oceandata-notebooks (pyproject.toml)
 h5py==3.12.1
-    # via h5netcdf
+    # via
+    #   h5netcdf
+    #   pvlib
 holoviews==1.19.1
     # via hvplot
 hvplot==0.11.0
@@ -148,6 +150,7 @@ matplotlib==3.9.2
     #   oceandata-notebooks (pyproject.toml)
     #   cartopy
     #   cmocean
+    #   seaborn
 matplotlib-inline==0.1.7
     # via
     #   ipykernel
@@ -182,7 +185,9 @@ numpy==2.1.1
     #   matplotlib
     #   netcdf4
     #   pandas
+    #   pvlib
     #   scipy
+    #   seaborn
     #   shapely
     #   xarray
 packaging==24.1
@@ -206,6 +211,8 @@ pandas==2.2.3
     #   holoviews
     #   hvplot
     #   panel
+    #   pvlib
+    #   seaborn
     #   xarray
 panel==1.5.2
     # via
@@ -241,6 +248,8 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
+pvlib==0.11.1
+    # via oceandata-notebooks (pyproject.toml)
 pygments==2.18.0
     # via ipython
 pyparsing==3.1.4
@@ -259,7 +268,9 @@ python-dateutil==2.9.0.post0
     #   pandas
     #   python-cmr
 pytz==2024.2
-    # via pandas
+    # via
+    #   pandas
+    #   pvlib
 pyviz-comms==3.0.3
     # via
     #   holoviews
@@ -277,10 +288,15 @@ requests==2.32.3
     # via
     #   earthaccess
     #   panel
+    #   pvlib
     #   python-cmr
 s3fs==2024.9.0
     # via earthaccess
 scipy==1.14.1
+    # via
+    #   oceandata-notebooks (pyproject.toml)
+    #   pvlib
+seaborn==0.13.2
     # via oceandata-notebooks (pyproject.toml)
 shapely==2.0.6
     # via cartopy

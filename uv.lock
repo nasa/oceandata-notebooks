@@ -2037,7 +2037,9 @@ dependencies = [
     { name = "matplotlib" },
     { name = "netcdf4" },
     { name = "pandas" },
+    { name = "pvlib" },
     { name = "scipy" },
+    { name = "seaborn" },
     { name = "xarray" },
 ]
 
@@ -2065,7 +2067,9 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.8.4" },
     { name = "netcdf4", specifier = ">=1.6.5" },
     { name = "pandas", specifier = ">=2.2.1" },
+    { name = "pvlib", specifier = ">=0.11.1" },
     { name = "scipy", specifier = ">=1.13.1" },
+    { name = "seaborn", specifier = ">=0.13.2" },
     { name = "tomlkit", marker = "extra == 'dev'", specifier = ">=0.13.2" },
     { name = "xarray", specifier = ">=2024.3.0" },
 ]
@@ -2346,6 +2350,23 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/cd/05/0a34433a064256a578f1783a10da6df098ceaa4a57bbeaa96a6c0352786b/pure_eval-0.2.3.tar.gz", hash = "sha256:5f4e983f40564c576c7c8635ae88db5956bb2229d7e9237d03b3c0b0190eaf42", size = 19752 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8e/37/efad0257dc6e593a18957422533ff0f87ede7c9c6ea010a2177d738fb82f/pure_eval-0.2.3-py3-none-any.whl", hash = "sha256:1db8e35b67b3d218d818ae653e27f06c3aa420901fa7b081ca98cbedc874e0d0", size = 11842 },
+]
+
+[[package]]
+name = "pvlib"
+version = "0.11.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "h5py" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "pytz" },
+    { name = "requests" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cb/30/74fbbd4f5d0dc698cb669615dbe74511dd786222c9bede7d49cd3a541cf5/pvlib-0.11.1.tar.gz", hash = "sha256:d02dbda515f2be54efd2e32839527c0f82e9f99028b460565facad068ac8574a", size = 35744945 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6e/c1/5995d523c107f69891b6955995681a8adac3d6cf1fc1765954ab27b77bf6/pvlib-0.11.1-py3-none-any.whl", hash = "sha256:cd957897dde11860b946a4c254db92458c3d7f51c3795601bdeb1e7920566fda", size = 29459990 },
 ]
 
 [[package]]
@@ -2912,6 +2933,20 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/35/f5/d0ad1a96f80962ba65e2ce1de6a1e59edecd1f0a7b55990ed208848012e0/scipy-1.13.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:637e98dcf185ba7f8e663e122ebf908c4702420477ae52a04f9908707456ba4d", size = 38612244 },
     { url = "https://files.pythonhosted.org/packages/8d/02/1165905f14962174e6569076bcc3315809ae1291ed14de6448cc151eedfd/scipy-1.13.1-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:a014c2b3697bde71724244f63de2476925596c24285c7a637364761f8710891c", size = 38845637 },
     { url = "https://files.pythonhosted.org/packages/3e/77/dab54fe647a08ee4253963bcd8f9cf17509c8ca64d6335141422fe2e2114/scipy-1.13.1-cp39-cp39-win_amd64.whl", hash = "sha256:392e4ec766654852c25ebad4f64e4e584cf19820b980bc04960bca0b0cd6eaa2", size = 46227440 },
+]
+
+[[package]]
+name = "seaborn"
+version = "0.13.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/86/59/a451d7420a77ab0b98f7affa3a1d78a313d2f7281a57afb1a34bae8ab412/seaborn-0.13.2.tar.gz", hash = "sha256:93e60a40988f4d65e9f4885df477e2fdaff6b73a9ded434c1ab356dd57eefff7", size = 1457696 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/83/11/00d3c3dfc25ad54e731d91449895a79e4bf2384dc3ac01809010ba88f6d5/seaborn-0.13.2-py3-none-any.whl", hash = "sha256:636f8336facf092165e27924f223d3c62ca560b1f2bb5dff7ab7fad265361987", size = 294914 },
 ]
 
 [[package]]
