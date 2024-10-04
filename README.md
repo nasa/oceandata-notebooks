@@ -34,10 +34,12 @@ TODO:
   - src/jupytext.toml makes manual sync annoying
   - pre-commit
     - ruff lint and fmt or black
-  - failing for oci_install_ocssw because of `%conda` cell.
+  - notebooks failing in `jb build src/`
+    - oci_install_ocssw because of `%conda` cell.
+    - ml_cloud_mask because of `torch` and `torchvision` installation trouble
   - random cell ids, preserved id metadata from notebooks? (see https://github.com/mwouts/jupytext/issues/1263)
   - stop doing manual copy of animation to ../../img
-   fill in "How to Cite" once on Zenodo
+  - fill in "How to Cite" once on Zenodo
 
 ### Dependencies
 
