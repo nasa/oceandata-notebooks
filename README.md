@@ -32,6 +32,10 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 
 TODO:
   - image definition for binderhub, oss (using repo2docker, how handles conda-lock?)
+    - conda-lock.yml: ignored
+    - requirements.txt: $KERNEL_PYTHON_PREFIX/bin/pip install (into conda env "notebook")
+    - environment.yml and requirements.txt: ignores requirements
+    - environment.yml including requirements.txt: works, but not sure how dualing deps are resolved.
   - src/jupytext.toml makes manual sync annoying
   - in pre-commit
     - ruff lint and fmt or black, hopefully comments too
