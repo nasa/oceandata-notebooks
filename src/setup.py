@@ -6,6 +6,7 @@
 #     'aiohttp==3.10.8',
 #     'aioitertools==0.12.0',
 #     'aiosignal==1.3.1',
+#     'appnope==0.1.4',
 #     'asttokens==2.4.1',
 #     'attrs==24.2.0',
 #     'bleach==6.1.0',
@@ -37,7 +38,6 @@
 #     'holoviews==1.19.1',
 #     'hvplot==0.11.0',
 #     'idna==3.10',
-#     'importlib-metadata==8.5.0',
 #     'importlib-resources==6.4.5',
 #     'ipykernel==6.29.5',
 #     'ipython==8.28.0',
@@ -115,7 +115,6 @@
 #     'xyzservices==2024.9.0',
 #     'yarl==1.13.1',
 #     'zict==3.0.0',
-#     'zipp==3.20.2',
 # ]
 # ///
 from ipykernel import kernelspec

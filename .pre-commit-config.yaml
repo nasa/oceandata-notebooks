@@ -16,6 +16,8 @@ repos:
     hooks:
       - id: update-setup-py
         name: update-setup-py
-        language: system
+        language: python
+        additional_dependencies:
+          - tomlkit>=0.13.2
         entry: python update-setup.py
         files: src/requirements.txt

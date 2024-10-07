@@ -30,7 +30,6 @@ optional-dependencies.dev = [
     "jupyter-book>=1.0.2",
     "jupyter-repo2docker>=2024.7.0",
     "jupytext>=1.16.4",
-    "tomlkit>=0.13.2",
 ]
 
 # [tool.uv]

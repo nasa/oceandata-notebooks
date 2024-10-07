@@ -1,16 +1,16 @@
 from pathlib import Path
 import re
 import sys
+import argparse
 
 import tomlkit
 
 
-def main(req: str) -> None:
-    comment = re.compile(r"^\s*#")
-    req = Path(req)
-    out = req.parent / "setup.py"
-    with req.open() as f:
+def main(requirements: Path) -> None:
+    out = requirements.parent / "setup.py"
+    with requirements.open() as f:
         pkgs = f.read()
+    comment = re.compile(r"^\s*#")
     pkgs = [i for i in pkgs.splitlines() if not comment.match(i)]
     with out.open() as f:
         content = f.read()
@@ -29,4 +29,9 @@ def parse(script: str) -> dict:
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    parser = argparse.ArgumentParser(
+        description="Inject the requirements.txt into inline pyproject metadata of setup.py.",
+    )
+    parser.add_argument("requirements", type=Path)
+    args = parser.parse_args()
+    sys.exit(main(**vars(args)))
