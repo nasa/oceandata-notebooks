@@ -6,18 +6,17 @@ import argparse
 import tomlkit
 
 
-def main(requirements: Path) -> None:
-    out = requirements.parent / "setup.py"
+def main(requirements: Path, script: Path) -> None:
     with requirements.open() as f:
         pkgs = f.read()
     comment = re.compile(r"^\s*#")
     pkgs = [i for i in pkgs.splitlines() if not comment.match(i)]
-    with out.open() as f:
+    with script.open() as f:
         content = f.read()
     toml, body = parse(content)
     toml["dependencies"] = tomlkit.array(pkgs).multiline(True)
     head = "\n# ".join(tomlkit.dumps(toml).splitlines())
-    with out.open("w") as f:
+    with script.open("w") as f:
         f.write("".join(("# /// script\n# ", head, "\n# ///", body)))
 
 
@@ -30,8 +29,13 @@ def parse(script: str) -> dict:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Inject the requirements.txt into inline pyproject metadata of setup.py.",
+        description="Injects dependencies as inline pyproject metadata.",
     )
-    parser.add_argument("requirements", type=Path)
+    parser.add_argument(
+        "requirements", help="file listing requirements as PEP 508 strings", type=Path
+    )
+    parser.add_argument(
+        "-s", dest="script", help="target to modify", default="src/setup.py", type=Path
+    )
     args = parser.parse_args()
     sys.exit(main(**vars(args)))

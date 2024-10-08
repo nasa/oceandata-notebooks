@@ -1,0 +1,12 @@
+channels:
+  - conda-forge
+dependencies:
+  - libnetcdf
+  - hdf5
+  - awscli
+  - code-server # TODO: >=4.0 ?
+  - pip
+  - pip:
+    - -r requirements.txt
+    - --no-binary netcdf4
+    - --no-binary h5py

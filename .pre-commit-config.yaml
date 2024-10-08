@@ -4,7 +4,12 @@ repos:
     hooks:
       - id: uv-lock
       - id: pip-compile
-        args: [pyproject.toml, -o, src/requirements.txt]
+        name: compile-dependencies
+        args: [pyproject.toml, -o, requirements.txt]
+        files: ^pyproject.toml$
+      - id: pip-compile
+        name: compile-hub-dependencies
+        args: [--extra, hub, pyproject.toml, -o, hub/requirements.txt]
         files: ^pyproject.toml$
   - repo: https://github.com/mwouts/jupytext
     rev: v1.16.2
@@ -20,4 +25,4 @@ repos:
         additional_dependencies:
           - tomlkit>=0.13.2
         entry: python update-setup.py
-        files: src/requirements.txt
+        files: ^requirements.txt$
