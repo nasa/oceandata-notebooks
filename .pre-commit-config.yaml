@@ -4,13 +4,13 @@ repos:
     hooks:
       - id: uv-lock
       - id: pip-compile
-        name: compile-dependencies
-        args: [pyproject.toml, -o, requirements.txt]
+        name: compile-kernel-dependencies
+        args: [-q, --extra=kernel, -orequirements.txt, pyproject.toml]
         files: ^pyproject.toml$
       - id: pip-compile
         name: compile-hub-dependencies
-        args: [--extra, hub, pyproject.toml, -o, hub/requirements.txt]
-        files: ^pyproject.toml$
+        args: [-q, --extra=hub, -ohub/requirements.txt, pyproject.toml, repo2docker/requirements.in]
+        files: ^(pyproject.toml|repo2docker/requirements.in)$
   - repo: https://github.com/mwouts/jupytext
     rev: v1.16.2
     hooks:
@@ -19,6 +19,14 @@ repos:
         files: ^src/notebooks/.*\.py$
   - repo: local
     hooks:
+      - id: repo2docker-requirements
+        name: repo2docker-requirements
+        language: python
+        additional_dependencies:
+          - jupyter-repo2docker>=2024.7.0
+        pass_filenames: false
+        entry: sh -c 'repo2docker --volume ${PWD}/repo2docker:./ repo2docker sh -c "pip list --format=freeze > requirements.in"'
+        files: ^pyproject.toml$
       - id: update-setup-py
         name: update-setup-py
         language: python

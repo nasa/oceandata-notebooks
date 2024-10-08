@@ -31,27 +31,50 @@ only tracks the paired ".py" files and ignores the ".ipynb" files, so commit the
 ## For Maintainers
 
 TODO:
-  - image definition for binderhub, oss (using repo2docker, how handles conda-lock?)
-    - conda-lock.yml: ignored
-    - requirements.txt: $KERNEL_PYTHON_PREFIX/bin/pip install (into conda env "notebook")
-    - environment.yml and requirements.txt: ignores requirements
-    - environment.yml including requirements.txt: works, but not sure how dualing deps are resolved.
+  - apply license to notebook files, but who is copyright holder?
+  - image definition for repo2docker
+    - how handles conda-lock?
+      - conda-lock.yml: ignored
+      - requirements.txt: $KERNEL_PYTHON_PREFIX/bin/pip install (into conda env "notebook")
+      - environment.yml and requirements.txt: ignores requirements
+      - environment.yml including requirements.txt: works, but not sure how dualing deps are resolved.
+    - FIXME: locked requirements.txt forces upgrade of (probably) jupyterlab deps from repo2docker
+      - run uv pip compile during build, with versions from kernel env, then pip install?
   - src/jupytext.toml makes manual sync annoying
   - in pre-commit
     - ruff lint and fmt or black, hopefully comments too
   - notebooks failing in `jb build src/`, see `src/_toc.yml`
   - random cell ids, preserved id metadata from notebooks? (see https://github.com/mwouts/jupytext/issues/1263)
   - fill in "How to Cite" once on Zenodo
+  - changelog
+  - CodeQL static code analyzer
+  - index-url for pytorch, but it pre-empts everything
+
 
 ### Dependencies
 
-If you add an `import` for a new package, make sure the package is listed under
-`dependencies` in `pyproject.toml`. You can add entries manually or using `uv`, as in
+If you add an `import` for a new package, or a notebook requires a package to be installed
+for some backend (e.g. h5netcdf), make sure the package is listed in the `project.dependencies`
+array in `pyproject.toml`. You can add entries manually or using `uv`, as in:
 ```
 $ uv add scipy
 ```
 
-### Repo2docker Image
+### Repo2Docker Image
+
+We maintain configuration files from which `repo2docker` can build an image suitable
+for a JupyterHub to launch. The following will build and run the image locally.
+
+```
+$ repo2docker --appendix="$(< hub/appendix)" --subdir hub -p 8889:8888 . jupyter lab --no-browser --ip 0.0.0.0
+```
+
+The configuration files are a bit complicated, but automated by `pre-commit` to trigger
+on manual updates to `pyproject.toml` and `hub/environment.yml` (no `requirements`
+file in this repository needs to be manually edited).
+1. `requirements.txt` are the locked dependencies needed in `src/setup.py`
+1. `repo2docker/requirements.in` are the packages installed by repo2docker
+1. `hub/requirements.txt` are a merge of our locked dependencies with repo2docker's packages
 
 ### Building HTML
 

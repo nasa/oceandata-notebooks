@@ -27,3 +27,5 @@ chapters:
 - file: notebooks/harp2/harp2_basic_visualizations
 #       TODO: WARNING: image file not readable: notebooks/harp2/harp2_red_anim_20240519T235950.gif
 #             current workaround is manual copying of animation to ../../img
+# - file: notebooks/oci/oci_gridding
+#         TODO: in process

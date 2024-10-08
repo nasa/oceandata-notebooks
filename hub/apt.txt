@@ -17,5 +17,4 @@ imagemagick
 htop
 jq
 nano
-rsync
 tree

@@ -1,12 +1,12 @@
 channels:
   - conda-forge
 dependencies:
-  - libnetcdf
-  - hdf5
-  - awscli
-  - code-server # TODO: >=4.0 ?
+  - libnetcdf==4.9.2
+  - hdf5==1.14.4
+  - awscli==2.18.0
+  - code-server==4.23.1
   - pip
   - pip:
     - -r requirements.txt
-    - --no-binary netcdf4
     - --no-binary h5py
+    - --no-binary netcdf4
