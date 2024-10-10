@@ -21,7 +21,7 @@
 # * How to run ThoMaS for a full matchup exercise: satellite extractions + minifiles + extraction statistics + matchup statistics
 # * Use standard matchup protocols to apply statistics and plot matchup data
 #
-# ## Contents 
+# ## Contents
 #
 # 1. [Setup](#1.-Setup)
 # 2. [Create configuration file for ThoMaS](#2.-Create configuration file for ThoMaS)
@@ -29,7 +29,7 @@
 
 # ## 1. Setup
 #
-# Begin by importing all of the packages used in this notebook. 
+# Begin by importing all of the packages used in this notebook.
 
 import sys
 import os
@@ -51,15 +51,15 @@ from main import ThoMaS_main as ThoMaS
 
 # ## 2. Create configuration file for ThoMaS
 #
-# In this example we will conduct matchups of in situ AERONET-OC Rrs data with PACE OCI Rrs data. The Aerosol Robotic Network (AERONET) was developed to sustain atmospheric studies at various scales with measurements from worldwide distributed autonomous sun-photometers. This has been extended to support marine applications, called AERONET – Ocean Color [(AERONET-OC)](https://aeronet.gsfc.nasa.gov/new_web/ocean_levels_versions.html), and provides the additional capability of measuring the radiance emerging from the sea (i.e., water-leaving radiance) with modified sun-photometers installed on offshore platforms like lighthouses, oceanographic and oil towers. AERONET-OC is instrumental in satellite ocean color validation activities. 
+# In this example we will conduct matchups of in situ AERONET-OC Rrs data with PACE OCI Rrs data. The Aerosol Robotic Network (AERONET) was developed to sustain atmospheric studies at various scales with measurements from worldwide distributed autonomous sun-photometers. This has been extended to support marine applications, called AERONET – Ocean Color [(AERONET-OC)](https://aeronet.gsfc.nasa.gov/new_web/ocean_levels_versions.html), and provides the additional capability of measuring the radiance emerging from the sea (i.e., water-leaving radiance) with modified sun-photometers installed on offshore platforms like lighthouses, oceanographic and oil towers. AERONET-OC is instrumental in satellite ocean color validation activities.
 #
-# In this tutorial, we will be collecting Rrs data from the Chesapeake Bay AERONET-OC site located at 39.1N, 76.3W in the upper Chesapeake Bay, Maryland, USA. The instrument is located 30m high on a USCG-controlled navigational range-light tower surrounded by highly turbid, optically deep 6-8 m depth waters. 
+# In this tutorial, we will be collecting Rrs data from the Chesapeake Bay AERONET-OC site located at 39.1N, 76.3W in the upper Chesapeake Bay, Maryland, USA. The instrument is located 30m high on a USCG-controlled navigational range-light tower surrounded by highly turbid, optically deep 6-8 m depth waters.
 #
 # Below are our requirements for this workflow:
 # 1. I want to test the performance of PACE OCI at the AERONET-OC station Chesapeake_Bay during July 2024.
 # 2. I wish to get matchups between this Chesapeake_Bay subset and PACE/OCI Rrs using the standard extraction protocol from [Bailey and Werdell, 2006](https://oceancolor.gsfc.nasa.gov/staff/jeremy/bailey_and_werdell_2006_rse.pdf), using an extraction window of 5x5.
 # 3. I want to apply the [Lee et al. ??](link) BRDF correction to both satellite and in situ data.
-# 4. Store all outputs in the "Chesapeake_Bay" directory. 
+# 4. Store all outputs in the "Chesapeake_Bay" directory.
 #
 
 # Let's first define and create the pathto our main output directory
@@ -94,8 +94,8 @@ config_params['insitu'] = {}
 config_params['insitu']['insitu_data2OCDBfile'] = 'AERONETOC'
 config_params['insitu']['insitu_input'] = os.path.join(output_path, 'Chesapeake_Bay_OCDB.csv')
 config_params['insitu']['insitu_satelliteTimeToleranceSeconds'] = 3600
-config_params['insitu']['insitu_getAncillary'] = False 
-config_params['insitu']['insitu_BRDF'] = 'L11' 
+config_params['insitu']['insitu_getAncillary'] = False
+config_params['insitu']['insitu_BRDF'] = 'L11'
 
 # satellite
 config_params['satellite'] = {}
@@ -142,5 +142,3 @@ ThoMaS(path_to_config_file)
 # * Summary plots of matchups
 
 # [back to top](#Contents)
-
-

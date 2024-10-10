@@ -94,7 +94,7 @@ export OCSSWROOT=/tmp/ocssw
 printenv OCSSWROOT
 
 # <div class="alert alert-warning" role="alert">
-#     
+#
 # You will need to [repeat these installation steps](#all) if your OCSSWROOT directory does not persist between sessions.
 #
 # </div>

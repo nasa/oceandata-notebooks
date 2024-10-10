@@ -126,7 +126,7 @@ logging.getLogger("earthaccess").setLevel(logging.INFO)
 random = np.random.default_rng(seed=5179916885778238210)
 
 # <div class="alert alert-info" role="alert">
-#     
+#
 # The `persist=True` argument ensures any discovered credentials are
 # stored in a `.netrc` file, so the argument is not necessary (but
 # it's also harmless) for subsequent calls to `earthaccess.login`.
@@ -162,7 +162,7 @@ def mean_and_std(x):
     Returns:
       A 2-tuple with the mean and standard deviation.
     """
-    
+
     # initialize sum (s) and sum-of-squares (ss)
     s = 0
     ss = 0
@@ -174,7 +174,7 @@ def mean_and_std(x):
     n = x.size
     mean = s / n
     variance = (ss / n - mean ** 2) * n / (n - 1)
-    
+
     return mean, variance ** (1/2)
 
 
@@ -494,7 +494,7 @@ index = KDTree(lonlat)
 # need a grid
 # need to get the lat lon of a point in the grid
 # use the index on those lat lon points
-# ... good lord this is tricky. and now there is 
+# ... good lord this is tricky. and now there is
 
 from rasterio.warp import reproject
 
@@ -502,7 +502,7 @@ reproject(
     src,
     dst=None,
     src_geoloc_array, # the x and y arrays
-    
+
     src_crs={"init": "EPSG:4326"}, # Geographic CRS
     dst_crs={"init": "EPSG:3857"}, # Projected CRS
 )

@@ -33,8 +33,8 @@
 # running**. There are three cases to distinguish:
 #
 # 1. The notebook is running on the local host. For instance, you started a Jupyter server on your laptop.
-# 1. The notebook is running on a remote host, but it does not have direct access to the AWS us-west-2 region. For instance, you are running in [GitHub Codespaces][codespaces], which is run on Microsoft Azure. 
-# 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud (AWS us-west-2 region). This is the case for the PACE Hackweek. 
+# 1. The notebook is running on a remote host, but it does not have direct access to the AWS us-west-2 region. For instance, you are running in [GitHub Codespaces][codespaces], which is run on Microsoft Azure.
+# 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud (AWS us-west-2 region). This is the case for the PACE Hackweek.
 #
 # [pypi]: https://pypi.org/
 # [conda]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-data-access/
@@ -89,7 +89,7 @@ import numpy as np
 # allow you to input credentials.
 #
 # <div class="alert alert-info" role="alert">
-#     
+#
 # The `persist=True` argument ensures any discovered credentials are
 # stored in a `.netrc` file, so the argument is not necessary (but
 # it's also harmless) for subsequent calls to `earthaccess.login`.
@@ -190,7 +190,7 @@ datatree
 dataset = xr.merge(datatree.to_dict().values())
 dataset
 
-# Let's do a quick plot of the `chlor_a` variable. 
+# Let's do a quick plot of the `chlor_a` variable.
 
 artist = dataset["chlor_a"].plot(vmax=5)
 
@@ -264,7 +264,7 @@ plot = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
 
 # ## 6. Download Data
 #
-# Let's go ahead and download a couple granules. 
+# Let's go ahead and download a couple granules.
 
 # Let's look at the `earthaccess.download` function, which is used
 # to copy files onto a filesystem local to the machine executing the
@@ -295,5 +295,3 @@ paths
 open_datatree(paths[0])
 
 # [back to top](#Contents)
-
-

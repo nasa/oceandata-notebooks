@@ -158,7 +158,7 @@ with open("l2bin_ifile.txt", "w") as file:
 
 # ## 3. Process L1B Data with `l2gen`
 #
-# At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters. 
+# At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters.
 #
 # <div class="alert alert-warning">
 #
@@ -197,7 +197,7 @@ par = {
 }
 write_par("l2gen.par", par)
 
-# With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell. 
+# With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell.
 
 # + scrolled=true language="bash"
 # source $OCSSWROOT/OCSSW_bash.env

@@ -23,7 +23,7 @@
 # - How to construct a simple neural network in Pytorch
 # - How the backpropagation algorithm works
 # - How to construct a training loop in Pytorch
-#   
+#
 # Stretch goals:
 # - How to use a GPU to speed up training
 # - How to use a convolutional neural network to process images better and faster
@@ -83,7 +83,7 @@ CLDMASK_PATH = pathlib.Path('/home/jovyan/shared/pace-hackweek-2024/cldmask_data
 # Let's look at an example. The next cell will open and display the images for a single instance.
 
 # +
-ex_img_idx = 57  # this image index displays a meaningful cloud mask and 
+ex_img_idx = 57  # this image index displays a meaningful cloud mask and
 input_imgs = [Image.open(CLDMASK_PATH / 'input' / f'{ex_img_idx:07d}_{i}.png') for i in range(4)]
 validity = Image.open(CLDMASK_PATH / 'input' / f'{ex_img_idx:07d}_mask.png')
 cld_mask = Image.open(CLDMASK_PATH / 'output' / f'{ex_img_idx:07d}.png')
@@ -140,15 +140,15 @@ def generate_split(name: str, replace: bool = False) -> None:
     """
     # count how many images are available in the data
     num_imgs = len(list((CLDMASK_PATH / 'output').glob('*.png')))
-    
+
     # determine how many images are in the train, val, and test data, using a 70%, 15%, 15% split
     num_train = round(0.7 * num_imgs)
     num_val = round(0.15 * num_imgs)
     num_test = round(0.15 * num_imgs)
-    
+
     # fix any rounding errors
     num_train += num_imgs - (num_train + num_val + num_test)
-    
+
     # get an array of image indices, shuffle it, and assign indices to train/val/test
     img_idxs = np.arange(num_imgs)
     np.random.shuffle(img_idxs)
@@ -186,7 +186,7 @@ from io import BytesIO
 class CloudMaskDataset(Dataset):
     def __init__(self, root_path: pathlib.Path, mode: str, split: dict) -> None:
         """Create a CloudMaskDataset.
-        
+
         Args:
             root_path: Path to the root directory containing the dataset.
             mode: Mode is usually 'train', 'val', or 'test', and must be a key in the provided split.
@@ -203,10 +203,10 @@ class CloudMaskDataset(Dataset):
 
     def __getitem__(self, idx: int) -> tuple[np.ndarray]:
         """Gets a specific instance in the dataset.
-        
+
         Args:
             idx: The index of the instance to return.
-            
+
         Returns:
             input: The (64, 64, 12) array of inputs to the model.
             valid: The (64, 64) mask of which locations contain valid data.
@@ -217,7 +217,7 @@ class CloudMaskDataset(Dataset):
         try:
             # concatenate four 3-channel images into one 12-channel array, divide by 255 as they were stored as 8-bit ints
             # input = np.concatenate([np.array(Image.open(p)) for p in input_paths], axis=2)
-            input = np.concatenate([np.array(Image.open(BytesIO(open(p, 'rb').read())), dtype=np.uint8) for p in input_paths], axis=2) 
+            input = np.concatenate([np.array(Image.open(BytesIO(open(p, 'rb').read())), dtype=np.uint8) for p in input_paths], axis=2)
             valid = np.array(Image.open(self.root_path / 'input' / f'{idx:07d}_mask.png'))  # validity mask
             labels = ~np.array(Image.open(label_path))  # cloud mask
             input[~valid] = 0
@@ -309,7 +309,7 @@ fig, axs = plt.subplots(4, 8, figsize=(12, 6))
 for i in range(16):
     # we have to convert from torch to numpy tensors, but first we have to detach it from the computation graph
     inp_img = inp[i, ..., :3].numpy()
-    
+
     axs[i // 4][i % 4].imshow(inp_img)
     axs[i // 4][i % 4].set_xticks([])
     axs[i // 4][i % 4].set_yticks([])
@@ -403,8 +403,8 @@ for batch_idx, (inp, valid, labels) in tqdm(enumerate(train_loader), total=NUM_B
 
     # convert from uint8 to float32
     inp = inp.float() / 255
-    
-    preds = simple_mlp(inp[valid])                        # get model predictions on valid inputs 
+
+    preds = simple_mlp(inp[valid])                        # get model predictions on valid inputs
     loss = objective(preds[:, 0], labels[valid].float())  # compute the loss function
     optimizer.zero_grad()                                 # zero out the optimizer
     loss.backward()                                       # backwards pass
@@ -544,7 +544,7 @@ img_checkers[:, mask_alt] = 1 - img_checkers[:, mask_alt]
 # First, get a 1D discrete gaussian w. mean=0 stdev=2 over [-3, 3]
 gaussian1d = np.exp(-((np.mgrid[-3:4] / 2) ** 2) / 2) / (np.sqrt(2 * np.pi) * 2)
 # Get a 2D gaussian by taking the outer product of our 1D gaussian
-gaussian2d = gaussian1d[:, None] @ gaussian1d[None]  
+gaussian2d = gaussian1d[:, None] @ gaussian1d[None]
 
 # make 2D sobel filters
 sobel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]]).astype(float)
@@ -613,7 +613,7 @@ class SimpleCNN(nn.Module):
         feature_depth: int
     ) -> None:
         """Initialize a SimpleCNN. This CNN uses padding to keep the image dimensions of its inputs unchanged.
-        
+
         Args:
             in_channels: The number of input channels.
             out_channels: The number of output channels.

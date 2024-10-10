@@ -5,11 +5,11 @@
 #
 # ## Summary
 #
-# In this example we will conduct matchups of in situ AERONET-OC Rrs data with PACE OCI Rrs data. The Aerosol Robotic Network (AERONET) was developed to sustain atmospheric studies at various scales with measurements from worldwide distributed autonomous sun-photometers. This has been extended to support marine applications, called AERONET – Ocean Color [(AERONET-OC)](https://aeronet.gsfc.nasa.gov/new_web/ocean_levels_versions.html), and provides the additional capability of measuring the radiance emerging from the sea (i.e., water-leaving radiance) with modified sun-photometers installed on offshore platforms like lighthouses, oceanographic and oil towers. AERONET-OC is instrumental in satellite ocean color validation activities. 
+# In this example we will conduct matchups of in situ AERONET-OC Rrs data with PACE OCI Rrs data. The Aerosol Robotic Network (AERONET) was developed to sustain atmospheric studies at various scales with measurements from worldwide distributed autonomous sun-photometers. This has been extended to support marine applications, called AERONET – Ocean Color [(AERONET-OC)](https://aeronet.gsfc.nasa.gov/new_web/ocean_levels_versions.html), and provides the additional capability of measuring the radiance emerging from the sea (i.e., water-leaving radiance) with modified sun-photometers installed on offshore platforms like lighthouses, oceanographic and oil towers. AERONET-OC is instrumental in satellite ocean color validation activities.
 #
 # In this tutorial, we will be collecting Rrs data from the  [Casablanca Platform](https://aeronet.gsfc.nasa.gov/cgi-bin/data_display_seaprism_v3?site=Casablanca_Platform&nachal=2&level=3&place_code=10) AERONET-OC site located at 40.7N, 1.4W in the western Mediterranean Sea which is typically characterized as oligotrophic/mesotrophic (ocean color signals tend to strongly covary with chlorophyll a).
 #
-# We will be collecting PACE OCI Rrs data in a 5x5 pixel window around the AERONET-OC site to compare to the AERONET-OC Rrs data. 
+# We will be collecting PACE OCI Rrs data in a 5x5 pixel window around the AERONET-OC site to compare to the AERONET-OC Rrs data.
 #
 # ## Learning Objectives
 #
@@ -31,12 +31,12 @@
 # + [markdown] tags=[]
 # ## 1. Setup
 #
-# We begin by loading a set of utility functions that work behind the scenes to do the majority of the work for us. 
+# We begin by loading a set of utility functions that work behind the scenes to do the majority of the work for us.
 # Collapse this for now and just run the cell, but feel free to dig into it and see how things work!
 #
-# <div class="alert alert-block alert-warning"> 
-#     
-# Note that the `get_f0` function requires the thuillier2003_f0.nc file. For the Hackweek, this is being pulled from the shared-public directory. For others trying to run the notebook, the .nc file can be found [here](https://oceancolor.gsfc.nasa.gov/docs/rsr/f0.txt). 
+# <div class="alert alert-block alert-warning">
+#
+# Note that the `get_f0` function requires the thuillier2003_f0.nc file. For the Hackweek, this is being pulled from the shared-public directory. For others trying to run the notebook, the .nc file can be found [here](https://oceancolor.gsfc.nasa.gov/docs/rsr/f0.txt).
 #
 # </div>
 
@@ -1131,18 +1131,18 @@ def plot_BAvsScat(x_input, y_input, label='',
 # There are three "levels" of AERONET-OC data in terms of data quality: 1, 1.5, and 2. If a complete measurement sequence with the instruments is able to be performed, it is collected and stored as Level 1. These data are then passed through an automated quality control system and stored as Level 1.5 if they pass all tests. Finally, Level 2 data are data from Level 1.5 that are subsequently screened by an experienced scientist and validated. We'll be using Level 1.5 data to pull as much good quality data as possible without the time lag for manual validation. More information on AERONET-OC levels can be found in [Zibordi et al., 2009.](https://doi.org/10.1175/2009JTECHO654.1)
 
 # + tags=[]
-aoc_cb = process_aeronet(aoc_site="Casablanca_Platform", 
+aoc_cb = process_aeronet(aoc_site="Casablanca_Platform",
                 start_date="2024-06-01", end_date="2024-07-31",
                 data_level=15)
-aoc_cb.head()              
+aoc_cb.head()
 
 # + [markdown] tags=[]
-# ## 3. Process PACE OCI data 
+# ## 3. Process PACE OCI data
 #
 # We will use the function `process_satellite` to search for `PACE_OCI_L2_AOP_NRT` data using `earthacces` within the specified time range and at the (lat,lon) coordinate of the Casablanca_Platform AERONET-OC site. This function finds the closest pixel and extracts all data within a 5x5 pixel window, excludes pixels based on L2 flags, calculates the mean to retrive a single Rrs spectra, and computes matchup statistics. The function outputs a pandas dataframe of every `PACE_OCI_L2_AOP_NRT` Rrs spectra for the specified time range. We'll also include an optional list of unique date strings from the AERONET-OC dataframe to "skip" the granules that don't have any field data associated with them.
 
 # + scrolled=true tags=["scroll-output"]
-# Pull out coordinates 
+# Pull out coordinates
 aoc_lat = aoc_cb["aoc_latitude"][0]
 aoc_lon = aoc_cb["aoc_longitude"][0]
 
@@ -1166,9 +1166,9 @@ sat_cb.head()
 # ?match_data
 
 # + scrolled=true tags=["scroll-output"]
-matchups = match_data(sat_cb, aoc_cb, cv_max=0.60, senz_max=60.0, 
+matchups = match_data(sat_cb, aoc_cb, cv_max=0.60, senz_max=60.0,
                       min_percent_valid=55.0, max_time_diff=180, std_max=1.5)
-matchups 
+matchups
 # -
 
 # Pull out wavelengths and Rrs data from matchups

@@ -67,7 +67,7 @@ import warnings
 import matplotlib.pylab as pl
 from matplotlib.colors import ListedColormap
 
-# In this tutorial, we suppress runtime warnings that show up when calculating log for negative values, which is common with our datasets. 
+# In this tutorial, we suppress runtime warnings that show up when calculating log for negative values, which is common with our datasets.
 
 warnings.simplefilter(action='ignore', category=RuntimeWarning)
 
@@ -75,9 +75,9 @@ warnings.simplefilter(action='ignore', category=RuntimeWarning)
 
 # ## Make image from L2 file processed with OCSSW
 #
-# The best product to create a high-quality RGB image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a L1B file to L2 using l2gen, like we showed in the OCSSW data processing exercise. We will use the L2 file that was created for this exercise. 
+# The best product to create a high-quality RGB image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a L1B file to L2 using l2gen, like we showed in the OCSSW data processing exercise. We will use the L2 file that was created for this exercise.
 #
-# Open the L2 netcdf file you created in the previous exercise in read-mode with netCDF4 and look at the information in the file. 
+# Open the L2 netcdf file you created in the previous exercise in read-mode with netCDF4 and look at the information in the file.
 #
 # If you do not have the file, download it with the following code:
 #
@@ -94,7 +94,7 @@ with h5netcdf.File(nc_file, 'r') as nc:
 groups
 # -
 
-# When exploring the dataset, we find that the rhos bands are not identified by their respective wavelength. 
+# When exploring the dataset, we find that the rhos bands are not identified by their respective wavelength.
 
 dataset_geo = xr.open_dataset(nc_file, group="geophysical_data")
 rhos = dataset_geo["rhos"]
@@ -103,7 +103,7 @@ rhos
 bands = rhos["wavelength_3d"]
 bands
 
-# To find the wavelengths corresponding to the bands, we need to look in the sensor band parameters. 
+# To find the wavelengths corresponding to the bands, we need to look in the sensor band parameters.
 
 # +
 dataset_band_pars = xr.open_dataset(nc_file, group="sensor_band_parameters")
@@ -167,7 +167,7 @@ ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), inte
 # OCI True Color 1 band -min/max adjusted
 vmin = 0.01
 vmax = 1.04 # Above 1 because whites can be higher than 1
-#---- 
+#----
 
 rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
 rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
@@ -217,7 +217,7 @@ ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alph
 # OCI True Color 1 band -min/max adjusted
 vmin = 0.01
 vmax = 1.04 # Above 1 because whites can be higher than 1
-#---- 
+#----
 
 rhos_red = dataset["rhos"].sel({"wavelength_3d": 25})
 rhos_green = dataset["rhos"].sel({"wavelength_3d": 17})
@@ -238,8 +238,8 @@ ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), inte
 
 # +
 # Image adjustments: change values from 0 to 2, 1 being unchanged
-contrast = 1.2 
-brightness = 1.1 
+contrast = 1.2
+brightness = 1.1
 sharpness = 2
 saturation = .8
 gamma = .95
@@ -252,9 +252,9 @@ image_pil = Image.fromarray(normalized_image) # Convert numpy array to Pillow Im
 
 # Adjust contrast, brightness and sharpness using Pillow
 enhancer = ImageEnhance.Contrast(image_pil)
-image_enhanced = enhancer.enhance(contrast)  
+image_enhanced = enhancer.enhance(contrast)
 enhancer = ImageEnhance.Brightness(image_enhanced)
-image_enhanced = enhancer.enhance(brightness)  
+image_enhanced = enhancer.enhance(brightness)
 enhancer = ImageEnhance.Sharpness(image_enhanced)
 image_enhanced = enhancer.enhance(sharpness)
 enhancer = ImageEnhance.Color(image_enhanced)
@@ -292,9 +292,9 @@ ax.imshow(rgb, extent=extent, origin='lower', transform=ccrs.PlateCarree(), inte
 
 # ## Make image from L3 file
 #
-# The best product to create a high-quality RGB image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a L1B file to L2 using l2gen, like we showed in the OCSSW data processing exercise. We will use the L2 file that was created for this exercise. 
+# The best product to create a high-quality RGB image from PACE is the Surface Reflectance (rhos). Cloud-masked rhos are distributed in the SFREFL product suite. If you want to create an image that includes clouds, however, you need to process a L1B file to L2 using l2gen, like we showed in the OCSSW data processing exercise. We will use the L2 file that was created for this exercise.
 #
-# Open the L2 netcdf file you created in the previous exercise in read-mode with netCDF4 and look at the information in the file. 
+# Open the L2 netcdf file you created in the previous exercise in read-mode with netCDF4 and look at the information in the file.
 
 # auth = earthaccess.login(persist=True)
 
@@ -321,7 +321,7 @@ with h5netcdf.File(nc_file, 'r') as nc:
 groups
 # -
 
-# When exploring the dataset, we find that the rhos bands are not identified by their respective wavelength. 
+# When exploring the dataset, we find that the rhos bands are not identified by their respective wavelength.
 
 dataset = xr.open_dataset(nc_file)
 rhos = dataset["rhos"]
@@ -334,7 +334,7 @@ print(df)
 
 # -
 
-# To find the wavelengths corresponding to the bands, we need to look in the sensor band parameters. 
+# To find the wavelengths corresponding to the bands, we need to look in the sensor band parameters.
 
 rhos555 = dataset["rhos"].sel({"wavelength": 555})
 plot = rhos555.plot(x="lon", y="lat", cmap="viridis", vmin=0)
@@ -343,7 +343,7 @@ plot = rhos555.plot(x="lon", y="lat", cmap="viridis", vmin=0)
 # OCI True Color 1 band -min/max adjusted
 vmin = 0.01
 vmax = 1.02 # Above 1 because whites can be higher than 1
-#---- 
+#----
 
 rhos_red = dataset["rhos"].sel({"wavelength": 645}) # 645 nm
 rhos_green = dataset["rhos"].sel({"wavelength": 555}) # 555 nm
@@ -364,8 +364,8 @@ plt.axis("image")
 
 # +
 # Image adjustments: change values from 0 to 2, 1 being unchanged
-contrast = 1.5 
-brightness = 1.02 
+contrast = 1.5
+brightness = 1.02
 sharpness = 2
 saturation = 1.1
 gamma = .95
@@ -376,9 +376,9 @@ normalized_image = normalized_image** gamma
 normalized_image = (normalized_image* 255).astype(np.uint8)
 image_pil = Image.fromarray(normalized_image)
 enhancer = ImageEnhance.Contrast(image_pil)
-image_enhanced = enhancer.enhance(contrast)  
+image_enhanced = enhancer.enhance(contrast)
 enhancer = ImageEnhance.Brightness(image_enhanced)
-image_enhanced = enhancer.enhance(brightness)  
+image_enhanced = enhancer.enhance(brightness)
 enhancer = ImageEnhance.Sharpness(image_enhanced)
 image_enhanced = enhancer.enhance(sharpness)
 enhancer = ImageEnhance.Color(image_enhanced)
@@ -432,7 +432,7 @@ plot = dataset["rhos_555"].plot(x="longitude", y="latitude", cmap="viridis", vmi
 # OCI True Color 1 band -min/max adjusted
 vmin = 0.01
 vmax = 1.04 # Above 1 because whites can be higher than 1
-#---- 
+#----
 
 rhos_red = dataset["rhos_645"]
 rhos_green = dataset["rhos_555"]
@@ -455,7 +455,7 @@ ax.imshow(rgb,
 # +
 # Image adjustments: change values from 0 to 2, 1 being unchanged
 contrast = 1.72
-brightness = 1 
+brightness = 1
 sharpness = 2
 saturation = 1.3
 gamma = .43
@@ -466,9 +466,9 @@ normalized_image = normalized_image** gamma
 normalized_image = (normalized_image* 255).astype(np.uint8)
 image_pil = Image.fromarray(normalized_image)
 enhancer = ImageEnhance.Contrast(image_pil)
-image_enhanced = enhancer.enhance(contrast)  
+image_enhanced = enhancer.enhance(contrast)
 enhancer = ImageEnhance.Brightness(image_enhanced)
-image_enhanced = enhancer.enhance(brightness)  
+image_enhanced = enhancer.enhance(brightness)
 enhancer = ImageEnhance.Sharpness(image_enhanced)
 image_enhanced = enhancer.enhance(sharpness)
 enhancer = ImageEnhance.Color(image_enhanced)
@@ -492,7 +492,7 @@ ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=c
 
 # +
 cmap_greens = pl.cm.Greens # Get original color map
-my_cmap_greens = cmap_greens(np.arange(cmap_greens.N)) 
+my_cmap_greens = cmap_greens(np.arange(cmap_greens.N))
 my_cmap_greens[:,-1] = np.linspace(0, 1, cmap_greens.N) # Set alpha for transparency
 my_cmap_greens = ListedColormap(my_cmap_greens) # Create new colormap
 cmap_reds = pl.cm.Reds
@@ -511,8 +511,8 @@ ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=c
 
 # +
 # Image adjustments: change values from 0 to 2, 1 being unchanged
-contrast = 1.9 
-brightness = 1 
+contrast = 1.9
+brightness = 1
 sharpness = 2
 saturation = 1.4
 gamma = .48
@@ -523,9 +523,9 @@ normalized_image = normalized_image** gamma
 normalized_image = (normalized_image* 255).astype(np.uint8)
 image_pil = Image.fromarray(normalized_image)
 enhancer = ImageEnhance.Contrast(image_pil)
-image_enhanced = enhancer.enhance(contrast)  
+image_enhanced = enhancer.enhance(contrast)
 enhancer = ImageEnhance.Brightness(image_enhanced)
-image_enhanced = enhancer.enhance(brightness)  
+image_enhanced = enhancer.enhance(brightness)
 enhancer = ImageEnhance.Sharpness(image_enhanced)
 image_enhanced = enhancer.enhance(sharpness)
 enhancer = ImageEnhance.Color(image_enhanced)
@@ -540,6 +540,3 @@ ax.imshow(dataset["prococcus_moana"], extent=extent, origin='lower', transform=c
 ax.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=20000, alpha = .5)
 ax.imshow(dataset["picoeuk_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_greens, vmin=0, vmax=50000, alpha = .5)
 plt.show()
-# -
-
-

@@ -64,7 +64,7 @@ import xarray as xr
 options = xr.set_options(display_expand_attrs=False)
 
 
-# In this tutorial, we suppress runtime warnings that show up when calculating log for negative values, which is common with our datasets. 
+# In this tutorial, we suppress runtime warnings that show up when calculating log for negative values, which is common with our datasets.
 
 # Define a function to apply enhancements, our own plus generic image enhancements from the Pillow package.
 
@@ -78,7 +78,7 @@ def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.04, gamma=0.95, contrast=1.
         vmin: minimum pixel value for the image
         vmax: maximum pixel value for the image
         gamma: exponential factor for gamma correction
-        contrast: amount of pixel value differentiation 
+        contrast: amount of pixel value differentiation
         brightness: pixel values (intensity)
         sharpness: amount of detail
         saturation: color intensity
@@ -89,7 +89,7 @@ def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.04, gamma=0.95, contrast=1.
     rgb = rgb.where(rgb > 0)
     rgb = np.log(rgb / scale) / np.log(1 / scale)
     rgb = rgb.where(rgb >= vmin, vmin)
-    rgb = rgb.where(rgb <= vmax, vmax)    
+    rgb = rgb.where(rgb <= vmax, vmax)
     rgb_min = rgb.min(("number_of_lines", "pixels_per_line"))
     rgb_max = rgb.max(("number_of_lines", "pixels_per_line"))
     rgb = (rgb - rgb_min) / (rgb_max - rgb_min)
@@ -109,7 +109,7 @@ def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.04, gamma=0.95, contrast=1.
     return rgb
 
 def enhancel3(rgb, scale = .01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1.5, brightness=1.02, sharpness=2, saturation=1.1):
-   
+
     rgb = rgb.where(rgb > 0)
     rgb = np.log(rgb / scale) / np.log(1 / scale)
     rgb = (rgb -  rgb.min()) / (rgb.max() - rgb.min())
@@ -125,7 +125,7 @@ def enhancel3(rgb, scale = .01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1.
     img = enhancer.enhance(sharpness)
     enhancer = ImageEnhance.Color(img)
     img = enhancer.enhance(saturation)
-    rgb[:] = np.array(img) / 255    
+    rgb[:] = np.array(img) / 255
     return rgb
 
 def pcolormesh(rgb):
@@ -147,7 +147,7 @@ def pcolormesh(rgb):
 
 # ## 2. Easy Global Chlorophyll-a Map
 
-# Let's start with the most basic visualization. First, get level-3 chlorophyll map product, which is already gridded on latitudes and longitudes. 
+# Let's start with the most basic visualization. First, get level-3 chlorophyll map product, which is already gridded on latitudes and longitudes.
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_CHL_NRT",
@@ -158,14 +158,14 @@ paths = earthaccess.open(results)
 dataset = xr.open_dataset(paths[-1])
 chla = dataset["chlor_a"]
 
-# Now we can already create a global map. Let's use a special colormap from `cmocean` to be fancy, but this is not necessary to make a basic map. Use the `robust="true"` option to remove outliers. 
+# Now we can already create a global map. Let's use a special colormap from `cmocean` to be fancy, but this is not necessary to make a basic map. Use the `robust="true"` option to remove outliers.
 
 artist = chla.plot(cmap=cmocean.cm.algae, robust="true")
 plt.gca().set_aspect("equal")
 
 # ## 3. Global Oceans in Quasi True Color
 
-# True color images use three bands to create a RGB image. Let's still use a level-3 mapped product, this time we use the remote-sensing reflectance (Rrs) product. 
+# True color images use three bands to create a RGB image. Let's still use a level-3 mapped product, this time we use the remote-sensing reflectance (Rrs) product.
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
@@ -213,17 +213,17 @@ for i, item in enumerate(rrs_rgb["channel"]):
 fig.tight_layout()
 plt.show()
 
-# We use the `enhancel3` function defined at the start of the tutorial to make adjusments to the image. 
+# We use the `enhancel3` function defined at the start of the tutorial to make adjusments to the image.
 
 rrs_rgb_enhanced = enhancel3(rrs_rgb)
 
-# And we create the image using the `imshow` function. 
+# And we create the image using the `imshow` function.
 
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
 plt.gca().set_aspect("equal")
 
 
-# Finally, we can add a grid and coastlines to the map with `cartopy` tools. 
+# Finally, we can add a grid and coastlines to the map with `cartopy` tools.
 
 fig = plt.figure(figsize=(7, 5))
 ax = plt.axes(projection=ccrs.PlateCarree())
@@ -253,7 +253,7 @@ dataset
 dataset = dataset.set_coords(("longitude", "latitude"))
 dataset
 
-# We then select the three wavelenghts that will become the red, green and blue chanels in our image. 
+# We then select the three wavelenghts that will become the red, green and blue chanels in our image.
 
 rhos_rgb = dataset["rhos"].sel({"wavelength_3d": [645, 555, 368]})
 rhos_rgb
@@ -269,7 +269,7 @@ rhos_rgb_enhanced = (rhos_rgb - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
 
 pcolormesh(rhos_rgb_enhanced)
 
-# Let's have a look at the image's histogram that shows the pixel intensity value distribution across the image. Here, we can see that the values are skewed towards the low intensities, which makes the image dark. 
+# Let's have a look at the image's histogram that shows the pixel intensity value distribution across the image. Here, we can see that the values are skewed towards the low intensities, which makes the image dark.
 
 rhos_rgb_enhanced.plot.hist()
 
@@ -290,7 +290,7 @@ rhos_rgb_min = rhos_rgb.min(("number_of_lines", "pixels_per_line"))
 rhos_rgb_enhanced = (rhos_rgb - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
 pcolormesh(rhos_rgb_enhanced)
 
-# Let's go back to the log-transformed image, but this time adjust the minimum and maximum pixel values `vmin` and `vmax`. 
+# Let's go back to the log-transformed image, but this time adjust the minimum and maximum pixel values `vmin` and `vmax`.
 
 rhos_rgb_enhanced = rhos_rgb.where(rhos_rgb > 0, np.nan)
 rhos_rgb_enhanced = np.log(rhos_rgb_enhanced / 0.01) / np.log(1 / 0.01)
@@ -317,7 +317,7 @@ rhos_rgb_enhanced.plot.hist()
 rhos_rgb_enhanced = enhance(rhos_rgb)
 pcolormesh(rhos_rgb_enhanced)
 
-# Since every image is unique, we can further adjust the parameters. 
+# Since every image is unique, we can further adjust the parameters.
 
 rhos_rgb_enhanced = enhance(rhos_rgb, contrast=1.2, brightness=1.1, saturation=0.8)
 pcolormesh(rhos_rgb_enhanced)
@@ -326,7 +326,7 @@ pcolormesh(rhos_rgb_enhanced)
 
 # ## 5. False Color for Ice Clouds
 
-# We can use the same RGB image method, this time with different bands, to create false-color images that highlight specific elements in an image. 
+# We can use the same RGB image method, this time with different bands, to create false-color images that highlight specific elements in an image.
 #
 # For example, using a combination of infrared bands can highlight ice clouds in the atmosphere, versus regular water vapor clouds. Let's try it:
 
@@ -335,15 +335,15 @@ rhos_ice = dataset["rhos"].sel({"wavelength_3d": [1618, 2131, 2258]})
 rhos_ice_enhanced = enhance(rhos_ice, vmin=0, vmax=0.9, scale=.1, gamma =1, contrast=1, brightness=1, saturation=1)
 pcolormesh(rhos_ice_enhanced)
 
-# Here, the ice clouds are purple and water vapor clouds are white, like we can see in the northwestern region of the scene. 
+# Here, the ice clouds are purple and water vapor clouds are white, like we can see in the northwestern region of the scene.
 
 # [back to top](#Contents)
 
 # ## 6. Phytoplankton in False Color
 
-# A uniquely innovative type of product from PACE is the phytoplankton community composition, using the MOANA algorithm. It gives the abundance of three types of plankton: picoeucaryotes, prochlorococcus and synechococcus. These products were used to create the first light image for PACE. Let's see how. 
+# A uniquely innovative type of product from PACE is the phytoplankton community composition, using the MOANA algorithm. It gives the abundance of three types of plankton: picoeucaryotes, prochlorococcus and synechococcus. These products were used to create the first light image for PACE. Let's see how.
 #
-# We first open the dataset that is created with l2gen. This will be covered in the OCSSW tutorial. 
+# We first open the dataset that is created with l2gen. This will be covered in the OCSSW tutorial.
 
 # +
 path = "/home/jovyan/shared/pace-hackweek-2024/PACE_OCI.20240309T115927.L2_MOANA.V2.nc"
@@ -353,22 +353,22 @@ dataset = xr.merge(datatree.to_dict().values())
 dataset
 # -
 
-# We can see the MOANA products, RGB bands and other level-2 products in the dataset. We still need to set the spatial variables as coordinates of the dataset. 
+# We can see the MOANA products, RGB bands and other level-2 products in the dataset. We still need to set the spatial variables as coordinates of the dataset.
 
 dataset = dataset.set_coords(("longitude", "latitude"))
 
-# Let's make a quick MOANA product plot to see if everything looks normal. 
+# Let's make a quick MOANA product plot to see if everything looks normal.
 
 artist = dataset["picoeuk_moana"].plot(x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true")
 plt.gca().set_aspect("equal")
 
-# Now we create a RGB image using our three rhos bands and the usual log-transform, vmin/vmax adjustments and normalization. We also project the map using cartopy. 
+# Now we create a RGB image using our three rhos bands and the usual log-transform, vmin/vmax adjustments and normalization. We also project the map using cartopy.
 
 # +
 # OCI True Color 1 band -min/max adjusted
 vmin = 0.01
 vmax = 1.04 # Above 1 because whites can be higher than 1
-#---- 
+#----
 
 rhos_red = dataset["rhos_645"]
 rhos_green = dataset["rhos_555"]
@@ -393,12 +393,12 @@ artist = axes.imshow(
 )
 # -
 
-# We then enhance the image. 
+# We then enhance the image.
 
 # +
 # Image adjustments: change values from 0 to 2, 1 being unchanged
 contrast = 1.72
-brightness = 1 
+brightness = 1
 sharpness = 2
 saturation = 1.3
 gamma = .43
@@ -409,9 +409,9 @@ normalized_image = normalized_image** gamma
 normalized_image = (normalized_image* 255).astype(np.uint8)
 image_pil = Image.fromarray(normalized_image)
 enhancer = ImageEnhance.Contrast(image_pil)
-image_enhanced = enhancer.enhance(contrast)  
+image_enhanced = enhancer.enhance(contrast)
 enhancer = ImageEnhance.Brightness(image_enhanced)
-image_enhanced = enhancer.enhance(brightness)  
+image_enhanced = enhancer.enhance(brightness)
 enhancer = ImageEnhance.Sharpness(image_enhanced)
 image_enhanced = enhancer.enhance(sharpness)
 enhancer = ImageEnhance.Color(image_enhanced)
@@ -423,7 +423,7 @@ axes = plt.subplot(projection=ccrs.PlateCarree())
 extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
 artist = axes.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
 # -
-# We then project the MOANA products on the same grid. We can look at Synechococcus as an example. 
+# We then project the MOANA products on the same grid. We can look at Synechococcus as an example.
 
 fig = plt.figure(figsize=(5, 5))
 axes = fig.add_subplot(projection=ccrs.PlateCarree())
@@ -434,7 +434,7 @@ artist = axes.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', 
 
 # +
 cmap_greens = pl.cm.Greens # Get original color map
-my_cmap_greens = cmap_greens(np.arange(cmap_greens.N)) 
+my_cmap_greens = cmap_greens(np.arange(cmap_greens.N))
 my_cmap_greens[:,-1] = np.linspace(0, 1, cmap_greens.N) # Set alpha for transparency
 my_cmap_greens = ListedColormap(my_cmap_greens) # Create new colormap
 cmap_reds = pl.cm.Reds
@@ -452,7 +452,7 @@ extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min()
 artist = axes.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=35000, alpha = 1)
 # -
 
-# We finally assemble the image using the plankton layers and the true-color base layer. 
+# We finally assemble the image using the plankton layers and the true-color base layer.
 
 fig = plt.figure(figsize=(7, 7))
 axes = plt.subplot(projection=ccrs.PlateCarree())
@@ -481,7 +481,7 @@ plt.show()
 
 hv.extension("bokeh")
 
-# Let's open a level 3 Rrs map. 
+# Let's open a level 3 Rrs map.
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
@@ -489,7 +489,7 @@ results = earthaccess.search_data(
 )
 paths = earthaccess.open(results)
 
-# We can create a map from a single band in the dataset and see the Rrs value by hovering over the map. 
+# We can create a map from a single band in the dataset and see the Rrs value by hovering over the map.
 
 dataset = xr.open_dataset(paths[-1])
 def single_band(w):
@@ -500,7 +500,7 @@ def single_band(w):
 single_band(368)
 
 
-# In order to explore the hyperspectral datasets from PACE, we can have a look at the Rrs Spectrum at a certain location. 
+# In order to explore the hyperspectral datasets from PACE, we can have a look at the Rrs Spectrum at a certain location.
 
 def spectrum(x, y):
     array = dataset.sel({"lon": x, "lat": y}, method="nearest")
@@ -570,7 +570,7 @@ wavelengths = view["intensity_wavelength"]
 
 def rad_to_refl(rad, f0, sza, r):
     """Convert radiance to reflectance.
-    
+
     Args:
         rad: Radiance.
         f0: Solar irradiance.

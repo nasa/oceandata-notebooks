@@ -176,7 +176,7 @@ def mean_and_std(x):
 
     Returns:
       A 2-tuple with the mean and standard deviation.
-    """    
+    """
     # initialize sum (s) and sum-of-squares (ss)
     s = 0
     ss = 0

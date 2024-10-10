@@ -32,7 +32,7 @@
 # 1. [Setup](#1.-Setup)
 # 2. [Get L1B Data](#2.-Get-L1B-Data)
 # 3. [Process L1B Data to L2 Surface Reflectances with `l2gen`](#3.-Process-L1B-Data-with-l2gen)
-# 4. [Process L1B Data to L2 MOANA Phytoplankton products with `l2gen`](#4.-L1B-Data-to-L2-MOANA) 
+# 4. [Process L1B Data to L2 MOANA Phytoplankton products with `l2gen`](#4.-L1B-Data-to-L2-MOANA)
 # 5. [Composite L2 Data with `l2bin`](#4.-Composite-L2-Data-with-l2bin)
 # 6. [Make a Map from Binned Data with `l3mapgen`](#5.-Make-a-Map-from-Binned-Data-with-l3mapgen)
 
@@ -140,9 +140,9 @@ artist = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 # + [markdown] tags=[]
 # ## 3. Process L1B Data with `l2gen`
 #
-# At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. `l2gen` also allows you to customize products in a way that allows you to get products you cannot directly download from earthdata, like you will see from the following two examples. The first shows how to produce surface reflectances to make true-color images. The second covers the upcoming MOANA phytoplankton community composition products. 
+# At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. `l2gen` also allows you to customize products in a way that allows you to get products you cannot directly download from earthdata, like you will see from the following two examples. The first shows how to produce surface reflectances to make true-color images. The second covers the upcoming MOANA phytoplankton community composition products.
 #
-# This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters. 
+# This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters.
 #
 # <div class="alert alert-warning">
 #
@@ -185,7 +185,7 @@ par = {
 write_par("l2gen.par", par)
 
 # + [markdown] tags=[]
-# With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell. 
+# With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell.
 
 # + scrolled=true tags=["scroll-output"] language="bash"
 # source $OCSSWROOT/OCSSW_bash.env
@@ -213,7 +213,7 @@ artist = dataset["rhos"].sel({"wavelength_3d": 25}).plot(cmap="viridis", robust=
 # ## 4. Make MOANA Phytoplankton Community Products with `l2gen`
 
 # + [markdown] tags=[]
-# One of the most exciting new PACE algorithms for the ocean color community is the MOANA algorithm that produces phytoplankton abundances for three different groups: Synechococcus, Prochlorococcus and picoeukaryotes. 
+# One of the most exciting new PACE algorithms for the ocean color community is the MOANA algorithm that produces phytoplankton abundances for three different groups: Synechococcus, Prochlorococcus and picoeukaryotes.
 
 # + tags=[]
 tspan = ("2024-03-09", "2024-03-09")
@@ -268,7 +268,7 @@ artist = dataset["picoeuk_moana"].plot(cmap="viridis", robust=True)
 # + [markdown] tags=[]
 # ## 5. Composite L2 Data with `l2bin`
 #
-# It can be useful to merge adjacent scenes to create a single, larger image. Let's do it with a chlorophyll product. 
+# It can be useful to merge adjacent scenes to create a single, larger image. Let's do it with a chlorophyll product.
 #
 # Searching on a location defined as a line, rather than a point, is a good way to get granules that are
 # adjacent to eachother. Pass a list of latitude and longitude tuples to the `line` argument of `search_data`.

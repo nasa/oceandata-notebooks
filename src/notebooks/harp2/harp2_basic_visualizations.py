@@ -45,7 +45,7 @@
 #
 # Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
 #
-# [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/ 
+# [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 # +
 from tempfile import TemporaryDirectory
@@ -262,7 +262,7 @@ plt.show()
 
 def rad_to_refl(rad, f0, sza, r):
     """Convert radiance to reflectance.
-    
+
     Args:
         rad: Radiance.
         f0: Solar irradiance.
@@ -380,7 +380,7 @@ plt.close()
 # [back to top](#Contents)
 #
 # <div class="alert alert-info" role="alert">
-#     
+#
 # You have completed the notebook giving a first look at HARP2 data. More notebooks are comming soon!
 #
 # </div>
