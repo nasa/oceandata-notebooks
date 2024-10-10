@@ -4,6 +4,9 @@ on:
     paths:
       - .github/workflows/repo2docker.yaml
       - hub/**
+# concurrency:
+#   group: ${{ github.workflow }}
+#   cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
