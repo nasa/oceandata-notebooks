@@ -54,6 +54,7 @@
 import csv
 import os
 
+from IPython.display import display
 import cartopy.crs as ccrs
 import earthaccess
 import xarray as xr
@@ -67,6 +68,7 @@ import matplotlib.pyplot as plt
 # equals-separated values. Not something you usually see in a data file, but it's better than
 # writing our own utility from scratch!
 
+
 def write_par(path, par):
     """
     Prepare a "par file" to be read by one of the OCSSW tools, as an
@@ -78,7 +80,7 @@ def write_par(path, par):
     """
     with open(path, "w") as file:
         writer = csv.writer(file, delimiter="=")
-        values = writer.writerows(par.items())
+        writer.writerows(par.items())
 
 
 # The Python docstring (fenced by triple quotation marks in the function definition) is not

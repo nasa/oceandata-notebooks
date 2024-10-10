@@ -41,9 +41,6 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
-# +
-import os
-
 from holoviews.streams import Tap
 from matplotlib import animation
 from matplotlib.colors import ListedColormap
@@ -59,7 +56,6 @@ import matplotlib.pylab as pl
 import numpy as np
 import panel.widgets as pnw
 import xarray as xr
-# -
 
 options = xr.set_options(display_expand_attrs=False)
 
@@ -68,8 +64,19 @@ options = xr.set_options(display_expand_attrs=False)
 
 # Define a function to apply enhancements, our own plus generic image enhancements from the Pillow package.
 
+
 # +
-def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.04, gamma=0.95, contrast=1.2, brightness=1.02, sharpness=2, saturation=1.1):
+def enhance(
+    rgb,
+    scale=0.01,
+    vmin=0.01,
+    vmax=1.04,
+    gamma=0.95,
+    contrast=1.2,
+    brightness=1.02,
+    sharpness=2,
+    saturation=1.1,
+):
     """The SeaDAS recipe for RGB images from Ocean Color missions.
 
     Args:
@@ -108,11 +115,21 @@ def enhance(rgb, scale = 0.01, vmin = 0.01, vmax = 1.04, gamma=0.95, contrast=1.
     rgb[:] = np.array(img) / 255
     return rgb
 
-def enhancel3(rgb, scale = .01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1.5, brightness=1.02, sharpness=2, saturation=1.1):
 
+def enhancel3(
+    rgb,
+    scale=0.01,
+    vmin=0.01,
+    vmax=1.02,
+    gamma=0.95,
+    contrast=1.5,
+    brightness=1.02,
+    sharpness=2,
+    saturation=1.1,
+):
     rgb = rgb.where(rgb > 0)
     rgb = np.log(rgb / scale) / np.log(1 / scale)
-    rgb = (rgb -  rgb.min()) / (rgb.max() - rgb.min())
+    rgb = (rgb - rgb.min()) / (rgb.max() - rgb.min())
     rgb = rgb * gamma
     img = rgb * 255
     img = img.where(img.notnull(), 0).astype("uint8")
@@ -127,6 +144,7 @@ def enhancel3(rgb, scale = .01, vmin = 0.01, vmax = 1.02, gamma=.95, contrast=1.
     img = enhancer.enhance(saturation)
     rgb[:] = np.array(img) / 255
     return rgb
+
 
 def pcolormesh(rgb):
     fig = plt.figure()
@@ -332,7 +350,16 @@ pcolormesh(rhos_rgb_enhanced)
 
 rhos_ice = dataset["rhos"].sel({"wavelength_3d": [1618, 2131, 2258]})
 
-rhos_ice_enhanced = enhance(rhos_ice, vmin=0, vmax=0.9, scale=.1, gamma =1, contrast=1, brightness=1, saturation=1)
+rhos_ice_enhanced = enhance(
+    rhos_ice,
+    vmin=0,
+    vmax=0.9,
+    scale=0.1,
+    gamma=1,
+    contrast=1,
+    brightness=1,
+    saturation=1,
+)
 pcolormesh(rhos_ice_enhanced)
 
 # Here, the ice clouds are purple and water vapor clouds are white, like we can see in the northwestern region of the scene.
@@ -359,7 +386,9 @@ dataset = dataset.set_coords(("longitude", "latitude"))
 
 # Let's make a quick MOANA product plot to see if everything looks normal.
 
-artist = dataset["picoeuk_moana"].plot(x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true")
+artist = dataset["picoeuk_moana"].plot(
+    x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true"
+)
 plt.gca().set_aspect("equal")
 
 # Now we create a RGB image using our three rhos bands and the usual log-transform, vmin/vmax adjustments and normalization. We also project the map using cartopy.
@@ -367,29 +396,34 @@ plt.gca().set_aspect("equal")
 # +
 # OCI True Color 1 band -min/max adjusted
 vmin = 0.01
-vmax = 1.04 # Above 1 because whites can be higher than 1
-#----
+vmax = 1.04  # Above 1 because whites can be higher than 1
+# ----
 
 rhos_red = dataset["rhos_645"]
 rhos_green = dataset["rhos_555"]
 rhos_blue = dataset["rhos_465"]
-red = np.log(rhos_red/0.01)/np.log(1/0.01)
-green = np.log(rhos_green/0.01)/np.log(1/0.01)
-blue = np.log(rhos_blue/0.01)/np.log(1/0.01)
+red = np.log(rhos_red / 0.01) / np.log(1 / 0.01)
+green = np.log(rhos_green / 0.01) / np.log(1 / 0.01)
+blue = np.log(rhos_blue / 0.01) / np.log(1 / 0.01)
 red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
 green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
 blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
 rgb = np.dstack((red, green, blue))
-rgb = (rgb -  np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb)) #normalize
+rgb = (rgb - np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb))  # normalize
 
 fig = plt.figure(figsize=(5, 5))
 axes = fig.add_subplot(projection=ccrs.PlateCarree())
 artist = axes.imshow(
     rgb,
-    extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max()),
-    origin='lower',
+    extent=(
+        dataset.longitude.min(),
+        dataset.longitude.max(),
+        dataset.latitude.min(),
+        dataset.latitude.max(),
+    ),
+    origin="lower",
     transform=ccrs.PlateCarree(),
-    interpolation='none',
+    interpolation="none",
 )
 # -
 
@@ -401,12 +435,12 @@ contrast = 1.72
 brightness = 1
 sharpness = 2
 saturation = 1.3
-gamma = .43
-#----
+gamma = 0.43
+# ----
 
 normalized_image = (rgb - rgb.min()) / (rgb.max() - rgb.min())
-normalized_image = normalized_image** gamma
-normalized_image = (normalized_image* 255).astype(np.uint8)
+normalized_image = normalized_image**gamma
+normalized_image = (normalized_image * 255).astype(np.uint8)
 image_pil = Image.fromarray(normalized_image)
 enhancer = ImageEnhance.Contrast(image_pil)
 image_enhanced = enhancer.enhance(contrast)
@@ -420,47 +454,129 @@ enhanced_image_np = np.array(image_enhanced) / 255.0  # Normalize back to [0, 1]
 
 fig = plt.figure(figsize=(5, 5))
 axes = plt.subplot(projection=ccrs.PlateCarree())
-extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
-artist = axes.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
+extent = (
+    dataset.longitude.min(),
+    dataset.longitude.max(),
+    dataset.latitude.min(),
+    dataset.latitude.max(),
+)
+artist = axes.imshow(
+    enhanced_image_np,
+    extent=extent,
+    origin="lower",
+    transform=ccrs.PlateCarree(),
+    alpha=1,
+)
 # -
 # We then project the MOANA products on the same grid. We can look at Synechococcus as an example.
 
 fig = plt.figure(figsize=(5, 5))
 axes = fig.add_subplot(projection=ccrs.PlateCarree())
-extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
-artist = axes.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap="Reds", vmin=0, vmax=35000, alpha = 1)
+extent = (
+    dataset.longitude.min(),
+    dataset.longitude.max(),
+    dataset.latitude.min(),
+    dataset.latitude.max(),
+)
+artist = axes.imshow(
+    dataset["syncoccus_moana"],
+    extent=extent,
+    origin="lower",
+    transform=ccrs.PlateCarree(),
+    interpolation="none",
+    cmap="Reds",
+    vmin=0,
+    vmax=35000,
+    alpha=1,
+)
 
 # To layer the three products on our true-color image, we will add transparency to our colormaps for the three plankton products. Look at the Synechococcus product again.
 
 # +
-cmap_greens = pl.cm.Greens # Get original color map
+cmap_greens = pl.cm.Greens  # Get original color map
 my_cmap_greens = cmap_greens(np.arange(cmap_greens.N))
-my_cmap_greens[:,-1] = np.linspace(0, 1, cmap_greens.N) # Set alpha for transparency
-my_cmap_greens = ListedColormap(my_cmap_greens) # Create new colormap
+my_cmap_greens[:, -1] = np.linspace(0, 1, cmap_greens.N)  # Set alpha for transparency
+my_cmap_greens = ListedColormap(my_cmap_greens)  # Create new colormap
 cmap_reds = pl.cm.Reds
 my_cmap_reds = cmap_reds(np.arange(cmap_reds.N))
-my_cmap_reds[:,-1] = np.linspace(0, 1, cmap_reds.N)
+my_cmap_reds[:, -1] = np.linspace(0, 1, cmap_reds.N)
 my_cmap_reds = ListedColormap(my_cmap_reds)
 cmap_blues = pl.cm.Blues
 my_cmap_blues = cmap_blues(np.arange(cmap_blues.N))
-my_cmap_blues[:,-1] = np.linspace(0, 1, cmap_blues.N)
+my_cmap_blues[:, -1] = np.linspace(0, 1, cmap_blues.N)
 my_cmap_blues = ListedColormap(my_cmap_blues)
 
 fig = plt.figure(figsize=(5, 5))
 axes = fig.add_subplot(projection=ccrs.PlateCarree())
-extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
-artist = axes.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=35000, alpha = 1)
+extent = (
+    dataset.longitude.min(),
+    dataset.longitude.max(),
+    dataset.latitude.min(),
+    dataset.latitude.max(),
+)
+artist = axes.imshow(
+    dataset["syncoccus_moana"],
+    extent=extent,
+    origin="lower",
+    transform=ccrs.PlateCarree(),
+    interpolation="none",
+    cmap=my_cmap_reds,
+    vmin=0,
+    vmax=35000,
+    alpha=1,
+)
 # -
 
 # We finally assemble the image using the plankton layers and the true-color base layer.
 
 fig = plt.figure(figsize=(7, 7))
 axes = plt.subplot(projection=ccrs.PlateCarree())
-extent=(dataset.longitude.min(), dataset.longitude.max(), dataset.latitude.min(), dataset.latitude.max())
-axes.imshow(enhanced_image_np, extent=extent, origin='lower', transform=ccrs.PlateCarree(), alpha=1)
-axes.imshow(dataset["prococcus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_blues, vmin=0, vmax=300000, alpha = .5)
-axes.imshow(dataset["syncoccus_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_reds, vmin=0, vmax=20000, alpha = .5)
-axes.imshow(dataset["picoeuk_moana"], extent=extent, origin='lower', transform=ccrs.PlateCarree(), interpolation='none', cmap=my_cmap_greens, vmin=0, vmax=50000, alpha = .5)
+extent = (
+    dataset.longitude.min(),
+    dataset.longitude.max(),
+    dataset.latitude.min(),
+    dataset.latitude.max(),
+)
+axes.imshow(
+    enhanced_image_np,
+    extent=extent,
+    origin="lower",
+    transform=ccrs.PlateCarree(),
+    alpha=1,
+)
+axes.imshow(
+    dataset["prococcus_moana"],
+    extent=extent,
+    origin="lower",
+    transform=ccrs.PlateCarree(),
+    interpolation="none",
+    cmap=my_cmap_blues,
+    vmin=0,
+    vmax=300000,
+    alpha=0.5,
+)
+axes.imshow(
+    dataset["syncoccus_moana"],
+    extent=extent,
+    origin="lower",
+    transform=ccrs.PlateCarree(),
+    interpolation="none",
+    cmap=my_cmap_reds,
+    vmin=0,
+    vmax=20000,
+    alpha=0.5,
+)
+axes.imshow(
+    dataset["picoeuk_moana"],
+    extent=extent,
+    origin="lower",
+    transform=ccrs.PlateCarree(),
+    interpolation="none",
+    cmap=my_cmap_greens,
+    vmin=0,
+    vmax=50000,
+    alpha=0.5,
+)
 plt.show()
 
 # [back to top](#Contents)
@@ -492,15 +608,21 @@ paths = earthaccess.open(results)
 # We can create a map from a single band in the dataset and see the Rrs value by hovering over the map.
 
 dataset = xr.open_dataset(paths[-1])
+
+
 def single_band(w):
     array = dataset.sel({"wavelength": w})
-    return hv.Image(array, kdims=["lon", "lat"], vdims=["Rrs"]).opts(aspect="equal", frame_width=450, frame_height=250, tools=['hover'])
+    return (
+        hv.Image(array, kdims=["lon", "lat"], vdims=["Rrs"])
+        .opts(aspect="equal", frame_width=450, frame_height=250, tools=["hover"])
+    )
 
 
 single_band(368)
 
 
 # In order to explore the hyperspectral datasets from PACE, we can have a look at the Rrs Spectrum at a certain location.
+
 
 def spectrum(x, y):
     array = dataset.sel({"lon": x, "lat": y}, method="nearest")
@@ -544,7 +666,11 @@ paths = earthaccess.open(results)
 
 prod = xr.open_dataset(paths[0])
 view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
-geo = xr.open_dataset(paths[0], group="geolocation_data").set_coords(["longitude", "latitude"])
+geo = (
+    xr.open_dataset(paths[0], group="geolocation_data")
+    .set_coords(["longitude", "latitude"])
+    .test("another one")
+)
 obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 
 # The `prod` dataset, as usual for OB.DAAC products, contains attributes but no variables. Merge it with the "observation_data" and "geolocation_data", setting latitude and longitude as auxiliary (e.e. non-index) coordinates, to get started.
@@ -567,6 +693,7 @@ wavelengths = view["intensity_wavelength"]
 # ### Radiance to Reflectance
 #
 # We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). This conversion compensates for the differences in appearance due to the viewing angle and sun angle. Write the conversion as a function, because you may need to repeat it.
+
 
 def rad_to_refl(rad, f0, sza, r):
     """Convert radiance to reflectance.
@@ -630,9 +757,11 @@ frames
 fig, ax = plt.subplots()
 im = ax.imshow(refl_pretty[{"number_of_views": 0}], cmap="gray")
 
+
 def update(i):
     im.set_data(refl_pretty[{"number_of_views": i}])
     return im
+
 
 an = animation.FuncAnimation(fig=fig, func=update, frames=frames, interval=30)
 filename = f'harp2_red_anim_{dataset.attrs["product_name"].split(".")[1]}.gif'

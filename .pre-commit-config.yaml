@@ -20,21 +20,28 @@ repos:
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: mixed-line-ending
-      - id: no-commit-to-branch # protects `main` by default
       - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
+        # prefer to fix the ipynbs (in src/_build) and later sync
+        exclude: ^src/notebooks/.*$
+      - id: ruff-format
+        # prefer to fix the ipynbs (in src/_build) and later sync
+        exclude: ^src/notebooks/.*$
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.4.20
     hooks:
       - id: uv-lock
       - id: pip-compile
         name: compile-kernel-dependencies
-        pass_filenames: true
-        args: [-q, --extra=kernel, -orequirements.txt]
+        args: [-q, --extra=kernel, -orequirements.txt, pyproject.toml]
         files: ^pyproject\.toml$
       - id: pip-compile
         name: compile-hub-dependencies
-        pass_filenames: true
-        args: [-q, --extra=hub, -ohub/requirements.txt]
+        args: [-q, --extra=hub, -ohub/requirements.txt, hub/requirements.in, pyproject.toml]
         files: ^(pyproject\.toml|hub/requirements\.in)$
   - repo: https://github.com/mwouts/jupytext
     rev: v1.16.4b

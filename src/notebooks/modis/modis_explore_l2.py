@@ -43,7 +43,6 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
-from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 from IPython.display import JSON
 import cartopy
 import earthaccess
@@ -144,10 +143,8 @@ nav = xr.open_dataset(paths[0], group="navigation_data")
 # The "navigation_data" group has geospatial coordinates that we merge into the "geophysical_data" group, which has the
 # "chlor_a" product.
 
-nav = (
-    nav
-    .set_coords(("longitude", "latitude"))
-    .rename({"pixel_control_points": "pixels_per_line"})
+nav = nav.set_coords(("longitude", "latitude")).rename(
+    {"pixel_control_points": "pixels_per_line"}
 )
 dataset = xr.merge((prod, obs, nav.coords))
 
@@ -163,9 +160,7 @@ array.attrs.update(
 # The `plot` method from XArray's plotting API is an easy way to take an `xr.Dataset` or `xr.DataArray` to
 # a `matplotlib` figure.
 
-im = array.plot(
-    x="longitude", y="latitude", aspect=2, size=4, cmap="jet", robust=True
-)
+im = array.plot(x="longitude", y="latitude", aspect=2, size=4, cmap="jet", robust=True)
 
 # We can enrich the visualiation using `matplotlib` and `cartopy`. The coordinates are latitude and longitude, so if we add the "Plate Carree" coordinate reference system (CRS) to our axes, we will get an improved map.
 

@@ -55,6 +55,7 @@
       "jupyter-book>=1.0.2",
       "jupyter-repo2docker>=2024.7.0",
       "jupytext>=1.16.4",
+      "ruff>=0.6.9",
       "tomlkit>=0.13.2",
     ]
   [[project.maintainers]]
@@ -89,5 +90,5 @@
     "src/notebooks" = "py"
 
 [tool.uv]
-  # #index-strategy = "unsafe-best-match"
-  # extra-index-url = ["https://download.pytorch.org/whl/cpu"]
+  #   #index-strategy = "unsafe-best-match"
+  #   extra-index-url = ["https://download.pytorch.org/whl/cpu"]

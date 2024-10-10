@@ -47,9 +47,6 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
-# +
-from tempfile import TemporaryDirectory
-
 from scipy.ndimage import gaussian_filter1d
 from matplotlib import animation
 import cartopy.crs as ccrs
@@ -57,9 +54,6 @@ import earthaccess
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-
-
-# -
 
 # [back to top](#Contents)
 
@@ -80,7 +74,9 @@ paths = earthaccess.open(results)
 
 prod = xr.open_dataset(paths[0])
 view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
-geo = xr.open_dataset(paths[0], group="geolocation_data").set_coords(["longitude", "latitude"])
+geo = xr.open_dataset(paths[0], group="geolocation_data").set_coords(
+    ["longitude", "latitude"]
+)
 obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 
 # The `prod` dataset, as usual for OB.DAAC products, contains attributes but no variables. Merge it with the "observation_data" and "geolocation_data", setting latitude and longitude as auxiliary (e.e. non-index) coordinates, to get started.
@@ -362,6 +358,7 @@ im = ax.imshow(refl_pretty[{"number_of_views": 0}], cmap="gray")
 def update(i):
     im.set_data(refl_pretty[{"number_of_views": i}])
     return im
+
 
 an = animation.FuncAnimation(fig=fig, func=update, frames=frames, interval=30)
 filename = f'harp2_red_anim_{dataset.attrs["product_name"].split(".")[1]}.gif'
