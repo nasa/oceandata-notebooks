@@ -1,6 +1,6 @@
 channels:
   - conda-forge
 dependencies:
-  - libnetcdf==4.9.2
-  - hdf5==1.14.4
-  - code-server==4.23.1
+  - libnetcdf>=4.9.2
+  - hdf5>=1.14.4
+  - code-server>=4.23.1
