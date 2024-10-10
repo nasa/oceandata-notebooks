@@ -669,7 +669,6 @@ view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
 geo = (
     xr.open_dataset(paths[0], group="geolocation_data")
     .set_coords(["longitude", "latitude"])
-    .test("another one")
 )
 obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 
