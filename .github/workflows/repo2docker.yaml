@@ -10,6 +10,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
     - name: free space on runner
       uses: jlumbroso/free-disk-space@v1.3.1
