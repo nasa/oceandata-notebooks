@@ -2806,6 +2806,7 @@ dev = [
     { name = "tomlkit" },
 ]
 hub = [
+    { name = "async-timeout" },
     { name = "bash-kernel" },
     { name = "dask-labextension" },
     { name = "geopandas" },
@@ -2827,6 +2828,7 @@ kernel = [
 
 [package.metadata]
 requires-dist = [
+    { name = "async-timeout", marker = "extra == 'hub'", specifier = ">=4.0.3" },
     { name = "bash-kernel", marker = "extra == 'hub'", specifier = ">=0.9.3" },
     { name = "cartopy", specifier = ">=0.22.0" },
     { name = "cmocean", specifier = ">=4.0.3" },

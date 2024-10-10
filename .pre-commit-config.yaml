@@ -1,16 +1,19 @@
+fail_fast: true
 repos:
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.4.18  # uv version
+    rev: 0.4.18
     hooks:
       - id: uv-lock
       - id: pip-compile
         name: compile-kernel-dependencies
-        args: [-q, --extra=kernel, -orequirements.txt, pyproject.toml]
-        files: ^pyproject.toml$
+        pass_filenames: true
+        args: [-q, --extra=kernel, -orequirements.txt]
+        files: ^pyproject\.toml$
       - id: pip-compile
         name: compile-hub-dependencies
-        args: [-q, --extra=hub, -ohub/requirements.txt, pyproject.toml, repo2docker/requirements.in]
-        files: ^(pyproject.toml|repo2docker/requirements.in)$
+        pass_filenames: true
+        args: [-q, --extra=hub, -ohub/requirements.txt]
+        files: ^(pyproject\.toml|hub/requirements\.in)$
   - repo: https://github.com/mwouts/jupytext
     rev: v1.16.2
     hooks:
@@ -25,12 +28,12 @@ repos:
         additional_dependencies:
           - jupyter-repo2docker>=2024.7.0
         pass_filenames: false
-        entry: sh -c 'repo2docker --volume ${PWD}/repo2docker:./ repo2docker sh -c "pip list --format=freeze > requirements.in"'
-        files: ^pyproject.toml$
+        entry: repo2docker --volume hub/requirements.in:./requirements.in hub sh -c "pip list --format=freeze > requirements.in"
+        files: ^(uv\.lock|hub/environment\.yml)$
       - id: update-setup-py
         name: update-setup-py
         language: python
         additional_dependencies:
           - tomlkit>=0.13.2
         entry: python update-setup.py
-        files: ^requirements.txt$
+        files: ^requirements\.txt$

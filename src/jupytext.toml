@@ -1,4 +1,4 @@
-notebook_metadata_filter = "-all"
+notebook_metadata_filter = "-all,license"
 cell_metadata_filter = "-all,scrolled,tags"
 
 [formats]
