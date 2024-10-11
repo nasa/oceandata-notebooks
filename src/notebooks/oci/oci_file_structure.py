@@ -56,8 +56,8 @@ import earthaccess
 import h5netcdf
 import matplotlib.pyplot as plt
 import numpy as np
-import xarray as xr
 import pandas as pd
+import xarray as xr
 
 # Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
 
@@ -221,7 +221,7 @@ tspan = ("2024-05-01", "2024-05-08")
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
     temporal=tspan,
-#    count=1,
+    #    count=1,
 )
 
 paths = earthaccess.open(results)
@@ -291,7 +291,7 @@ chla.attrs.update(
         "units": f'log({dataset["chlor_a"].attrs["units"]})',
     }
 )
-im = chla.sel(date = "2024-05-02").plot(aspect=2, size=4, cmap="GnBu_r")
+im = chla.sel(date="2024-05-02").plot(aspect=2, size=4, cmap="GnBu_r")
 
 # ... to a map of average values, skipping "NaN" values that result from clouds and the OCI's tilt maneuver.
 
@@ -301,7 +301,7 @@ im = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
 # We can also create a time series of mean values over the whole region.
 
 chla_avg = chla.mean(dim=["lon", "lat"], keep_attrs=True)
-im = chla_avg.plot(linestyle='-', marker='o', color='b')
+im = chla_avg.plot(linestyle="-", marker="o", color="b")
 
 # [back to top](#Contents)
 #

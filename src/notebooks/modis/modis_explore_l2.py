@@ -43,12 +43,12 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
-from IPython.display import JSON
 import cartopy
 import earthaccess
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
+from IPython.display import JSON
 
 
 # [back to top](#Contents)

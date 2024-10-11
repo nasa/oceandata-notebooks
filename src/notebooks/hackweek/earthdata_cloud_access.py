@@ -63,12 +63,12 @@
 #
 # We begin by importing the packages used in this notebook.
 
+import cartopy.crs as ccrs
 import earthaccess
+import matplotlib.pyplot as plt
+import numpy as np
 import xarray as xr
 from xarray.backends.api import open_datatree
-import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
-import numpy as np
 
 # The last import provides a preview of the `DataTree` object. Once it is fully integrated into XArray,
 # the additional import won't be needed, as the function will be available as `xr.open_datree`.
@@ -205,7 +205,9 @@ fig = plt.figure()
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.coastlines()
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
-plot = dataset["chlor_a"].plot(x="longitude", y="latitude", cmap="viridis", vmax=5, ax=ax)
+plot = dataset["chlor_a"].plot(
+    x="longitude", y="latitude", cmap="viridis", vmax=5, ax=ax
+)
 
 # [back to top](#Contents)
 

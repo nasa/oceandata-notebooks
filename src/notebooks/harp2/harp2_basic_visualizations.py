@@ -47,13 +47,13 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
-from scipy.ndimage import gaussian_filter1d
-from matplotlib import animation
 import cartopy.crs as ccrs
 import earthaccess
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
+from matplotlib import animation
+from scipy.ndimage import gaussian_filter1d
 
 # [back to top](#Contents)
 
@@ -266,6 +266,7 @@ def rad_to_refl(rad, f0, sza, r):
         r: Sun-Earth distance (in AU).
 
     Returns: Reflectance.
+
     """
     return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) / f0
 

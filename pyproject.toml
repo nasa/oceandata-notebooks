@@ -90,6 +90,12 @@
     notebooks = "ipynb"
     "src/notebooks" = "py"
 
+[tool.ruff]
+  extend-include = ["_build"]
+  [tool.ruff.lint]
+    extend-select = ["I", "D"]
+    ignore = ["D1", "D417", "F841"] # TODO: reconsider F841
+
 [tool.uv]
   #   #index-strategy = "unsafe-best-match"
   #   extra-index-url = ["https://download.pytorch.org/whl/cpu"]

@@ -49,8 +49,8 @@ import os
 
 import cartopy.crs as ccrs
 import earthaccess
-import xarray as xr
 import matplotlib.pyplot as plt
+import xarray as xr
 
 
 # + [markdown] tags=[]
@@ -63,17 +63,19 @@ import matplotlib.pyplot as plt
 
 # + tags=[]
 def write_par(path, par):
-    """
-    Prepare a "par file" to be read by one of the OCSSW tools, as an
-    alternative to specifying each parameter on the command line.
+    """Prepare a "par file" to be read by one of the OCSSW tools.
+
+    Using a parameter file is equivalent to specifying parameters
+    on the command line.
 
     Args:
         path (str): where to write the parameter file
         par (dict): the parameter names and values included in the file
+
     """
     with open(path, "w") as file:
         writer = csv.writer(file, delimiter="=")
-        values = writer.writerows(par.items())
+        writer.writerows(par.items())
 
 
 # + [markdown] tags=[]
@@ -381,7 +383,9 @@ dataset
 # + tags=[]
 fig = plt.figure(figsize=(10, 3))
 ax = plt.axes(projection=ccrs.AlbersEqualArea(-45))
-artist = dataset["chlor_a"].plot(x="lon", y="lat", cmap="viridis", robust=True, ax=ax, transform=ccrs.PlateCarree())
+artist = dataset["chlor_a"].plot(
+    x="lon", y="lat", cmap="viridis", robust=True, ax=ax, transform=ccrs.PlateCarree()
+)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.2)
 ax.coastlines(linewidth=0.5)
 plt.show()

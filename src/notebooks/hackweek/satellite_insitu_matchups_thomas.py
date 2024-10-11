@@ -31,14 +31,14 @@
 #
 # Begin by importing all of the packages used in this notebook.
 
-import sys
 import os
+import sys
 
 # We also need to retrieve the toolkit itself. For the hackweek, we have already saved the ThoMaS toolkit under `shared/pace-hackweek-2024/lib/ThoMaS`.
 #
 # ThoMaS can be used from the [command line](https://gitlab.eumetsat.int/eumetlab/oceans/ocean-science-studies/ThoMaS/-/blob/main/README_examples.md), but here we will use it as a Python library. Lets import ThoMaS into our notebook.
 
-sys.path.insert(1, 'shared/pace-hackweek-2024/lib/ThoMaS')
+sys.path.insert(1, "shared/pace-hackweek-2024/lib/ThoMaS")
 from main import ThoMaS_main as ThoMaS
 
 # We also need to save our Earthdata login credentials in our home directory.
@@ -71,58 +71,64 @@ if not os.path.exists(output_path):
 # Let's now define out configuration file.
 
 # +
-path_to_config_file = os.path.join(output_path, 'config_file.ini')
+path_to_config_file = os.path.join(output_path, "config_file.ini")
 config_params = {}
 
 # global
-config_params['global'] = {}
-config_params['global']['path_output'] = output_path
-config_params['global']['SetID'] = 'Chesapeake_Bay'
-config_params['global']['workflow'] = 'insitu, SatData, minifiles, EDB, MDB'
+config_params["global"] = {}
+config_params["global"]["path_output"] = output_path
+config_params["global"]["SetID"] = "Chesapeake_Bay"
+config_params["global"]["workflow"] = "insitu, SatData, minifiles, EDB, MDB"
 
 
 # AERONETOC
-config_params['AERONETOC'] = {}
-config_params['AERONETOC']['AERONETOC_pathRaw'] = os.path.join(output_path, 'Chesapeake_Bay', 'AERONET_OC_raw')
-config_params['AERONETOC']['AERONETOC_dateStart'] = '2024-07-01T00:00:00'
-config_params['AERONETOC']['AERONETOC_dateEnd'] = '2024-07-31T00:00:00'
-config_params['AERONETOC']['AERONETOC_dataQuality'] = 1.5
-config_params['AERONETOC']['AERONETOC_station'] = 'Chesapeake_Bay'
+config_params["AERONETOC"] = {}
+config_params["AERONETOC"]["AERONETOC_pathRaw"] = os.path.join(
+    output_path, "Chesapeake_Bay", "AERONET_OC_raw"
+)
+config_params["AERONETOC"]["AERONETOC_dateStart"] = "2024-07-01T00:00:00"
+config_params["AERONETOC"]["AERONETOC_dateEnd"] = "2024-07-31T00:00:00"
+config_params["AERONETOC"]["AERONETOC_dataQuality"] = 1.5
+config_params["AERONETOC"]["AERONETOC_station"] = "Chesapeake_Bay"
 
 # insitu
-config_params['insitu'] = {}
-config_params['insitu']['insitu_data2OCDBfile'] = 'AERONETOC'
-config_params['insitu']['insitu_input'] = os.path.join(output_path, 'Chesapeake_Bay_OCDB.csv')
-config_params['insitu']['insitu_satelliteTimeToleranceSeconds'] = 3600
-config_params['insitu']['insitu_getAncillary'] = False
-config_params['insitu']['insitu_BRDF'] = 'L11'
+config_params["insitu"] = {}
+config_params["insitu"]["insitu_data2OCDBfile"] = "AERONETOC"
+config_params["insitu"]["insitu_input"] = os.path.join(
+    output_path, "Chesapeake_Bay_OCDB.csv"
+)
+config_params["insitu"]["insitu_satelliteTimeToleranceSeconds"] = 3600
+config_params["insitu"]["insitu_getAncillary"] = False
+config_params["insitu"]["insitu_BRDF"] = "L11"
 
 # satellite
-config_params['satellite'] = {}
-config_params['satellite']['satellite_path-to-SatData'] = os.path.join(output_path, 'SatData')
-config_params['satellite']['satellite_source'] = 'NASA_OBPG'
-config_params['satellite']['satellite_collections'] = 'operational'
-config_params['satellite']['satellite_platforms'] = 'PACE'
-config_params['satellite']['satellite_resolutions'] = 'FR'
-config_params['satellite']['satellite_BRDF'] = 'L11'
+config_params["satellite"] = {}
+config_params["satellite"]["satellite_path-to-SatData"] = os.path.join(
+    output_path, "SatData"
+)
+config_params["satellite"]["satellite_source"] = "NASA_OBPG"
+config_params["satellite"]["satellite_collections"] = "operational"
+config_params["satellite"]["satellite_platforms"] = "PACE"
+config_params["satellite"]["satellite_resolutions"] = "FR"
+config_params["satellite"]["satellite_BRDF"] = "L11"
 
 # minifiles
-config_params['minifiles'] = {}
-config_params['minifiles']['minifiles_winSize'] = 5
+config_params["minifiles"] = {}
+config_params["minifiles"]["minifiles_winSize"] = 5
 
 # EDB
-config_params['EDB'] = {}
-config_params['EDB']['EDB_protocols_L2'] = 'Bailey_and_Werdell_2006'
-config_params['EDB']['EDB_winSizes'] = 5
+config_params["EDB"] = {}
+config_params["EDB"]["EDB_protocols_L2"] = "Bailey_and_Werdell_2006"
+config_params["EDB"]["EDB_winSizes"] = 5
 
 # MDB
-config_params['MDB'] = {}
-config_params['MDB']['MDB_time-interpolation'] = 'insitu2satellite_NN'
-config_params['MDB']['MDB_stats_plots'] = True
-config_params['MDB']['MDB_stats_protocol'] = 'Bailey_and_Werdell_2006'
+config_params["MDB"] = {}
+config_params["MDB"]["MDB_time-interpolation"] = "insitu2satellite_NN"
+config_params["MDB"]["MDB_stats_plots"] = True
+config_params["MDB"]["MDB_stats_protocol"] = "Bailey_and_Werdell_2006"
 
 # Write config_params sections into config_file.ini
-write_config_file(path_to_config_file, config_params)
+# write_config_file(path_to_config_file, config_params) # FIXME: where does this function come from?
 # -
 
 # [back to top](#Contents)

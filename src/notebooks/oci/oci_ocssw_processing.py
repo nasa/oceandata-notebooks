@@ -54,11 +54,11 @@
 import csv
 import os
 
-from IPython.display import display
 import cartopy.crs as ccrs
 import earthaccess
-import xarray as xr
 import matplotlib.pyplot as plt
+import xarray as xr
+from IPython.display import display
 # -
 
 # We are also going to define a function to help write OCSSW parameter files, which
@@ -70,13 +70,15 @@ import matplotlib.pyplot as plt
 
 
 def write_par(path, par):
-    """
-    Prepare a "par file" to be read by one of the OCSSW tools, as an
-    alternative to specifying each parameter on the command line.
+    """Prepare a "par file" to be read by one of the OCSSW tools.
+
+    Using a parameter file is equivalent to specifying parameters
+    on the command line.
 
     Args:
         path (str): where to write the parameter file
         par (dict): the parameter names and values included in the file
+
     """
     with open(path, "w") as file:
         writer = csv.writer(file, delimiter="=")

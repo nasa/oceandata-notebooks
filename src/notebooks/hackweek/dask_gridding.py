@@ -50,18 +50,18 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
-import dask.array as da
-from   dask.distributed import Client
 import cartopy.crs as ccrs
+import dask.array as da
 import earthaccess
-from   matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 import numba
 import numpy as np
 import pyproj
-from   scipy.interpolate import griddata
 import xarray as xr
-from   xarray.backends.api import open_datatree
+from dask.distributed import Client
+from matplotlib.patches import Rectangle
+from scipy.interpolate import griddata
+from xarray.backends.api import open_datatree
 
 # We will discuss `dask` in more detail below, but we use several additional packages that are worth their own tutorials:
 # - `scipy` is a massive collection of useful numerical methods, including a function that resamples irregularly spaced values onto regular (i.e. gridded) coordinates
@@ -97,8 +97,18 @@ dataset
 
 fig = plt.figure(figsize=(8, 4))
 axes = fig.add_subplot()
-artist = dataset["chlor_a"].plot.pcolormesh(x="longitude", y="latitude", robust=True, ax=axes)
-axes.add_patch(Rectangle(bbox[:2], bbox[2]-bbox[0], bbox[3]-bbox[1], edgecolor="red", facecolor="none"))
+artist = dataset["chlor_a"].plot.pcolormesh(
+    x="longitude", y="latitude", robust=True, ax=axes
+)
+axes.add_patch(
+    Rectangle(
+        bbox[:2],
+        bbox[2] - bbox[0],
+        bbox[3] - bbox[1],
+        edgecolor="red",
+        facecolor="none",
+    )
+)
 axes.set_aspect("equal")
 plt.show()
 
@@ -107,18 +117,20 @@ plt.show()
 
 # +
 def time_from_attr(ds):
-    """Set the time attribute as a dataset variable
+    """Set the start time attribute as a dataset variable.
 
     Args:
         ds: a dataset corresponding to a Level-2 granule
 
     Returns:
         the dataset with a scalar "time" coordinate
+
     """
     datetime = ds.attrs["time_coverage_start"].replace("Z", "")
     ds["time"] = ((), np.datetime64(datetime, "ns"))
     ds = ds.set_coords("time")
     return ds
+
 
 def trim_number_of_lines(ds):
     ds = ds.isel({"number_of_lines": slice(0, 1709)})
@@ -176,6 +188,7 @@ def mean_and_std(x):
 
     Returns:
       A 2-tuple with the mean and standard deviation.
+
     """
     # initialize sum (s) and sum-of-squares (ss)
     s = 0
@@ -187,8 +200,8 @@ def mean_and_std(x):
     # mean and std. dev. calculations
     n = x.size
     mean = s / n
-    variance = (ss / n - mean ** 2) * n / (n - 1)
-    return mean, variance ** (1/2)
+    variance = (ss / n - mean**2) * n / (n - 1)
+    return mean, variance ** (1 / 2)
 
 
 # Confirm the function is working; it should return approximations to
@@ -320,7 +333,7 @@ client
 dask_random = da.random.default_rng(random)
 
 # + scrolled=true
-dask_array = dask_random.normal(1, 2, size=3*2**27, chunks="32 MiB")
+dask_array = dask_random.normal(1, 2, size=3 * 2**27, chunks="32 MiB")
 dask_array
 # -
 
@@ -359,7 +372,9 @@ pyproj.CRS.from_epsg(4326)
 
 # The `pyproj` database contains all the UTM grids and helps us choose the best one for our AOI.
 
-crs_list = pyproj.database.query_utm_crs_info(datum_name="WGS 84", area_of_interest=aoi, contains=True)
+crs_list = pyproj.database.query_utm_crs_info(
+    datum_name="WGS 84", area_of_interest=aoi, contains=True
+)
 for i in crs_list:
     print(i.auth_name, i.code, ": ", i.name)
 
@@ -379,10 +394,12 @@ x_max, y_max
 
 x_size = int((x_max - x_min) // 1000)
 y_size = int((y_max - y_min) // 1000)
-grid_point = xr.Dataset({
-    "x": ("x", np.linspace(x_min, x_max, x_size)),
-    "y": ("y", np.linspace(y_min, y_max, y_size))
-})
+grid_point = xr.Dataset(
+    {
+        "x": ("x", np.linspace(x_min, x_max, x_size)),
+        "y": ("y", np.linspace(y_min, y_max, y_size)),
+    }
+)
 grid_point = grid_point.stack({"point": ["x", "y"]})
 grid_point
 
@@ -402,8 +419,12 @@ paths = earthaccess.open(results[10:20])
 
 kwargs = {"combine": "nested", "concat_dim": "time"}
 prod = xr.open_mfdataset(paths, preprocess=time_from_attr, **kwargs)
-nav = xr.open_mfdataset(paths, preprocess=trim_number_of_lines, group="navigation_data", **kwargs)
-sci = xr.open_mfdataset(paths, preprocess=trim_number_of_lines, group="geophysical_data", **kwargs)
+nav = xr.open_mfdataset(
+    paths, preprocess=trim_number_of_lines, group="navigation_data", **kwargs
+)
+sci = xr.open_mfdataset(
+    paths, preprocess=trim_number_of_lines, group="geophysical_data", **kwargs
+)
 dataset = xr.merge((prod, nav, sci))
 dataset
 
@@ -419,8 +440,14 @@ client
 groups = []
 for key, value in dataset.groupby("time"):
     value = value.squeeze("time")
-    swath_pixel = value.stack({"point": ["number_of_lines", "pixels_per_line"]}, create_index=False)
-    swath_latlon = swath_pixel[["latitude", "longitude"]].to_dataarray("axis").transpose("point", ...)
+    swath_pixel = value.stack(
+        {"point": ["number_of_lines", "pixels_per_line"]}, create_index=False
+    )
+    swath_latlon = (
+        swath_pixel[["latitude", "longitude"]]
+        .to_dataarray("axis")
+        .transpose("point", ...)
+    )
     gridded = griddata(swath_latlon, swath_pixel["chlor_a"], grid_latlon)
     gridded = xr.DataArray(gridded, dims="point")
     gridded = gridded.expand_dims({"time": [key]})

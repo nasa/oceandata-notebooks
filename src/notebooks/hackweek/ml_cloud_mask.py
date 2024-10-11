@@ -53,21 +53,21 @@
 # - tqdm: For progress bars on loops
 
 # +
-from functools import cache
 import json
 import pathlib
+from functools import cache
 
-from matplotlib.patches import Patch
 import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image, UnidentifiedImageError
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
+from matplotlib.patches import Patch
+from PIL import Image, UnidentifiedImageError
+from torch.utils.data import DataLoader, Dataset
 from tqdm.notebook import tqdm
 
-CLDMASK_PATH = pathlib.Path('/home/jovyan/shared/pace-hackweek-2024/cldmask_dataset')
+CLDMASK_PATH = pathlib.Path("/home/jovyan/shared/pace-hackweek-2024/cldmask_dataset")
 # -
 
 # [back to top](#Contents)
@@ -84,19 +84,21 @@ CLDMASK_PATH = pathlib.Path('/home/jovyan/shared/pace-hackweek-2024/cldmask_data
 
 # +
 ex_img_idx = 57  # this image index displays a meaningful cloud mask and
-input_imgs = [Image.open(CLDMASK_PATH / 'input' / f'{ex_img_idx:07d}_{i}.png') for i in range(4)]
-validity = Image.open(CLDMASK_PATH / 'input' / f'{ex_img_idx:07d}_mask.png')
-cld_mask = Image.open(CLDMASK_PATH / 'output' / f'{ex_img_idx:07d}.png')
+input_imgs = [
+    Image.open(CLDMASK_PATH / "input" / f"{ex_img_idx:07d}_{i}.png") for i in range(4)
+]
+validity = Image.open(CLDMASK_PATH / "input" / f"{ex_img_idx:07d}_mask.png")
+cld_mask = Image.open(CLDMASK_PATH / "output" / f"{ex_img_idx:07d}.png")
 
 fig, axs = plt.subplots(1, 6, figsize=(12, 2))
 for i in range(4):
     axs[i].imshow(input_imgs[i])
-    axs[i].axis('off')
-    axs[i].set_title(f'Input image {i}')
+    axs[i].axis("off")
+    axs[i].set_title(f"Input image {i}")
 axs[4].imshow(validity)
 axs[5].imshow(cld_mask)
-axs[4].set_title('Validity')
-axs[5].set_title('Cloud Mask')
+axs[4].set_title("Validity")
+axs[5].set_title("Cloud Mask")
 for i in [4, 5]:
     axs[i].set_xticks([])
     axs[i].set_yticks([])
@@ -111,7 +113,7 @@ plt.show()
 #
 # So, how many instances are there in this dataset? Let's find out:
 
-len(list((CLDMASK_PATH / 'output').glob('*.png')))
+len(list((CLDMASK_PATH / "output").glob("*.png")))
 
 
 # Wow! That's a lot. And this represents a small fraction of the available data since PACE has launched. With PACE, we truly are drowning in data. This is why machine learning is such a valuable tool for us. Next, let's talk about how we're going to use that data.
@@ -137,9 +139,10 @@ def generate_split(name: str, replace: bool = False) -> None:
     Args:
         name: The name of the split file to generate.
         replace: Whether to replace an existing split file with the provided name.
+
     """
     # count how many images are available in the data
-    num_imgs = len(list((CLDMASK_PATH / 'output').glob('*.png')))
+    num_imgs = len(list((CLDMASK_PATH / "output").glob("*.png")))
 
     # determine how many images are in the train, val, and test data, using a 70%, 15%, 15% split
     num_train = round(0.7 * num_imgs)
@@ -153,19 +156,20 @@ def generate_split(name: str, replace: bool = False) -> None:
     img_idxs = np.arange(num_imgs)
     np.random.shuffle(img_idxs)
     split = {
-        'train': sorted(img_idxs[:num_train].tolist()),
-        'val': sorted(img_idxs[num_train:num_train + num_val].tolist()),
-        'test': sorted(img_idxs[-num_test:].tolist()),
+        "train": sorted(img_idxs[:num_train].tolist()),
+        "val": sorted(img_idxs[num_train : num_train + num_val].tolist()),
+        "test": sorted(img_idxs[-num_test:].tolist()),
     }
 
-    split_path =  pathlib.Path(f'{name}.json')
+    split_path = pathlib.Path(f"{name}.json")
     if not replace and split_path.exists():
         raise ValueError(f"Uh oh, you tried to create a split called '{name}', but '{split_path}' already exists. \
                          Please either choose a different name or pass 'replace=True' to this function.")
 
-    json.dump(split, open(split_path, 'w'))
+    json.dump(split, open(split_path, "w"))
 
-generate_split('default_split')
+
+generate_split("default_split")
 # -
 
 #
@@ -191,6 +195,7 @@ class CloudMaskDataset(Dataset):
             root_path: Path to the root directory containing the dataset.
             mode: Mode is usually 'train', 'val', or 'test', and must be a key in the provided split.
             split: Dictionary containing indices belonging to each dataset mode.
+
         """
         self.root_path = root_path
         self.mode = mode
@@ -198,11 +203,11 @@ class CloudMaskDataset(Dataset):
 
     @cache  # cache decorator makes this function 'remember' what to return if the inputs haven't changed
     def __len__(self) -> int:
-        """Returns how many instances are in this dataset."""
+        """Return the number of instances in this dataset."""
         return len(self.img_idxs)
 
     def __getitem__(self, idx: int) -> tuple[np.ndarray]:
-        """Gets a specific instance in the dataset.
+        """Get a specific instance in the dataset.
 
         Args:
             idx: The index of the instance to return.
@@ -211,32 +216,48 @@ class CloudMaskDataset(Dataset):
             input: The (64, 64, 12) array of inputs to the model.
             valid: The (64, 64) mask of which locations contain valid data.
             labels: The (64, 64) cloud mask labels corresponding to the inputs.
+
         """
-        input_paths = [self.root_path / 'input' / f'{idx:07d}_{i}.png' for i in range(4)]
-        label_path = self.root_path / 'output' / f'{idx:07d}.png'
+        input_paths = [
+            self.root_path / "input" / f"{idx:07d}_{i}.png" for i in range(4)
+        ]
+        label_path = self.root_path / "output" / f"{idx:07d}.png"
         try:
             # concatenate four 3-channel images into one 12-channel array, divide by 255 as they were stored as 8-bit ints
             # input = np.concatenate([np.array(Image.open(p)) for p in input_paths], axis=2)
-            input = np.concatenate([np.array(Image.open(BytesIO(open(p, 'rb').read())), dtype=np.uint8) for p in input_paths], axis=2)
-            valid = np.array(Image.open(self.root_path / 'input' / f'{idx:07d}_mask.png'))  # validity mask
+            input = np.concatenate(
+                [
+                    np.array(Image.open(BytesIO(open(p, "rb").read())), dtype=np.uint8)
+                    for p in input_paths
+                ],
+                axis=2,
+            )
+            valid = np.array(
+                Image.open(self.root_path / "input" / f"{idx:07d}_mask.png")
+            )  # validity mask
             labels = ~np.array(Image.open(label_path))  # cloud mask
             input[~valid] = 0
             return input, valid, labels
         except UnidentifiedImageError:
             return np.zeros((64, 64, 12)), np.zeros((64, 64)), np.zeros((64, 64))
 
-split = json.load(open('default_split.json'))
-train_dataset = CloudMaskDataset(CLDMASK_PATH, 'train', split)
-val_dataset = CloudMaskDataset(CLDMASK_PATH, 'val', split)
-test_dataset = CloudMaskDataset(CLDMASK_PATH, 'test', split)
+
+split = json.load(open("default_split.json"))
+train_dataset = CloudMaskDataset(CLDMASK_PATH, "train", split)
+val_dataset = CloudMaskDataset(CLDMASK_PATH, "val", split)
+test_dataset = CloudMaskDataset(CLDMASK_PATH, "test", split)
 # -
 
 # When we iterate over the data while training our model, we want to convert from numpy to torch arrays, to randomly shuffle our data, and we want to load the data in batches of a fixed size. The [`torch.utils.DataLoader`](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader) class will handle this for us, with the `batch_size` and `shuffle` arguments. Another thing it can do for us is create subprocesses to speed up dataloading. We can specify how many subprocesses to use with `num_workers`. Let's go ahead and create a dataloader for the training, validation, and test sets:
 
 BATCH_SIZE = 16
-train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+train_loader = DataLoader(
+    train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4
+)
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
-test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+test_loader = DataLoader(
+    test_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4
+)
 
 # Let's check a batch to make sure things are working. We expect to see torch array sizes of (BATCH_SIZE, 64, 64, 12) for the input array, (BATCH_SIZE, 64, 64) for the validity mask, and (BATCH_SIZE, 64, 64) for the cloud mask.
 
@@ -261,10 +282,10 @@ y_sigmoid = F.sigmoid(x)
 y_relu = F.relu(x)
 
 fig, ax = plt.subplots(1, 1, figsize=(12, 3))
-ax.plot(x.numpy(), y_sigmoid.numpy(), label='sigmoid')
-ax.plot(x.numpy(), y_relu.numpy(), label='relu')
+ax.plot(x.numpy(), y_sigmoid.numpy(), label="sigmoid")
+ax.plot(x.numpy(), y_relu.numpy(), label="relu")
 ax.set_ylim(-0.1, 2)
-ax.set_title('Activation functions')
+ax.set_title("Activation functions")
 ax.legend()
 plt.show()
 # -
@@ -276,23 +297,28 @@ plt.show()
 # Now that we have our basic components, let's construct our multi-layer perceptron. We'll start off really simple with only three layers. If we don't need anything more complicated than a simple, feed forward network, the [`torch.nn.Sequential`](https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html) module is perfect. We can simply provide all of the layers we want, in order. Recall that our input has 12 channel and our output is a single channel cloud mask. Note that the output size of each layer must match the input size of the next layer. The activation functions don't need to know about sizes since they apply the same operation to each element.
 
 # +
-in_channels = 12             # call this M
-out_channels = 1             # call this N
+in_channels = 12  # call this M
+out_channels = 1  # call this N
 simple_mlp_hidden_size = 16  # call this H
 
 # define the MLP
 simple_mlp = nn.Sequential(
-    nn.Linear(in_channels, simple_mlp_hidden_size),             # M -> H
+    nn.Linear(in_channels, simple_mlp_hidden_size),  # M -> H
     nn.ReLU(),
     nn.Linear(simple_mlp_hidden_size, simple_mlp_hidden_size),  # H -> H
     nn.ReLU(),
-    nn.Linear(simple_mlp_hidden_size, out_channels))            # H -> N
+    nn.Linear(simple_mlp_hidden_size, out_channels),
+)  # H -> N
 
 # Get some input from our training set, pass it through the model
 for inp, valid, labels in train_loader:
-    inp_flat = inp.view(-1, 12)  # flatten the input (our model treats each pixel as an independent observation
+    inp_flat = inp.view(
+        -1, 12
+    )  # flatten the input (our model treats each pixel as an independent observation
     inp_flat = inp_flat.float() / 255  # convert from uint8 to float
-    preds = simple_mlp(inp_flat)  # applying a model to data is as simple as treating it as a function
+    preds = simple_mlp(
+        inp_flat
+    )  # applying a model to data is as simple as treating it as a function
     break
 
 inp.shape, preds.shape
@@ -348,8 +374,8 @@ loss.item()
 # first, define the optimizer, with a learning rate / step size of 0.1
 optimizer = torch.optim.SGD(simple_mlp.parameters(), lr=0.1)
 
-loss.backward()        # !!!
-optimizer.step()       # update the parameters
+loss.backward()  # !!!
+optimizer.step()  # update the parameters
 optimizer.zero_grad()  # zero out the optimizer for next time (don't forget to do this!!!)
 # -
 
@@ -371,26 +397,31 @@ NUM_BATCHES = 1000
 HIDDEN_SIZE = 32  # H
 
 # re-initialize some stuff
-train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+train_loader = DataLoader(
+    train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4
+)
 
 in_channels = 12  # M
 out_channels = 1  # N
 
 # a bigger MLP
 simple_mlp = nn.Sequential(
-    nn.Linear(in_channels, HIDDEN_SIZE),   # M -> H
+    nn.Linear(in_channels, HIDDEN_SIZE),  # M -> H
     nn.ReLU(),
-    nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),   # H -> H
+    nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),  # H -> H
     nn.ReLU(),
-    nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),   # H -> H
+    nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),  # H -> H
     nn.ReLU(),
-    nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),   # H -> H
+    nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),  # H -> H
     nn.ReLU(),
-    nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),   # H -> H
+    nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),  # H -> H
     nn.ReLU(),
-    nn.Linear(HIDDEN_SIZE, out_channels))  # H -> N
+    nn.Linear(HIDDEN_SIZE, out_channels),
+)  # H -> N
 objective = torch.nn.BCEWithLogitsLoss()
-optimizer = torch.optim.Adam(simple_mlp.parameters())  # can use Adam with the default parameters
+optimizer = torch.optim.Adam(
+    simple_mlp.parameters()
+)  # can use Adam with the default parameters
 
 losses = []
 accs = []
@@ -404,12 +435,12 @@ for batch_idx, (inp, valid, labels) in tqdm(enumerate(train_loader), total=NUM_B
     # convert from uint8 to float32
     inp = inp.float() / 255
 
-    preds = simple_mlp(inp[valid])                        # get model predictions on valid inputs
+    preds = simple_mlp(inp[valid])  # get model predictions on valid inputs
     loss = objective(preds[:, 0], labels[valid].float())  # compute the loss function
-    optimizer.zero_grad()                                 # zero out the optimizer
-    loss.backward()                                       # backwards pass
-    optimizer.step()                                      # update the model
-    losses.append(loss.item())                            # keep track of the loss over time
+    optimizer.zero_grad()  # zero out the optimizer
+    loss.backward()  # backwards pass
+    optimizer.step()  # update the model
+    losses.append(loss.item())  # keep track of the loss over time
 
     # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
     num_valid = valid.sum()
@@ -421,11 +452,11 @@ running_loss_mean = np.array(losses).cumsum() / (np.arange(len(losses)) + 1)
 # -
 
 plt.figure(figsize=(12, 4))
-plt.plot(np.arange(len(losses)), np.array(losses), label='Train Loss')
-plt.plot(np.arange(len(losses)), running_loss_mean, label='Train Loss: running mean')
-plt.plot(np.arange(len(accs)), accs, label='Train Accuracy')
+plt.plot(np.arange(len(losses)), np.array(losses), label="Train Loss")
+plt.plot(np.arange(len(losses)), running_loss_mean, label="Train Loss: running mean")
+plt.plot(np.arange(len(accs)), accs, label="Train Accuracy")
 plt.legend()
-plt.xlabel('batch index')
+plt.xlabel("batch index")
 plt.show()
 
 # You should be seeing that the training loss goes down, while the accuracy goes up. That's what we want. The model's skill seems to plateau very quickly, and it seems like our accuracy is quite high! Unfortunately, this is a little misleading. Let's take a qualitative look at some examples to see why:
@@ -436,7 +467,9 @@ for inp, valid, labels in train_loader:
     break
 
 preds_img = torch.zeros((BATCH_SIZE, 64, 64)).bool()
-preds_img[valid] = preds[..., 0] > 0  # we have to threshold our output logits to turn them into a mask
+preds_img[valid] = (
+    preds[..., 0] > 0
+)  # we have to threshold our output logits to turn them into a mask
 
 color1 = np.array([216, 27, 96])
 color2 = np.array([30, 136, 229])
@@ -444,18 +477,30 @@ color2 = np.array([30, 136, 229])
 fig, axs = plt.subplots(4, 4, figsize=(8, 8))
 for i in range(16):
     viz_img = np.zeros((64, 64, 3))
-    viz_img = np.clip(preds_img[i].numpy()[..., None] * color1[None, None] + \
-                      labels[i].numpy()[..., None] * color2[None, None], 0, 255)
+    viz_img = np.clip(
+        preds_img[i].numpy()[..., None] * color1[None, None]
+        + labels[i].numpy()[..., None] * color2[None, None],
+        0,
+        255,
+    )
     axs[i // 4][i % 4].imshow(viz_img)
     axs[i // 4][i % 4].set_xticks([])
     axs[i // 4][i % 4].set_yticks([])
-legend_elements = [Patch(facecolor=np.clip(color1 + color2, 0, 255) / 255,
-                         edgecolor=np.clip(color1 + color2, 0, 255) / 255,
-                         label='True Positive'),
-                   Patch(facecolor=color1 / 255, edgecolor=color1 / 255, label='False Positive'),
-                   Patch(facecolor=color2 / 255, edgecolor=color2 / 255, label='False Negative'),
-                   Patch(facecolor=np.array([0, 0, 0]), edgecolor=np.array([0, 0, 0]), label='True Negative')]
-axs[0][0].legend(handles=legend_elements, loc='center')
+legend_elements = [
+    Patch(
+        facecolor=np.clip(color1 + color2, 0, 255) / 255,
+        edgecolor=np.clip(color1 + color2, 0, 255) / 255,
+        label="True Positive",
+    ),
+    Patch(facecolor=color1 / 255, edgecolor=color1 / 255, label="False Positive"),
+    Patch(facecolor=color2 / 255, edgecolor=color2 / 255, label="False Negative"),
+    Patch(
+        facecolor=np.array([0, 0, 0]),
+        edgecolor=np.array([0, 0, 0]),
+        label="True Negative",
+    ),
+]
+axs[0][0].legend(handles=legend_elements, loc="center")
 plt.subplots_adjust(wspace=None, hspace=None)
 plt.show()
 # -
@@ -483,12 +528,16 @@ torch.cuda.is_available()
 # So, now that we've ensured you have access to a GPU via CUDA, how do we convert our code to use CUDA? Well, converting a single torch tensor to CUDA is as easy as adding `.cuda()` after it. We can also convert our model with `.cuda()`. Another way to move a tensor between devices is to use the `.to(device=...)` syntax, which allows you to be a little smarter with your allocation, especially in cases where you're using multiple GPUs at the same time. The following cell illustrates the basic functionality:
 
 # + tags=["skip-execution"]
-print(f'Available device count: {torch.cuda.device_count()}\nCurrent device ID: {torch.cuda.current_device()}')
+print(
+    f"Available device count: {torch.cuda.device_count()}\nCurrent device ID: {torch.cuda.current_device()}"
+)
 
 rand_cpu = torch.randn(10)
 rand_gpu1 = rand_cpu.cuda()
 rand_gpu2 = rand_cpu.to(device=torch.cuda.current_device())
-print(f'Device IDs | rand_cpu: {rand_cpu.device} | rand_gpu1: {rand_gpu1.device} | rand_gpu2: {rand_gpu2.device}')
+print(
+    f"Device IDs | rand_cpu: {rand_cpu.device} | rand_gpu1: {rand_gpu1.device} | rand_gpu2: {rand_gpu2.device}"
+)
 # -
 
 # [back to top](#Contents)
@@ -509,8 +558,8 @@ print(f'Device IDs | rand_cpu: {rand_cpu.device} | rand_gpu1: {rand_gpu1.device}
 # define some interesting looking functions
 x = np.linspace(-1, 1, 100)
 f_x = np.cos(x * np.pi * 2)
-f_x[x < -1/4] = 0
-f_x[x > 1/4] = 0
+f_x[x < -1 / 4] = 0
+f_x[x > 1 / 4] = 0
 g_x = x * 2 * (x > 0) * (x < 0.5)
 
 # normalize them
@@ -518,12 +567,12 @@ f_x /= np.sum(np.abs(f_x))
 g_x /= np.sum(g_x)
 
 # convolve them
-conv_fg_x = np.convolve(f_x, g_x, mode='same')
+conv_fg_x = np.convolve(f_x, g_x, mode="same")
 
 plt.figure(figsize=(8, 4))
-plt.plot(x, f_x, label='f(x)', linestyle='dotted')
-plt.plot(x, g_x, label='g(x)', linestyle='dashed')
-plt.plot(x, conv_fg_x, label='f * g')
+plt.plot(x, f_x, label="f(x)", linestyle="dotted")
+plt.plot(x, g_x, label="g(x)", linestyle="dashed")
+plt.plot(x, conv_fg_x, label="f * g")
 plt.legend()
 plt.show()
 # -
@@ -550,13 +599,21 @@ gaussian2d = gaussian1d[:, None] @ gaussian1d[None]
 sobel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]]).astype(float)
 sobel_y = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]]).astype(float)
 
+
 def conv_from_kernel_array(kernel: np.ndarray) -> nn.Conv2d:
     """Take a 2D array of shape (N, N) where N is odd and turn it into a torch Conv2D."""
     assert isinstance(kernel, np.ndarray)
-    assert len(kernel.shape) == 2 and kernel.shape[0] == kernel.shape[1] and kernel.shape[0] % 2 == 1
-    conv = nn.Conv2d(1, 1, kernel.shape[0], padding=(kernel.shape[0] - 1) // 2, bias=False)
+    assert (
+        len(kernel.shape) == 2
+        and kernel.shape[0] == kernel.shape[1]
+        and kernel.shape[0] % 2 == 1
+    )
+    conv = nn.Conv2d(
+        1, 1, kernel.shape[0], padding=(kernel.shape[0] - 1) // 2, bias=False
+    )
     conv.weight = nn.Parameter(torch.from_numpy(kernel[None, None]))
     return conv
+
 
 # get the conv2ds for each kernel
 conv_gaussian = conv_from_kernel_array(gaussian2d)
@@ -571,20 +628,29 @@ img_checkers_sobel_y = conv_sobel_y(img_torch)[0, 0].detach().numpy()
 
 # plot everything
 fig, ax = plt.subplots(1, 1, figsize=(3, 3))
-ax.imshow(img_checkers, cmap='gray')
-ax.set_title('Checkerboard pattern')
+ax.imshow(img_checkers, cmap="gray")
+ax.set_title("Checkerboard pattern")
 ax.set_xticks([]), ax.set_yticks([])
 
 fig, axs = plt.subplots(2, 4, figsize=(12, 6))
-axs[0][0].imshow(gaussian2d, cmap='gray'), axs[0][0].set_title('Gaussian kernel')
-axs[0][1].imshow(sobel_x, cmap='gray'), axs[0][1].set_title('Sobel filter (x)')
-axs[0][2].imshow(sobel_y, cmap='gray'), axs[0][2].set_title('Sobel filter (y)')
-axs[0][3].imshow(np.zeros((1, 1)), cmap='gray')
-axs[1][0].imshow(img_checkers_blur, cmap='gray'), axs[1][0].set_title('Checkerboard * Gaussian')
-axs[1][1].imshow(img_checkers_sobel_x, cmap='gray'), axs[1][1].set_title('Checkerboard * Sobel_x')
-axs[1][2].imshow(img_checkers_sobel_y, cmap='gray'), axs[1][2].set_title('Checkerboard * Sobel_y')
-axs[1][3].imshow(np.abs(img_checkers_sobel_x + img_checkers_sobel_y), cmap='gray')
-axs[1][3].set_title('|Sobel_x + Sobel_y|')
+axs[0][0].imshow(gaussian2d, cmap="gray"), axs[0][0].set_title("Gaussian kernel")
+axs[0][1].imshow(sobel_x, cmap="gray"), axs[0][1].set_title("Sobel filter (x)")
+axs[0][2].imshow(sobel_y, cmap="gray"), axs[0][2].set_title("Sobel filter (y)")
+axs[0][3].imshow(np.zeros((1, 1)), cmap="gray")
+(
+    axs[1][0].imshow(img_checkers_blur, cmap="gray"),
+    axs[1][0].set_title("Checkerboard * Gaussian"),
+)
+(
+    axs[1][1].imshow(img_checkers_sobel_x, cmap="gray"),
+    axs[1][1].set_title("Checkerboard * Sobel_x"),
+)
+(
+    axs[1][2].imshow(img_checkers_sobel_y, cmap="gray"),
+    axs[1][2].set_title("Checkerboard * Sobel_y"),
+)
+axs[1][3].imshow(np.abs(img_checkers_sobel_x + img_checkers_sobel_y), cmap="gray")
+axs[1][3].set_title("|Sobel_x + Sobel_y|")
 [(a.set_xticks([]), a.set_yticks([])) for ax in axs for a in ax]
 plt.show()
 # -
@@ -606,11 +672,7 @@ plt.show()
 # + tags=["skip-execution"]
 class SimpleCNN(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        num_layers: int,
-        feature_depth: int
+        self, in_channels: int, out_channels: int, num_layers: int, feature_depth: int
     ) -> None:
         """Initialize a SimpleCNN. This CNN uses padding to keep the image dimensions of its inputs unchanged.
 
@@ -619,6 +681,7 @@ class SimpleCNN(nn.Module):
             out_channels: The number of output channels.
             num_layers: How many convolutional layers to include in the CNN.
             feature_depth: The channel depth of the intermediate layers.
+
         """
         super().__init__()
         assert num_layers > 2
@@ -627,7 +690,10 @@ class SimpleCNN(nn.Module):
         self.num_layers = num_layers
         self.feature_depth = feature_depth
         self.first_layer = nn.Conv2d(self.in_channels, self.feature_depth, 3, padding=1)
-        mid_convs = [nn.Conv2d(self.feature_depth, self.feature_depth, 3, padding=1) for _ in range(self.num_layers - 2)]
+        mid_convs = [
+            nn.Conv2d(self.feature_depth, self.feature_depth, 3, padding=1)
+            for _ in range(self.num_layers - 2)
+        ]
         # interleave our middle convs, batchnorms every 2 layers, and ReLUs
         mid_layers = []
         for i, c in enumerate(mid_convs):
@@ -647,17 +713,17 @@ class SimpleCNN(nn.Module):
 # + tags=["skip-execution"]
 # initialize the network and move it to the GPU
 simple_cnn = SimpleCNN(
-    in_channels=12,   # 12 input features, as discussed above
-    out_channels=1,   # 1 output, which is the cloud mask logit
-    num_layers=10,     # Let's try 10 layers to start
-    feature_depth=16  # 16 is probably more than enough of a feature depth since there are only 12 inputs
+    in_channels=12,  # 12 input features, as discussed above
+    out_channels=1,  # 1 output, which is the cloud mask logit
+    num_layers=10,  # Let's try 10 layers to start
+    feature_depth=16,  # 16 is probably more than enough of a feature depth since there are only 12 inputs
 ).cuda()
 print(simple_cnn)
 
 # test it out on some random numbers to check everything works
 test_input = torch.randn(8, 12, 64, 64).cuda()
 test_output = simple_cnn(test_input)
-print(f'Should be (8, 1, 64, 64): {test_output.shape}')
+print(f"Should be (8, 1, 64, 64): {test_output.shape}")
 # -
 
 # [back to top](#Contents)
@@ -670,16 +736,18 @@ print(f'Should be (8, 1, 64, 64): {test_output.shape}')
 
 # + tags=["skip-execution"]
 # hyperparameters
-NUM_EPOCHS = 5      # we'll go through the whole training set 5 times
-BATCH_SIZE = 256    # A bigger batch size since we're running on GPU
-NUM_LAYERS = 10     # Let's try 10 layers to start
+NUM_EPOCHS = 5  # we'll go through the whole training set 5 times
+BATCH_SIZE = 256  # A bigger batch size since we're running on GPU
+NUM_LAYERS = 10  # Let's try 10 layers to start
 FEATURE_DEPTH = 16  # 16 is probably more than enough of a feature depth since there are only 12 inputs
 
-split = json.load(open('default_split.json'))
-train_dataset = CloudMaskDataset(CLDMASK_PATH, 'train', split)
-val_dataset = CloudMaskDataset(CLDMASK_PATH, 'val', split)
+split = json.load(open("default_split.json"))
+train_dataset = CloudMaskDataset(CLDMASK_PATH, "train", split)
+val_dataset = CloudMaskDataset(CLDMASK_PATH, "val", split)
 
-train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+train_loader = DataLoader(
+    train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4
+)
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
 
 model = SimpleCNN(
@@ -688,54 +756,66 @@ model = SimpleCNN(
     num_layers=NUM_LAYERS,
     feature_depth=FEATURE_DEPTH,
 ).cuda()
-objective = torch.nn.BCEWithLogitsLoss(reduction='none')
-optimizer = torch.optim.Adam(model.parameters())  # can use Adam with the default parameters
+objective = torch.nn.BCEWithLogitsLoss(reduction="none")
+optimizer = torch.optim.Adam(
+    model.parameters()
+)  # can use Adam with the default parameters
 
 train_losses, val_losses = [], []
 train_accs, val_accs = [], []
 
 for epoch in range(NUM_EPOCHS):
-    print(f'Starting epoch {epoch + 1}/{NUM_EPOCHS} training:')
+    print(f"Starting epoch {epoch + 1}/{NUM_EPOCHS} training:")
     model.train()
-    for batch_idx, (inp, valid, labels) in tqdm(enumerate(train_loader), total=len(train_loader)):
+    for batch_idx, (inp, valid, labels) in tqdm(
+        enumerate(train_loader), total=len(train_loader)
+    ):
         inp, valid, labels = inp.cuda(), valid.cuda(), labels.cuda()
         inp = inp.float() / 255  # uint8 to float
-        preds = model(inp.permute(0, 3, 1, 2))  # have to change the order to (batch, channel, Y, X)
+        preds = model(
+            inp.permute(0, 3, 1, 2)
+        )  # have to change the order to (batch, channel, Y, X)
         # have to ignore invalid locations in the loss
         loss = objective(preds[:, 0], labels.float())[valid].sum() / valid.numel()
-        optimizer.zero_grad()       # zero out the optimizer
-        loss.backward()             # backwards pass
-        optimizer.step()            # update the model
+        optimizer.zero_grad()  # zero out the optimizer
+        loss.backward()  # backwards pass
+        optimizer.step()  # update the model
         train_losses.append(loss.item())  # keep track of the loss over time
 
         # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
         num_valid = valid.sum()
-        train_accs.append((((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item())  # compute accuracy
+        train_accs.append(
+            (((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item()
+        )  # compute accuracy
 
-    print(f'Starting epoch {epoch + 1}/{NUM_EPOCHS} validation:')
+    print(f"Starting epoch {epoch + 1}/{NUM_EPOCHS} validation:")
     model.eval()
     with torch.no_grad():  # don't require gradients for validation!
-        for batch_idx, (inp, valid, labels) in tqdm(enumerate(val_loader), total=len(val_loader)):
+        for batch_idx, (inp, valid, labels) in tqdm(
+            enumerate(val_loader), total=len(val_loader)
+        ):
             inp, valid, labels = inp.cuda(), valid.cuda(), labels.cuda()
             preds = model(inp.permute(0, 3, 1, 2))
             loss = objective(preds[:, 0], labels.float())[valid].sum() / valid.numel()
             val_losses.append(loss.item())
             # compute and track accuracy over time (need to track num valid pixels to correctly compute the average later)
             num_valid = valid.sum()
-            val_accs.append((((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item())  # compute accuracy
+            val_accs.append(
+                (((preds[:, 0] > 0) == labels)[valid].sum() / num_valid).item()
+            )  # compute accuracy
 
 # + tags=["skip-execution"]
 plt.figure(figsize=(12, 4))
-plt.plot(np.arange(len(train_losses)), np.array(train_losses), label='Train Loss')
-plt.plot(np.arange(len(train_accs)), train_accs, label='Train Accuracy')
+plt.plot(np.arange(len(train_losses)), np.array(train_losses), label="Train Loss")
+plt.plot(np.arange(len(train_accs)), train_accs, label="Train Accuracy")
 plt.legend()
-plt.xlabel('batch index')
+plt.xlabel("batch index")
 
 plt.figure(figsize=(12, 4))
-plt.plot(np.arange(len(val_losses)), np.array(val_losses), label='Val Loss')
-plt.plot(np.arange(len(val_accs)), val_accs, label='Val Accuracy')
+plt.plot(np.arange(len(val_losses)), np.array(val_losses), label="Val Loss")
+plt.plot(np.arange(len(val_accs)), val_accs, label="Val Accuracy")
 plt.legend()
-plt.xlabel('batch index')
+plt.xlabel("batch index")
 
 plt.show()
 # -

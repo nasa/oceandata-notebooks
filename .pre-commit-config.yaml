@@ -30,7 +30,7 @@ repos:
         # prefer to fix the ipynbs (in src/_build) and later sync
         exclude: ^src/notebooks/.*$
       - id: ruff-format
-        # entry: ruff format
+        entry: ruff format
         # prefer to fix the ipynbs (in src/_build) and later sync
         exclude: ^src/notebooks/.*$
   - repo: https://github.com/astral-sh/uv-pre-commit

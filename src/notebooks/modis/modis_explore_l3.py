@@ -51,11 +51,11 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
-from matplotlib import pyplot as plt
 import cartopy
 import earthaccess
 import numpy as np
 import xarray as xr
+from matplotlib import pyplot as plt
 
 auth = earthaccess.login(persist=True)
 
@@ -67,7 +67,7 @@ auth = earthaccess.login(persist=True)
 
 results = earthaccess.search_datasets(
     keyword="L3m ocean color modis aqua chlorophyll",
-    instrument = "MODIS",
+    instrument="MODIS",
 )
 
 set((i.summary()["short-name"] for i in results))

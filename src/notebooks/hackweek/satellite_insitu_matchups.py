@@ -41,51 +41,83 @@
 # </div>
 
 # + tags=["hide-cell"]
-"""
-Helper functions for PACE Hackweek Validation Tutorial.
+"""Helper functions for PACE Hackweek Validation Tutorial.
 
 Authors:
     James Allen and Anna Windle
 """
 import datetime
-from pathlib import Path
 import re
+from pathlib import Path
 
 import earthaccess
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import matplotlib.style as style
-from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 import pvlib.solarposition as sunpos
-from scipy import stats, odr
 import seaborn as sns
 import xarray as xr
+from matplotlib.ticker import FuncFormatter
+from scipy import odr, stats
 
 # AERONET-OC Download Constants
 # Valid AERONET-OC site list
 AERONET_SITES = [
-    'AAOT', 'Abu_Al_Bukhoosh', 'ARIAKE_TOWER', 'Bahia_Blanca', 'Banana_River',
-    'Blyth_NOAH', 'Casablanca_Platform', 'Chesapeake_Bay', 'COVE_SEAPRISM',
-    'Galata_Platform', 'Gloria', 'GOT_Seaprism', 'Grizzly_Bay',
-    'Gustav_Dalen_Tower', 'Helsinki_Lighthouse', 'Ieodo_Station',
-    'Irbe_Lighthouse', 'Kemigawa_Offshore', 'Lake_Erie', 'Lake_Okeechobee',
-    'Lake_Okeechobee_N', 'LISCO', 'Lucinda', 'MVCO', 'Palgrunden',
-    'PLOCAN_Tower', 'RdP-EsNM', 'Sacramento_River', 'San_Marco_Platform',
-    'Section-7_Platform', 'Socheongcho', 'South_Greenbay', 'Thornton_C-power',
-    'USC_SEAPRISM', 'Venise', 'WaveCIS_Site_CSI_6', 'Zeebrugge-MOW1'
-    ]
+    "AAOT",
+    "Abu_Al_Bukhoosh",
+    "ARIAKE_TOWER",
+    "Bahia_Blanca",
+    "Banana_River",
+    "Blyth_NOAH",
+    "Casablanca_Platform",
+    "Chesapeake_Bay",
+    "COVE_SEAPRISM",
+    "Galata_Platform",
+    "Gloria",
+    "GOT_Seaprism",
+    "Grizzly_Bay",
+    "Gustav_Dalen_Tower",
+    "Helsinki_Lighthouse",
+    "Ieodo_Station",
+    "Irbe_Lighthouse",
+    "Kemigawa_Offshore",
+    "Lake_Erie",
+    "Lake_Okeechobee",
+    "Lake_Okeechobee_N",
+    "LISCO",
+    "Lucinda",
+    "MVCO",
+    "Palgrunden",
+    "PLOCAN_Tower",
+    "RdP-EsNM",
+    "Sacramento_River",
+    "San_Marco_Platform",
+    "Section-7_Platform",
+    "Socheongcho",
+    "South_Greenbay",
+    "Thornton_C-power",
+    "USC_SEAPRISM",
+    "Venise",
+    "WaveCIS_Site_CSI_6",
+    "Zeebrugge-MOW1",
+]
 
 # Get subset of AERONET columns to make it a bit more manageable (also rename)
-AOC_KEEP_COLS = ["AERONET_Site", "aoc_datetime", "Site_Latitude(Degrees)",
-                 "Site_Longitude(Degrees)", "Solar_Zenith_Angle[400nm]"]
+AOC_KEEP_COLS = [
+    "AERONET_Site",
+    "aoc_datetime",
+    "Site_Latitude(Degrees)",
+    "Site_Longitude(Degrees)",
+    "Solar_Zenith_Angle[400nm]",
+]
 COLUMN_RENAME = {
     "Site_Latitude(Degrees)": "aoc_latitude",
     "Site_Longitude(Degrees)": "aoc_longitude",
     "AERONET_Site": "aoc_site",
-    "Solar_Zenith_Angle[400nm]": "aoc_solar_zenith"
-    }
+    "Solar_Zenith_Angle[400nm]": "aoc_solar_zenith",
+}
 
 # Bland-Altman/Scatterplot Constants
 # Plot colors, font sizes
@@ -112,21 +144,59 @@ SAT_LOOKUP = {
     "TERRA": "MODIST_L2_OC",
     "NOAA-20": "VIIRSJ1_L2_OC",
     "NOAA-21": "VIIRSJ2_L2_OC",
-    "SUOMI-NPP": "VIIRSN_L2_OC"
-    }
+    "SUOMI-NPP": "VIIRSN_L2_OC",
+}
 
 # List l2 flags, then build them into a dict
 l2_flags_list = [
-    "ATMFAIL", "LAND", "PRODWARN", "HIGLINT", "HILT", "HISATZEN", "COASTZ",
-    "SPARE", "STRAYLIGHT", "CLDICE", "COCCOLITH", "TURBIDW", "HISOLZEN",
-    "SPARE", "LOWLW", "CHLFAIL", "NAVWARN", "ABSAER", "SPARE", "MAXAERITER",
-    "MODGLINT", "CHLWARN", "ATMWARN", "SPARE", "SEAICE", "NAVFAIL", "FILTER",
-    "SPARE", "BOWTIEDEL", "HIPOL", "PRODFAIL", "SPARE"]
+    "ATMFAIL",
+    "LAND",
+    "PRODWARN",
+    "HIGLINT",
+    "HILT",
+    "HISATZEN",
+    "COASTZ",
+    "SPARE",
+    "STRAYLIGHT",
+    "CLDICE",
+    "COCCOLITH",
+    "TURBIDW",
+    "HISOLZEN",
+    "SPARE",
+    "LOWLW",
+    "CHLFAIL",
+    "NAVWARN",
+    "ABSAER",
+    "SPARE",
+    "MAXAERITER",
+    "MODGLINT",
+    "CHLWARN",
+    "ATMWARN",
+    "SPARE",
+    "SEAICE",
+    "NAVFAIL",
+    "FILTER",
+    "SPARE",
+    "BOWTIEDEL",
+    "HIPOL",
+    "PRODFAIL",
+    "SPARE",
+]
 L2_FLAGS = {flag: 1 << idx for idx, flag in enumerate(l2_flags_list)}
 
 # Bailey and Werdell 2006 exclusion criteria
-EXCLUSION_FLAGS = ["LAND", "HIGLINT", "HILT", "STRAYLIGHT", "CLDICE",
-                   "ATMFAIL", "LOWLW", "FILTER", "NAVFAIL", "NAVWARN"]
+EXCLUSION_FLAGS = [
+    "LAND",
+    "HIGLINT",
+    "HILT",
+    "STRAYLIGHT",
+    "CLDICE",
+    "ATMFAIL",
+    "LOWLW",
+    "FILTER",
+    "NAVFAIL",
+    "NAVWARN",
+]
 
 # --------------------------------------------------------------------------- #
 #                              General Utilities                              #
@@ -134,8 +204,7 @@ EXCLUSION_FLAGS = ["LAND", "HIGLINT", "HILT", "STRAYLIGHT", "CLDICE",
 
 
 def get_f0(wavelengths=None, obs_time=None, window_size=10, f0_file=None):
-    """
-    Load the Thuillier2003 netCDF file and return F0.
+    """Load the Thuillier2003 netCDF file and return F0.
 
     Defaults to returning the full table. Input obs_time to correct for the
     Earth-Sun distance.
@@ -161,6 +230,7 @@ def get_f0(wavelengths=None, obs_time=None, window_size=10, f0_file=None):
             The solar irradiance values.
         - f0_wave : np.ndarray
             The corresponding wavelengths.
+
     """
     if f0_file is None:
         f0_file = Path("/home/jovyan/shared/pace-hackweek-2024/thuillier2003_f0.nc")
@@ -186,17 +256,15 @@ def get_f0(wavelengths=None, obs_time=None, window_size=10, f0_file=None):
 
         # Deal with multiple input times
         if len(pd.Series(obs_time)) > 1:
-            f0_spectra = f0_spectra[None, :] / es_distance[:, None]**2
+            f0_spectra = f0_spectra[None, :] / es_distance[:, None] ** 2
         else:
             f0_spectra /= es_distance**2
 
     return f0_spectra, f0_wave
 
 
-def bandpass_avg(data, input_wavelengths, window_size=10,
-                 target_wavelengths=None):
-    """
-    Apply a band-pass filter to the data.
+def bandpass_avg(data, input_wavelengths, window_size=10, target_wavelengths=None):
+    """Apply a band-pass filter to the data.
 
     Parameters
     ----------
@@ -215,6 +283,7 @@ def bandpass_avg(data, input_wavelengths, window_size=10,
     -------
     np.ndarray
         1D or 2D array containing the band-pass filtered data.
+
     """
     data = np.atleast_2d(data)
     half_window = window_size / 2
@@ -227,8 +296,9 @@ def bandpass_avg(data, input_wavelengths, window_size=10,
     for idx, target_wl in enumerate(target_wavelengths):
         start = target_wl - half_window
         end = target_wl + half_window
-        cols_in_range = np.where((input_wavelengths >= start)
-                                 & (input_wavelengths <= end))[0]
+        cols_in_range = np.where(
+            (input_wavelengths >= start) & (input_wavelengths <= end)
+        )[0]
         filtered_data[:, idx] = np.nanmean(data[:, cols_in_range], axis=1)
 
     return filtered_data if num_samples > 1 else filtered_data.flatten()
@@ -248,9 +318,10 @@ def get_column_prods(df, type_prefix):
     -------
     data_dict
         dictionary mapping data product with their wavelengths and columns.
+
     """
     data_dict = {}
-    pattern = rf'{type_prefix}_(\w+?)(\d*\.?\d+)?$'
+    pattern = rf"{type_prefix}_(\w+?)(\d*\.?\d+)?$"
 
     for col in df.columns:
         match = re.match(pattern, col)
@@ -258,14 +329,15 @@ def get_column_prods(df, type_prefix):
             product = match.group(1)
             wavelength = match.group(2) if match.group(2) else None
             if product not in data_dict:
-                data_dict[product] = {'wavelengths': [], 'columns': []}
-            data_dict[product]['columns'].append(col)
+                data_dict[product] = {"wavelengths": [], "columns": []}
+            data_dict[product]["columns"].append(col)
             if wavelength:
-                if '.' in wavelength:
-                    data_dict[product]['wavelengths'].append(float(wavelength))
+                if "." in wavelength:
+                    data_dict[product]["wavelengths"].append(float(wavelength))
                 else:
-                    data_dict[product]['wavelengths'].append(int(wavelength))
+                    data_dict[product]["wavelengths"].append(int(wavelength))
     return data_dict
+
 
 # --------------------------------------------------------------------------- #
 #                            AERONET_OC Utilities                             #
@@ -273,8 +345,7 @@ def get_column_prods(df, type_prefix):
 
 
 def construct_url(aoc_site, data_level, start_date, end_date):
-    """
-    Craft the AERONET-OC data URL.
+    """Craft the AERONET-OC data URL.
 
     Parameters
     ----------
@@ -291,17 +362,22 @@ def construct_url(aoc_site, data_level, start_date, end_date):
     -------
     str
         url to API pull
+
     """
     # Validate inputs
     if aoc_site not in AERONET_SITES:
-        raise ValueError(f"{aoc_site} is not an AERONET site. Available "
-                         f"sites are: {', '.join(AERONET_SITES)}")
+        raise ValueError(
+            f"{aoc_site} is not an AERONET site. Available "
+            f"sites are: {', '.join(AERONET_SITES)}"
+        )
 
-    url = ("https://aeronet.gsfc.nasa.gov/cgi-bin/print_web_data_v3?"
-           f"AVG=10&LWN{data_level}=1&year={start_date.year}"
-           f"&month={start_date.month}&day={start_date.day}"
-           f"&if_no_html=1&year2={end_date.year}&month2={end_date.month}"
-           f"&day2={end_date.day}&site={aoc_site}")
+    url = (
+        "https://aeronet.gsfc.nasa.gov/cgi-bin/print_web_data_v3?"
+        f"AVG=10&LWN{data_level}=1&year={start_date.year}"
+        f"&month={start_date.month}&day={start_date.day}"
+        f"&if_no_html=1&year2={end_date.year}&month2={end_date.month}"
+        f"&day2={end_date.day}&site={aoc_site}"
+    )
 
     return url
 
@@ -320,12 +396,13 @@ def get_data_dict(df, search_str=None):
         numpy array of wavelengths of the data
     column_map
         dict of the dataframe columns associated with each wavelength
+
     """
     if search_str is None:
         search_str = "Lwn_IOP"
     wavelengths = []
     column_map = {}
-    pattern = re.compile(rf'{search_str}\[(\d+)nm\]')
+    pattern = re.compile(rf"{search_str}\[(\d+)nm\]")
 
     for col in df.columns:
         match = pattern.search(col)
@@ -336,10 +413,10 @@ def get_data_dict(df, search_str=None):
     return np.array(wavelengths), column_map
 
 
-def process_aeronet(aoc_site="AAOT", start_date="2024-03-01", end_date=None,
-                    data_level=15):
-    """
-    Download and process AERONET-OC data for matchups.
+def process_aeronet(
+    aoc_site="AAOT", start_date="2024-03-01", end_date=None, data_level=15
+):
+    """Download and process AERONET-OC data for matchups.
 
     Parameters
     ----------
@@ -356,37 +433,42 @@ def process_aeronet(aoc_site="AAOT", start_date="2024-03-01", end_date=None,
     -------
     pandas DataFrame object
         Dataframe of downloaded AERONET-OC data
+
     """
     # Set up processing
     if end_date is None:
         end_date = datetime.now()
-    start_date = pd.to_datetime(start_date, errors='raise')
-    end_date = pd.to_datetime(end_date, errors='raise')
+    start_date = pd.to_datetime(start_date, errors="raise")
+    end_date = pd.to_datetime(end_date, errors="raise")
 
     # Make url
     url_aoc = construct_url(aoc_site, data_level, start_date, end_date)
 
     # Download data (skip the 5 header rows)
     try:
-        df_aoc_full = pd.read_csv(url_aoc, delimiter=",", na_values=-999,
-                                  skiprows=5)
+        df_aoc_full = pd.read_csv(url_aoc, delimiter=",", na_values=-999, skiprows=5)
     except Exception as e:
-        raise Exception(f"Could not download data. Try another station, reduce"
-                        f" the data_level, or expand the times. (Error: {e})")
+        raise Exception(
+            f"Could not download data. Try another station, reduce"
+            f" the data_level, or expand the times. (Error: {e})"
+        )
 
     # Drop empty columns
-    df_aoc_full.dropna(axis=1, how='all', inplace=True)
+    df_aoc_full.dropna(axis=1, how="all", inplace=True)
 
     # Parse datetimes
-    df_aoc_full['aoc_datetime'] = pd.to_datetime(
-        df_aoc_full["Date(dd-mm-yyyy)"] + ' ' + df_aoc_full["Time(hh:mm:ss)"],
-        format="%d:%m:%Y %H:%M:%S"
-        ).dt.tz_localize("UTC")
+    df_aoc_full["aoc_datetime"] = pd.to_datetime(
+        df_aoc_full["Date(dd-mm-yyyy)"] + " " + df_aoc_full["Time(hh:mm:ss)"],
+        format="%d:%m:%Y %H:%M:%S",
+    ).dt.tz_localize("UTC")
 
     # Get subset of Lwn_f/Q columns (ignore the count columns)
     # Alternatively, could pull Lwn_IOP for L11 BRDF
-    subset_lwn = [col for col in df_aoc_full.columns
-                  if "Lwn_f/Q" in col and "N[Lwn_f/Q" not in col]
+    subset_lwn = [
+        col
+        for col in df_aoc_full.columns
+        if "Lwn_f/Q" in col and "N[Lwn_f/Q" not in col
+    ]
     lwn_iop = df_aoc_full[subset_lwn].values
 
     # Now get array of wavelengths from columns
@@ -419,8 +501,7 @@ def process_aeronet(aoc_site="AAOT", start_date="2024-03-01", end_date=None,
 
 
 def parse_quality_flags(flag_value):
-    """
-    Parse bitwise flag into a list of flag names.
+    """Parse bitwise flag into a list of flag names.
 
     Parameters
     ----------
@@ -431,14 +512,15 @@ def parse_quality_flags(flag_value):
     -------
     list of str
         List of flag names that are set in the flag_value.
+
     """
-    return [flag_name for flag_name, value in L2_FLAGS.items()
-            if (flag_value & value) != 0]
+    return [
+        flag_name for flag_name, value in L2_FLAGS.items() if (flag_value & value) != 0
+    ]
 
 
 def get_fivebyfive(file, latitude, longitude, rrs_wavelengths):
-    """
-    Get stats on a 5x5 box around station coordinates of a satellite granule.
+    """Get stats on a 5x5 box around station coordinates of a satellite granule.
 
     Parameters
     ----------
@@ -454,13 +536,14 @@ def get_fivebyfive(file, latitude, longitude, rrs_wavelengths):
     Returns
     -------
     None.
+
     """
     with xr.open_dataset(file, group="navigation_data") as ds_nav:
-        sat_lat = ds_nav['latitude'].values
-        sat_lon = ds_nav['longitude'].values
+        sat_lat = ds_nav["latitude"].values
+        sat_lon = ds_nav["longitude"].values
 
     # Calculate the Euclidean distance for 2D lat/lon arrays
-    distances = np.sqrt((sat_lat - latitude)**2 + (sat_lon - longitude)**2)
+    distances = np.sqrt((sat_lat - latitude) ** 2 + (sat_lon - longitude) ** 2)
 
     # Find the index of the minimum distance
     # Dimensions are (lines, pixels)
@@ -475,14 +558,22 @@ def get_fivebyfive(file, latitude, longitude, rrs_wavelengths):
 
     # Extract the data
     with xr.open_dataset(file, group="geophysical_data") as ds_data:
-        rrs_data = ds_data['Rrs'].isel(
-            number_of_lines=slice(line_start, line_end),
-            pixels_per_line=slice(pixel_start, pixel_end)
-            ).values
-        flags_data = ds_data['l2_flags'].isel(
-            number_of_lines=slice(line_start, line_end),
-            pixels_per_line=slice(pixel_start, pixel_end)
-            ).values
+        rrs_data = (
+            ds_data["Rrs"]
+            .isel(
+                number_of_lines=slice(line_start, line_end),
+                pixels_per_line=slice(pixel_start, pixel_end),
+            )
+            .values
+        )
+        flags_data = (
+            ds_data["l2_flags"]
+            .isel(
+                number_of_lines=slice(line_start, line_end),
+                pixels_per_line=slice(pixel_start, pixel_end),
+            )
+            .values
+        )
 
     # Calculate the bitwise OR of all flags in EXCLUSION_FLAGS to get a mask
     exclude_mask = sum(L2_FLAGS[flag] for flag in EXCLUSION_FLAGS)
@@ -499,41 +590,43 @@ def get_fivebyfive(file, latitude, longitude, rrs_wavelengths):
 
         # Exclude spectra > 1.5 stdevs away
         std_mask = np.all(
-            np.abs(rrs_valid - rrs_mean_initial) <= 1.5 * rrs_std_initial,
-            axis=1)
+            np.abs(rrs_valid - rrs_mean_initial) <= 1.5 * rrs_std_initial, axis=1
+        )
         rrs_std = np.std(rrs_valid[std_mask], axis=0)
         rrs_mean = np.mean(rrs_valid[std_mask], axis=0).flatten()
 
         # Matchup criteria uses cv as median of 405-570nm
         rrs_cv = rrs_std / rrs_mean
-        rrs_cv_median = np.median(rrs_cv[(rrs_wavelengths >= 405)
-                                         & (rrs_wavelengths <= 570)])
+        rrs_cv_median = np.median(
+            rrs_cv[(rrs_wavelengths >= 405) & (rrs_wavelengths <= 570)]
+        )
     else:
         rrs_cv_median = np.nan
         rrs_mean = np.nan * np.empty_like(rrs_wavelengths)
 
     # Put in dictionary of the row
     row = {
-        "oci_datetime": pd.to_datetime(file.granule["umm"]["TemporalExtent"]
-                                       ["RangeDateTime"]["BeginningDateTime"]),
+        "oci_datetime": pd.to_datetime(
+            file.granule["umm"]["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"]
+        ),
         "oci_cv": rrs_cv_median,
         "oci_latitude": sat_lat[center_line, center_pixel],
         "oci_longitude": sat_lon[center_line, center_pixel],
-        "oci_pixel_valid": np.sum(valid_mask)
+        "oci_pixel_valid": np.sum(valid_mask),
     }
 
     # Add mean spectra to the row dictionary
     for wavelength, mean_value in zip(rrs_wavelengths, rrs_mean):
-        key = f'oci_rrs{int(wavelength)}'
+        key = f"oci_rrs{int(wavelength)}"
         row[key] = mean_value
 
     return row
 
 
-def process_satellite(start_date, end_date, latitude, longitude, sat="PACE",
-                      selected_dates=None):
-    """
-    Download and process satellite data for matchups.
+def process_satellite(
+    start_date, end_date, latitude, longitude, sat="PACE", selected_dates=None
+):
+    """Download and process satellite data for matchups.
 
     Caution: If the date or coordinates aren't formatted correctly, it might
     pull a huge granule list and take forever to run. If it takes more than 45
@@ -575,23 +668,28 @@ def process_satellite(start_date, end_date, latitude, longitude, sat="PACE",
     """
     # Look up short name from constants
     if sat not in SAT_LOOKUP.keys():
-        raise ValueError(f"{sat} is not in the lookup dictionary. Available "
-                         f"sats are: {', '.join(SAT_LOOKUP)}")
+        raise ValueError(
+            f"{sat} is not in the lookup dictionary. Available "
+            f"sats are: {', '.join(SAT_LOOKUP)}"
+        )
     short_name = SAT_LOOKUP[sat]
 
     # Format search parameters
     time_bounds = (f"{start_date}T00:00:00", f"{end_date}T23:59:59")
 
     # Run Earthaccess data search
-    results = earthaccess.search_data(point=(longitude, latitude),
-                                      temporal=time_bounds,
-                                      short_name=short_name)
+    results = earthaccess.search_data(
+        point=(longitude, latitude), temporal=time_bounds, short_name=short_name
+    )
     if selected_dates is not None:
         filtered_results = [
-            result for result in results
-            if result["umm"]["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"][:10]
-            in selected_dates
+            result
+            for result in results
+            if result["umm"]["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"][
+                :10
             ]
+            in selected_dates
+        ]
         print(f"Filtered to {len(filtered_results)} Granules.")
         files = earthaccess.open(filtered_results)
     else:
@@ -604,21 +702,30 @@ def process_satellite(start_date, end_date, latitude, longitude, sat="PACE",
     # Loop through files and process
     sat_rows = []
     for idx, file in enumerate(files):
-        granule_date = pd.to_datetime(file.granule["umm"]["TemporalExtent"]
-                                      ["RangeDateTime"]["BeginningDateTime"])
+        granule_date = pd.to_datetime(
+            file.granule["umm"]["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"]
+        )
         print(f"Running Granule: {granule_date}")
         row = get_fivebyfive(file, latitude, longitude, rrs_wavelengths)
         sat_rows.append(row)
 
     return pd.DataFrame(sat_rows)
 
+
 # --------------------------------------------------------------------------- #
 #                              Matchup Utilities                              #
 # --------------------------------------------------------------------------- #
 
 
-def match_data(df_sat, df_aoc, cv_max=0.15, senz_max=60.0,
-               min_percent_valid=55.0, max_time_diff=180, std_max=1.5):
+def match_data(
+    df_sat,
+    df_aoc,
+    cv_max=0.15,
+    senz_max=60.0,
+    min_percent_valid=55.0,
+    max_time_diff=180,
+    std_max=1.5,
+):
     """Create matchup dataframe based on selection criteria.
 
     Parameters
@@ -641,46 +748,51 @@ def match_data(df_sat, df_aoc, cv_max=0.15, senz_max=60.0,
     Returns
     -------
     pandas dataframe of matchups for product
+
     """
     # Setup
     time_window = pd.Timedelta(minutes=max_time_diff)
     df_match_list = []
 
     # Filter Field data based on Solar Zenith
-    df_aoc_filtered = df_aoc[df_aoc['aoc_solar_zenith'] <= senz_max]
+    df_aoc_filtered = df_aoc[df_aoc["aoc_solar_zenith"] <= senz_max]
 
     # Filter satellite data based on cv threshold
-    df_sat_filtered = df_sat[df_sat['oci_cv'] <= cv_max]
+    df_sat_filtered = df_sat[df_sat["oci_cv"] <= cv_max]
 
     # Filter satellite data based on percent good pixels
     df_sat_filtered = df_sat_filtered[
-        df_sat_filtered['oci_pixel_valid'] >= min_percent_valid * 25 / 100]
+        df_sat_filtered["oci_pixel_valid"] >= min_percent_valid * 25 / 100
+    ]
 
     for _, sat_row in df_sat_filtered.iterrows():
         # Filter field data based on time difference and coordinates
-        time_diff = abs(df_aoc_filtered['aoc_datetime']-sat_row['oci_datetime'])
+        time_diff = abs(df_aoc_filtered["aoc_datetime"] - sat_row["oci_datetime"])
         within_time = time_diff <= time_window
         within_lat = 0.2 >= abs(
-            df_aoc_filtered['aoc_latitude'] - sat_row['oci_latitude'])
+            df_aoc_filtered["aoc_latitude"] - sat_row["oci_latitude"]
+        )
         within_lon = 0.2 >= abs(
-            df_aoc_filtered['aoc_longitude'] - sat_row['oci_longitude'])
+            df_aoc_filtered["aoc_longitude"] - sat_row["oci_longitude"]
+        )
         field_matches = df_aoc_filtered[within_time & within_lat & within_lon]
 
         if field_matches.shape[0] > 5:
             # Filter by Standard Deviation for rrs columns
-            rrs_cols = [col for col in field_matches.columns
-                        if col.startswith('aoc_rrs')]
+            rrs_cols = [
+                col for col in field_matches.columns if col.startswith("aoc_rrs")
+            ]
             if rrs_cols:
                 mean_spectra = field_matches[rrs_cols].mean(axis=0)
                 std_spectra = field_matches[rrs_cols].std(axis=0)
-                within_std = (abs(field_matches[rrs_cols] - mean_spectra)
-                              <= std_max * std_spectra)
+                within_std = (
+                    abs(field_matches[rrs_cols] - mean_spectra) <= std_max * std_spectra
+                )
                 field_matches = field_matches[within_std.all(axis=1)]
 
         if not field_matches.empty:
             # Select the best match based on time delta
-            time_diff = abs(
-                field_matches['aoc_datetime']-sat_row['oci_datetime'])
+            time_diff = abs(field_matches["aoc_datetime"] - sat_row["oci_datetime"])
             best_match = field_matches.loc[time_diff.idxmin()]
             df_match_list.append({**best_match.to_dict(), **sat_row.to_dict()})
 
@@ -694,8 +806,7 @@ def match_data(df_sat, df_aoc, cv_max=0.15, senz_max=60.0,
 
 
 def compute_bland_altman_metrics(xx, yy, xx_unc_modl, yy_unc_modl):
-    """
-    Compute metrics for Bland-Altman plot.
+    """Compute metrics for Bland-Altman plot.
 
     Parameters
     ----------
@@ -712,6 +823,7 @@ def compute_bland_altman_metrics(xx, yy, xx_unc_modl, yy_unc_modl):
     -------
     dict
         Dictionary of Bland-Altman metrics.
+
     """
     jj = (xx + yy) / 2
     kk = (yy - xx) / np.sqrt((xx_unc_modl**2) + (yy_unc_modl**2))
@@ -733,13 +845,12 @@ def compute_bland_altman_metrics(xx, yy, xx_unc_modl, yy_unc_modl):
         "LOAhgh": LOAhgh,
         "ba_stat": ba_stat,
         "ba_p": ba_p,
-        "ba_independ": ba_independ
+        "ba_independ": ba_independ,
     }
 
 
 def compute_regression_metrics(xx, yy, is_type2=False):
-    """
-    Compute regression metrics using specified type.
+    """Compute regression metrics using specified type.
 
     Parameters
     ----------
@@ -755,12 +866,12 @@ def compute_regression_metrics(xx, yy, is_type2=False):
     -------
     dict
         Dictionary of regression metrics.
+
     """
     if is_type2:
         # Perform Type 2 regression (orthogonal distance regression)
         def linear_model(B, x):
-            """
-            Linear function y = m*x + b.
+            """Linear function y = m*x + b.
 
             B is a vector of the parameters.
             x is an array of the current x values.
@@ -776,7 +887,7 @@ def compute_regression_metrics(xx, yy, is_type2=False):
         data = odr.RealData(xx, yy)
 
         # Set up ODR with the model and data
-        odr_instance = odr.ODR(data, linear, beta0=[1., 0.])
+        odr_instance = odr.ODR(data, linear, beta0=[1.0, 0.0])
 
         # Run the regression
         odr_result = odr_instance.run()
@@ -800,14 +911,12 @@ def compute_regression_metrics(xx, yy, is_type2=False):
         "r_spear": spearman_r.correlation,
         "r_pear": pearson_r[0],
         "rmse": rmse_all,
-        "mae": mae_all
+        "mae": mae_all,
     }
 
 
-def add_text_annotations(ax, text_lines, position='top right',
-                         fontsize=SIZE_TEXTLABEL):
-    """
-    Add text annotations to the plot.
+def add_text_annotations(ax, text_lines, position="top right", fontsize=SIZE_TEXTLABEL):
+    """Add text annotations to the plot.
 
     Parameters
     ----------
@@ -819,39 +928,44 @@ def add_text_annotations(ax, text_lines, position='top right',
         Position of the text on the plot.
     fontsize : int, default 12
         Font size of the text.
-    """
-    if position == 'top right':
-        x = 0.95
-        y = 0.95
-        ha = 'right'
-        va = 'top'
-    elif position == 'top left':
-        x = 0.05
-        y = 0.95
-        ha = 'left'
-        va = 'top'
-    elif position == 'bottom left':
-        x = 0.05
-        y = 0.05
-        ha = 'left'
-        va = 'bottom'
-    elif position == 'bottom right':
-        x = 0.95
-        y = 0.05
-        ha = 'right'
-        va = 'bottom'
 
-    text = '\n'.join(text_lines)
+    """
+    if position == "top right":
+        x = 0.95
+        y = 0.95
+        ha = "right"
+        va = "top"
+    elif position == "top left":
+        x = 0.05
+        y = 0.95
+        ha = "left"
+        va = "top"
+    elif position == "bottom left":
+        x = 0.05
+        y = 0.05
+        ha = "left"
+        va = "bottom"
+    elif position == "bottom right":
+        x = 0.95
+        y = 0.05
+        ha = "right"
+        va = "bottom"
+
+    text = "\n".join(text_lines)
     ax.text(
-        x, y, text, transform=ax.transAxes, fontsize=fontsize,
-        verticalalignment=va, horizontalalignment=ha,
-        bbox=dict(facecolor='white', alpha=0.6, edgecolor='none')
-        )
+        x,
+        y,
+        text,
+        transform=ax.transAxes,
+        fontsize=fontsize,
+        verticalalignment=va,
+        horizontalalignment=ha,
+        bbox=dict(facecolor="white", alpha=0.6, edgecolor="none"),
+    )
 
 
 def setup_plot(label):
-    """
-    Set up the plot with titles and labels.
+    """Set up the plot with titles and labels.
 
     Parameters
     ----------
@@ -862,8 +976,9 @@ def setup_plot(label):
     -------
     tuple
         Figure and axes of the plot.
+
     """
-    style.use('seaborn-v0_8-whitegrid')
+    style.use("seaborn-v0_8-whitegrid")
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6), layout="constrained")
     fig.suptitle(label, fontsize=22)
     return fig, ax1, ax2
@@ -871,19 +986,19 @@ def setup_plot(label):
 
 def format_ticks(ax):
     """Format the tick labels on the axes to be more readable."""
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:.3g}'))
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.3g}'))
-    ax.tick_params(axis='both', which='major', width=2, length=6)
-    ax.spines['top'].set_linewidth(2)
-    ax.spines['right'].set_linewidth(2)
-    ax.spines['left'].set_linewidth(2)
-    ax.spines['bottom'].set_linewidth(2)
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x:.3g}"))
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f"{y:.3g}"))
+    ax.tick_params(axis="both", which="major", width=2, length=6)
+    ax.spines["top"].set_linewidth(2)
+    ax.spines["right"].set_linewidth(2)
+    ax.spines["left"].set_linewidth(2)
+    ax.spines["bottom"].set_linewidth(2)
 
 
-def plot_bland_altman(ax1, metrics, binscale, scat, xx_unc_modl,
-                      x_label="x", y_label="y"):
-    """
-    Plot Bland-Altman plot.
+def plot_bland_altman(
+    ax1, metrics, binscale, scat, xx_unc_modl, x_label="x", y_label="y"
+):
+    """Plot Bland-Altman plot.
 
     Parameters
     ----------
@@ -901,6 +1016,7 @@ def plot_bland_altman(ax1, metrics, binscale, scat, xx_unc_modl,
         String for labels for x data
     y_label : string, default "y"
         String for labels for y data
+
     """
     jj = metrics["jj"]
     kk = metrics["kk"]
@@ -927,42 +1043,65 @@ def plot_bland_altman(ax1, metrics, binscale, scat, xx_unc_modl,
         jj_sorted = np.sort(jj)
         min_jj = jj_sorted[int(0.01 * len(jj))]
         max_jj = jj_sorted[int(0.99 * len(jj))]
-        lineclr, loaclr, fitclr = ('white', 'yellow', 'cyan')
-        h = ax1.hist2d(jj, kk, bins=(nbin, nbin),
-                       norm=mcolors.PowerNorm(gamma), cmap=plt.cm.inferno,
-                       range=[[min_jj, max_jj], [min_kk, max_kk]])
+        lineclr, loaclr, fitclr = ("white", "yellow", "cyan")
+        h = ax1.hist2d(
+            jj,
+            kk,
+            bins=(nbin, nbin),
+            norm=mcolors.PowerNorm(gamma),
+            cmap=plt.cm.inferno,
+            range=[[min_jj, max_jj], [min_kk, max_kk]],
+        )
         plt.colorbar(h[3], ax=ax1)
 
-    ax1.set_title('Bland-Altman plot', fontsize=SIZE_TITLE)
-    ylabel = ('Uncertainty normalized bias' if xx_unc_modl != np.sqrt(0.5)
-              else f'Bias, ${y_label}-{x_label}$')
+    ax1.set_title("Bland-Altman plot", fontsize=SIZE_TITLE)
+    ylabel = (
+        "Uncertainty normalized bias"
+        if xx_unc_modl != np.sqrt(0.5)
+        else f"Bias, ${y_label}-{x_label}$"
+    )
     ax1.set_ylabel(ylabel, fontsize=SIZE_AXLABEL)
-    ax1.set_xlabel(f'Paired mean, $({x_label}+{y_label})/2$',
-                   fontsize=SIZE_AXLABEL)
-    ax1.plot([min_jj, max_jj], [0, 0],
-             color=lineclr, linestyle='solid', linewidth=4.0)
+    ax1.set_xlabel(f"Paired mean, $({x_label}+{y_label})/2$", fontsize=SIZE_AXLABEL)
+    ax1.plot([min_jj, max_jj], [0, 0], color=lineclr, linestyle="solid", linewidth=4.0)
 
     if ba_independ:
-        ax1.plot([min_jj, max_jj], [meanbias, meanbias],
-                 color=fitclr, linestyle='dashed', linewidth=3.0,
-                 label='Mean Bias')
-        ax1.plot([min_jj, max_jj], [LOAlow, LOAlow],
-                 color=loaclr, linestyle='dashed', linewidth=2.0,
-                 label='Lower LOA')
-        ax1.plot([min_jj, max_jj], [LOAhgh, LOAhgh],
-                 color=loaclr, linestyle='dashed', linewidth=2.0,
-                 label='Upper LOA')
-        ax1.fill_between([min_jj, max_jj], LOAlow, LOAhgh,
-                         color=loaclr, alpha=0.1)
+        ax1.plot(
+            [min_jj, max_jj],
+            [meanbias, meanbias],
+            color=fitclr,
+            linestyle="dashed",
+            linewidth=3.0,
+            label="Mean Bias",
+        )
+        ax1.plot(
+            [min_jj, max_jj],
+            [LOAlow, LOAlow],
+            color=loaclr,
+            linestyle="dashed",
+            linewidth=2.0,
+            label="Lower LOA",
+        )
+        ax1.plot(
+            [min_jj, max_jj],
+            [LOAhgh, LOAhgh],
+            color=loaclr,
+            linestyle="dashed",
+            linewidth=2.0,
+            label="Upper LOA",
+        )
+        ax1.fill_between([min_jj, max_jj], LOAlow, LOAhgh, color=loaclr, alpha=0.1)
     else:
         ba_regress_result = stats.linregress(jj, kk)
-        ba_min_fit_yy = (ba_regress_result.slope * min_jj
-                         + ba_regress_result.intercept)
-        ba_max_fit_yy = (ba_regress_result.slope * max_jj
-                         + ba_regress_result.intercept)
-        ax1.plot([min_jj, max_jj], [ba_min_fit_yy, ba_max_fit_yy],
-                 color=fitclr, linestyle='dashed', linewidth=3.0,
-                 label='Linear Fit')
+        ba_min_fit_yy = ba_regress_result.slope * min_jj + ba_regress_result.intercept
+        ba_max_fit_yy = ba_regress_result.slope * max_jj + ba_regress_result.intercept
+        ax1.plot(
+            [min_jj, max_jj],
+            [ba_min_fit_yy, ba_max_fit_yy],
+            color=fitclr,
+            linestyle="dashed",
+            linewidth=3.0,
+            label="Linear Fit",
+        )
     if SHOW_LEGEND:
         ax1.legend()
     ax1.grid(True)
@@ -973,15 +1112,15 @@ def plot_bland_altman(ax1, metrics, binscale, scat, xx_unc_modl,
         f"Mean Bias: {meanbias:.2e}",
         f"Limits of Agreement: [{LOAlow:.2e}, {LOAhgh:.2e}]",
         f"Rank Correlation: {ba_stat:.3f}",
-        "Bias Independent" if ba_independ else "Bias Dependent"
+        "Bias Independent" if ba_independ else "Bias Dependent",
     ]
-    add_text_annotations(ax1, text_lines, position='bottom right')
+    add_text_annotations(ax1, text_lines, position="bottom right")
 
 
-def plot_scatter(ax2, xx, yy, regress_metrics, binscale, scat,
-                 x_label="x", y_label="y"):
-    """
-    Plot scatter plot with regression line.
+def plot_scatter(
+    ax2, xx, yy, regress_metrics, binscale, scat, x_label="x", y_label="y"
+):
+    """Plot scatter plot with regression line.
 
     Parameters
     ----------
@@ -1001,6 +1140,7 @@ def plot_scatter(ax2, xx, yy, regress_metrics, binscale, scat,
         String for labels for x data
     y_label : string, default "y"
         String for labels for y data
+
     """
     nbin = int(0.5 * binscale * np.sqrt(len(xx)))
     min_val = min(np.min(xx), np.min(yy))
@@ -1012,24 +1152,39 @@ def plot_scatter(ax2, xx, yy, regress_metrics, binscale, scat,
         ax2.set_xlim([min_val, max_val])
         ax2.set_ylim([min_val, max_val])
     else:
-        g = ax2.hist2d(xx, yy, bins=(nbin, nbin),
-                       norm=mcolors.PowerNorm(gamma), cmap=plt.cm.inferno,
-                       range=[[min_val, max_val], [min_val, max_val]])
+        g = ax2.hist2d(
+            xx,
+            yy,
+            bins=(nbin, nbin),
+            norm=mcolors.PowerNorm(gamma),
+            cmap=plt.cm.inferno,
+            range=[[min_val, max_val], [min_val, max_val]],
+        )
         plt.colorbar(g[3], ax=ax2)
 
-    ax2.set_title('Scatterplot', fontsize=SIZE_TITLE)
-    ax2.set_xlabel(f'${x_label}$', fontsize=SIZE_AXLABEL)
-    ax2.set_ylabel(f'${y_label}$', fontsize=SIZE_AXLABEL)
-    ax2.plot([min_val, max_val], [min_val, max_val],
-             color=COLOR_LINE, linestyle='solid', linewidth=4.0)
+    ax2.set_title("Scatterplot", fontsize=SIZE_TITLE)
+    ax2.set_xlabel(f"${x_label}$", fontsize=SIZE_AXLABEL)
+    ax2.set_ylabel(f"${y_label}$", fontsize=SIZE_AXLABEL)
+    ax2.plot(
+        [min_val, max_val],
+        [min_val, max_val],
+        color=COLOR_LINE,
+        linestyle="solid",
+        linewidth=4.0,
+    )
 
     slope = regress_metrics["slope"]
     intercept = regress_metrics["intercept"]
     min_fit_yy = slope * min_val + intercept
     max_fit_yy = slope * max_val + intercept
-    ax2.plot([min_val, max_val], [min_fit_yy, max_fit_yy],
-             color=COLOR_FITLINE, linestyle='dashed', linewidth=3.0,
-             label='Regression Line')
+    ax2.plot(
+        [min_val, max_val],
+        [min_fit_yy, max_fit_yy],
+        color=COLOR_FITLINE,
+        linestyle="dashed",
+        linewidth=3.0,
+        label="Regression Line",
+    )
     if SHOW_LEGEND:
         ax2.legend()
     ax2.grid(True)
@@ -1041,17 +1196,25 @@ def plot_scatter(ax2, xx, yy, regress_metrics, binscale, scat,
         f"Linear Correlation: {regress_metrics['r_pear']:.3f}",
         f"Rank Correlation: {regress_metrics['r_spear']:.3f}",
         f"RMSE: {regress_metrics['rmse']:.2e}",
-        f"MAE: {regress_metrics['mae']:.2e}"
+        f"MAE: {regress_metrics['mae']:.2e}",
     ]
-    add_text_annotations(ax2, text_lines, position='bottom right')
+    add_text_annotations(ax2, text_lines, position="bottom right")
 
 
-def plot_BAvsScat(x_input, y_input, label='',
-                  saveplot=None, scat=True, binscale=1.0,
-                  xx_unc_modl=np.sqrt(0.5), yy_unc_modl=np.sqrt(0.5),
-                  x_label="x", y_label="y", is_type2=True):
-    """
-    Routine to plot paired data as Bland-Altman and scatter plot.
+def plot_BAvsScat(
+    x_input,
+    y_input,
+    label="",
+    saveplot=None,
+    scat=True,
+    binscale=1.0,
+    xx_unc_modl=np.sqrt(0.5),
+    yy_unc_modl=np.sqrt(0.5),
+    x_label="x",
+    y_label="y",
+    is_type2=True,
+):
+    """Routine to plot paired data as Bland-Altman and scatter plot.
 
     Parameters
     ----------
@@ -1080,11 +1243,16 @@ def plot_BAvsScat(x_input, y_input, label='',
     -------
     dict
         Dictionary of computed statistics.
+
     """
     xx = np.asarray(x_input)
     yy = np.asarray(y_input)
-    valid_indices = (np.isfinite(x_input) & np.isfinite(y_input)
-                     & (x_input != -999) & (y_input != -999))
+    valid_indices = (
+        np.isfinite(x_input)
+        & np.isfinite(y_input)
+        & (x_input != -999)
+        & (y_input != -999)
+    )
     xx = x_input[valid_indices]
     yy = y_input[valid_indices]
 
@@ -1092,15 +1260,13 @@ def plot_BAvsScat(x_input, y_input, label='',
     regress_metrics = compute_regression_metrics(xx, yy, is_type2=is_type2)
 
     fig, ax1, ax2 = setup_plot(label)
-    plot_bland_altman(ax1, ba_metrics, binscale, scat, xx_unc_modl,
-                      x_label, y_label)
-    plot_scatter(ax2, xx, yy, regress_metrics, binscale, scat,
-                 x_label, y_label)
+    plot_bland_altman(ax1, ba_metrics, binscale, scat, xx_unc_modl, x_label, y_label)
+    plot_scatter(ax2, xx, yy, regress_metrics, binscale, scat, x_label, y_label)
 
     if saveplot is not None:
         figpath = Path("../output") / saveplot
         fig.savefig(figpath)
-        print('Saved figure to:', figpath)
+        print("Saved figure to:", figpath)
 
     plt.show()
 
@@ -1108,18 +1274,18 @@ def plot_BAvsScat(x_input, y_input, label='',
         "Number_of_Points": ba_metrics["count"],
         "Scale_Independence": ba_metrics["ba_independ"],
         "Mean_Bias": ba_metrics["meanbias"],
-        "Limits_of_Agreement_low": (ba_metrics["LOAlow"]
-                                    if ba_metrics["ba_independ"]
-                                    else float("nan")),
-        "Limits_of_Agreement_high": (ba_metrics["LOAhgh"]
-                                     if ba_metrics["ba_independ"]
-                                     else float("nan")),
+        "Limits_of_Agreement_low": (
+            ba_metrics["LOAlow"] if ba_metrics["ba_independ"] else float("nan")
+        ),
+        "Limits_of_Agreement_high": (
+            ba_metrics["LOAhgh"] if ba_metrics["ba_independ"] else float("nan")
+        ),
         "Linear_Slope": regress_metrics["slope"],
         "Linear_Intercept": regress_metrics["intercept"],
         "Linear_Correlation": regress_metrics["r_pear"],
         "Rank_Correlation": regress_metrics["r_spear"],
         "RMSE": regress_metrics["rmse"],
-        "MAE": regress_metrics["mae"]
+        "MAE": regress_metrics["mae"],
     }
 
 
@@ -1131,9 +1297,12 @@ def plot_BAvsScat(x_input, y_input, label='',
 # There are three "levels" of AERONET-OC data in terms of data quality: 1, 1.5, and 2. If a complete measurement sequence with the instruments is able to be performed, it is collected and stored as Level 1. These data are then passed through an automated quality control system and stored as Level 1.5 if they pass all tests. Finally, Level 2 data are data from Level 1.5 that are subsequently screened by an experienced scientist and validated. We'll be using Level 1.5 data to pull as much good quality data as possible without the time lag for manual validation. More information on AERONET-OC levels can be found in [Zibordi et al., 2009.](https://doi.org/10.1175/2009JTECHO654.1)
 
 # + tags=[]
-aoc_cb = process_aeronet(aoc_site="Casablanca_Platform",
-                start_date="2024-06-01", end_date="2024-07-31",
-                data_level=15)
+aoc_cb = process_aeronet(
+    aoc_site="Casablanca_Platform",
+    start_date="2024-06-01",
+    end_date="2024-07-31",
+    data_level=15,
+)
 aoc_cb.head()
 
 # + [markdown] tags=[]
@@ -1148,11 +1317,16 @@ aoc_lon = aoc_cb["aoc_longitude"][0]
 
 # Pull out unique days
 unique_days = aoc_cb["aoc_datetime"].dt.date.unique()
-unique_days_str = [day.strftime('%Y-%m-%d') for day in unique_days]
+unique_days_str = [day.strftime("%Y-%m-%d") for day in unique_days]
 
-sat_cb = process_satellite(start_date="2024-06-01", end_date="2024-07-31",
-                  latitude=aoc_lat, longitude=aoc_lon, sat="PACE",
-                  selected_dates=unique_days_str)
+sat_cb = process_satellite(
+    start_date="2024-06-01",
+    end_date="2024-07-31",
+    latitude=aoc_lat,
+    longitude=aoc_lon,
+    sat="PACE",
+    selected_dates=unique_days_str,
+)
 # -
 
 sat_cb.head()
@@ -1166,8 +1340,15 @@ sat_cb.head()
 # ?match_data
 
 # + scrolled=true tags=["scroll-output"]
-matchups = match_data(sat_cb, aoc_cb, cv_max=0.60, senz_max=60.0,
-                      min_percent_valid=55.0, max_time_diff=180, std_max=1.5)
+matchups = match_data(
+    sat_cb,
+    aoc_cb,
+    cv_max=0.60,
+    senz_max=60.0,
+    min_percent_valid=55.0,
+    max_time_diff=180,
+    std_max=1.5,
+)
 matchups
 # -
 
@@ -1206,17 +1387,20 @@ for idx, match_wave in enumerate(MATCH_WAVES):
     valid_indices = np.isfinite(match_sat) & np.isfinite(match_aoc)
     if np.sum(valid_indices) > 5:
         fig_label = f"Rrs({match_wave}), sr" + r"$\mathregular{^{-1}}$"
-        dict_stats = plot_BAvsScat(match_aoc[valid_indices],
-                                   match_sat[valid_indices],
-                                   label=fig_label,
-                                   saveplot=None,
-                                   x_label="AERONET", y_label="PACE",
-                                   is_type2=True)
+        dict_stats = plot_BAvsScat(
+            match_aoc[valid_indices],
+            match_sat[valid_indices],
+            label=fig_label,
+            saveplot=None,
+            x_label="AERONET",
+            y_label="PACE",
+            is_type2=True,
+        )
         dict_stats["wavelength"] = match_wave
         stats_list.append(dict_stats)
 
 # Organize stats DataFrame
 df_stats = pd.DataFrame(stats_list)
-df_stats.set_index('wavelength', inplace=True)
+df_stats.set_index("wavelength", inplace=True)
 df_stats = df_stats.fillna(-999)
 df_stats

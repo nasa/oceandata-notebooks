@@ -41,21 +41,21 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
+import cartopy.crs as ccrs
+import cmocean
+import earthaccess
+import holoviews as hv
+import matplotlib.pylab as pl
+import matplotlib.pyplot as plt
+import numpy as np
+import panel.widgets as pnw
+import xarray as xr
 from holoviews.streams import Tap
 from matplotlib import animation
 from matplotlib.colors import ListedColormap
 from PIL import Image, ImageEnhance
 from scipy.ndimage import gaussian_filter1d
 from xarray.backends.api import open_datatree
-import cartopy.crs as ccrs
-import cmocean
-import earthaccess
-import holoviews as hv
-import matplotlib.pyplot as plt
-import matplotlib.pylab as pl
-import numpy as np
-import panel.widgets as pnw
-import xarray as xr
 
 options = xr.set_options(display_expand_attrs=False)
 
@@ -77,7 +77,7 @@ def enhance(
     sharpness=2,
     saturation=1.1,
 ):
-    """The SeaDAS recipe for RGB images from Ocean Color missions.
+    """Follow the SeaDAS recipe for RGB images from Ocean Color missions.
 
     Args:
         rgb: a data array with three dimensions, having 3 or 4 bands in the third dimension
@@ -92,6 +92,7 @@ def enhance(
 
     Returns:
        a transformed data array better for RGB display
+
     """
     rgb = rgb.where(rgb > 0)
     rgb = np.log(rgb / scale) / np.log(1 / scale)
@@ -148,7 +149,7 @@ def enhancel3(
 
 def pcolormesh(rgb):
     fig = plt.figure()
-    axes = plt.subplot()
+    axes = fig.add_subplot()
     artist = axes.pcolormesh(
         rgb["longitude"],
         rgb["latitude"],
@@ -243,7 +244,7 @@ plt.gca().set_aspect("equal")
 
 # Finally, we can add a grid and coastlines to the map with `cartopy` tools.
 
-fig = plt.figure(figsize=(7, 5))
+plt.figure(figsize=(7, 5))
 ax = plt.axes(projection=ccrs.PlateCarree())
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, color="white", linewidth=0.3)
@@ -453,7 +454,7 @@ image_enhanced = enhancer.enhance(saturation)
 enhanced_image_np = np.array(image_enhanced) / 255.0  # Normalize back to [0, 1] range
 
 fig = plt.figure(figsize=(5, 5))
-axes = plt.subplot(projection=ccrs.PlateCarree())
+axes = fig.add_subplot(projection=ccrs.PlateCarree())
 extent = (
     dataset.longitude.min(),
     dataset.longitude.max(),
@@ -612,9 +613,8 @@ dataset = xr.open_dataset(paths[-1])
 
 def single_band(w):
     array = dataset.sel({"wavelength": w})
-    return (
-        hv.Image(array, kdims=["lon", "lat"], vdims=["Rrs"])
-        .opts(aspect="equal", frame_width=450, frame_height=250, tools=["hover"])
+    return hv.Image(array, kdims=["lon", "lat"], vdims=["Rrs"]).opts(
+        aspect="equal", frame_width=450, frame_height=250, tools=["hover"]
     )
 
 
@@ -666,9 +666,8 @@ paths = earthaccess.open(results)
 
 prod = xr.open_dataset(paths[0])
 view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
-geo = (
-    xr.open_dataset(paths[0], group="geolocation_data")
-    .set_coords(["longitude", "latitude"])
+geo = xr.open_dataset(paths[0], group="geolocation_data").set_coords(
+    ["longitude", "latitude"]
 )
 obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 
@@ -704,6 +703,7 @@ def rad_to_refl(rad, f0, sza, r):
         r: Sun-Earth distance (in AU).
 
     Returns: Reflectance.
+
     """
     return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) / f0
 
