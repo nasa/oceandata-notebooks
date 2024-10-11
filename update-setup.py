@@ -1,7 +1,7 @@
-from pathlib import Path
+import argparse
 import re
 import sys
-import argparse
+from pathlib import Path
 
 import tomlkit
 

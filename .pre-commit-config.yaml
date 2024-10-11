@@ -25,10 +25,12 @@ repos:
     rev: v0.6.9
     hooks:
       - id: ruff
+        entry: ruff check
         args: ["--fix", "--exit-non-zero-on-fix"]
         # prefer to fix the ipynbs (in src/_build) and later sync
         exclude: ^src/notebooks/.*$
       - id: ruff-format
+        # entry: ruff format
         # prefer to fix the ipynbs (in src/_build) and later sync
         exclude: ^src/notebooks/.*$
   - repo: https://github.com/astral-sh/uv-pre-commit

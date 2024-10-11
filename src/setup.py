@@ -122,8 +122,8 @@
 # ///
 from argparse import ArgumentParser
 
-from ipykernel import kernelspec
 import bash_kernel.install
+from ipykernel import kernelspec
 
 if __name__ == "__main__":
     # install an ipython kernel
