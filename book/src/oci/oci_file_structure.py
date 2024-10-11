@@ -88,7 +88,7 @@ paths = earthaccess.open(results)
 try:
     paths[0].f.bucket
 except AttributeError:
-    raise "The result opened without an S3FileSystem."
+    raise Exception("The result opened without an S3FileSystem.") from None
 
 # Let's open the first file of the L1B files list:
 
