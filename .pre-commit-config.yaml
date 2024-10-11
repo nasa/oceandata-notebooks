@@ -21,18 +21,6 @@ repos:
       - id: end-of-file-fixer
       - id: mixed-line-ending
       - id: trailing-whitespace
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
-    hooks:
-      - id: ruff
-        entry: ruff check
-        args: ["--fix", "--exit-non-zero-on-fix"]
-        # prefer to fix the ipynbs (in src/_build) and later sync
-        exclude: ^src/notebooks/.*$
-      - id: ruff-format
-        entry: ruff format
-        # prefer to fix the ipynbs (in src/_build) and later sync
-        exclude: ^src/notebooks/.*$
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.4.20
     hooks:
@@ -45,12 +33,6 @@ repos:
         name: compile-hub-dependencies
         args: [-q, --extra=hub, -ohub/requirements.txt, hub/requirements.in, pyproject.toml]
         files: ^(pyproject\.toml|hub/requirements\.in)$
-  - repo: https://github.com/mwouts/jupytext
-    rev: v1.16.4
-    hooks:
-      - id: jupytext
-        args: [--sync]
-        files: ^src/notebooks/.*\.py$
   - repo: local
     hooks:
       - id: repo2docker-requirements
@@ -68,3 +50,19 @@ repos:
           - tomlkit>=0.13.2
         entry: python update-setup.py
         files: ^requirements\.txt$
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
+        # prefer to fix the ipynbs
+        exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
+      - id: ruff-format
+        # prefer to fix the ipynbs
+        exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
+  - repo: https://github.com/mwouts/jupytext
+    rev: v1.16.4
+    hooks:
+      - id: jupytext
+        args: [--sync]
+        files: ^book/src/.*\.py$  # FIXME: no reason these would be staged

@@ -138,13 +138,13 @@ l2gen
 # For this example, we will be using the L1B file downloaded in the OCI Data Access notebook. Confirm that the L1B file to process is at the expected location by listing (with `ls`) the directory contents. If the directory is empty, check that you've completed the prerequiste notebooks for this tutorial!
 
 # + tags=[]
-ls L1B
+# ls L1B
 # -
 
 # Create a directory for output files.
 
 # + tags=[]
-mkdir L2
+# mkdir L2
 # -
 
 # And run! Note, this may take several minutes.

@@ -1,0 +1,14 @@
+only_build_toc_files: true
+execute:
+  timeout: -1  # no cell timeout
+  run_in_temp: true  # no reuse of downloads, etc.
+  execute_notebooks: off  # re-use outputs (when none of the code cells change)
+sphinx:
+  config:
+    templates_path:
+      - _templates
+    # nb_custom_formats:
+    #   .py:
+    #     - jupytext.reads
+    #     - fmt: py
+    #     - true  # use CommonMark (not MyST Markdown)

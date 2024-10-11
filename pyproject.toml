@@ -84,11 +84,11 @@
     email = "guoqing.wang@nasa.gov"
 
 [tool.jupytext]
-  notebook_metadata_filter = "-all,license"
+  notebook_metadata_filter = "-all,license,tags"
   cell_metadata_filter = "-all,scrolled,tags"
   [tool.jupytext.formats]
     notebooks = "ipynb"
-    "src/notebooks" = "py"
+    src = "py"
 
 [tool.ruff]
   extend-include = ["_build"]
