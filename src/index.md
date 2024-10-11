@@ -15,17 +15,17 @@ The **Earthdata Cloud** icon next to some notebooks indicates they are meant to 
 
 ### Jupyter Kernel
 
-Download our setup script ({download}`setup.py`) and run it under `pipx` to create a
-Jupyter kernel ready for use with the notebooks. For example, in a Terminal within your
-JupyterLab, execute the following.
+If you have a running Jupyter Lab, download our setup script ({download}`setup.py`) and
+run it under `pipx` to create a Jupyter kernel ready for use with the notebooks. For
+example, in a Terminal within your JupyterLab, execute the following.
 ```
 pipx run setup.py --user --name oc
 ```
-Your JupyterLab should soon include "oc" as a kernel choice for notebooks and consoles.
-For more on the provided arguments, which customize the kernel location and name,
+Your JupyterLab should soon include "oc" and "bash" as kernel choices for notebooks and
+consoles. For more on the provided arguments, which customize the kernel location and name,
 execute `pipx run setup.py --help`. The `pipx` documenation provides
 [install instructions](https://pipx.pypa.io/stable/installation/) that include the
-simple approach of `pip install --user pipx`.
+simple approach of `pip install --user pipx`. Uninstall kernels with `jupyter kernelspec`.
 
 ## Notebooks
 

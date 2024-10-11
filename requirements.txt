@@ -18,6 +18,8 @@ asttokens==2.4.1
     # via stack-data
 attrs==24.2.0
     # via aiohttp
+bash-kernel==0.9.3
+    # via oceandata-notebooks (pyproject.toml)
 bleach==6.1.0
     # via panel
 bokeh==3.6.0
@@ -108,7 +110,9 @@ idna==3.10
 importlib-resources==6.4.5
     # via earthaccess
 ipykernel==6.29.5
-    # via oceandata-notebooks (pyproject.toml)
+    # via
+    #   oceandata-notebooks (pyproject.toml)
+    #   bash-kernel
 ipython==8.28.0
     # via
     #   ipykernel
@@ -236,7 +240,9 @@ parso==0.8.4
 partd==1.4.2
     # via dask
 pexpect==4.9.0
-    # via ipython
+    # via
+    #   bash-kernel
+    #   ipython
 pillow==10.4.0
     # via
     #   oceandata-notebooks (pyproject.toml)

@@ -9,6 +9,7 @@
 #     'appnope==0.1.4',
 #     'asttokens==2.4.1',
 #     'attrs==24.2.0',
+#     'bash-kernel==0.9.3',
 #     'bleach==6.1.0',
 #     'bokeh==3.6.0',
 #     'botocore==1.35.23',
@@ -119,7 +120,22 @@
 #     'zict==3.0.0',
 # ]
 # ///
+from argparse import ArgumentParser
+
 from ipykernel import kernelspec
+import bash_kernel.install
 
 if __name__ == "__main__":
-    kernelspec.InstallIPythonKernelSpecApp().launch_instance()
+    # install an ipython kernel
+    app = kernelspec.InstallIPythonKernelSpecApp()
+    app.initialize()
+    app.start()
+    argv = app.argv
+    # install the bash kernel, from a subset of the same arguments
+    parser = ArgumentParser()
+    parser.add_argument("--user", action="store_true")
+    parser.add_argument("--prefix", action="store_true")
+    parser.add_argument("--sys-prefix")
+    _, unknown = parser.parse_known_args(argv)
+    argv = [i for i in argv if i not in unknown]
+    bash_kernel.install.main(argv)

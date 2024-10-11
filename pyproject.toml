@@ -29,13 +29,14 @@
   ]
   [project.optional-dependencies]
     kernel = [
-      # src/setup.py
+      # extras for src/setup.py
+      "bash-kernel>=0.9.3",
       "ipykernel>=6.29.3",
       "ipywidgets>=8.1.2",
     ]
     hub = [
-      # hub/requirements.txt
-      "async-timeout>=4.0.3", # TODO: possible unlisted dep of jupyter-vscode-proxy
+      # extras for hub/requirements.txt
+      "async-timeout>=4.0.3", # TODO: possible unlisted dep of jupyter-vscode-proxy?
       "bash-kernel>=0.9.3",
       "dask-labextension>=7.0.0",
       "geopandas>=1.0.1",
