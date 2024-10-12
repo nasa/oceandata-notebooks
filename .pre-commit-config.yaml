@@ -10,9 +10,7 @@ repos:
       # Check for common mistakes
       - id: check-added-large-files
       - id: check-case-conflict
-      - id: check-illegal-windows-names
       - id: check-merge-conflict
-      - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: check-symlinks
       - id: check-vcs-permalinks
@@ -27,11 +25,11 @@ repos:
       - id: uv-lock
       - id: pip-compile
         name: compile-kernel-dependencies
-        args: [-q, --extra=kernel, -orequirements.txt, pyproject.toml]
+        args: [-q, --extra, kernel, -o, requirements.txt, pyproject.toml]
         files: ^pyproject\.toml$
       - id: pip-compile
         name: compile-hub-dependencies
-        args: [-q, --extra=hub, -ohub/requirements.txt, hub/requirements.in, pyproject.toml]
+        args: [-q, --extra, hub, -o, hub/requirements.txt, hub/requirements.in, pyproject.toml]
         files: ^(pyproject\.toml|hub/requirements\.in)$
   - repo: local
     hooks:
@@ -48,7 +46,7 @@ repos:
         language: python
         additional_dependencies:
           - tomlkit>=0.13.2
-        entry: python update-setup.py
+        entry: python update-setup.py -o book/setup.py
         files: ^requirements\.txt$
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.6.9
@@ -65,4 +63,4 @@ repos:
     hooks:
       - id: jupytext
         args: [--sync]
-        files: ^book/src/.*\.py$  # FIXME: no reason these would be staged
+        files: ^book/src/.*\.py$

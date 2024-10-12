@@ -6,8 +6,8 @@ from pathlib import Path
 import tomlkit
 
 
-def main(requirements: Path, script: Path) -> None:
-    with requirements.open() as f:
+def main(reqs: Path, script: Path) -> None:
+    with reqs.open() as f:
         pkgs = f.read()
     comment = re.compile(r"^\s*#")
     pkgs = [i for i in pkgs.splitlines() if not comment.match(i)]
@@ -31,11 +31,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Injects dependencies as inline pyproject metadata.",
     )
-    parser.add_argument(
-        "requirements", help="file listing requirements as PEP 508 strings", type=Path
-    )
-    parser.add_argument(
-        "-s", dest="script", help="target to modify", default="src/setup.py", type=Path
-    )
+    parser.add_argument("reqs", help="file listing requirements (PEP 508)", type=Path)
+    parser.add_argument("-o", dest="script", help="target to modify", type=Path)
     args = parser.parse_args()
     sys.exit(main(**vars(args)))
