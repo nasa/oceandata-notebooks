@@ -8,10 +8,11 @@ the [oceandata tutorials and data recipes][tutorials].
 > [!Note]
 > After you clone this repository, the `notebooks` folder will be empty. Open a
 > terminal at the project root and sync from the `src` with `jupytext`.
-> ```
-> $ shopt -s globstar  # enable `**` in Bash (can skip for Zsh)
-> $ jupytext --sync src/**/*.py
-> ```
+
+```shell
+$ shopt -s globstar  # enable `**` in Bash (can skip for Zsh)
+$ jupytext --sync src/**/*.py
+```
 
 Keeping notebooks in a code repository is tough for collaboration and curation
 because notebooks contain blobs of binary outputs and constantly changing metadata.
@@ -27,7 +28,7 @@ tracked by git. Save the ".ipynb", commit the ".py", and push.
 When you create a brand new notebook under the `notebooks` folder, it won't be visible
 as a notebook on GitHub until you create, commit, and push the "clean" version under `book`.
 To create the `book` version for GitHub, use `jupytext`.
-```
+```shell
 $ jupytext --sync book/src/path/to/tutorial.py
 $ git add book/notebooks/path/to/tutorial.ipynb
 ```
@@ -45,25 +46,12 @@ request to `main`, consider yourself a maintainer) will want to know.
 
 TODO: describe using pre-commit on changes between a branch to main
 
-TODO:
-  - why is thomas notebook different on website?
-  - get working on oss
-  - notebooks failing in `jb build src/`, see `src/_toc.yml`
-  - pre-commit markdown word wrap?
-  - index-url for pytorch, but it pre-empts everything
-  - apply license to separately downloadable files (setup.py, *.ipynb)
-  - changelog
-  - random cell ids, preserved id metadata from notebooks? (see https://github.com/mwouts/jupytext/issues/1263)
-  - fill in "How to Cite" once on Zenodo
-  - CodeQL static code analyzer
-  - keep the download and report issue buttons in the notebooks
-
 ### Dependencies
 
 For every `import` statement, or if a notebook requires a package to be installed
 for a backend (e.g. h5netcdf), make sure the package is listed in the `project.dependencies`
 array in `pyproject.toml`. You can add entries manually or using `uv`, as in:
-```
+```shell
 $ uv add scipy
 ```
 
@@ -73,7 +61,7 @@ The `hub` folder has configuration files that `repo2docker` uses to build an ima
 for use with a JupyterHub platform. The following command builds and runs the image locally,
 while the `jupyterhub/repo2docker-action` pushes built images to GitHub packages.
 
-```
+```shell
 $ uv sync --extra dev
 $ source .venv/bin/activate
 (oceandata-notebooks) $ repo2docker --appendix="$(< hub/appendix)" -p 8889:8888 hub jupyter lab --no-browser --ip 0.0.0.0
@@ -96,7 +84,7 @@ provides a way to test that all notebook are free of errors. Run the following c
 in an environment with all dependencies along with the jupyter-book and jupytext packages.
 
 Build the full book (the HTML files):
-```
+```shell
 $ uv sync --extra dev
 $ source .venv/bin/activate
 (oceandata-notebooks) $ jb build src
