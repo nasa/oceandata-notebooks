@@ -71,13 +71,13 @@ These configuration files are a bit complicated, but automated by `pre-commit` t
 on manual updates to `pyproject.toml` and `hub/environment.yml`. No `requirements`
 file in this repository should be manually edited. The `hub/environment.yml` is there
 for non-Python packages we prefer to get from conda-forge.
-1. `requirements.txt` are the locked dependencies needed in `src/setup.py`
+1. `requirements.txt` are the locked dependencies needed in `book/setup.py`
 1. `hub/requirements.in` are the (locked) packages from repo2docker and `hub/environment.yml`
 1. `hub/requirements.txt` are a merge of our (locked) dependencies `hub/requirements.in`
 
 ### Building Notebooks as HTML
 
-In addition to the ".py" files paired to notebooks, the `src` folder contains configuration
+In addition to the ".py" files paired to notebooks, the `book` folder contains configuration
 for a [Jupyter Book][jb]. Building the notebooks as one book allows for separation of content
 from the JavaScript and CSS, unlike standalone HTML files built with `nbconvert`. It also
 provides a way to test that all notebook are free of errors. Run the following commands
@@ -87,9 +87,9 @@ Build the full book (the HTML files):
 ```shell
 $ uv sync --extra dev
 $ source .venv/bin/activate
-(oceandata-notebooks) $ jb build src
+(oceandata-notebooks) $ jb build book
 ```
-That populates the `src/_build` folder. The folder is ignored by git, but its contents
+That populates the `book/_build` folder. The folder is ignored by git, but its contents
 can be provided to the web team. The `_templates` make the website look very plain on
 purpose, so that only the notebook content is included in the HTML files.
 
