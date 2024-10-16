@@ -28,9 +28,9 @@ repos:
         args: [-q, --extra, kernel, -o, requirements.txt, pyproject.toml]
         files: ^uv\.lock$
       - id: pip-compile
-        name: compile-hub-dependencies
-        args: [-q, --extra, hub, -o, hub/requirements.txt, hub/requirements.in, pyproject.toml]
-        files: ^(uv\.lock|hub/requirements\.in)$
+        name: compile-docker-dependencies
+        args: [-q, --extra, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml]
+        files: ^(uv\.lock|docker/requirements\.in)$
   - repo: local
     hooks:
       - id: repo2docker-requirements
@@ -39,8 +39,8 @@ repos:
         additional_dependencies:
           - jupyter-repo2docker>=2024.7.0
         pass_filenames: false
-        entry: repo2docker --volume hub/requirements.in:./out hub sh -c "pip list --format=freeze > out"
-        files: ^(uv\.lock|hub/environment\.yml)$
+        entry: repo2docker --volume docker/requirements.in:./out docker sh -c "pip list --format=freeze > out"
+        files: ^(uv\.lock|docker/environment\.yml)$
       - id: update-setup-py
         name: update-setup-py
         language: python

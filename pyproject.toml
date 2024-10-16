@@ -34,8 +34,8 @@
       "ipykernel>=6.29.3",
       "ipywidgets>=8.1.2",
     ]
-    hub = [
-      # extras for hub/requirements.txt
+    docker = [
+      # extras for docker/requirements.txt
       "async-timeout>=4.0.3", # TODO: possible unlisted dep of jupyter-vscode-proxy?
       "bash-kernel>=0.9.3",
       "dask-labextension>=7.0.0",

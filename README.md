@@ -61,24 +61,24 @@ array in `pyproject.toml`. You can add entries manually or using `uv`, as in:
 $ uv add scipy
 ```
 
-### Container Image: the `hub` folder
+### Container Image: the `docker` folder
 
-The `hub` folder has configuration files that `repo2docker` uses to build an image suitable
+The `docker` folder has configuration files that `repo2docker` uses to build an image suitable
 for use with a JupyterHub platform. The following command builds and runs the image locally,
 while the `jupyterhub/repo2docker-action` pushes built images to GitHub packages. You
 must have `docker` available to use `repo2docker`.
 
 ```shell
-(oceandata-notebooks) $ repo2docker --appendix="$(< hub/appendix)" -p 8889:8888 hub jupyter lab --no-browser --ip 0.0.0.0
+(oceandata-notebooks) $ repo2docker --appendix="$(< docker/appendix)" -p 8889:8888 docker jupyter lab --no-browser --ip 0.0.0.0
 ```
 
 The configuration files are a bit complicated, but updated automatically by `pre-commit`
-hooks following changes to `pyproject.toml` and `hub/environment.yml`. No `requirements`
-file in this repository should be manually edited. The `hub/environment.yml` is there
+hooks following changes to `pyproject.toml` and `docker/environment.yml`. No `requirements`
+file in this repository should be manually edited. The `docker/environment.yml` is there
 for non-Python packages we prefer to get from conda-forge.
 1. `requirements.txt` are the (locked) dependencies needed in `book/setup.py`
-1. `hub/requirements.in` are the (locked) packages from repo2docker and `hub/environment.yml`
-1. `hub/requirements.txt` are a merge of our (locked) dependencies `hub/requirements.in`
+1. `docker/requirements.in` are the (locked) packages from repo2docker and `docker/environment.yml`
+1. `docker/requirements.txt` are a merge of our (locked) dependencies `docker/requirements.in`
 
 ### Rendering to HTML: the `book` folder
 
