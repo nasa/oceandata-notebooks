@@ -52,10 +52,11 @@
       "zarr>=2.18.2",
     ]
     dev = [
-      # anything else
+      # extras for maintainer actions
       "jupyter-book>=1.0.2",
       "jupyter-repo2docker>=2024.7.0",
       "jupytext>=1.16.4",
+      "pre-commit>=4.0.1",
       "ruff>=0.6.9",
       "tomlkit>=0.13.2",
     ]

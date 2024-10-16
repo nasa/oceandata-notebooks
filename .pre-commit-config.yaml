@@ -26,11 +26,11 @@ repos:
       - id: pip-compile
         name: compile-kernel-dependencies
         args: [-q, --extra, kernel, -o, requirements.txt, pyproject.toml]
-        files: ^pyproject\.toml$
+        files: ^uv\.lock$
       - id: pip-compile
         name: compile-hub-dependencies
         args: [-q, --extra, hub, -o, hub/requirements.txt, hub/requirements.in, pyproject.toml]
-        files: ^(pyproject\.toml|hub/requirements\.in)$
+        files: ^(uv\.lock|hub/requirements\.in)$
   - repo: local
     hooks:
       - id: repo2docker-requirements
@@ -53,10 +53,10 @@ repos:
     hooks:
       - id: ruff
         args: ["--fix", "--exit-non-zero-on-fix"]
-        # prefer to fix the ipynbs
+        # prefer to lint the ipynbs
         exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
       - id: ruff-format
-        # prefer to fix the ipynbs
+        # prefer to format the ipynbs
         exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
   - repo: https://github.com/mwouts/jupytext
     rev: v1.16.4

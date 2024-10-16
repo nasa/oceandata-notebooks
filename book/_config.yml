@@ -7,8 +7,4 @@ sphinx:
   config:
     templates_path:
       - _templates
-    # nb_custom_formats:
-    #   .py:
-    #     - jupytext.reads
-    #     - fmt: py
-    #     - true  # use CommonMark (not MyST Markdown)
+# FIXME: use CommonMark (not MyST Markdown) ... maybe not jupyter book but what its built on?
