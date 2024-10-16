@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - .github/workflows/repo2docker.yaml
-      - hub/**
+      - docker/**
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
@@ -28,4 +28,4 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         DOCKER_REGISTRY: ghcr.io
         IMAGE_NAME: gsfc-oel/oss
-        APPENDIX_FILE: hub/appendix
+        APPENDIX_FILE: docker/appendix
