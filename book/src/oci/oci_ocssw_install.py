@@ -1,16 +1,20 @@
 # ---
 # jupyter:
 #   jupytext:
-#     cell_metadata_filter: all,-autoscroll,-trusted,-ExecuteTime
-#     notebook_metadata_filter: -kernelspec,NOTICE
+#     cell_metadata_filter: all,-trusted
+#     notebook_metadata_filter: all,-kernelspec
 #     text_representation:
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.16.4
+#   language_info:
+#     codemirror_mode: shell
+#     file_extension: .sh
+#     mimetype: text/x-sh
+#     name: bash
 # ---
 
-# + [markdown] editable=true slideshow={"slide_type": ""}
 # # Installing and Running OCSSW Command-line Tools
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
@@ -51,7 +55,6 @@
 # 2. [Install OCSSW](#2.-Install-OCSSW)
 # 3. [Process Data with `l2gen`](#3.-Process-Data-with-`l2gen`)
 # 4. [All-in-One](#4.-All-in-One)
-# -
 
 # ## 1. Setup
 #

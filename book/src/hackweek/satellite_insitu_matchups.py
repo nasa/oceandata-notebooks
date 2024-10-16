@@ -1,13 +1,23 @@
 # ---
 # jupyter:
 #   jupytext:
-#     cell_metadata_filter: all,-autoscroll,-trusted,-ExecuteTime
-#     notebook_metadata_filter: -kernelspec,NOTICE
+#     cell_metadata_filter: all,-trusted
+#     notebook_metadata_filter: all,-kernelspec
 #     text_representation:
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.16.4
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.12.7
 # ---
 
 # # Matchups of in situ data with satellite data
