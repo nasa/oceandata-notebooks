@@ -1,3 +1,15 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: all,-autoscroll,-trusted,-ExecuteTime
+#     notebook_metadata_filter: -kernelspec,NOTICE
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.16.4
+# ---
+
 # # Orientation to Earthdata Cloud Access
 #
 # **Tutorial Lead:** Anna Windle (NASA, SSAI)

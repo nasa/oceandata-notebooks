@@ -7,4 +7,5 @@ sphinx:
   config:
     templates_path:
       - _templates
+    myst_commonmark_only: true
 # FIXME: use CommonMark (not MyST Markdown) ... maybe not jupyter book but what its built on?

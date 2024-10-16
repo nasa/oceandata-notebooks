@@ -1,3 +1,15 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: all,-autoscroll,-trusted,-ExecuteTime
+#     notebook_metadata_filter: -kernelspec,NOTICE
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.16.4
+# ---
+
 # # Explore Level-2 Ocean Color Data from the Moderate Resolution Imaging Spectroradiometer (MODIS)
 #
 # **Authors:** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
@@ -43,12 +55,14 @@
 #
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
+# +
 import cartopy
 import earthaccess
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 from IPython.display import JSON
+# -
 
 
 # [back to top](#Contents)

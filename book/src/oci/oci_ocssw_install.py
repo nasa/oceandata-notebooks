@@ -1,4 +1,16 @@
-# + [markdown] tags=[]
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: all,-autoscroll,-trusted,-ExecuteTime
+#     notebook_metadata_filter: -kernelspec,NOTICE
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.16.4
+# ---
+
+# + [markdown] editable=true slideshow={"slide_type": ""}
 # # Installing and Running OCSSW Command-line Tools
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
@@ -59,7 +71,7 @@
 #
 # Convert the following cell from type "Raw" to "Code", using the notebook menu, and run it. If the terminal prompts you, enter "Y" to accept.
 
-# + scrolled=true active=""
+# + scrolled=true tags=["scroll-output"] active=""
 # %conda install bash_kernel
 # -
 
@@ -85,7 +97,7 @@ chmod +x install_ocssw
 
 # Take a look at the different OCSSW "tags" you can install. It is recommended to use the most recent one for the installation, which is T2024.16 at the time of writing this tutorial. Tags starting with "V" are operational versions, and tags starting with "T" are test versions. Use "T" to process the latest data products, but keep in mind that processing can change a lot between tags. Other tags are deprecated, including those starting with "R".
 
-# + scrolled=true
+# + scrolled=true tags=["scroll-output"]
 ./install_ocssw --list_tags
 # -
 
@@ -127,7 +139,7 @@ which install_ocssw
 #
 # [docs]: https://seadas.gsfc.nasa.gov/help-8.3.0/processors/ProcessL2gen.html
 
-# + scrolled=true
+# + scrolled=true tags=["scroll-output"]
 l2gen
 # -
 
@@ -137,19 +149,15 @@ l2gen
 #
 # For this example, we will be using the L1B file downloaded in the OCI Data Access notebook. Confirm that the L1B file to process is at the expected location by listing (with `ls`) the directory contents. If the directory is empty, check that you've completed the prerequiste notebooks for this tutorial!
 
-# + tags=[]
 # ls L1B
-# -
 
 # Create a directory for output files.
 
-# + tags=[]
 # mkdir L2
-# -
 
 # And run! Note, this may take several minutes.
 
-# + scrolled=true
+# + scrolled=true tags=["scroll-output"]
 l2gen \
   ifile=L1B/PACE_OCI.20240501T165311.L1B.nc \
   ofile=L2/PACE_OCI.20240501T165311.L2.SFREFL.nc \

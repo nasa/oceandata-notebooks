@@ -1,3 +1,15 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: all,-autoscroll,-trusted,-ExecuteTime
+#     notebook_metadata_filter: -kernelspec,NOTICE
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.16.4
+# ---
+
 # # Processing with OCSSW Command Line Interface (CLI)
 #
 # **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
@@ -59,14 +71,15 @@ import earthaccess
 import matplotlib.pyplot as plt
 import xarray as xr
 from IPython.display import display
-# -
 
+# + [markdown]
 # We are also going to define a function to help write OCSSW parameter files, which
 # is needed several times in this tutorial. To write the results in the format understood
 # by OCSSW, this function uses the `csv.writer` from the Python Standard Library. Instead of
 # writing comma-separated values, however, we specify a non-default delimiter to get
 # equals-separated values. Not something you usually see in a data file, but it's better than
 # writing our own utility from scratch!
+# -
 
 
 def write_par(path, par):

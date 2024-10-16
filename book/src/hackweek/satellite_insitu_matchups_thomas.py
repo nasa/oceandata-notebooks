@@ -1,3 +1,15 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: all,-autoscroll,-trusted,-ExecuteTime
+#     notebook_metadata_filter: -kernelspec,NOTICE
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.16.4
+# ---
+
 # # Matchups of in situ data with satellite data using the ThoMaS match-up toolkit
 # **Authors:** Anna Windle (NASA, SSAI), James Allen (NASA, Morgan State University), Juan Ignacio Gossn (EUMETSAT), Ben Loveday (EUMETSAT)
 #

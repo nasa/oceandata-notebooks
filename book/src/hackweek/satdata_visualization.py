@@ -1,3 +1,15 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: all,-autoscroll,-trusted,-ExecuteTime
+#     notebook_metadata_filter: -kernelspec,NOTICE
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.16.4
+# ---
+
 # # Satellite Data Visualization
 #
 # **Tutorial Leads:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC) and Sean Foley (NASA, MSU)
@@ -57,11 +69,14 @@ from PIL import Image, ImageEnhance
 from scipy.ndimage import gaussian_filter1d
 from xarray.backends.api import open_datatree
 
+# +
 options = xr.set_options(display_expand_attrs=False)
+# -
 
 
 # In this tutorial, we suppress runtime warnings that show up when calculating log for negative values, which is common with our datasets.
 
+# + [markdown]
 # Define a function to apply enhancements, our own plus generic image enhancements from the Pillow package.
 
 
@@ -238,8 +253,10 @@ rrs_rgb_enhanced = enhancel3(rrs_rgb)
 
 # And we create the image using the `imshow` function.
 
+# +
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
 plt.gca().set_aspect("equal")
+# -
 
 
 # Finally, we can add a grid and coastlines to the map with `cartopy` tools.
@@ -582,7 +599,9 @@ plt.show()
 
 # [back to top](#Contents)
 
+# + [markdown]
 # ## 7. Full Spectra from Global Oceans
+# -
 
 
 # <div class="alert alert-warning" role="alert">
@@ -618,10 +637,13 @@ def single_band(w):
     )
 
 
+# +
 single_band(368)
 
 
+# + [markdown]
 # In order to explore the hyperspectral datasets from PACE, we can have a look at the Rrs Spectrum at a certain location.
+# -
 
 
 def spectrum(x, y):
@@ -684,13 +706,16 @@ dataset
 #
 # Pull out the view angles and wavelengths.
 
+# +
 angles = view["sensor_view_angle"]
 wavelengths = view["intensity_wavelength"]
 
 
+# + [markdown]
 # ### Radiance to Reflectance
 #
 # We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). This conversion compensates for the differences in appearance due to the viewing angle and sun angle. Write the conversion as a function, because you may need to repeat it.
+# -
 
 
 def rad_to_refl(rad, f0, sza, r):
