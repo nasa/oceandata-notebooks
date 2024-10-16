@@ -46,7 +46,7 @@ repos:
         language: python
         additional_dependencies:
           - tomlkit>=0.13.2
-        entry: python update-setup.py -o book/setup.py
+        entry: python book/update-setup.py -o book/setup.py
         files: ^requirements\.txt$
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.6.9
