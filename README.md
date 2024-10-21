@@ -5,44 +5,52 @@ The code repository for the collection of notebooks distributed as
 
 ## For Contributors
 
+> [!IMPORTANT]
+> - Edit notebooks in JupyterLab so Jupytext can do its magic.
+> - Create new notebooks under the `notebooks` folder, starting from a copy of `COPYME.ipynb`.
+
+Keeping notebooks in a code repository is tough for collaboration and curation
+because notebooks contain large, binary outputs and metadata that messes up `git merge`.
+This repository uses [Jupytext][jupytext] to keep notebooks (the ".ipynb" files) paired
+with plain text files (the ".py" files). Contributors should work on the ".ipynb" files
+in the `notebooks` folder. These files are ignored by git, but the paired ".py" files are
+not. So, save your changes in a notebook, commit the paired ".py" file, and push.
+
 > [!Note]
-> After you clone this repository, the `notebooks` folder will be empty. Open a
-> terminal at the project root and sync from the `src` with `jupytext`.
+> When you first clone this repository, the `notebooks` folder will be empty. Open a
+> terminal at the project root and sync from the `src` using `jupytext`.
 
 ```shell
 $ shopt -s globstar  # enables `**` in Bash (enabled by default in Zsh)
 $ jupytext --sync src/**/*.py
 ```
-
-Keeping notebooks in a code repository is tough for collaboration and curation
-because notebooks contain blobs of binary outputs and have constantly changing metadata.
-This repository uses [Jupytext][jupytext] to keep each notebook (".ipynb" files) paired
-with a plain text file (".py" files). Contributors should work on ".ipynb" files under
-the `notebooks` folder. While these files are ignored by git, the paired ".py" files are
-not. So, save your notebook changes, commit the ".py" files, and push.
-
-> [!IMPORTANT]
-> - Edit notebooks in JupyterLab so Jupytext can do its magic.
-> - Create new notebooks under the `notebooks` folder, starting from a copy of `COPYME.ipynb`.
+You can run this any time to ensure there is an ".ipynb" file in your `notebooks` folder
+for every ".py" file in the `src` folder.
 
 ## For Maintainers
 
-The subsections below provide information that repository maintainers (if you merge a pull
-request to `main`, consider yourself a maintainer) will want to know. You will need the
-`uv` command line tool to prepare a development environment for certain actions.
+The subsections below provides information that repository maintainers will want to know.
+If you merge a pull request to `main`, consider yourself a maintainer.
+
+<!-- TODO: pre-commit shows warning when run in virtual env -->
+
+### Development Environment: the `uv.lock` file
+
+We use the `uv` command line tool to maintain a virtual environment for maintainer activities,
+which you should install separately (a `pip install --user` or `pipx install` both work).
+The `uv sync` command creates the development environment from the `uv.lock` file.
 ```shell
 $ uv sync --extra dev
 $ source .venv/bin/activate
 (oceandata-notebooks) $
 ```
-The `uv` command line tool is not included as a `dev` dependency, as is common for projects
-that build Python packages. Since this is not a Python package, we want to avoid `pip install ".[dev]"`.
 
 ### Automation and Checks: the `.pre-commit-config.yaml` file
 
 We use several automations to get standard code formatting, run lint checks, and ensure
 consistency between ".py" and ".ipynb" files. These are implemented using the [pre-commit]
-tool. You can install git hooks too run these automations, as needed, at every commit.
+tool from the development environment. You can setup git hooks to run these automations,
+as needed, at every commit.
 ```shell
 (oceandata-notebooks) $ pre-commit install
 ```
@@ -81,6 +89,10 @@ for non-Python packages available on conda-forge; we use PyPI for Python package
 1. `requirements.txt` are the (locked) dependencies needed in `book/setup.py`
 1. `docker/requirements.in` are the (locked) packages from repo2docker and `docker/environment.yml`
 1. `docker/requirements.txt` are a merge of our (locked) dependencies with `docker/requirements.in`
+
+> [!Note]
+> The top-level `requirements.txt` file is located there to also provide dependencies for
+> [Binder](https://mybinder.org/).
 
 ### Rendering to HTML: the `book` folder
 
