@@ -1,0 +1,28 @@
+ARG OCSSWTAG=V2024.6
+ARG OCSSWROOT=/opt/ocssw
+ENV OCSSWROOT=${OCSSWROOT}
+
+# install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
+USER root
+RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d ${OCSSWROOT}
+USER ${NB_USER}
+RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw && \
+    wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py && \
+    chmod +x install_ocssw && \
+    ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt && \
+    rm install_ocssw manifest.py
+
+# install (locked) dependencies for oceandata-notebooks[hub]
+RUN pip install --no-cache-dir --no-deps \
+      --no-binary h5py \
+      --no-binary netcdf4 \
+      -r requirements.txt
+
+# set a safer default editor
+ENV EDITOR=nano
+
+# TODO: set up gh-scoped-creds
+# tell gh-scoped-creds which GitHub app to use for push access
+# see https://github.com/jupyterhub/gh-scoped-creds#github-app-configuration
+# ENV GH_SCOPED_CREDS_CLIENT_ID=
+# ENV GH_SCOPED_CREDS_APP_URL=
