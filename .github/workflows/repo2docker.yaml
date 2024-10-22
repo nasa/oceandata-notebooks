@@ -22,7 +22,8 @@ jobs:
     - name: checkout files in repo
       uses: actions/checkout@v4
       with:
-        sparse-checkout: docker/*
+        sparse-checkout: docker
+        sparse-checkout-cone-mode: false
     - name: move repo2docker files
       run: |
         mv docker/* .
