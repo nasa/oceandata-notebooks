@@ -1,10 +1,11 @@
-ARG GOOFYS_BIN=/opt/goofys/bin/
+ARG GOOFYS_PREFIX=/opt/goofys
 ARG GOOFYS_VERSION=v0.24.0
 
 # # install goofys for s3-mount
 USER root
-RUN /usr/bin/install -d ${GOOFYS_BIN} && \
-    wget -O ${GOOFYS_BIN}/goofys https://github.com/kahing/goofys/releases/download/${GOOFYS_VERSION}/goofys
+RUN wget https://github.com/kahing/goofys/releases/download/${GOOFYS_VERSION}/goofys && \
+    /usr/bin/install -D goofys ${GOOFYS_PREFIX}/bin/goofys && \
+    rm goofys
 USER ${NB_USER}
 
 # # install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
