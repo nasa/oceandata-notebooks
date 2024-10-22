@@ -4,8 +4,8 @@
   description = "Oceandata Jupyter Notebook Tutorials"
   requires-python = ">=3.9"
   readme = "README.md"
+  # every package used in an import or by a backend (e.g. h5netcdf)
   dependencies = [
-    # every package used in an import or by a backend (e.g. h5netcdf)
     "cartopy>=0.22.0",
     "cmocean>=4.0.3",
     "dask[distributed]>=2024.4.1",
@@ -29,14 +29,13 @@
   ]
   [project.optional-dependencies]
     kernel = [
-      # extras for src/setup.py
       "bash-kernel>=0.9.3",
       "ipykernel>=6.29.3",
       "ipywidgets>=8.1.2",
     ]
     docker = [
-      # extras for docker/requirements.txt
-      "async-timeout>=4.0.3", # TODO: possible unlisted dep of jupyter-vscode-proxy?
+      "async-timeout>=4.0.3",
+      # TODO: possible unlisted dep of jupyter-vscode-proxy?
       "bash-kernel>=0.9.3",
       "dask-labextension>=7.0.0",
       "geopandas>=1.0.1",
@@ -52,7 +51,6 @@
       "zarr>=2.18.2",
     ]
     dev = [
-      # extras for maintainer actions
       "jupyter-book>=1.0.2",
       "jupyter-repo2docker>=2024.7.0",
       "jupytext>=1.16.4",

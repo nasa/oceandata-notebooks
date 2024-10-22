@@ -1,17 +1,20 @@
-# # Dependencies for nbconvert and myst
-# LaTeX tools
-texlive-xetex
-texlive-plain-generic
-texlive-fonts-extra
-texlive-fonts-recommended
-texlive-lang-chinese
-texlive-science
-latexmk
-lmodern
-latexdiff
-# other useful document-related tools
-pandoc
-imagemagick
+# # # Dependencies for nbconvert and myst
+# # LaTeX tools
+# texlive-xetex
+# texlive-plain-generic
+# texlive-fonts-extra
+# texlive-fonts-recommended
+# texlive-lang-chinese
+# texlive-science
+# latexmk
+# lmodern
+# latexdiff
+# # other useful document-related tools
+# pandoc
+# imagemagick
+
+# # Dependencies for OSS
+fuse
 
 # # Other niceties for command-line work and life
 htop

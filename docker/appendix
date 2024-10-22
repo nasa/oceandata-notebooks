@@ -1,16 +1,24 @@
-ARG OCSSWTAG=V2024.6
-ARG OCSSWROOT=/opt/ocssw
-ENV OCSSWROOT=${OCSSWROOT}
+ARG GOOFYS_BIN=/opt/goofys/bin/
+ARG GOOFYS_VERSION=v0.24.0
 
-# install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
+# # install goofys for s3-mount
 USER root
-RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d ${OCSSWROOT}
+RUN /usr/bin/install -d ${GOOFYS_BIN} && \
+    wget -O ${GOOFYS_BIN}/goofys https://github.com/kahing/goofys/releases/download/${GOOFYS_VERSION}/goofys
 USER ${NB_USER}
-RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw && \
-    wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py && \
-    chmod +x install_ocssw && \
-    ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt && \
-    rm install_ocssw manifest.py
+
+# # install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
+# ARG OCSSWTAG=V2024.6
+# ARG OCSSWROOT=/opt/ocssw
+# ENV OCSSWROOT=${OCSSWROOT}
+# USER root
+# RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d ${OCSSWROOT}
+# USER ${NB_USER}
+# RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw && \
+#     wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py && \
+#     chmod +x install_ocssw && \
+#     ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt && \
+#     rm install_ocssw manifest.py
 
 # install (locked) dependencies for oceandata-notebooks[hub]
 RUN pip install --no-cache-dir --no-deps \
