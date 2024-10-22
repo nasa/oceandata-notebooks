@@ -13,11 +13,8 @@
 # pandoc
 # imagemagick
 
-# # Dependencies for OSS
+# # Dependencies for Navteca OSS JupyterHub
 fuse
 
-# # Other niceties for command-line work and life
-htop
-jq
+# # Other
 nano
-tree

@@ -7,6 +7,7 @@ RUN wget https://github.com/kahing/goofys/releases/download/${GOOFYS_VERSION}/go
     /usr/bin/install -D goofys ${GOOFYS_PREFIX}/bin/goofys && \
     rm goofys
 USER ${NB_USER}
+ENV PATH="${PATH}:${GOOFYS_PREFIX}/bin"
 
 # # install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
 # ARG OCSSWTAG=V2024.6
