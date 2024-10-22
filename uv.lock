@@ -2655,6 +2655,19 @@ wheels = [
 ]
 
 [[package]]
+name = "nbgitpuller"
+version = "1.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "jupyter-server" },
+    { name = "tornado" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f2/73/2b27e4820a04e50e9eb275dee9893c60f559646b1ab7bc571834e1b80707/nbgitpuller-1.2.1.tar.gz", hash = "sha256:c3d8e13215d31387e0ef0d264cdc8676cfe4f364c27f3664b4e7bd04996ee64d", size = 323557 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ce/1b/57f179e069719c8c09319792d39243ace38d0db44ad30de49bb3ece5348b/nbgitpuller-1.2.1-py2.py3-none-any.whl", hash = "sha256:b0d055450b1395706faf34d8ccff2c43ba41e2aa8ddf5e4dbf38c0d96080d71e", size = 316890 },
+]
+
+[[package]]
 name = "nest-asyncio"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2881,6 +2894,7 @@ docker = [
     { name = "jupyter-vscode-proxy" },
     { name = "jupyterlab-git" },
     { name = "jupyterlab-h5web" },
+    { name = "nbgitpuller" },
     { name = "rasterio" },
     { name = "rioxarray" },
     { name = "scikit-image" },
@@ -2918,6 +2932,7 @@ requires-dist = [
     { name = "jupyterlab-h5web", marker = "extra == 'docker'", specifier = ">=12.3.0" },
     { name = "jupytext", marker = "extra == 'dev'", specifier = ">=1.16.4" },
     { name = "matplotlib", specifier = ">=3.8.4" },
+    { name = "nbgitpuller", marker = "extra == 'docker'", specifier = ">=1.2.1" },
     { name = "netcdf4", specifier = ">=1.6.5" },
     { name = "numba", specifier = ">=0.60.0" },
     { name = "pandas", specifier = ">=2.2.1" },

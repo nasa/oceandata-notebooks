@@ -394,6 +394,7 @@ jupyter-server==2.13.0
     #   jupyterlab-server
     #   nbclassic
     #   nbdime
+    #   nbgitpuller
     #   notebook-shim
 jupyter-server-mathjax==0.2.6
     # via nbdime
@@ -512,6 +513,8 @@ nbformat==5.10.3
     #   nbconvert
     #   nbdime
     #   notebook
+nbgitpuller==1.2.1
+    # via oceandata-notebooks (pyproject.toml)
 nest-asyncio==1.6.0
     # via
     #   -r docker/requirements.in
@@ -914,6 +917,7 @@ tornado==6.4
     #   jupyterlab
     #   nbclassic
     #   nbdime
+    #   nbgitpuller
     #   notebook
     #   terminado
 tqdm==4.66.5
