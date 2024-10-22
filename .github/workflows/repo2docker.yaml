@@ -36,3 +36,4 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         DOCKER_REGISTRY: ghcr.io
         APPENDIX_FILE: appendix
+        FORCE_REPO2DOCKER_VERSION: repo2docker==2024.7.0

@@ -3,7 +3,7 @@ ARG GOOFYS_VERSION=v0.24.0
 
 # # install goofys for s3-mount
 USER root
-RUN wget https://github.com/kahing/goofys/releases/download/${GOOFYS_VERSION}/goofys && \
+RUN wget -q https://github.com/kahing/goofys/releases/download/${GOOFYS_VERSION}/goofys && \
     /usr/bin/install -D goofys ${GOOFYS_PREFIX}/bin/goofys && \
     rm goofys
 USER ${NB_USER}
