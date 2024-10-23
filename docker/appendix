@@ -7,7 +7,11 @@ RUN wget -q https://github.com/kahing/goofys/releases/download/${GOOFYS_VERSION}
     /usr/bin/install -D goofys ${GOOFYS_PREFIX}/bin/goofys && \
     rm goofys
 USER ${NB_USER}
-ENV PATH="${PATH}:${GOOFYS_PREFIX}/bin"
+ENV PATH=${PATH}:${GOOFYS_PREFIX}/bin
+
+USER root
+RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} pangeo-start /srv/start
+USER ${NB_USER}
 
 # # install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
 # ARG OCSSWTAG=V2024.6
@@ -22,11 +26,11 @@ ENV PATH="${PATH}:${GOOFYS_PREFIX}/bin"
 #     ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt && \
 #     rm install_ocssw manifest.py
 
-# install (locked) dependencies for oceandata-notebooks[hub]
-RUN pip install --no-cache-dir --no-deps \
-      --no-binary h5py \
-      --no-binary netcdf4 \
-      -r requirements.txt
+# # install (locked) dependencies for oceandata-notebooks[hub]
+# RUN pip install --no-cache-dir --no-deps \
+#       --no-binary h5py \
+#       --no-binary netcdf4 \
+#       -r requirements.txt
 
 # set a safer default editor
 ENV EDITOR=nano
