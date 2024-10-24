@@ -37,7 +37,7 @@ repos:
         name: repo2docker-requirements
         language: python
         additional_dependencies:
-          - jupyter-repo2docker>=2024.7.0
+          - jupyter-repo2docker==2024.7.0
         pass_filenames: false
         entry: repo2docker --volume docker/requirements.in:./out docker sh -c "pip list --format=freeze > out"
         files: ^(uv\.lock|docker/environment\.yml)$
@@ -64,3 +64,13 @@ repos:
       - id: jupytext
         args: [--sync]
         files: ^book/src/.*\.py$
+  - repo: local
+    hooks:
+      - id: repo2docker-build
+        name: repo2docker-build
+        language: python
+        additional_dependencies:
+          - jupyter-repo2docker==2024.7.0
+        pass_filenames: false
+        entry: repo2docker --appendix "$(< docker/appendix)" --no-run docker
+        files: ^docker/.*$

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export SCRATCH_BUCKET=smce-oel-oss-scratch/${JUPYTERHUB_USER}
+
+exec "$@"

@@ -53,7 +53,7 @@
     ]
     dev = [
       "jupyter-book>=1.0.2",
-      "jupyter-repo2docker==2024.7.0", # matched pin in .github/workflows/repo2docker.yaml
+      "jupyter-repo2docker==2024.7.0", # matched pin in .github/workflows/repo2docker.yaml and pre-commit
       "jupytext>=1.16.4",
       "pre-commit>=4.0.1",
       "ruff>=0.6.9",
