@@ -1,5 +1,8 @@
-# install goofys for s3-mount
+# use goofys for s3-readonly mounts
 COPY --from=public.ecr.aws/smce/smce-images:smce-oss-earth-base-9f9fc2c3 /opt/goofys /opt/goofys
+USER root
+RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d /s3-readonly
+USER ${NB_USER}
 
 # install aws cli
 USER root
@@ -32,7 +35,7 @@ RUN pip install --no-cache-dir --no-deps \
 # environment variables
 ENV EDITOR=nano OCSSWROOT=${OCSSWROOT}
 
-CMD ["jupyter", "lab", "--no-browser", "--ip", "0.0.0.0"]
+CMD "jupyter lab --no-browser --ip 0.0.0.0"
 
 # TODO: set up gh-scoped-creds
 # tell gh-scoped-creds which GitHub app to use for push access
