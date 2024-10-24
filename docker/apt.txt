@@ -1,3 +1,6 @@
+# # Dependencies for Navteca OSS JupyterHub
+fuse
+
 # # # Dependencies for nbconvert and myst
 # # LaTeX tools
 # texlive-xetex
@@ -11,10 +14,7 @@
 # latexdiff
 # # other useful document-related tools
 # pandoc
-# imagemagick
-
-# # Dependencies for Navteca OSS JupyterHub
-fuse
 
 # # Other
 nano
+imagemagick

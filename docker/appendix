@@ -1,36 +1,25 @@
-ARG GOOFYS_PREFIX=/opt/goofys
-ARG GOOFYS_VERSION=v0.24.0
+# install goofys for s3-mount
+COPY --from=public.ecr.aws/smce/smce-images:smce-oss-earth-base-9f9fc2c3 /opt/goofys /opt/goofys
+ENV PATH=${PATH}:/opt/goofys/bin
 
-# # install goofys for s3-mount
+# install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
+ARG OCSSWTAG=V2024.6
+ARG OCSSWROOT=/opt/ocssw
+ENV OCSSWROOT=${OCSSWROOT}
 USER root
-RUN wget -q https://github.com/kahing/goofys/releases/download/${GOOFYS_VERSION}/goofys && \
-    /usr/bin/install -D goofys ${GOOFYS_PREFIX}/bin/goofys && \
-    rm goofys
+RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d ${OCSSWROOT}
 USER ${NB_USER}
-ENV PATH=${PATH}:${GOOFYS_PREFIX}/bin
+RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw && \
+    wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py && \
+    chmod +x install_ocssw && \
+    ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt && \
+    rm install_ocssw manifest.py
 
-USER root
-RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} pangeo-start /srv/start
-USER ${NB_USER}
-
-# # install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
-# ARG OCSSWTAG=V2024.6
-# ARG OCSSWROOT=/opt/ocssw
-# ENV OCSSWROOT=${OCSSWROOT}
-# USER root
-# RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d ${OCSSWROOT}
-# USER ${NB_USER}
-# RUN wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw && \
-#     wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py && \
-#     chmod +x install_ocssw && \
-#     ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt && \
-#     rm install_ocssw manifest.py
-
-# # install (locked) dependencies for oceandata-notebooks[hub]
-# RUN pip install --no-cache-dir --no-deps \
-#       --no-binary h5py \
-#       --no-binary netcdf4 \
-#       -r requirements.txt
+# install (locked) dependencies for oceandata-notebooks[hub]
+RUN pip install --no-cache-dir --no-deps \
+      --no-binary h5py \
+      --no-binary netcdf4 \
+      -r requirements.txt
 
 # set a safer default editor
 ENV EDITOR=nano
