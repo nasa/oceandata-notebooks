@@ -1,7 +1,7 @@
 # Oceandata Notebooks
 
 The code repository for the collection of notebooks distributed as
-[oceandata tutorials and data recipes][tutorials].
+[data recipes for the Ocean Biology DAAC][data-recipes].
 
 ## For Contributors
 
@@ -30,19 +30,18 @@ for every ".py" file in the `src` folder.
 ## For Maintainers
 
 The subsections below provides information that repository maintainers will want to know.
-If you merge a pull request to `main`, consider yourself a maintainer.
 
-<!-- TODO: pre-commit shows warning when run in virtual env -->
+> [!IMPORTANT]
+> If you merge a pull requests to `main`, consider yourself a maintainer.
 
 ### Development Environment: the `uv.lock` file
 
 We use the `uv` command line tool to maintain a virtual environment for maintainer activities,
-which you should install separately (a `pip install --user` or `pipx install` both work).
+which you should install separately (`pip install --user uv` or `pipx install uv` both work).
 The `uv sync` command creates the development environment from the `uv.lock` file.
 ```shell
 $ uv sync --extra dev
-$ source .venv/bin/activate
-(oceandata-notebooks) $
+$ PATH=.venv/bin/:$PATH
 ```
 
 ### Automation and Checks: the `.pre-commit-config.yaml` file
@@ -52,12 +51,16 @@ consistency between ".py" and ".ipynb" files. These are implemented using the [p
 tool from the development environment. You can setup git hooks to run these automations,
 as needed, at every commit.
 ```shell
-(oceandata-notebooks) $ pre-commit install
+$ pre-commit install
 ```
 You can also run checks over all files chaged on a feature branch or the currently
 checked out git ref. For the latter:
 ```shell
-(oceandata-notebooks) $ pre-commit run --from-ref main --to-ref HEAD
+$ pre-commit run --from-ref main --to-ref HEAD
+```
+If you have `docker` available, you can build the image defined in the `docker` folder.
+```shell
+$ pre-commit run --hook-stage manual repo2docker-build
 ```
 
 ### Dependencies: the `pyproject.toml` file
@@ -79,7 +82,7 @@ while the `jupyterhub/repo2docker-action` pushes built images to GitHub packages
 must have `docker` available to use `repo2docker`.
 
 ```shell
-(oceandata-notebooks) $ repo2docker --appendix="$(< docker/appendix)" -p 8889:8888 docker jupyter lab --no-browser --ip 0.0.0.0
+$ repo2docker --user-name jovyan --appendix "$(< docker/appendix)" -p 8889:8888 docker jupyter lab --no-browser --ip 0.0.0.0
 ```
 
 The configuration files are a bit complicated, but updated automatically by `pre-commit`
@@ -103,7 +106,7 @@ JavaScript and CSS, and a test that all notebook run without errors.
 
 To build the book:
 ```shell
-(oceandata-notebooks) $ jb build book
+$ jb build book
 ```
 That populates the `book/_build` folder. The folder is ignored by git, but its contents
 can be provided to the web team. The `_templates` make the website look very plain on
@@ -119,13 +122,11 @@ $ git add book/notebooks/path/to/new/tutorial.ipynb
 Opening the notebook this creates under `book/notebooks` in JupyterLab will add unwanted
 metadata. Do not commit any changes introduced by opening the new notebook.
 
-## How to Cite
-
 ## Acknowledgements
 This repository has greatly benefited from works of multiple open-science projects,
 notably [Learn OLCI][learn-olci] and the [NASA EarthData Cloud Cookbook][cookbook].
 
-[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
+[data-recipes]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 [jupytext]: https://jupytext.readthedocs.io/
 [jupyterlab]: https://jupyter.org
 [jb]: https://jupyterbook.org

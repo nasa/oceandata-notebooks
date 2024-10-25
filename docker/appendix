@@ -35,7 +35,8 @@ RUN pip install --no-cache-dir --no-deps \
 # environment variables
 ENV EDITOR=nano OCSSWROOT=${OCSSWROOT}
 
-CMD "jupyter lab --no-browser --ip 0.0.0.0"
+# TODO: https://github.com/jupyterhub/repo2docker/issues/1374
+CMD ["jupyter", "lab", "--no-browser", "--ip", "0.0.0.0"]
 
 # TODO: set up gh-scoped-creds
 # tell gh-scoped-creds which GitHub app to use for push access

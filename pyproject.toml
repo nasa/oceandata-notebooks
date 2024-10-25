@@ -4,6 +4,7 @@
   description = "Oceandata Jupyter Notebook Tutorials"
   requires-python = ">=3.9"
   readme = "README.md"
+  maintainers = [{ "name" = "Ian Carroll", "email" = "ian.t.carroll@nasa.gov" }]
   # every package used in an import or by a backend (e.g. h5netcdf)
   dependencies = [
     "cartopy>=0.22.0",
@@ -28,14 +29,15 @@
     "xarray>=2024.3.0",
   ]
   [project.optional-dependencies]
+    # additional packages for docker/setup.py
     kernel = [
       "bash-kernel>=0.9.3",
       "ipykernel>=6.29.3",
       "ipywidgets>=8.1.2",
     ]
+    # additional packages for docker/requirements.txt
     docker = [
-      "async-timeout>=4.0.3",
-      # TODO: possible unlisted dep of jupyter-vscode-proxy?
+      "async-timeout>=4.0.3", # TODO: possible unlisted dep of jupyter-vscode-proxy?
       "bash-kernel>=0.9.3",
       "dask-labextension>=7.0.0",
       "geopandas>=1.0.1",
@@ -51,6 +53,7 @@
       "scikit-learn>=1.5.2",
       "zarr>=2.18.2",
     ]
+    # additional packages for maintenance activities
     dev = [
       "jupyter-book>=1.0.2",
       "jupyter-repo2docker==2024.7.0", # matched pin in .github/workflows/repo2docker.yaml and pre-commit
@@ -59,29 +62,11 @@
       "ruff>=0.6.9",
       "tomlkit>=0.13.2",
     ]
-  [[project.maintainers]]
-    name = "Ian Carroll"
-    email = "ian.t.carroll@nasa.gov"
   [project.license]
     text = "Apache-2.0"
   [project.urls]
     Repository = "https://github.com/gsfc-oel/oceandata-notebooks"
     Issues = "https://github.com/gsfc-oel/oceandata-notebooks/issues"
-  [[project.authors]]
-    name = "Ian Carroll"
-    email = "ian.t.carroll@nasa.gov"
-  [[project.authors]]
-    name = "Anna Windle DiPaola"
-    email = "anna.windledipaola@nasa.gov"
-  [[project.authors]]
-    name = "Sean Foley"
-    email = "sean.r.foley@nasa.gov"
-  [[project.authors]]
-    name = "Carina Poulin"
-    email = "carina.poulin@nasa.gov"
-  [[project.authors]]
-    name = "Guoqing Wang"
-    email = "guoqing.wang@nasa.gov"
 
 [tool.jupytext]
   notebook_metadata_filter = "all,-kernelspec"
