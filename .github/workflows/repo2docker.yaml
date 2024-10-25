@@ -21,11 +21,19 @@ jobs:
         docker-images: false
     - name: checkout files in repo
       uses: actions/checkout@v4
+      with:
+        sparse-checkout: docker
+        sparse-checkout-cone-mode: false
+    - name: move repo2docker files
+      run: |
+        mv docker/* .
+        rmdir docker
+        ls
     - name: build with repo2docker
       uses: jupyterhub/repo2docker-action@master
       with:
         DOCKER_USERNAME: ${{ github.actor }}
         DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         DOCKER_REGISTRY: ghcr.io
-        IMAGE_NAME: gsfc-oel/oss
-        APPENDIX_FILE: docker/appendix
+        APPENDIX_FILE: appendix
+        FORCE_REPO2DOCKER_VERSION: jupyter-repo2docker==2024.7.0
