@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+title: Data recipes for the Ocean Biology DAAC
+authors:
+  - family-names: Carroll
+    given-names: Ian
+    affiliation: "NASA Goddard Space Flight Center; University of Maryland Baltimore County"
+    orcid: "https://orcid.org/0000-0002-3616-810X"
+  - family-names: Windle
+    given-names: Anna
+    affiliation: "NASA Goddard Space Flight Center; Science Systems and Applications, Inc."
+    orcid: "https://orcid.org/0000-0002-4852-5848"
+  - family-names: Wang
+    given-names: Guoqing
+    affiliation: "NASA Goddard Space Flight Center; Science Systems and Applications, Inc."
+    orcid: "https://orcid.org/0000-0001-5552-319X"
+  - family-names: Poulin
+    given-names: Carina
+    affiliation: "NASA Goddard Space Flight Center; Science Systems and Applications, Inc."
+    orcid: "https://orcid.org/0000-0001-5907-7473"
+  - family-names: Foley
+    given-names: Sean
+    affiliation: "NASA Goddard Space Flight Center; Morgan State University"
+    orcid: "https://orcid.org/0000-0001-5907-7473"
+  - family-names: Gray
+    given-names: Patrick
+    affiliation: "University of Maine; University of Haifa"
+    orcid: "https://orcid.org/0000-0002-8997-5255"
+  - family-names: Holmes
+    given-names: Eli
+    affiliation: "NOAA Fisheries; University of Washington"
+    orcid: "https://orcid.org/0000-0001-9128-8393"
