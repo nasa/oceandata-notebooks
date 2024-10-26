@@ -1,11 +1,11 @@
 # Oceandata Notebooks
 
 The code repository for the collection of notebooks distributed as data recipes for
-users of the Ocean Biology Distributed Active Archive Center (OB.DAAC).
+users of the Ocean Biology Distributed Active Archive Center ([OB.DAAC]).
 
 ## For Users
 
-Get started on our [Help Hub][data-recipes].
+Get started on our [Help Hub].
 
 ## For Contributors
 
@@ -15,7 +15,7 @@ Get started on our [Help Hub][data-recipes].
 
 Keeping notebooks in a code repository is tough for collaboration and curation
 because notebooks contain large, binary outputs and metadata that messes up `git merge`.
-This repository uses [Jupytext][jupytext] to keep notebooks (the ".ipynb" files) paired
+This repository uses [Jupytext] to keep notebooks (the ".ipynb" files) paired
 with plain text files (the ".py" files). Contributors should work on the ".ipynb" files
 in the `notebooks` folder. These files are ignored by git, but the paired ".py" files are
 not. So, save your changes in a notebook, commit the paired ".py" file, and push.
@@ -33,8 +33,6 @@ for every ".py" file in the `src` folder.
 
 ## For Maintainers
 
-The subsections below provide information that repository maintainers will want to know.
-
 > [!IMPORTANT]
 > If you merge pull requests to `main`, you might be a maintainer.
 
@@ -48,8 +46,8 @@ on the `uv.lock` file.
 $ uv sync
 $ PATH=.venv/bin:$PATH
 ```
-If being conscientious about storage, set the `UV_PROJECT_ENIRONMENT` variable to a temporary
-directory and avoid caching.
+If being conscientious about storage (e.g. on a cloud-based JupyterHub), set the `UV_PROJECT_ENIRONMENT`
+variable to a temporary directory and avoid caching.
 ```shell
 $ export UV_PROJECT_ENVIRONMENT=/tmp/venv
 $ uv sync --no-cache
@@ -88,15 +86,13 @@ either for a Jupyter kernel, for a Docker image with JupyterLab, or by maintaine
 
 ### Container Image: the `docker` folder
 
-The `docker` folder has configuration files that `repo2docker` uses to build an image suitable
+The `docker` folder has configuration files that [repo2docker] uses to build an image suitable
 for use with a JupyterHub platform. The following command builds and runs the image locally,
-while the `jupyterhub/repo2docker-action` pushes built images to GitHub packages. You
+while the [repo2docker-action] pushes built images to GitHub packages. You
 must have `docker` available to use `repo2docker`.
-
 ```shell
 $ repo2docker --user-name jovyan --appendix "$(< docker/appendix)" -p 8889:8888 docker jupyter lab --no-browser --ip 0.0.0.0
 ```
-
 The configuration files are a bit complicated, but updated automatically by `pre-commit`
 hooks following changes to `pyproject.toml` and `docker/environment.yml`. No `requirements`
 file in this repository should be manually edited. The `docker/environment.yml` file is there
@@ -106,13 +102,12 @@ for non-Python packages available on conda-forge; we use PyPI for Python package
 1. `docker/requirements.txt` are a merge of our (locked) dependencies with `docker/requirements.in`
 
 > [!Note]
-> The top-level `requirements.txt` file is located there to also provide dependencies for
-> [Binder](https://mybinder.org/).
+> The top-level `requirements.txt` file is located there to also provide dependencies for [Binder].
 
 ### Rendering to HTML: the `book` folder
 
 In addition to the ".py" files paired to notebooks, the `book` folder contains configuration
-for a [Jupyter Book][jb]. Only notebooks listed in `book/_toc.yml` are included. Building
+for a [Jupyter Book]. Only notebooks listed in `book/_toc.yml` are included. Building
 the notebooks as one book provides smaller files for tutorial content, a single source of
 JavaScript and CSS, and a test that all notebook run without errors.
 
@@ -135,13 +130,17 @@ Opening the notebook this creates under `book/notebooks` in JupyterLab will add 
 metadata. Do not commit any changes introduced by opening the new notebook.
 
 ## Acknowledgements
-This repository has greatly benefited from works of multiple open-science projects,
-notably [Learn OLCI][learn-olci] and the [NASA EarthData Cloud Cookbook][cookbook].
 
-[data-recipes]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
-[jupytext]: https://jupytext.readthedocs.io/
-[jupyterlab]: https://jupyter.org
-[jb]: https://jupyterbook.org
-[learn-olci]: https://github.com/wekeo/learn-olci/blob/main/README.md
-[cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook
-[pre-commit]: https://pre-commit.com/
+This repository has greatly benefited from works of multiple open-science projects,
+notably [Learn OLCI] and the [NASA EarthData Cloud Cookbook].
+
+[OB.DAAC]: https://www.earthdata.nasa.gov/centers/ob-daac
+[Help Hub]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
+[Jupytext]: https://jupytext.readthedocs.io
+[Jupyter Book]: https://jupyterbook.org
+[pre-commit]: https://pre-commit.com
+[Binder]: https://mybinder.org/
+[repo2docker]: https://repo2docker.readthedocs.io
+[repo2docker-action]: https://github.com/marketplace/actions/repo2docker-action
+[Learn OLCI]: https://github.com/wekeo/learn-olci
+[NASA EarthData Cloud Cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook
