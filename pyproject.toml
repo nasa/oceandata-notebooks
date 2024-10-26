@@ -1,13 +1,18 @@
 [project]
-name = "oceandata-notebooks"
 version = "0.2.0"
+name = "oceandata-notebooks"
 description = "Oceandata Jupyter Notebook Tutorials"
-maintainers = [{ "name" = "Ian Carroll", "email" = "ian.t.carroll@nasa.gov" }]
-license = { "text" = "Apache-2.0" }
+urls.Issues = "https://github.com/gsfc-oel/oceandata-notebooks/issues"
+urls.Repository = "https://github.com/gsfc-oel/oceandata-notebooks"
+license.text = "Apache-2.0"
 requires-python = ">=3.9"
 readme = "README.md"
+maintainers = [
+  { "name" = "Ian Carroll", "email" = "ian.t.carroll@nasa.gov" },
+]
 dependencies = [
   # every package used in an import or by a backend (e.g. h5netcdf)
+  # TODO: torch, torchvision
   "cartopy>=0.22.0",
   "cmocean>=4.0.3",
   "dask[distributed]>=2024.4.1",
@@ -25,19 +30,15 @@ dependencies = [
   "scipy>=1.13.1",
   "seaborn>=0.13.2",
   "tqdm>=4.66.5",
-  # "torch>=2.4.1",
-  # "torchvision>=0.19.0",
   "xarray>=2024.3.0",
 ]
-
-[project.optional-dependencies]
-kernel = [
+optional-dependencies.kernel = [
   # additional packages for book/setup.py
   "bash-kernel>=0.9.3",
   "ipykernel>=6.29.3",
   "ipywidgets>=8.1.2",
 ]
-docker = [
+optional-dependencies.docker = [
   # additional packages for book/setup.py
   # TODO: async-timeout is a possible unlisted dep of jupyter-vscode-proxy?
   "async-timeout>=4.0.3",
@@ -49,35 +50,28 @@ docker = [
   "jupyter-vscode-proxy>=0.6",
   "jupyterlab-git>=0.50.1",
   "jupyterlab-h5web>=12.3.0",
+  "jupytext>=1.16.4",
   "nbgitpuller>=1.2.1",
   "rasterio>=1.4.1",
   "rioxarray>=0.15.0",
   "scikit-image>=0.24.0",
   "scikit-learn>=1.5.2",
+  "uv>=0.4.27",
   "zarr>=2.18.2",
 ]
-dev = [
-  # additional packages for docker/requirements.txt
-  # beware pins in .github/workflows/repo2docker.yaml and .pre-commit-config.yaml
-  "jupyter-book>=1.0.2",
-  "jupyter-repo2docker==2024.7.0",
-  "jupytext>=1.16.4",
-  "pre-commit>=4.0.1",
-  "ruff>=0.6.9",
-  "tomlkit>=0.13.2",
-]
 
-[project.urls]
-Repository = "https://github.com/gsfc-oel/oceandata-notebooks"
-Issues = "https://github.com/gsfc-oel/oceandata-notebooks/issues"
+[dependency-groups]
+dev = [
+  "jupyter-book>=1.0.3",
+  "jupyter-repo2docker>=2024.7.0",
+  "pre-commit>=4.0.1",
+  "ruff>=0.7.1",
+]
 
 [tool.jupytext]
 notebook_metadata_filter = "all,-kernelspec"
 cell_metadata_filter = "all,-trusted"
 formats = { "notebooks" = "ipynb", "src" = "py" }
-
-[tool.ruff]
-extend-include = ["_build"]
 
 [tool.ruff.lint]
 extend-select = ["I", "D"]

@@ -16,8 +16,12 @@ The **Earthdata Cloud** icon next to some notebooks indicates they are meant to 
 ### Jupyter Kernel
 
 If you have a running Jupyter Lab, download our setup script ({download}`setup.py`) and
-run it under `pipx` to create a Jupyter kernel ready for use with the notebooks. For
-example, in a Terminal within your JupyterLab, execute the following.
+run it under either `pipx` or `uv` to create a Jupyter kernel ready for use with the notebooks. For
+example, if you have `uv` installed, execute the following from a Terminal.
+```
+uv run setup.py --user --name oc
+```
+Alternatively, if you have `pipx` installed:
 ```
 pipx run setup.py --user --name oc
 ```

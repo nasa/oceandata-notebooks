@@ -432,6 +432,8 @@ jupyterlab-widgets==3.0.10
     # via
     #   -r docker/requirements.in
     #   ipywidgets
+jupytext==1.16.4
+    # via oceandata-notebooks (pyproject.toml)
 kiwisolver==1.4.7
     # via matplotlib
 lazy-loader==0.4
@@ -452,6 +454,7 @@ markdown==3.7
     # via panel
 markdown-it-py==3.0.0
     # via
+    #   jupytext
     #   mdit-py-plugins
     #   panel
 markupsafe==2.1.5
@@ -472,7 +475,9 @@ matplotlib-inline==0.1.6
     #   ipykernel
     #   ipython
 mdit-py-plugins==0.4.2
-    # via panel
+    # via
+    #   jupytext
+    #   panel
 mdurl==0.1.2
     # via markdown-it-py
 mistune==3.0.2
@@ -508,6 +513,7 @@ nbformat==5.10.3
     #   -r docker/requirements.in
     #   jupyter-server
     #   jupyterlab-git
+    #   jupytext
     #   nbclassic
     #   nbclient
     #   nbconvert
@@ -598,6 +604,7 @@ packaging==24.0
     #   jupyterlab
     #   jupyterlab-git
     #   jupyterlab-server
+    #   jupytext
     #   lazy-loader
     #   matplotlib
     #   nbconvert
@@ -763,6 +770,7 @@ pyyaml==6.0.1
     #   dask
     #   distributed
     #   jupyter-events
+    #   jupytext
 pyzmq==24.0.1
     # via
     #   -r docker/requirements.in
@@ -976,6 +984,8 @@ urllib3==2.2.1
     #   botocore
     #   distributed
     #   requests
+uv==0.4.27
+    # via oceandata-notebooks (pyproject.toml)
 wcwidth==0.2.13
     # via
     #   -r docker/requirements.in

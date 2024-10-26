@@ -52,10 +52,8 @@ repos:
         files: ^docker/.*$
       - id: update-setup-py
         name: update-setup-py
-        language: python
-        additional_dependencies:
-          - tomlkit>=0.13.2
-        entry: python book/update-setup.py -o book/setup.py
+        language: system
+        entry: uv add --script book/setup.py -r
         files: ^requirements\.txt$
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.6.9
