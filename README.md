@@ -1,7 +1,11 @@
 # Oceandata Notebooks
 
-The code repository for the collection of notebooks distributed as
-[data recipes for the Ocean Biology DAAC][data-recipes].
+The code repository for the collection of notebooks distributed as data recipes for
+users of the Ocean Biology Distributed Active Archive Center (OB.DAAC).
+
+## For Users
+
+Get started on our [Help Hub][data-recipes].
 
 ## For Contributors
 

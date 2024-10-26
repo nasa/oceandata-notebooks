@@ -69,9 +69,9 @@ dev = [
 ]
 
 [tool.jupytext]
+formats = { "notebooks" = "ipynb", "src" = "py" }
 notebook_metadata_filter = "-all,jupytext,language_info.name"
 cell_metadata_filter = "all,-trusted"
-formats = { "notebooks" = "ipynb", "src" = "py" }
 
 [tool.ruff.lint]
 extend-select = ["I", "D"]
