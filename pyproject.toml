@@ -69,7 +69,7 @@ dev = [
 ]
 
 [tool.jupytext]
-notebook_metadata_filter = "all,-kernelspec"
+notebook_metadata_filter = "-all,jupytext,language_info.name"
 cell_metadata_filter = "all,-trusted"
 formats = { "notebooks" = "ipynb", "src" = "py" }
 

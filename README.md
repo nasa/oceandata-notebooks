@@ -29,19 +29,27 @@ for every ".py" file in the `src` folder.
 
 ## For Maintainers
 
-The subsections below provides information that repository maintainers will want to know.
+The subsections below provide information that repository maintainers will want to know.
 
 > [!IMPORTANT]
-> If you merge a pull requests to `main`, consider yourself a maintainer.
+> If you merge pull requests to `main`, you might be a maintainer.
 
 ### Development Environment: the `uv.lock` file
 
-We use the `uv` command line tool to maintain a virtual environment for maintainer activities,
-which you should install separately (`pip install --user uv` or `pipx install uv` both work).
-The `uv sync` command creates the development environment from the `uv.lock` file.
+We use the `uv` command line tool to maintain a Python environment for maintainer activities.
+It can be installed with `pip install uv`, `pip install --user uv`, or `pipx install uv`.
+The `uv sync` command creates an isolated development environment, at `.venv` by default, based
+on the `uv.lock` file.
 ```shell
-$ uv sync --extra dev
-$ PATH=.venv/bin/:$PATH
+$ uv sync
+$ PATH=.venv/bin:$PATH
+```
+If being conscientious about storage, set the `UV_PROJECT_ENIRONMENT` variable to a temporary
+directory and avoid caching.
+```shell
+$ export UV_PROJECT_ENVIRONMENT=/tmp/venv
+$ uv sync --no-cache
+$ PATH=${UV_PROJECT_ENVIRONMENT}/bin:$PATH
 ```
 
 ### Automation and Checks: the `.pre-commit-config.yaml` file
