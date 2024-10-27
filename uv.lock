@@ -363,6 +363,20 @@ wheels = [
 ]
 
 [[package]]
+name = "boto3"
+version = "1.35.36"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "botocore" },
+    { name = "jmespath" },
+    { name = "s3transfer" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/33/9f/17536f9a1ab4c6ee454c782f27c9f0160558f70502fc55da62e456c47229/boto3-1.35.36.tar.gz", hash = "sha256:586524b623e4fbbebe28b604c6205eb12f263cc4746bccb011562d07e217a4cb", size = 110987 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/52/6b/8b126c2e1c07fae33185544ea974de67027afc905bd072feef9fbbd38d3d/boto3-1.35.36-py3-none-any.whl", hash = "sha256:33735b9449cd2ef176531ba2cb2265c904a91244440b0e161a17da9d24a1e6d1", size = 139143 },
+]
+
+[[package]]
 name = "botocore"
 version = "1.35.36"
 source = { registry = "https://pypi.org/simple" }
@@ -2905,6 +2919,7 @@ dependencies = [
 docker = [
     { name = "async-timeout" },
     { name = "bash-kernel" },
+    { name = "boto3" },
     { name = "dask-labextension" },
     { name = "geopandas" },
     { name = "geoviews" },
@@ -2940,6 +2955,7 @@ requires-dist = [
     { name = "async-timeout", marker = "extra == 'docker'", specifier = ">=4.0.3" },
     { name = "bash-kernel", marker = "extra == 'docker'", specifier = ">=0.9.3" },
     { name = "bash-kernel", marker = "extra == 'kernel'", specifier = ">=0.9.3" },
+    { name = "boto3", marker = "extra == 'docker'", specifier = ">=1.35.36" },
     { name = "cartopy", specifier = ">=0.22.0" },
     { name = "cmocean", specifier = ">=4.0.3" },
     { name = "dask", extras = ["distributed"], specifier = ">=2024.4.1" },
@@ -4163,6 +4179,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/75/65/4b4c868cff76c036d11dc75dd91e5696dbf16ce626514166f35d5f4a930f/s3fs-2024.10.0.tar.gz", hash = "sha256:58b8c3650f8b99dbedf361543da3533aac8707035a104db5d80b094617ad4a3f", size = 75916 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/99/44/bb9ff095ae7b1b6908480f683b6ca6b71c2105d343a5e5cb25334b01f5fa/s3fs-2024.10.0-py3-none-any.whl", hash = "sha256:7a2025d60d5b1a6025726b3a5e292a8e5aa713abc3b16fd1f81735181f7bb282", size = 29855 },
+]
+
+[[package]]
+name = "s3transfer"
+version = "0.10.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "botocore" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a0/a8/e0a98fd7bd874914f0608ef7c90ffde17e116aefad765021de0f012690a2/s3transfer-0.10.3.tar.gz", hash = "sha256:4f50ed74ab84d474ce614475e0b8d5047ff080810aac5d01ea25231cfc944b0c", size = 144591 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/c0/b0fba8259b61c938c9733da9346b9f93e00881a9db22aafdd72f6ae0ec05/s3transfer-0.10.3-py3-none-any.whl", hash = "sha256:263ed587a5803c6c708d3ce44dc4dfedaab4c1a32e8329bab818933d79ddcf5d", size = 82625 },
 ]
 
 [[package]]
