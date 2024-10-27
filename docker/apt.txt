@@ -18,3 +18,5 @@ fuse
 # # Other
 nano
 imagemagick
+groff
+sudo

@@ -1,22 +1,22 @@
+# make ${NB_USER} a passwordless sudoer
+USER root
+RUN echo "${NB_USER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${NB_USER}
+USER jovyan
+
 # use goofys for s3-readonly mounts
 COPY --from=public.ecr.aws/smce/smce-images:smce-oss-earth-base-9f9fc2c3 /opt/goofys /opt/goofys
-USER root
-RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d /s3-readonly
-USER ${NB_USER}
+RUN sudo /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d /s3-readonly
 
 # install aws cli
-USER root
 RUN curl --no-progress-meter -o "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" && \
     unzip -q awscliv2.zip && \
-    ./aws/install && \
+    sudo ./aws/install && \
     rm -rf awscliv2.zip aws
-USER ${NB_USER}
 
 # install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
 ARG OCSSWTAG=V2024.6
 ARG OCSSWROOT=/opt/ocssw
-USER root
-RUN /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d ${OCSSWROOT}
+RUN sudo /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d ${OCSSWROOT}
 USER ${NB_USER}
 RUN curl --no-progress-meter -O https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw && \
     curl --no-progress-meter -O https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py && \
@@ -31,6 +31,9 @@ RUN pip install --no-cache-dir --no-deps \
       --no-binary h5py \
       --no-binary netcdf4 \
       -r requirements.txt
+
+# jupyter configuration
+COPY src/jupyter_server_config.json /usr/local/etc/jupyter/jupyter_server_config.json
 
 # environment variables
 ENV EDITOR=nano OCSSWROOT=${OCSSWROOT}
