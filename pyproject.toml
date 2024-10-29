@@ -44,6 +44,7 @@ optional-dependencies.docker = [
   "async-timeout>=4.0.3",
   "bash-kernel>=0.9.3",
   "boto3>=1.35.36",
+  "dask-gateway>=2024.1.0",
   "dask-labextension>=7.0.0",
   "geopandas>=1.0.1",
   "geoviews>=1.12.0",

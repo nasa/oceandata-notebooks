@@ -33,16 +33,19 @@ RUN pip install --no-cache-dir --no-deps \
       -r requirements.txt
 
 # jupyter configuration
-COPY src/jupyter_server_config.json /usr/local/etc/jupyter/jupyter_server_config.json
+COPY src/jupyter_server_config.json /usr/local/etc/jupyter/
+# TODO: https://github.com/jupyterlab/jupyterlab/issues/16347 (maybe)
+COPY src/overrides.json ${CONDA_PREFIX}/share/jupyter/lab/settings/
+
+# git configuration
+# TODO: https://github.com/jupyterlab/jupyterlab-git/issues/1369
+RUN sudo git config --system credential.helper 'cache --timeout=36000 --socket /tmp/.git-credential-cache/socket'
+
+# enable globstar
+RUN sudo sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
 
 # environment variables
 ENV EDITOR=nano OCSSWROOT=${OCSSWROOT}
 
 # TODO: https://github.com/jupyterhub/repo2docker/issues/1374
 CMD ["jupyter", "lab", "--no-browser", "--ip", "0.0.0.0"]
-
-# TODO: set up gh-scoped-creds
-# tell gh-scoped-creds which GitHub app to use for push access
-# see https://github.com/jupyterhub/gh-scoped-creds#github-app-configuration
-# ENV GH_SCOPED_CREDS_CLIENT_ID=
-# ENV GH_SCOPED_CREDS_APP_URL=

@@ -851,6 +851,23 @@ distributed = [
 ]
 
 [[package]]
+name = "dask-gateway"
+version = "2024.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "click" },
+    { name = "dask" },
+    { name = "distributed" },
+    { name = "pyyaml" },
+    { name = "tornado" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/66/f7/481546ba908de470ee0c805a514aaa763fa2027170a8f50af67b84d1a48c/dask-gateway-2024.1.0.tar.gz", hash = "sha256:b9f14dcc63780ac60ae2d2cb15a1bb01318758f831ff97128677e6dcade2e7c4", size = 22257 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3b/20/1e1a37251ac66334059cda78112492d0113d5a7f7ca55a8b6f4ee1cd95f0/dask_gateway-2024.1.0-py3-none-any.whl", hash = "sha256:4bd362e8ca01c71d3417259fb239f5baa5b02fb36dd7e6bebbf9cc4344aa3f95", size = 24141 },
+]
+
+[[package]]
 name = "dask-labextension"
 version = "7.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2920,6 +2937,7 @@ docker = [
     { name = "async-timeout" },
     { name = "bash-kernel" },
     { name = "boto3" },
+    { name = "dask-gateway" },
     { name = "dask-labextension" },
     { name = "geopandas" },
     { name = "geoviews" },
@@ -2959,6 +2977,7 @@ requires-dist = [
     { name = "cartopy", specifier = ">=0.22.0" },
     { name = "cmocean", specifier = ">=4.0.3" },
     { name = "dask", extras = ["distributed"], specifier = ">=2024.4.1" },
+    { name = "dask-gateway", marker = "extra == 'docker'", specifier = ">=2024.1.0" },
     { name = "dask-labextension", marker = "extra == 'docker'", specifier = ">=7.0.0" },
     { name = "earthaccess", specifier = ">=0.11.0" },
     { name = "geopandas", marker = "extra == 'docker'", specifier = ">=1.0.1" },

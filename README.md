@@ -96,7 +96,7 @@ $ repo2docker --user-name jovyan --appendix "$(< docker/appendix)" -p 8889:8888 
 The configuration files are a bit complicated, but updated automatically by `pre-commit`
 hooks following changes to `pyproject.toml` and `docker/environment.yml`. No `requirements`
 file in this repository should be manually edited. The `docker/environment.yml` file is there
-for non-Python packages available on conda-forge; we use PyPI for Python packages.
+for non-Python packages needed from conda-forge. We use PyPI for Python packages.
 1. `requirements.txt` are the (locked) dependencies needed in `book/setup.py`
 1. `docker/requirements.in` are the (locked) packages from repo2docker and `docker/environment.yml`
 1. `docker/requirements.txt` are a merge of our (locked) dependencies with `docker/requirements.in`
