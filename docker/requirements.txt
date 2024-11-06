@@ -459,6 +459,8 @@ locket==1.0.0
     # via
     #   distributed
     #   partd
+lz4==4.3.3
+    # via oceandata-notebooks (pyproject.toml)
 mako==1.3.2
     # via
     #   -r docker/requirements.in
@@ -794,7 +796,7 @@ pyzmq==24.0.1
     #   jupyter-server
     #   nbclassic
     #   notebook
-rasterio==1.4.1
+rasterio==1.4.2
     # via
     #   oceandata-notebooks (pyproject.toml)
     #   rioxarray
