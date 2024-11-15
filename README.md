@@ -25,8 +25,8 @@ not. So, save your changes in a notebook, commit the paired ".py" file, and push
 > terminal at the project root and sync from the `src` using `jupytext`.
 
 ```shell
-$ shopt -s globstar  # enables `**` in Bash (enabled by default in Zsh)
-$ jupytext --sync src/**/*.py
+shopt -s globstar  # enables `**` in Bash (enabled by default in Zsh)
+jupytext --sync src/**/*.py
 ```
 You can run this any time to ensure there is an ".ipynb" file in your `notebooks` folder
 for every ".py" file in the `src` folder.
@@ -43,15 +43,15 @@ It can be installed with `pip install uv`, `pip install --user uv`, or `pipx ins
 The `uv sync` command creates an isolated development environment, at `.venv` by default, based
 on the `uv.lock` file.
 ```shell
-$ uv sync
-$ PATH=.venv/bin:$PATH
+uv sync
+PATH=.venv/bin:$PATH
 ```
 If being conscientious about storage (e.g. on a cloud-based JupyterHub), set the `UV_PROJECT_ENIRONMENT`
 variable to a temporary directory and avoid caching.
 ```shell
-$ export UV_PROJECT_ENVIRONMENT=/tmp/venv
-$ uv sync --no-cache
-$ PATH=${UV_PROJECT_ENVIRONMENT}/bin:$PATH
+export UV_PROJECT_ENVIRONMENT=/tmp/venv
+uv sync --no-cache
+PATH=${UV_PROJECT_ENVIRONMENT}/bin:$PATH
 ```
 
 ### Automation and Checks: the `.pre-commit-config.yaml` file
@@ -61,16 +61,16 @@ consistency between ".py" and ".ipynb" files. These are implemented using the [p
 tool from the development environment. You can setup git hooks to run these automations,
 as needed, at every commit.
 ```shell
-$ pre-commit install
+pre-commit install
 ```
 You can also run checks over all files chaged on a feature branch or the currently
 checked out git ref. For the latter:
 ```shell
-$ pre-commit run --from-ref main --to-ref HEAD
+pre-commit run --from-ref main --to-ref HEAD
 ```
 If you have `docker` available, you can build the image defined in the `docker` folder.
 ```shell
-$ pre-commit run --hook-stage manual repo2docker-build
+pre-commit run --hook-stage manual repo2docker-build
 ```
 
 ### Dependencies: the `pyproject.toml` file
@@ -79,7 +79,7 @@ For every `import` statement, or if a notebook requires a package to be installe
 for a backend (e.g. h5netcdf), make sure the package is listed in the `project.dependencies`
 array in `pyproject.toml`. You can add entries manually or using `uv`, as in:
 ```shell
-$ uv add scipy
+uv add scipy
 ```
 The `project.optional-dependencies` tables list additional dependencies that are needed
 either for a Jupyter kernel, for a Docker image with JupyterLab, or by maintainers.
@@ -91,7 +91,14 @@ for use with a JupyterHub platform. The following command builds and runs the im
 while the [repo2docker-action] pushes built images to GitHub packages. You
 must have `docker` available to use `repo2docker`.
 ```shell
-$ repo2docker --user-name jovyan --appendix "$(< docker/appendix)" -p 8889:8888 docker jupyter lab --no-browser --ip 0.0.0.0
+export DOCKER_HOST=unix://${HOME}/.docker/run/docker.sock
+repo2docker \
+    --image-name oceandata-notebooks \
+    --user-id 1000 \
+    --user-name jovyan \
+    --appendix "$(< docker/appendix)" \
+    -p 8889:8888 \
+    docker jupyter lab --no-browser --ip 0.0.0.0
 ```
 The configuration files are a bit complicated, but updated automatically by `pre-commit`
 hooks following changes to `pyproject.toml` and `docker/environment.yml`. No `requirements`
@@ -113,7 +120,7 @@ JavaScript and CSS, and a test that all notebook run without errors.
 
 To build the book:
 ```shell
-$ jb build book
+jb build book
 ```
 That populates the `book/_build` folder. The folder is ignored by git, but its contents
 can be provided to the web team. The `_templates` make the website look very plain on
@@ -123,8 +130,8 @@ When you create a brand new notebook under the `notebooks` folder, it won't be r
 to HTML locally or visible as a notebook on GitHub until you create, commit, and push the
 copy under `book`. To create the `book` version:
 ```shell
-$ jupytext --sync book/src/path/to/new/tutorial.py
-$ git add book/notebooks/path/to/new/tutorial.ipynb
+jupytext --sync book/src/path/to/new/tutorial.py
+git add book/notebooks/path/to/new/tutorial.ipynb
 ```
 Opening the notebook this creates under `book/notebooks` in JupyterLab will add unwanted
 metadata. Do not commit any changes introduced by opening the new notebook.
