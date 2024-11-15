@@ -31,7 +31,6 @@ RUN pip install --no-cache-dir --no-deps \
       -r requirements.txt
 
 # add configuration via files
-# TODO: https://github.com/jupyterlab/jupyterlab/issues/16347 (maybe)
 COPY --chown=${NB_USER}:${NB_USER} src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # add configuration via command line
