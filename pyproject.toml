@@ -57,6 +57,7 @@ optional-dependencies.docker = [
   "jupyterlab-h5web>=12.3.0",
   "jupytext>=1.16.4",
   "lz4>=4.3.3",
+  "pyinterp>=2024.6.0",
   "rasterio>=1.4.2",
   "rioxarray>=0.15.0",
   "scikit-image>=0.24.0",

@@ -177,6 +177,7 @@ dask==2024.9.1
     #   oceandata-notebooks (pyproject.toml)
     #   dask-gateway
     #   distributed
+    #   pyinterp
 dask-gateway==2024.1.0
     # via oceandata-notebooks (pyproject.toml)
 dask-labextension==7.0.0
@@ -586,6 +587,7 @@ numpy==2.0.2
     #   numcodecs
     #   pandas
     #   pvlib
+    #   pyinterp
     #   pyogrio
     #   rasterio
     #   rioxarray
@@ -741,6 +743,8 @@ pygments==2.17.2
     #   ipython
     #   nbconvert
     #   nbdime
+pyinterp==2024.11.0
+    # via oceandata-notebooks (pyproject.toml)
 pyjwt==2.8.0
     # via -r docker/requirements.in
 pyogrio==0.10.0
@@ -1044,6 +1048,7 @@ wrapt==1.16.0
 xarray==2024.9.0
     # via
     #   oceandata-notebooks (pyproject.toml)
+    #   pyinterp
     #   rioxarray
 xyzservices==2024.9.0
     # via
