@@ -83,8 +83,9 @@ bleach==6.1.0
     #   panel
 blinker==1.7.0
     # via -r docker/requirements.in
-bokeh==3.5.2
+bokeh==3.4.2
     # via
+    #   -r docker/requirements.in
     #   dask-labextension
     #   geoviews
     #   holoviews
@@ -134,6 +135,7 @@ charset-normalizer==3.3.2
     #   requests
 click==8.1.7
     # via
+    #   -r docker/requirements.in
     #   black
     #   click-plugins
     #   cligj
@@ -145,8 +147,9 @@ click-plugins==1.1.1
     # via rasterio
 cligj==0.7.2
     # via rasterio
-cloudpickle==3.0.0
+cloudpickle==3.1.0
     # via
+    #   -r docker/requirements.in
     #   dask
     #   distributed
 cmocean==4.0.3
@@ -162,8 +165,9 @@ comm==0.2.2
     #   -r docker/requirements.in
     #   ipykernel
     #   ipywidgets
-contourpy==1.3.0
+contourpy==1.3.1
     # via
+    #   -r docker/requirements.in
     #   bokeh
     #   matplotlib
 cryptography==42.0.5
@@ -172,12 +176,18 @@ cryptography==42.0.5
     #   pyopenssl
 cycler==0.12.1
     # via matplotlib
-dask==2024.9.1
+cytoolz==1.0.0
+    # via -r docker/requirements.in
+dask==2024.11.2
     # via
+    #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml)
+    #   dask-expr
     #   dask-gateway
     #   distributed
     #   pyinterp
+dask-expr==1.1.19
+    # via -r docker/requirements.in
 dask-gateway==2024.1.0
     # via oceandata-notebooks (pyproject.toml)
 dask-labextension==7.0.0
@@ -194,8 +204,9 @@ defusedxml==0.7.1
     # via
     #   -r docker/requirements.in
     #   nbconvert
-distributed==2024.9.1
+distributed==2024.11.2
     # via
+    #   -r docker/requirements.in
     #   dask
     #   dask-gateway
     #   dask-labextension
@@ -227,14 +238,15 @@ frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
-fsspec==2024.9.0
+fsspec==2024.10.0
     # via
+    #   -r docker/requirements.in
     #   dask
     #   earthaccess
     #   s3fs
 geopandas==1.0.1
     # via oceandata-notebooks (pyproject.toml)
-geoviews==1.13.0
+geoviews==1.12.0
     # via oceandata-notebooks (pyproject.toml)
 gh-scoped-creds==4.1
     # via oceandata-notebooks (pyproject.toml)
@@ -465,10 +477,13 @@ llvmlite==0.43.0
     # via numba
 locket==1.0.0
     # via
+    #   -r docker/requirements.in
     #   distributed
     #   partd
 lz4==4.3.3
-    # via oceandata-notebooks (pyproject.toml)
+    # via
+    #   -r docker/requirements.in
+    #   oceandata-notebooks (pyproject.toml)
 mako==1.3.2
     # via
     #   -r docker/requirements.in
@@ -508,7 +523,9 @@ mistune==3.0.2
     #   -r docker/requirements.in
     #   nbconvert
 msgpack==1.1.0
-    # via distributed
+    # via
+    #   -r docker/requirements.in
+    #   distributed
 multidict==6.1.0
     # via
     #   aiohttp
@@ -568,6 +585,7 @@ numcodecs==0.13.0
     # via zarr
 numpy==2.0.2
     # via
+    #   -r docker/requirements.in
     #   bokeh
     #   cartopy
     #   cftime
@@ -634,7 +652,6 @@ packaging==24.0
     #   lazy-loader
     #   matplotlib
     #   nbconvert
-    #   panel
     #   pyogrio
     #   rioxarray
     #   scikit-image
@@ -645,8 +662,10 @@ pamela==1.1.0
     #   jupyterhub
 pandas==2.2.3
     # via
+    #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml)
     #   bokeh
+    #   dask-expr
     #   geopandas
     #   holoviews
     #   hvplot
@@ -658,7 +677,7 @@ pandocfilters==1.5.0
     # via
     #   -r docker/requirements.in
     #   nbconvert
-panel==1.5.2
+panel==1.4.5
     # via
     #   geoviews
     #   holoviews
@@ -675,7 +694,9 @@ parso==0.8.3
     #   -r docker/requirements.in
     #   jedi
 partd==1.4.2
-    # via dask
+    # via
+    #   -r docker/requirements.in
+    #   dask
 pathspec==0.12.1
     # via black
 pexpect==4.9.0
@@ -686,8 +707,9 @@ pexpect==4.9.0
     #   jupyterlab-git
 pickleshare==0.7.5
     # via -r docker/requirements.in
-pillow==10.4.0
+pillow==11.0.0
     # via
+    #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml)
     #   bokeh
     #   imageio
@@ -733,6 +755,10 @@ pure-eval==0.2.2
     #   stack-data
 pvlib==0.11.1
     # via oceandata-notebooks (pyproject.toml)
+pyarrow==18.0.0
+    # via
+    #   -r docker/requirements.in
+    #   dask-expr
 pycparser==2.21
     # via
     #   -r docker/requirements.in
@@ -744,7 +770,9 @@ pygments==2.17.2
     #   nbconvert
     #   nbdime
 pyinterp==2024.11.0
-    # via oceandata-notebooks (pyproject.toml)
+    # via
+    #   -r docker/requirements.in
+    #   oceandata-notebooks (pyproject.toml)
 pyjwt==2.8.0
     # via -r docker/requirements.in
 pyogrio==0.10.0
@@ -858,7 +886,7 @@ ruamel-yaml-clib==0.2.8
     # via
     #   -r docker/requirements.in
     #   ruamel-yaml
-s3fs==2024.9.0
+s3fs==2024.10.0
     # via earthaccess
 s3transfer==0.10.3
     # via boto3
@@ -904,7 +932,9 @@ sniffio==1.3.1
     #   anyio
     #   httpx
 sortedcontainers==2.4.0
-    # via distributed
+    # via
+    #   -r docker/requirements.in
+    #   distributed
 soupsieve==2.5
     # via
     #   -r docker/requirements.in
@@ -919,7 +949,9 @@ stack-data==0.6.2
     #   -r docker/requirements.in
     #   ipython
 tblib==3.0.0
-    # via distributed
+    # via
+    #   -r docker/requirements.in
+    #   distributed
 terminado==0.18.1
     # via
     #   -r docker/requirements.in
@@ -941,8 +973,10 @@ tinynetrc==1.3.1
     # via earthaccess
 tomli==2.0.1
     # via -r docker/requirements.in
-toolz==0.12.1
+toolz==1.0.0
     # via
+    #   -r docker/requirements.in
+    #   cytoolz
     #   dask
     #   distributed
     #   partd
@@ -1005,7 +1039,9 @@ typing-extensions==4.10.0
 typing-utils==0.1.0
     # via -r docker/requirements.in
 tzdata==2024.2
-    # via pandas
+    # via
+    #   -r docker/requirements.in
+    #   pandas
 uc-micro-py==1.0.3
     # via linkify-it-py
 uri-template==1.3.0
@@ -1045,21 +1081,26 @@ widgetsnbextension==4.0.10
     #   ipywidgets
 wrapt==1.16.0
     # via aiobotocore
-xarray==2024.9.0
+xarray==2024.10.0
     # via
+    #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml)
     #   pyinterp
     #   rioxarray
 xyzservices==2024.9.0
     # via
+    #   -r docker/requirements.in
     #   bokeh
     #   geoviews
+    #   panel
 yarl==1.13.1
     # via aiohttp
 zarr==2.18.3
     # via oceandata-notebooks (pyproject.toml)
 zict==3.0.0
-    # via distributed
+    # via
+    #   -r docker/requirements.in
+    #   distributed
 zipp==3.17.0
     # via
     #   -r docker/requirements.in

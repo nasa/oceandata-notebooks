@@ -3056,7 +3056,7 @@ kernel = [
     { name = "ipywidgets" },
 ]
 
-[package.dev-dependencies]
+[package.dependency-groups]
 dev = [
     { name = "jupyter-book" },
     { name = "jupyter-repo2docker" },
@@ -3112,7 +3112,7 @@ requires-dist = [
     { name = "zarr", marker = "extra == 'docker'", specifier = ">=2.18.2" },
 ]
 
-[package.metadata.requires-dev]
+[package.metadata.dependency-groups]
 dev = [
     { name = "jupyter-book", specifier = ">=1.0.3" },
     { name = "jupyter-repo2docker", specifier = ">=2024.7.0" },

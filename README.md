@@ -93,7 +93,6 @@ must have `docker` available to use `repo2docker`.
 ```shell
 export DOCKER_HOST=unix://${HOME}/.docker/run/docker.sock
 repo2docker \
-    --image-name oceandata-notebooks \
     --user-id 1000 \
     --user-name jovyan \
     --appendix "$(< docker/appendix)" \
