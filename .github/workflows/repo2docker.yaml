@@ -1,26 +1,18 @@
 name: build jupyterhub image
 on:
-  workflow_run:
-    workflows: [update conda lockfile]
-    types:
-      - completed
   push:
     paths:
       - .github/workflows/repo2docker.yaml
-      # files used by binder/appendix
-      - conda/conda-lock.yml
-      # files used by repo2docker, in order of use
-      - binder/apt.txt
-      - binder/environment.yml
-      - binder/start
-      - binder/appendix
+      - docker/**
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
 jobs:
   build:
-    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
     - name: free space on runner
       uses: jlumbroso/free-disk-space@v1.3.1
@@ -28,12 +20,20 @@ jobs:
         tool-cache: true
         docker-images: false
     - name: checkout files in repo
-      uses: actions/checkout@main
-    - name: update jupyter dependencies with repo2docker
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: docker
+        sparse-checkout-cone-mode: false
+    - name: move repo2docker files
+      run: |
+        mv docker/* .
+        rmdir docker
+        ls
+    - name: build with repo2docker
       uses: jupyterhub/repo2docker-action@master
       with:
-        DOCKER_USERNAME: ${{ secrets.QUAY_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
-        DOCKER_REGISTRY: quay.io
-        IMAGE_NAME: pacehackweek/pace-2024
-        APPENDIX_FILE: binder/appendix
+        DOCKER_USERNAME: ${{ github.repository_owner }}
+        DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        DOCKER_REGISTRY: ghcr.io
+        APPENDIX_FILE: appendix
+        FORCE_REPO2DOCKER_VERSION: jupyter-repo2docker==2024.7.0

@@ -1,0 +1,74 @@
+fail_fast: true
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-vcs-permalinks
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.5.3
+    hooks:
+      - id: uv-lock
+      - id: pip-compile
+        name: compile-kernel-dependencies
+        args: [-q, --extra, kernel, -o, requirements.txt, pyproject.toml]
+        files: ^uv\.lock$
+      - id: pip-compile
+        name: compile-docker-dependencies
+        args: [-q, --extra, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml]
+        files: ^(uv\.lock|docker/requirements\.in)$
+  - repo: https://github.com/mwouts/jupytext
+    rev: v1.16.4b
+    hooks:
+      - id: jupytext
+        args: [--sync]
+        files: ^book/src/.*\.py$
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
+        # prefer to lint the ipynbs
+        exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
+      - id: ruff-format
+        # prefer to format the ipynbs
+        exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
+  - repo: local
+    hooks:
+      - id: repo2docker-requirements
+        name: repo2docker-requirements
+        description: Generate docker/requirements.in with prerequisites from repo2docker.
+        language: python
+        additional_dependencies:
+          - jupyter-repo2docker==2024.7.0
+        pass_filenames: false
+        entry: repo2docker --volume docker/requirements.in:./out docker sh -c "pip list --format=freeze > out"
+        files: ^(uv\.lock|docker/environment\.yml)$
+      - id: repo2docker-build
+        name: repo2docker-build
+        description: Call repo2docker (with --no-run) to confirm successfull build.
+        stages: [manual]
+        language: python
+        additional_dependencies:
+          - jupyter-repo2docker==2024.7.0
+        pass_filenames: false
+        entry: repo2docker --appendix "$(< docker/appendix)" --no-run docker
+        files: ^docker/.*$
+      - id: update-setup-py
+        name: update-setup-py
+        description: Embed the dependencies (with extra "kernel") in the metadata of book/setup.py.
+        language: system
+        entry: uv add --script book/setup.py -r
+        files: ^requirements\.txt$

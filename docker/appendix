@@ -1,0 +1,45 @@
+# make ${NB_USER} a passwordless sudoer
+USER root
+RUN echo "${NB_USER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${NB_USER}
+USER ${NB_USER}
+
+# use goofys for s3-readonly mounts
+COPY --from=public.ecr.aws/smce/smce-images:smce-oss-earth-base-9f9fc2c3 /opt/goofys /opt/goofys
+RUN sudo /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d /s3-readonly
+
+# install aws cli
+ADD --chown=${NB_USER}:${NB_USER} https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip ./
+RUN unzip -q aws*.zip \
+ && sudo ./aws/install \
+ && rm -rf aws*
+
+# install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
+ARG OCSSWTAG=V2024.6
+ARG OCSSWROOT=/opt/ocssw
+ADD --chown=${NB_USER}:${NB_USER} https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw ./
+ADD --chown=${NB_USER}:${NB_USER} https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py ./
+RUN sudo /usr/bin/install -o ${NB_USER} -g ${NB_USER} -d ${OCSSWROOT} \
+ && chmod +x install_ocssw && ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt \
+ && ln -s /efs/ocssw/share ${OCSSWROOT} \
+ && ln -s /efs/ocssw/var ${OCSSWROOT} \
+ && rm install_ocssw manifest.py
+
+# install (locked) dependencies for oceandata-notebooks[docker]
+RUN pip install --no-cache-dir --no-deps \
+      --no-binary h5py \
+      --no-binary netcdf4 \
+      -r requirements.txt
+
+# add configuration via files
+COPY --chown=${NB_USER}:${NB_USER} src/prefix/ ${NB_PYTHON_PREFIX}/
+
+# add configuration via command line
+# TODO: https://github.com/jupyterlab/jupyterlab-git/issues/1369
+RUN sudo git config --system credential.helper 'cache --timeout=36000 --socket /tmp/.git-credential-cache/socket' \
+ && sudo sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
+
+# environment variables
+ENV EDITOR=nano OCSSWROOT=${OCSSWROOT}
+
+# TODO: https://github.com/jupyterhub/repo2docker/issues/1374
+CMD ["jupyter", "lab", "--no-browser", "--ip", "0.0.0.0"]

@@ -1,0 +1,10 @@
+only_build_toc_files: true
+execute:
+  timeout: -1  # no cell timeout
+  run_in_temp: true  # no reuse of downloads, etc.
+  execute_notebooks: cache  # re-use outputs (when none of the code cells change)
+sphinx:
+  config:
+    templates_path:
+      - _templates
+    myst_commonmark_only: true
