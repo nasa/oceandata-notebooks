@@ -1,9 +1,15 @@
 # ---
 # jupyter:
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
+#   jupytext:
+#     cell_metadata_filter: all,-trusted
+#     notebook_metadata_filter: -all,jupytext,language_info.name
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.16.4
+#   language_info:
+#     name: python
 # ---
 
 # _Author: Guoqing Wang (guoqing.wang@nasa.gov), OB.DAAC Scientist, NASA GSFC; SSAI_
