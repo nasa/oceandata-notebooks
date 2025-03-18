@@ -1,6 +1,15 @@
+"""Install kernels for Jupyter.
+
+The script installs an IPython kernel and a bash kernel from whatever Python
+interpreter was invoked. Because dependencies are defined, a "tool" manager
+(e.g. `pipx` or `uv`) will install these dependencies in an isolated environment
+before running the script from that envrionment.
+"""
+
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.12"
 # dependencies = [
+#     "affine==2.4.0",
 #     "aiobotocore==2.15.1",
 #     "aiohappyeyeballs==2.4.3",
 #     "aiohttp==3.10.8",
@@ -16,9 +25,12 @@
 #     "bounded-pool-executor==0.0.3",
 #     "cartopy==0.23.0",
 #     "certifi==2024.8.30",
+#     "cf-xarray==0.10.3",
 #     "cftime==1.6.4",
 #     "charset-normalizer==3.3.2",
 #     "click==8.1.7",
+#     "click-plugins==1.1.1",
+#     "cligj==0.7.2",
 #     "cloudpickle==3.0.0",
 #     "cmocean==4.0.3",
 #     "colorcet==3.1.0",
@@ -53,11 +65,11 @@
 #     "linkify-it-py==2.0.3",
 #     "llvmlite==0.43.0",
 #     "locket==1.0.0",
-#     "markdown-it-py==3.0.0",
 #     "markdown==3.7",
+#     "markdown-it-py==3.0.0",
 #     "markupsafe==2.1.5",
-#     "matplotlib-inline==0.1.7",
 #     "matplotlib==3.9.2",
+#     "matplotlib-inline==0.1.7",
 #     "mdit-py-plugins==0.4.2",
 #     "mdurl==0.1.2",
 #     "msgpack==1.1.0",
@@ -92,6 +104,7 @@
 #     "pyviz-comms==3.0.3",
 #     "pyyaml==6.0.2",
 #     "pyzmq==26.2.0",
+#     "rasterio==1.4.3",
 #     "requests==2.32.3",
 #     "s3fs==2024.9.0",
 #     "scipy==1.14.1",

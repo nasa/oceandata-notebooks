@@ -74,7 +74,7 @@ beautifulsoup4==4.12.3
     # via
     #   -r docker/requirements.in
     #   nbconvert
-black==24.10.0
+black==25.1.0
     # via oceandata-notebooks (pyproject.toml)
 bleach==6.1.0
     # via
@@ -122,6 +122,8 @@ certipy==0.1.3
     # via
     #   -r docker/requirements.in
     #   jupyterhub
+cf-xarray==0.10.3
+    # via oceandata-notebooks (pyproject.toml)
 cffi==1.16.0
     # via
     #   -r docker/requirements.in
@@ -255,9 +257,7 @@ gitdb==4.0.11
 gitpython==3.1.43
     # via nbdime
 greenlet==3.0.3
-    # via
-    #   -r docker/requirements.in
-    #   sqlalchemy
+    # via -r docker/requirements.in
 h11==0.14.0
     # via
     #   -r docker/requirements.in
@@ -336,7 +336,7 @@ isoduration==20.11.0
     # via
     #   -r docker/requirements.in
     #   jsonschema
-isort==5.13.2
+isort==6.0.1
     # via oceandata-notebooks (pyproject.toml)
 jedi==0.19.1
     # via
@@ -1085,6 +1085,7 @@ xarray==2024.10.0
     # via
     #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml)
+    #   cf-xarray
     #   pyinterp
     #   rioxarray
 xyzservices==2024.9.0
