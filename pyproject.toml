@@ -14,6 +14,7 @@ dependencies = [
   # every package used in an import or by a backend (e.g. h5netcdf)
   # TODO: torch, torchvision
   "cartopy>=0.22.0",
+  "cf-xarray>=0.9.4",
   "cmocean>=4.0.3",
   "dask[distributed]>=2024.4.1",
   "earthaccess>=0.11.0",
@@ -27,6 +28,7 @@ dependencies = [
   "pillow>=10.4.0",
   "pvlib>=0.11.1",
   "pyproj>=3.6.1",
+  "rasterio>=1.4.1",
   "scipy>=1.13.1",
   "seaborn>=0.13.2",
   "tqdm>=4.66.5",
@@ -43,17 +45,21 @@ optional-dependencies.docker = [
   # TODO: async-timeout is a possible unlisted dep of jupyter-vscode-proxy?
   "async-timeout>=4.0.3",
   "bash-kernel>=0.9.3",
+  "black>=24.10.0",
   "boto3>=1.35.36",
+  "dask-gateway>=2024.1.0",
   "dask-labextension>=7.0.0",
   "geopandas>=1.0.1",
   "geoviews>=1.12.0",
   "gh-scoped-creds>=4.1",
+  "isort>=5.13.2",
   "jupyter-vscode-proxy>=0.6",
+  "jupyterlab-code-formatter>=3.0.2",
   "jupyterlab-git>=0.50.1",
   "jupyterlab-h5web>=12.3.0",
   "jupytext>=1.16.4",
-  "nbgitpuller>=1.2.1",
-  "rasterio>=1.4.1",
+  "lz4>=4.3.3",
+  "pyinterp>=2024.6.0",
   "rioxarray>=0.15.0",
   "scikit-image>=0.24.0",
   "scikit-learn>=1.5.2",
@@ -76,7 +82,12 @@ cell_metadata_filter = "all,-trusted"
 
 [tool.ruff.lint]
 extend-select = ["I", "D"]
-ignore = ["D1", "D417", "F841"] # TODO: reconsider F841
+ignore = [
+  "D101", "D102", "D103",  # TODO: better docstrings for all functions, methods, and classes
+  "D203", "D213",  # preference over convlicting styles D211 and D212, respectively
+  "D417",  # TODO: parameter descriptions for all docstrings
+  "F841",  # TODO: reconsider defining variables that aren't used to prevent display
+]
 
 # [tool.uv]
 #   index-strategy = "unsafe-best-match"

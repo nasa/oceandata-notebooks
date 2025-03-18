@@ -9,6 +9,7 @@ aiohappyeyeballs==2.4.3
 aiohttp==3.10.8
     # via
     #   aiobotocore
+    #   dask-gateway
     #   jupyter-server-proxy
     #   s3fs
 aioitertools==0.12.0
@@ -73,6 +74,8 @@ beautifulsoup4==4.12.3
     # via
     #   -r docker/requirements.in
     #   nbconvert
+black==25.1.0
+    # via oceandata-notebooks (pyproject.toml)
 bleach==6.1.0
     # via
     #   -r docker/requirements.in
@@ -80,8 +83,9 @@ bleach==6.1.0
     #   panel
 blinker==1.7.0
     # via -r docker/requirements.in
-bokeh==3.5.2
+bokeh==3.4.2
     # via
+    #   -r docker/requirements.in
     #   dask-labextension
     #   geoviews
     #   holoviews
@@ -118,6 +122,8 @@ certipy==0.1.3
     # via
     #   -r docker/requirements.in
     #   jupyterhub
+cf-xarray==0.10.3
+    # via oceandata-notebooks (pyproject.toml)
 cffi==1.16.0
     # via
     #   -r docker/requirements.in
@@ -131,17 +137,21 @@ charset-normalizer==3.3.2
     #   requests
 click==8.1.7
     # via
+    #   -r docker/requirements.in
+    #   black
     #   click-plugins
     #   cligj
     #   dask
+    #   dask-gateway
     #   distributed
     #   rasterio
 click-plugins==1.1.1
     # via rasterio
 cligj==0.7.2
     # via rasterio
-cloudpickle==3.0.0
+cloudpickle==3.1.0
     # via
+    #   -r docker/requirements.in
     #   dask
     #   distributed
 cmocean==4.0.3
@@ -157,8 +167,9 @@ comm==0.2.2
     #   -r docker/requirements.in
     #   ipykernel
     #   ipywidgets
-contourpy==1.3.0
+contourpy==1.3.1
     # via
+    #   -r docker/requirements.in
     #   bokeh
     #   matplotlib
 cryptography==42.0.5
@@ -167,10 +178,20 @@ cryptography==42.0.5
     #   pyopenssl
 cycler==0.12.1
     # via matplotlib
-dask==2024.9.1
+cytoolz==1.0.0
+    # via -r docker/requirements.in
+dask==2024.11.2
     # via
+    #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml)
+    #   dask-expr
+    #   dask-gateway
     #   distributed
+    #   pyinterp
+dask-expr==1.1.19
+    # via -r docker/requirements.in
+dask-gateway==2024.1.0
+    # via oceandata-notebooks (pyproject.toml)
 dask-labextension==7.0.0
     # via oceandata-notebooks (pyproject.toml)
 debugpy==1.8.1
@@ -185,9 +206,11 @@ defusedxml==0.7.1
     # via
     #   -r docker/requirements.in
     #   nbconvert
-distributed==2024.9.1
+distributed==2024.11.2
     # via
+    #   -r docker/requirements.in
     #   dask
+    #   dask-gateway
     #   dask-labextension
 earthaccess==0.11.0
     # via oceandata-notebooks (pyproject.toml)
@@ -217,14 +240,15 @@ frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
-fsspec==2024.9.0
+fsspec==2024.10.0
     # via
+    #   -r docker/requirements.in
     #   dask
     #   earthaccess
     #   s3fs
 geopandas==1.0.1
     # via oceandata-notebooks (pyproject.toml)
-geoviews==1.13.0
+geoviews==1.12.0
     # via oceandata-notebooks (pyproject.toml)
 gh-scoped-creds==4.1
     # via oceandata-notebooks (pyproject.toml)
@@ -233,9 +257,7 @@ gitdb==4.0.11
 gitpython==3.1.43
     # via nbdime
 greenlet==3.0.3
-    # via
-    #   -r docker/requirements.in
-    #   sqlalchemy
+    # via -r docker/requirements.in
 h11==0.14.0
     # via
     #   -r docker/requirements.in
@@ -314,6 +336,8 @@ isoduration==20.11.0
     # via
     #   -r docker/requirements.in
     #   jsonschema
+isort==6.0.1
+    # via oceandata-notebooks (pyproject.toml)
 jedi==0.19.1
     # via
     #   -r docker/requirements.in
@@ -396,12 +420,12 @@ jupyter-server==2.13.0
     #   jupyter-server-mathjax
     #   jupyter-server-proxy
     #   jupyterlab
+    #   jupyterlab-code-formatter
     #   jupyterlab-git
     #   jupyterlab-h5web
     #   jupyterlab-server
     #   nbclassic
     #   nbdime
-    #   nbgitpuller
     #   notebook-shim
 jupyter-server-mathjax==0.2.6
     # via nbdime
@@ -423,6 +447,8 @@ jupyterlab==4.1.5
     # via
     #   -r docker/requirements.in
     #   dask-labextension
+jupyterlab-code-formatter==3.0.2
+    # via oceandata-notebooks (pyproject.toml)
 jupyterlab-git==0.50.1
     # via oceandata-notebooks (pyproject.toml)
 jupyterlab-h5web==12.3.0
@@ -451,8 +477,13 @@ llvmlite==0.43.0
     # via numba
 locket==1.0.0
     # via
+    #   -r docker/requirements.in
     #   distributed
     #   partd
+lz4==4.3.3
+    # via
+    #   -r docker/requirements.in
+    #   oceandata-notebooks (pyproject.toml)
 mako==1.3.2
     # via
     #   -r docker/requirements.in
@@ -492,13 +523,17 @@ mistune==3.0.2
     #   -r docker/requirements.in
     #   nbconvert
 msgpack==1.1.0
-    # via distributed
+    # via
+    #   -r docker/requirements.in
+    #   distributed
 multidict==6.1.0
     # via
     #   aiohttp
     #   yarl
 multimethod==1.12
     # via earthaccess
+mypy-extensions==1.0.0
+    # via black
 nbclassic==1.0.0
     # via
     #   -r docker/requirements.in
@@ -526,8 +561,6 @@ nbformat==5.10.3
     #   nbconvert
     #   nbdime
     #   notebook
-nbgitpuller==1.2.1
-    # via oceandata-notebooks (pyproject.toml)
 nest-asyncio==1.6.0
     # via
     #   -r docker/requirements.in
@@ -552,6 +585,7 @@ numcodecs==0.13.0
     # via zarr
 numpy==2.0.2
     # via
+    #   -r docker/requirements.in
     #   bokeh
     #   cartopy
     #   cftime
@@ -571,6 +605,7 @@ numpy==2.0.2
     #   numcodecs
     #   pandas
     #   pvlib
+    #   pyinterp
     #   pyogrio
     #   rasterio
     #   rioxarray
@@ -595,6 +630,7 @@ overrides==7.7.0
 packaging==24.0
     # via
     #   -r docker/requirements.in
+    #   black
     #   bokeh
     #   cartopy
     #   cmocean
@@ -609,13 +645,13 @@ packaging==24.0
     #   jupyter-server
     #   jupyterhub
     #   jupyterlab
+    #   jupyterlab-code-formatter
     #   jupyterlab-git
     #   jupyterlab-server
     #   jupytext
     #   lazy-loader
     #   matplotlib
     #   nbconvert
-    #   panel
     #   pyogrio
     #   rioxarray
     #   scikit-image
@@ -626,8 +662,10 @@ pamela==1.1.0
     #   jupyterhub
 pandas==2.2.3
     # via
+    #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml)
     #   bokeh
+    #   dask-expr
     #   geopandas
     #   holoviews
     #   hvplot
@@ -639,7 +677,7 @@ pandocfilters==1.5.0
     # via
     #   -r docker/requirements.in
     #   nbconvert
-panel==1.5.2
+panel==1.4.5
     # via
     #   geoviews
     #   holoviews
@@ -656,7 +694,11 @@ parso==0.8.3
     #   -r docker/requirements.in
     #   jedi
 partd==1.4.2
-    # via dask
+    # via
+    #   -r docker/requirements.in
+    #   dask
+pathspec==0.12.1
+    # via black
 pexpect==4.9.0
     # via
     #   -r docker/requirements.in
@@ -665,8 +707,9 @@ pexpect==4.9.0
     #   jupyterlab-git
 pickleshare==0.7.5
     # via -r docker/requirements.in
-pillow==10.4.0
+pillow==11.0.0
     # via
+    #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml)
     #   bokeh
     #   imageio
@@ -679,6 +722,7 @@ pkgutil-resolve-name==1.3.10
 platformdirs==4.2.0
     # via
     #   -r docker/requirements.in
+    #   black
     #   jupyter-core
 pqdm==0.2.0
     # via earthaccess
@@ -711,6 +755,10 @@ pure-eval==0.2.2
     #   stack-data
 pvlib==0.11.1
     # via oceandata-notebooks (pyproject.toml)
+pyarrow==18.0.0
+    # via
+    #   -r docker/requirements.in
+    #   dask-expr
 pycparser==2.21
     # via
     #   -r docker/requirements.in
@@ -721,6 +769,10 @@ pygments==2.17.2
     #   ipython
     #   nbconvert
     #   nbdime
+pyinterp==2024.11.0
+    # via
+    #   -r docker/requirements.in
+    #   oceandata-notebooks (pyproject.toml)
 pyjwt==2.8.0
     # via -r docker/requirements.in
 pyogrio==0.10.0
@@ -775,6 +827,7 @@ pyyaml==6.0.1
     #   -r docker/requirements.in
     #   bokeh
     #   dask
+    #   dask-gateway
     #   distributed
     #   jupyter-events
     #   jupytext
@@ -787,7 +840,7 @@ pyzmq==24.0.1
     #   jupyter-server
     #   nbclassic
     #   notebook
-rasterio==1.4.1
+rasterio==1.4.2
     # via
     #   oceandata-notebooks (pyproject.toml)
     #   rioxarray
@@ -833,7 +886,7 @@ ruamel-yaml-clib==0.2.8
     # via
     #   -r docker/requirements.in
     #   ruamel-yaml
-s3fs==2024.9.0
+s3fs==2024.10.0
     # via earthaccess
 s3transfer==0.10.3
     # via boto3
@@ -879,7 +932,9 @@ sniffio==1.3.1
     #   anyio
     #   httpx
 sortedcontainers==2.4.0
-    # via distributed
+    # via
+    #   -r docker/requirements.in
+    #   distributed
 soupsieve==2.5
     # via
     #   -r docker/requirements.in
@@ -894,7 +949,9 @@ stack-data==0.6.2
     #   -r docker/requirements.in
     #   ipython
 tblib==3.0.0
-    # via distributed
+    # via
+    #   -r docker/requirements.in
+    #   distributed
 terminado==0.18.1
     # via
     #   -r docker/requirements.in
@@ -916,8 +973,10 @@ tinynetrc==1.3.1
     # via earthaccess
 tomli==2.0.1
     # via -r docker/requirements.in
-toolz==0.12.1
+toolz==1.0.0
     # via
+    #   -r docker/requirements.in
+    #   cytoolz
     #   dask
     #   distributed
     #   partd
@@ -925,6 +984,7 @@ tornado==6.4
     # via
     #   -r docker/requirements.in
     #   bokeh
+    #   dask-gateway
     #   distributed
     #   ipykernel
     #   jupyter-client
@@ -934,7 +994,6 @@ tornado==6.4
     #   jupyterlab
     #   nbclassic
     #   nbdime
-    #   nbgitpuller
     #   notebook
     #   terminado
 tqdm==4.66.5
@@ -980,7 +1039,9 @@ typing-extensions==4.10.0
 typing-utils==0.1.0
     # via -r docker/requirements.in
 tzdata==2024.2
-    # via pandas
+    # via
+    #   -r docker/requirements.in
+    #   pandas
 uc-micro-py==1.0.3
     # via linkify-it-py
 uri-template==1.3.0
@@ -1020,20 +1081,27 @@ widgetsnbextension==4.0.10
     #   ipywidgets
 wrapt==1.16.0
     # via aiobotocore
-xarray==2024.9.0
+xarray==2024.10.0
     # via
+    #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml)
+    #   cf-xarray
+    #   pyinterp
     #   rioxarray
 xyzservices==2024.9.0
     # via
+    #   -r docker/requirements.in
     #   bokeh
     #   geoviews
+    #   panel
 yarl==1.13.1
     # via aiohttp
 zarr==2.18.3
     # via oceandata-notebooks (pyproject.toml)
 zict==3.0.0
-    # via distributed
+    # via
+    #   -r docker/requirements.in
+    #   distributed
 zipp==3.17.0
     # via
     #   -r docker/requirements.in

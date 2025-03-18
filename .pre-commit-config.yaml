@@ -1,5 +1,11 @@
 fail_fast: true
 repos:
+  - repo: https://github.com/mwouts/jupytext
+    rev: v1.16.7
+    hooks:
+      - id: jupytext
+        entry: jupytext --sync
+        files: ^book/src/.*\.py$
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -18,7 +24,7 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.4.20
+    rev: 0.6.6
     hooks:
       - id: uv-lock
       - id: pip-compile
@@ -29,14 +35,8 @@ repos:
         name: compile-docker-dependencies
         args: [-q, --extra, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml]
         files: ^(uv\.lock|docker/requirements\.in)$
-  - repo: https://github.com/mwouts/jupytext
-    rev: v1.16.4
-    hooks:
-      - id: jupytext
-        args: [--sync]
-        files: ^book/src/.*\.py$
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
+    rev: v0.11.0
     hooks:
       - id: ruff
         args: ["--fix", "--exit-non-zero-on-fix"]
@@ -47,9 +47,16 @@ repos:
         exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
   - repo: local
     hooks:
+      - id: update-setup-py
+        name: update-setup-py
+        description: Embed the dependencies (with extra "kernel") in the metadata of book/setup.py.
+        language: system
+        entry: uv add --script book/setup.py -r
+        files: ^requirements\.txt$
       - id: repo2docker-requirements
         name: repo2docker-requirements
         description: Generate docker/requirements.in with prerequisites from repo2docker.
+        stages: [manual]
         language: python
         additional_dependencies:
           - jupyter-repo2docker==2024.7.0
@@ -64,11 +71,5 @@ repos:
         additional_dependencies:
           - jupyter-repo2docker==2024.7.0
         pass_filenames: false
-        entry: repo2docker --user-name jovyan --appendix "$(< docker/appendix)" --no-run docker
+        entry: repo2docker --appendix "$(< docker/appendix)" --no-run docker
         files: ^docker/.*$
-      - id: update-setup-py
-        name: update-setup-py
-        description: Embed the dependencies (with extra "kernel") in the metadata of book/setup.py.
-        language: system
-        entry: uv add --script book/setup.py -r
-        files: ^requirements\.txt$
