@@ -35,7 +35,7 @@
 #
 # ## Summary
 #
-# This notebook will use `rasterio` to reproject PACE OCI data from the instrument swath into a projected coordinate system and save the file as a GeoTIFF, a common data format used in GIS applications. 
+# This notebook will use `rasterio` to reproject PACE OCI data from the instrument swath into a projected coordinate system and save the file as a GeoTIFF, a common data format used in GIS applications.
 #
 # ## Learning Objectives
 #
@@ -58,25 +58,24 @@
 # [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 # +
-import os
-import numpy as np 
-import xarray as xr
-import cartopy.crs as ccrs 
-import matplotlib.pyplot as plt 
-import earthaccess
-import cf_xarray
-from xarray.backends.api import open_datatree
 from pathlib import Path
 
+import earthaccess
+import rasterio
+import rasterio.warp
+import xarray as xr
+from xarray.backends.api import open_datatree
+
+
 def open_and_merge(filepath):
-    """
-    Open a PACE OCI netcdf file and merge the geophysical data
-        with the geolocation data.
+    """Open a level-2 file and merge the geophysical data with the geolocation data.
+
     Args:
         filepath: path to the OCI file
     Returns:
-        ds: merged dataset containing data variables and lat/lon 
+        ds: merged dataset containing data variables and lat/lon
             information as coordinates
+
     """
     datatree = open_datatree(filepath)
     data = datatree.geophysical_data.to_dict()
@@ -108,13 +107,13 @@ auth = earthaccess.login(persist=True)
 # Using the same file as the terrestrial analysis tutorial for now
 srf_results = earthaccess.search_data(
     short_name="PACE_OCI_L2_SFREFL",
-    granule_name = "*20240701T175112*"
+    granule_name="*20240701T175112*",
 )
 srf_results[0]
 
 vi_results = earthaccess.search_data(
     short_name="PACE_OCI_L2_LANDVI",
-    granule_name = "*20240701T175112*"
+    granule_name="*20240701T175112*",
 )
 vi_results[0]
 
@@ -126,23 +125,22 @@ vi_paths
 
 rhos = open_and_merge(srf_paths[0])
 rhos
-#dt = open_datatree(srf_paths[0])
-#dt.geophysical_data.to_dict()
+# dt = open_datatree(srf_paths[0])
+# dt.geophysical_data.to_dict()
 
 vi = open_and_merge(vi_paths[0])
 vi
 
 # You can see that `rhos` is a 3-dimensional variable with dimensions (`number_of_lines`, `pixels_per_line`, `wavelength_3d`) which corresponds to (rows, columns, wavelength), while each vegetation index is 2-dimensional with (rows, columns). This is important because it means each file has to be treated differently when converting their format. We'll start with the simpler case, the VIs.
 #
-# Since each VI is a separate variable in our dataset `vi`, we'll have to convert each one into a separate GeoTIFF. Let's take CIRE as an example. First, we define the coordinate reference systems (CRS) for both the source dataset and our destination GeoTIFF, and calculate the necessary parameters for the projection. 
+# Since each VI is a separate variable in our dataset `vi`, we'll have to convert each one into a separate GeoTIFF. Let's take CIRE as an example. First, we define the coordinate reference systems (CRS) for both the source dataset and our destination GeoTIFF, and calculate the necessary parameters for the projection.
 #
-# Because we're using unprojected latitude and longitude values based on WGS 84, the CRS of our source data is EPSG 4326. The destination CRS is user's choice; we'll use EPSG 4326 again for simplicity. 
+# Because we're using unprojected latitude and longitude values based on WGS 84, the CRS of our source data is EPSG 4326. The destination CRS is user's choice; we'll use EPSG 4326 again for simplicity.
 
 # +
-datatree = open_datatree(vi_paths[0])
-src = datatree["cire"]
-lon = datatree["longitude"]
-lat = datatree["latitude"]
+src = vi["cire"]
+lon = vi["longitude"]
+lat = vi["latitude"]
 
 src_crs = rasterio.crs.CRS.from_epsg(4326)
 dst_crs = rasterio.crs.CRS.from_epsg(4326)
@@ -155,9 +153,6 @@ transform, width, height = rasterio.warp.calculate_default_transform(
     src_geoloc_array=(lon, lat),
 )
 # -
-
-
-
 # [back to top](#Contents)
 
 # ## 3. Style Notes
