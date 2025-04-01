@@ -52,11 +52,15 @@
 # +
 import os
 import numpy as np 
+import cf_xarray
 import xarray as xr
+import cartopy
 import cartopy.crs as ccrs 
 import matplotlib.pyplot as plt 
 import earthaccess
-import cf_xarray
+import holoviews as hv
+import hvplot.xarray
+import panel as pn
 from xarray.backends.api import open_datatree
 # -
 
@@ -69,11 +73,12 @@ from xarray.backends.api import open_datatree
 
 auth = earthaccess.login(persist=True)
 
-# We will use 'earthaccess' to search and open a specific L2 surface reflectance granule covering the Great Lakes. 
+# We will use `earthaccess` to search and open a specific L2 surface reflectance granule covering part of the Great Lakes region of North America. 
 
+# Changing granule to Australia for VI example in sect. 4
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_SFREFL",
-    granule_name = "*20240701T175112*"
+    granule_name = "*20240701T175112*"#"*20250117T044314*"
 )
 results[0]
 
@@ -86,101 +91,206 @@ paths
 # We will use open_datatree() to open up all variables within the NetCDF and set the coordinates to the lat, lon variables.
 
 datatree = open_datatree(paths[0])
-wavelengths = datatree.sensor_band_parameters.wavelength_3d.values
-dataset_dict = datatree.geophysical_data.to_dict()
-dataset_dict.update(datatree.navigation_data.to_dict())
-# TODO: Find a way to either add wavelength_3d values to the dataset or create a dict of wavelength 3d indices = actual wavelength?? for plot below.
-#dataset_dict.update({"wavelength_3d":datatree.sensor_band_parameters.wavelength_3d.to_dict()})
-dataset = xr.merge(dataset_dict.values())
-dataset = dataset.set_coords(("longitude", "latitude"))
+all_data = xr.merge(datatree.to_dict().values())
+all_data = all_data.set_coords(("longitude", "latitude", "wavelength_3d"))
+all_data
+
+# The merged dataset has a lot of variables we won't need in this analysis, so we can pull the subset that we need to make it more manageable.
+
+dataset = all_data[["rhos", "l2_flags"]]
 dataset
 
 # In the above print-out of our L2 file, we see the data variables `rhos` and `l2_flags`. The `rhos` variable are surface reflectances, and the `l2_flags` are quality flags as defined by the [Ocean Biology Processing Group].
 #
 # [Ocean Biology Processing Group]:https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/
 #
-# We can also see which wavelengths the surface reflectances correspond to by opening the `wavelength_3d` coordinate:
+# We can also see which wavelengths we have surface reflectance measurements at by accessing the `wavelength_3d` coordinate:
 
-# Let's plot surface reflectance at 555 nm.
+dataset.wavelength_3d
+
+# Let's plot surface reflectance in the NIR at 860 nm, where land is bright and we can differentiate land, water, and clouds.
 
 # +
-rhos_555 = dataset["rhos"].sel({"wavelength_3d": np.argwhere(wavelengths == 555)[0][0]})
+rhos_860 = dataset.sel(wavelength_3d=860, method='nearest')
 
 fig = plt.figure(figsize=(8,5))
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.coastlines(linewidth=0.5)
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"},linewidth=0.25)
-rhos_555.plot(x='longitude', y='latitude', cmap='viridis', vmin=0, vmax=1.0)
-ax.set_title('Surface reflectance at 555 nm')
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
+ax.add_feature(cartopy.feature.OCEAN, edgecolor='w',linewidth=0.01)
+ax.add_feature(cartopy.feature.LAND, edgecolor='w',linewidth=0.01)
+rhos_860.rhos.plot(x='longitude', y='latitude', cmap='Greys_r', vmin=0, vmax=1.0)
 # -
 
-# Great! We've plotted the surface reflectance at a single band for the whole scene. However, there are some clouds in this image that we want to exclude from our analysis. 
+# Great! We've plotted the surface reflectance at a single band for the whole scene (see [this tutorial](https://pacehackweek.github.io/pace-2024/presentations/hackweek/satdata_visualization.html) for how to do an RGB visualization). However, there are some features in this image that we want to exclude from our analysis. 
 
 # [back to top](#Contents)
 
 # ## 3. Mask for Clouds and Water
 #
-# Let's look more closely at the `l2_flags` variable.
+# Level 2 files generally include some information on the quality of each pixel in the scene, presented in the `l2_flags` variable. Let's look at it a little more closely.
 
 dataset.l2_flags
 
-# `l2_flags` is in the same shape as the surface reflectance we plotted above, but plotting the variable doesn't seem to give us any information. That's because `l2_flags` is actually a 2D array of numbers representing bitflags, so they must be treated as bits and not numbers.
+# At first glance, we can see that `l2_flags` is in the same shape as the surface reflectance we plotted above. The attributes provide some information, but a lot of it looks like random numbers and abbreviations. If we were to plot the variable, it wouldn't look like anything useful, either. This is because the values in `l2_flags` are numerical representations those quality flags mentioned above. In order to decode which flags apply to which pixels, we have to treat them differently than we would a normal geophysical variable.
 #
-# There are a couple ways to deal with bitflags - thankfully, one of those is to use `cf_xarray`, which is a part of the `xarray` package that allows you to access any [CF metadata convention](http://cfconventions.org/) attributes present in a file. 
+# There are a couple ways to deal with these flags. One of those is to use the `cf_xarray` package, which allows you to access any [CF metadata convention](http://cfconventions.org/) attributes present in an `xarray` object. Since all PACE data follows CF conventions, the package should be able to handle the flags for us.
 #
 # For example, say we want to mask any pixels flagged as clouds and or water in our data. First, we have to make sure that the `l2_flags` variable is readable by `cf_xarray` so that we can eventually apply them to the data. We can check this using the built in `is_flag_variable` function:
 
 print('Is l2_flags a flag variable?: ', dataset.l2_flags.cf.is_flag_variable)
 
-# The statement returned "True", which means `l2_flags` is recognized as a flag variable. By referencing [this link](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/) which describes each flag, we find the name of the ones we want to mask out. In this case, "CLDICE" is the cloud flag, and while there is no specific water mask (this is an ocean mission, after all) there is a LAND flag we can invert to mask out water. The cell below will retain any pixel identified as land which is also not a cloud (thanks to the `~`):
+# The statement returned "True", which means `l2_flags` is recognized as a flag variable. By referencing [this link](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/) which describes each flag, we find the name of the ones we want to mask out. In this case, "CLDICE" is the cloud flag, and while there is no specific water mask (this is an ocean mission, after all) there is a "LAND" flag we can invert to mask out water. The expressions in the cell below will retain any pixel identified as land which is also not a cloud (thanks to the `~`):
 
 cldwater_mask = (dataset.l2_flags.cf == 'LAND') & ~(dataset.l2_flags.cf == 'CLDICE')
-land_values = dataset.where(cldwater_mask)
+land_only = dataset.where(cldwater_mask)
 
-# Then, we can see if the mask worked by plotting the same wavelength once again:
+# Then, we can see if the mask worked by plotting the data once again. Note that we need to redefine the `rhos_860` selection with the new masked dataset.
 
 # +
-land_rhos_555 = land_values["rhos"].sel({"wavelength_3d": np.argwhere(wavelengths == 555)[0][0]})
+rhos_860 = land_only.sel(wavelength_3d=860, method='nearest')
 
-fig = plt.figure(figsize=(8,6))
+fig = plt.figure(figsize=(9,5))
 ax = plt.axes(projection=ccrs.PlateCarree())
-ax.coastlines(linewidth=0.5)
+ax.coastlines(linewidth=0.25)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"},linewidth=0.25)
-land_rhos_555.plot(x='longitude', y='latitude', cmap='viridis', vmin=0)
-ax.set_title('Surface reflectance at 555 nm with cloud & water mask')
+ax.add_feature(cartopy.feature.OCEAN, edgecolor='w',linewidth=0.01)
+ax.add_feature(cartopy.feature.LAND, edgecolor='w',linewidth=0.01)
+ax.add_feature(cartopy.feature.LAKES, edgecolor='k',linewidth=0.1)
+#land_only["rhos"][:,:,wl_idx].plot(x='longitude', y='latitude', cmap='Greys_r', vmin=0, vmax=1.0)
+#ax.set_title(f'Surface reflectance at {wavelengths[wl_idx]} nm with cloud & water mask')
+rhos_860.rhos.plot(x='longitude', y='latitude', cmap='Greys_r', vmin=0, vmax=1.0)
 # -
 
 # ## 4. Working with PACE Terrestrial Data
 #
-# Now that we have our surface reflectance data masked, 
+# ### Multispectral Vegetation Indices
+#
+# Now that we have our surface reflectance data masked, we can start doing some analysis. A relatively simple but powerful use of surface reflectance data is in the calculation of vegetation indices (VIs). VIs use the well-known, ideal spectral shape of leaves (and other materials) to determine features of the content in a pixel, like how healthy the vegetation is, or the relative water content, or even the presence of snow. They've been used in terrestrial remote sensing for decades, and are particularly valuable when considering the limited number of bands in previous multispectral sensors. They can, of course, also be calculated with hyperspectral sensors like PACE.
+#
+# Let's take NDVI for example. NDVI is a metric which quantifies plant "greenness", which is related to the abundance and health of the vegetation in a pixel. It is a normalized ratio of the red and NIR bands:
+# $$
+# NDVI = \frac{\rho_{NIR} - \rho_{red}}{\rho_{NIR} + \rho_{red}}
+# $$
+#
+# You'll notice that the equation does not mention specific wavelengths, but rather just requires a "red" measurement and a "NIR" measurement. With PACE, as we can see in the spectra below, we have a lot of measurements throughout the red and NIR regions of the spectrum. 
+
+r, c, ct = 900, 300, 0
+fig, ax = plt.subplots(1,2, figsize=(10, 5), sharey=True)
+while ct < 40:
+    ax[0].plot(land_only.wavelength_3d.values, land_only.rhos[r, c,:], ls='', marker='o', markersize=2,alpha=0.2, c='k')
+    ax[1].plot(land_only.wavelength_3d.values, land_only.rhos[r, c,:], ls='--', marker='o', markersize=6, alpha=0.2, c='k')
+    c, ct = c+1, ct+1
+ax[0].set_xlim([340, 900])
+ax[1].set_xlim([910, 2290])
+ax[0].set_xlabel("Wavelength (nm)")
+ax[1].set_xlabel("Wavelength (nm)")
+ax[0].set_ylabel("Reflectance")
+
+
+# To calculate NDVI and other heritage multispectral indices with PACE, you could choose a single band from each region. However, doing so would mean capturing only the information from one of OCI's narrow 5 nm bands. In other words, we would miss out on information from surrounding wavelengths that improve these calculations and would have otherwise been included from other sensors. To preserve continuity with those sensors and calculate a more accurate NDVI, we can take an average of several OCI bands to simulate a multispectral measurement, incorporating as much relevant information into the calculation as possible.
+#
+# We'll take MODIS's red and NIR bandwidths and average the PACE measurements together:
+
+# +
+def avg_rfl(data, wl_range):
+    '''
+    Finds the index of each boundary wavelength and averages data in 
+        that range.
+    Args:
+        data - xarray object containing reflectances variable "rhos" 
+        wl_range - list of bounds of wavelengths to average over     
+    '''
+    lidx = np.argwhere(land_only.wavelength_3d.values == wl_range[0])[0][0]
+    hidx = np.argwhere(land_only.wavelength_3d.values == wl_range[1])[0][0]
+    return data.rhos[:,:,lidx:hidx].mean(dim="wavelength_3d", skipna=True)
+
+avg_red = avg_rfl(land_only, [620, 670])
+avg_nir = avg_rfl(land_only, [840, 875])
+
+
+# -
+
+# Now, we can use those averaged reflectances to calculate NDVI from PACE:
+
+# +
+def get_ndvi(red, nir):
+    return (nir - red) / (nir + red)
+
+pace_ndvi = get_ndvi(avg_red, avg_nir)
+
+fig = plt.figure(figsize=(9,5))
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.coastlines(linewidth=0.5)
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
+ax.add_feature(cartopy.feature.OCEAN, edgecolor='w',linewidth=0.01)
+ax.add_feature(cartopy.feature.LAND, edgecolor='w',linewidth=0.01)
+ax.add_feature(cartopy.feature.LAKES, edgecolor='k',linewidth=0.1)
+pace_ndvi.plot(x='longitude', y='latitude', cmap='RdYlGn', vmin=-0.05, vmax=1.0,
+              cbar_kwargs={"label":"Normalized Difference Vegetation Index (NDVI)"})
+ax.set_title('NDVI from PACE OCI')
+# -
+
+# Making these heritage calculations are important for many reasons, not least of which because the MODIS instruments are reaching the end of their lives and will soon be decommissioned. PACE can then fill the gap that would have otherwise been left in the time series of these VI datasets. However, as a hyperspectral instrument, PACE OCI is able to go beyond these legacy calculations and create new products, as well!
+#
+# ### Hyperspectral-enabled Vegetation Indices
+#
+# Hyperspectral-enabled VIs are still band ratios, but rather than using wide bands to capture the general aspects of a spectrum, they target minute fluctuations in surface reflectances to describe detailed features of a pixel, such as relative pigment concentration in plants. This means that, unlike multispectral VIs, these indices require the narrow bandwidths inherent to OCI data. In other words, we don't want to do any band averaging as we did above, because we'd likely dilute the very signal we want to pull out. The calculations for this type of VI then become much simpler!
+#
+# This time, we'll take the Chlorophyll Index Red Edge (CIRE) as an example. CIRE uses bands from the red edge and the NIR to get at relative canopy chlorophyll content:
+# $$
+# CIRE = \frac{\rho_{800}}{\rho_{705}} - 1
+# $$
+#
+# Because we're not doing any averaging, all we have to do is grab the bands from our dataset and follow the equation. We'll use the closest bands that the SFREFL suite has to 800 and 705 nm.
+
+# +
+rhos_800 = land_only.rhos.sel(wavelength_3d=800, method='nearest')
+rhos_705 = land_only.rhos.sel(wavelength_3d=705, method='nearest')
+
+cire = (rhos_800 / rhos_705) - 1
+# -
+
+# We can compare these maps side by side to see similarities and differences in the patterns of each VI.
+
+# +
+# NOTE: Lat/Lon in the hover shows as NaN, why?
+plots = [cire.hvplot.quadmesh(x='longitude', y='latitude', crs=ccrs.PlateCarree(), 
+                             clim=(0, 6), tiles='CartoLight', title="CIRE, July 1st, 2024", project=True, 
+                             cmap="RdYlGn"),
+         pace_ndvi.hvplot.quadmesh(x='longitude', y='latitude', crs=ccrs.PlateCarree(), 
+                                   clim=(0,1.0), tiles='CartoLight', 
+                                   title="NDVI, July 1st, 2024", project=True, cmap="RdYlGn")]
+
+grid = pn.GridSpec()
+for i, plot in enumerate(plots):
+    grid[i//2, i%2] = plot
+
+grid.servable()
+# -
+
+# Comparing these two plots, we can see some similarities and differences. Generally, the patterns of high and low values fall in the same places - this is because NDVI is essentially measuring the amount of green vegetation, and CIRE is measuring the amount of green pigment in plants. However, CIRE also has a higher dynamic range than NDVI does. For one, NDVI saturates as vegetation density increases, so a wide range of ecosystems with varying amounts of green veegtation may have very similar NDVI values. On the other hand, CIRE is not as affected by the leaf area, and can instead hone in on the relative amount of chlorophyll pigment in a pixel rather than the amount of leaves. This is a major advantage of CIRE and other hyperspectral-enabled VIs like the Carotenoid Content Index (Car), enabling us to track specific biochemical shifts in plants that correspond states of photosynthetic/photoprotective ability and thus providing insight on their physiological condition. 
+#
+# If calculating these indices manually felt a little tedious, not to worry! PACE OCI provides 10 VIs in its LANDVI product suite - 6 are heritage indices, and the remaining 4 are narrowband pigment indices including CIRE. Read more about it in the ATBD (in review, will link when published)
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_LANDVI",
+    granule_name = "*20240701*MO*0p1*"#"*20250117T044314*"
+)
+results[0]
+
+paths = earthaccess.download(results, local_path="data")
+
+datatree = open_datatree(paths[0])
+datatree
+
+
+# +
+def single_vi(vi):
+    return vi.hvplot.image("lon", "lat", tiles="CartoLight", project=True, tools=['hover'], 
+                           frame_width=450, frame_height=250, cmap="magma", title=f"{vi.name}, July 2024 Monthly Average")
+
+single_vi(datatree.mari)
+# -
 
 # [back to top](#Contents)
-
-# ## 4. GIS Compatibility
-#
-# Let's take a look at the the `masked_dataset`:
-
-masked_dataset
-
-# Since PACE data is hyperspectral, we're working with a 3D array of reflectances. We have dimensions `number_of_lines` (rows, or our 'y' variable), `pixels_per_line` (columns, or our 'x' variable), and wavelength_3d, which is an array of wavelengths in our hyperspectral data cube. The dimensions are in this *exact* order, so when we load a L2 surface reflectance NetCDF into QGIS, it looks a little funky. 
-#
-# Because of the way PACE data orders its dimensions - that is, with `number_of_lines` first - QGIS reads that as the dimension we're interested in looking at. There's a simple way to fix this so that instead of reading the y variable, QGIS will show us the surface reflectance, our actual variable of interest. 
-#
-# All we have to do to fix this is to transpose our dataset. Thankfully, xarray has this capability as well.
-
-transposed_file = masked_dataset.transpose("wavelength_3d", "number_of_lines", "pixels_per_line")
-transposed_file
-
-# Now we can see that ```rhos``` has the correct dimension order: wavelength, row, column. We can export this new set up using `xarray` again:
-
-output_path = paths[0].replace(".nc","_transposed.nc")
-transposed_file.to_netcdf(path=output_path)
-
-# If we load that new file into QGIS, we see that now wavelength is the dimension that varies! Remember that these data are still in the instrument swath and have not been projected to any coordinate system yet.
-#
-# We're finally close to being done! If you're fine working with netCDF format, you could stop here. The final thing we'll take you through is how to convert netCDF to a GeoTIFF format.
-
-#
-
-
-
