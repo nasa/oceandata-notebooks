@@ -75,10 +75,9 @@ auth = earthaccess.login(persist=True)
 
 # We will use `earthaccess` to search and open a specific L2 surface reflectance granule covering part of the Great Lakes region of North America. 
 
-# Changing granule to Australia for VI example in sect. 4
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_SFREFL",
-    granule_name = "*20240701T175112*"#"*20250117T044314*"
+    granule_name = "*20240701T175112*"
 )
 results[0]
 
@@ -157,8 +156,6 @@ ax.gridlines(draw_labels={"left": "y", "bottom": "x"},linewidth=0.25)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor='w',linewidth=0.01)
 ax.add_feature(cartopy.feature.LAND, edgecolor='w',linewidth=0.01)
 ax.add_feature(cartopy.feature.LAKES, edgecolor='k',linewidth=0.1)
-#land_only["rhos"][:,:,wl_idx].plot(x='longitude', y='latitude', cmap='Greys_r', vmin=0, vmax=1.0)
-#ax.set_title(f'Surface reflectance at {wavelengths[wl_idx]} nm with cloud & water mask')
 rhos_860.rhos.plot(x='longitude', y='latitude', cmap='Greys_r', vmin=0, vmax=1.0)
 # -
 
@@ -275,7 +272,7 @@ grid.servable()
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_LANDVI",
-    granule_name = "*20240701*MO*0p1*"#"*20250117T044314*"
+    granule_name = "*20240701*MO*0p1*"
 )
 results[0]
 
