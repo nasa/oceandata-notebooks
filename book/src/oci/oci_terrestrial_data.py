@@ -12,8 +12,8 @@
 #     name: python
 # ---
 
-# # Orientation to PACE OCI Terrestrial Products 
-# **Tutorial Lead:** Skye Caplan (NASA, SSAI) 
+# # Orientation to PACE OCI Terrestrial Products
+# **Tutorial Lead:** Skye Caplan (NASA, SSAI)
 #
 # <div class="alert alert-info" role="alert">
 #
@@ -25,7 +25,7 @@
 #
 # ## Summary
 #
-# This notebook will use `earthaccess` to search and access PACE OCI surface reflectance data and provide tools for visualization and masking. This notebook also includes example code to convert netcdfs to GeoTIFFs, making them compatible in a GIS platform. 
+# This notebook will use `earthaccess` to search and access PACE OCI surface reflectance data and provide tools for visualization and masking. This notebook also includes example code to convert netcdfs to GeoTIFFs, making them compatible in a GIS platform.
 #
 # ## Learning objectives
 #
@@ -34,7 +34,7 @@
 # - Mask those products for features you want to exclude from your analysis that are flagged in the data
 # - Convert Level-2 OCI data to a GIS compatible format
 # - Export those GIS compatible data as a GeoTIFF
-#   
+#
 #
 # ## Contents
 # 1. [Setup](#1.-Setup)
@@ -42,12 +42,10 @@
 # 3. [Mask Data for Clouds and Water](#3.-Mask-Data-for-Clouds-and-Water)
 # 4. [GIS Compatibility](#4.-GIS-Compatibility)
 # 5. [Convert netCDF to GeoTIFF Format](#5.-Convert-netCDF-to-GeoTIFF-Format)
-#    
-# -------
 
 # ## 1. Setup
 #
-# We begin by importing the packages used in this notebook. 
+# We begin by importing the packages used in this notebook.
 
 # +
 import os
@@ -77,7 +75,7 @@ auth = earthaccess.login(persist=True)
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_SFREFL",
-    granule_name = "*20240701T175112*"
+    granule_name="*20240701T175112*",
 )
 results[0]
 
@@ -112,7 +110,7 @@ dataset.wavelength_3d
 # +
 rhos_860 = dataset.sel(wavelength_3d=860, method='nearest')
 
-fig = plt.figure(figsize=(8,5))
+fig = plt.figure(figsize=(8, 5))
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.coastlines(linewidth=0.5)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
@@ -137,7 +135,7 @@ dataset.l2_flags
 #
 # For example, say we want to mask any pixels flagged as clouds and or water in our data. First, we have to make sure that the `l2_flags` variable is readable by `cf_xarray` so that we can eventually apply them to the data. We can check this using the built in `is_flag_variable` function:
 
-print('Is l2_flags a flag variable?: ', dataset.l2_flags.cf.is_flag_variable)
+print("Is l2_flags a flag variable?: ", dataset.l2_flags.cf.is_flag_variable)
 
 # The statement returned "True", which means `l2_flags` is recognized as a flag variable. By referencing [this link](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/) which describes each flag, we find the name of the ones we want to mask out. In this case, "CLDICE" is the cloud flag, and while there is no specific water mask (this is an ocean mission, after all) there is a "LAND" flag we can invert to mask out water. The expressions in the cell below will retain any pixel identified as land which is also not a cloud (thanks to the `~`):
 
