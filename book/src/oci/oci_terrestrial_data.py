@@ -47,7 +47,7 @@
 
 # ## 1. Setup
 #
-# We begin by importing the packages used in this notebook. At first glance, the `cf_xarray` package appears unused and should therefore not be imported. Since it actually provides the `cf` attribute used below on certain `xarray` data structures, we indicate that the import is necessary by the inline comment `# noqa: F401` referencing rule [F401](https://docs.astral.sh/ruff/rules/unused-import/).
+# We begin by importing the packages used in this notebook. At first glance, the `cf_xarray` package appears unused and should therefore not be imported. Since it actually provides the `cf` attribute used below on certain `xarray` data structures, we indicate that the import is necessary by the inline comment `# noqa: F401` referencing rule [F401](https://docs.astral.sh/ruff/rules/unused-import/). Likewise for `hvplot.xarray` and the `hvplot` attribute.
 
 # +
 import cartopy
@@ -123,7 +123,7 @@ ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
 rhos_860.plot(x="longitude", y="latitude", cmap="Greys_r", vmin=0, vmax=1.0)
 plt.show()
 
-# Great! We've plotted the surface reflectance at a single band for the whole scene. However, there are some features in this image that we want to exclude from our analysis. 
+# Great! We've plotted the surface reflectance at a single band for the whole scene. However, there are some features in this image that we want to exclude from our analysis.
 
 # [back to top](#Contents)
 
@@ -187,9 +187,10 @@ sample_rhos = rhos.sel(
 hyper_rhos = sample_rhos.sel({"wavelength_3d": slice(None, 895)})
 multi_rhos = sample_rhos.sel({"wavelength_3d": slice(1038, None)})
 
-fig, (a, b) = plt.subplots(1, 2, figsize=(10, 5))
-hyper_rhos.plot.line('k', x="wavelength_3d", ax=a, alpha=0.3, add_legend=False)
-multi_rhos.plot.line('k--o', x="wavelength_3d", ax=b, alpha=0.3, add_legend=False)
+fig, (a, b) = plt.subplots(1, 2, figsize=(10, 5), sharey=True)
+hyper_rhos.plot.line("k", x="wavelength_3d", ax=a, alpha=0.3, add_legend=False)
+multi_rhos.plot.line("k--o", x="wavelength_3d", ax=b, alpha=0.3, add_legend=False)
+b.set_ylabel("")
 plt.show()
 
 # To calculate NDVI and other heritage multispectral indices with PACE, you could choose a single band from each region. However, doing so would mean capturing only the information from one of OCI's narrow 5 nm bands. In other words, we would miss out on information from surrounding wavelengths that improve these calculations and would have otherwise been included from other sensors. To preserve continuity with those sensors and calculate a more comparable NDVI, we can take an average of several OCI bands to simulate a multispectral measurement, incorporating as much relevant information into the calculation as possible.
