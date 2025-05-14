@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.7
+#       jupytext_version: 1.16.0
 #   language_info:
 #     name: python
 # ---
@@ -27,7 +27,7 @@
 #
 # ## Summary
 #
-# This notebook will use `rioxarray` to reproject PACE OCI data from the instrument swath into a projected coordinate system and save the file as a GeoTIFF, a common data format used in GIS applications.
+# This notebook will use `rioxarray` to reproject PACE OCI data from the instrument swath into a projected coordinate system and save the file as a GeoTIFF (.tif), a common data format used in GIS applications.
 #
 # ## Learning Objectives
 #
@@ -61,11 +61,13 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import cf_xarray  # noqa: F401
 from xarray.backends.api import open_datatree
+
+import rasterio
 # -
 
 # The goal of this tutorial is to reproject and convert L2 PACE data between formats, but L2 PACE data comes in many forms. We'll cover two examples here - one with 3-dimensional surface reflectance (SFREFL) data, and one with 2-dimensional vegetation index (VI) data - to illustrate how these datasets need to be handled.
 #
-# The following cells set and persist your Earthdata login credentials, then search for and download the relevant datasets for a scene covering eastern North America. 
+# The following cells use `earthaccess` to set and persist your Earthdata login credentials, then search for and download the relevant datasets for a scene covering eastern North America. 
 
 # +
 auth = earthaccess.login(persist=True)
@@ -86,9 +88,9 @@ paths = earthaccess.download(results, local_path="data")
 # ## 2. Reprojecting L2 PACE Data
 # ### 2.1. 2D Variables - Vegetation Indices
 #
-# All of PACE's L2 data are still in the instrument swath - in other words, they are not projected to any sort of regular grid, which makes comparing between satellites, or even between two PACE granules in the same location, difficult. However, each pixel is geolocated (i.e., has an associated latitude and longitude), meaning that we can reproject our data onto a grid to make working with the data go much more smoothly. 
+# All of PACE's L2 data are still in the instrument swath - in other words, they are not projected to any sort of regular grid, which makes comparing between satellites, or even between two PACE granules in the same location, difficult. However, each pixel is geolocated (i.e., has an associated latitude and longitude), meaning we can reproject our data onto a grid to make working with the data go much more smoothly. 
 #
-# As mentioned above, we're working with 2 data products in this tutorial. We'll open both as `xarray` datasets and display their different dimensional architecture:
+# As mentioned above, we're working with two data products in this tutorial. We'll open both as `xarray` datatrees and display their different dimensional architecture:
 
 # +
 vi_path, sr_path = paths[0], paths[1]
@@ -100,7 +102,7 @@ print("Surface reflectance dimensions: ", sr_dt.geophysical_data.rhos.dims)
 print("Vegetation index dimensions: ", vi_dt.geophysical_data.cire.dims)
 # -
 
-# As we can see, the dimensions between the variables in both datasets differ. The surface reflectances contained in the `rhos` have 3 dimensions corresponding to (rows, columns, wavelengths), while each VI (e.g., `ndvi` or `cire`) is a 2D variable with (row, column) dimensions. 
+# As we can see, the dimensions between the variables in both datasets differ. The surface reflectances contained in the `rhos` variable have 3 dimensions corresponding to (rows, columns, wavelengths), while each VI variable (e.g., `ndvi` or `cire`) is a 2D variable with (row, column) dimensions. 
 #
 # If we plot one of these variables, we'll see that they aren't on any sort of regular grid, and will instead be plotted by their row (`number_of_lines`) and column (`pixels_per_line`) indices as any non-geospatial array would be.
 
@@ -148,6 +150,7 @@ ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
 vi_dst.cire.plot(cmap="magma", vmin=0)
+plt.title("")
 plt.show()
 
 # We can see this dataset is already masked for water, but not clouds. We can use the `cf_xarray` package to handle cloud masking before we export this dataset.
@@ -166,6 +169,7 @@ ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
 vi_dst.cire.plot(cmap="magma", vmin=0)
+plt.title("")
 plt.show()
 # -
 
@@ -177,11 +181,16 @@ plt.show()
 #
 # Recalling from above, the surface reflectance variable `rhos` has dimensions (rows, columns, wavelengths) - in other words, (Y, X, Z). Without resolving this issue, trying to load PACE surface reflectance data in QGIS will result in what looks like nonsensical lines and squares instead of a rich reflectance data cube! 
 #
-# To put PACE reflectances in the correct dimensional order, all we have to do is transpose the data so that he wavelength dimension, `wavelength_3d`, is first. 
+# To put PACE reflectances in the correct dimensional order, all we have to do is transpose the data so that the wavelength dimension, `wavelength_3d`, is first. 
+#
+# Before this, we include code that renames the wavelength_3d variable to the center wavelength of each band. This makes it easier to select bands based on wavelength values versus just 1-122 numerical ordering. 
+
+sr_dt['geophysical_data'] = sr_dt['geophysical_data'].to_dataset().assign_coords(sr_dt["sensor_band_parameters"].coords)
+sr_dt["geophysical_data"]
 
 # +
 # Export rhos with l2_flags or just rhos dataarray?
-#sr_src = srfl_dt["geophysical_data"].to_dataset()
+#sr_src = sr_dt["geophysical_data"].to_dataset()
 sr_src = sr_dt["geophysical_data"]["rhos"]
 sr_src = sr_src.transpose("wavelength_3d", ...)
 
@@ -225,7 +234,8 @@ ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
 #ax.set_extent([-110, -50, 20, 60], crs=ccrs.PlateCarree())
-sr_dst[110,:,:].plot(cmap="Greys_r", vmin=0, vmax=1, zorder=101)
+sr_dst.sel({'wavelength_3d':510}).plot(cmap="Greys_r", vmin=0, vmax=1, zorder=101)
+plt.title("")
 plt.show()
 
 # ## 3. Exporting to GeoTIFF
@@ -236,7 +246,11 @@ plt.show()
 
 # +
 # NOTE: Either duplicate for each or make a function and call it twice?
-sr_dst_name = Path(srfl_path).with_suffix(".tif").name
+#AW: I think having duplicate calls here is fine since it's only two.. 
+#espcially since you have a function below that does everything
+
+sr_dst_name = Path(sr_path).with_suffix(".tif") 
+
 profile = {
     "driver": "GTiff",
     "width": sr_dst.shape[2],
@@ -251,7 +265,7 @@ profile = {
     }
 sr_dst.rio.to_raster(sr_dst_name, **profile)
 
-vi_dst_name = Path(vi_path).with_suffix(".tif").name
+vi_dst_name = Path(vi_path).with_suffix(".tif")
 profile = {
     "driver": "GTiff",
     "width": vi_dst.cire.shape[1],
@@ -264,12 +278,13 @@ profile = {
     "nodata": np.nan,
     "tiled": True                           
     }
-vi_dst.rio.to_raster(sr_dst_name, **profile)
-
+vi_dst.rio.to_raster(vi_dst_name, **profile)
 
 # -
 
-# The files should be successfully converted, and able to be analyzed properly in QGIS and other software! To do this in one step with a function, see the cell below:
+# The files should be successfully converted, and able to be analyzed properly in QGIS and other software!
+
+# To do this in one step with a function, see the cell below:
 
 # Would welcome a better way to do this!
 def nc_to_gtiff(fpath):
@@ -312,7 +327,7 @@ def nc_to_gtiff(fpath):
         width, height, count = dst.cire.shape[1], dst.cire.shape[0], 11
         dtype = dst.cire.dtype
         
-    dst_name = Path(fpath).with_suffix(".tif").name
+    dst_name = Path(fpath).with_suffix(".tif")
     profile = {
         "driver": "GTiff", 
         "width": width,
@@ -327,12 +342,22 @@ def nc_to_gtiff(fpath):
     }
     
     dst.rio.to_raster(dst_name, **profile)
-    
 
+
+nc_to_gtiff(sr_path)
 
 # ## 4. A Note About Converting Level 3 Data to GeoTIFF
 #
-# Level 3 PACE data is already mapped to a Plate Carrée projection - in other words, unless you want the data in another projection, you don't need to reproject as we did for the Level 2 data above. In order to convert these files from NetCDF to GeoTIFF, all you need is to assign transpose the datasets as necessary and assign a CRS, as in the cell below.
+# Level 3 PACE data is already mapped to a Plate Carrée projection - in other words, unless you want the data in another projection, you don't need to reproject as we did for the Level 2 data above. In order to convert these files from NetCDF to GeoTIFF, all you need is to assign transpose the datasets as necessary and assign a CRS.
+
+# First, let's download a Level-3 Global Mapped Surface Reflectance file.
+
+# +
+results = earthaccess.search_data(
+    short_name = 'PACE_OCI_L3M_SFREFL',
+    granule_name = 'PACE_OCI.20240601_20240630.L3m.MO.SFREFL.V3_0.rhos.0p1deg.nc')
+
+paths = earthaccess.download(results, local_path="data")
 
 # +
 # Would welcome better way to do this part as well - don't want to make folks download another file
@@ -345,7 +370,7 @@ elif "LANDVI" in l3_file:
     ds = xr.open_dataset(l3_file).drop_vars("palette")
     
 ds = ds.rio.write_crs("epsg:4326")
-ds.rio.to_raster(Path(l3_file).with_suffix(".tif").name)
+ds.rio.to_raster(Path(l3_file).with_suffix(".tif"))
 # -
 
 # [back to top](#Contents)
