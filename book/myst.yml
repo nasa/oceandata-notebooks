@@ -1,0 +1,39 @@
+version: 1
+project:
+  toc:
+    - file: index.md
+    - file: notebooks/hackweek/earthdata_cloud_access.md
+    # - file: notebooks/hackweek/satdata_visualization
+    #         # TODO: WARNING: skipping unknown output mime type: application/vnd.holoviews_load.v0+json [mystnb.unknown_mime_type]
+    # - file: notebooks/hackweek/satellite_insitu_matchups
+    # # - file: notebooks/hackweek/satellite_insitu_matchups_thomas
+    # #         # FIXME: dependencies on eumetsat conda channel
+    # # - file: notebooks/hackweek/ocssw_processing
+    # #         # TODO: try with image
+    # # - file: notebooks/hackweek/dask_gridding
+    # #         # TODO: try again!
+    # # - file: notebooks/hackweek/ml_cloud_mask
+    # #         # FIXME: cannot get torch installation right with uv (without conda)
+    # #         # NB: requires data on cryocloud at ~/shared/pace-hackweek-2024/
+    # - file: notebooks/modis/modis_explore_l2
+    #         # TODO: WARNING: skipping unknown output mime type: application/json [mystnb.unknown_mime_type]
+    # - file: notebooks/modis/modis_explore_l3
+    # - file: notebooks/oci/oci_data_access
+    # - file: notebooks/oci/oci_file_structure
+    # # - file: notebooks/oci/oci_ocssw_install
+    # #         # FIXME: kernelspec deleted when saving ipynb b/c of global config
+    # #         # FIXME: needs a data file from oci_data_access
+    # # - file: notebooks/oci/oci_ocssw_processing
+    # #         # FIXME: permission denied. trying to overwrite previous file?
+    # - file: notebooks/harp2/harp2_basic_visualizations
+    #         # TODO: WARNING: image file not readable: notebooks/harp2/harp2_red_anim_20240519T235950.gif
+    #         #       current workaround is manual copying of animation to ../../img
+site:
+  options:
+    folders: true
+    logo_text: Oceandata Notebooks
+    # hide_toc: true
+    hide_footer_links: true
+    hide_outline: true
+    hide_search: true
+  template: book-theme

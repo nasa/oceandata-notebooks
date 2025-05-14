@@ -1,4 +1,4 @@
-# Jupyter Notebooks
+# Oceandata Notebooks
 
 ## About
 

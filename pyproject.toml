@@ -1,8 +1,7 @@
 [project]
 version = "0.2.0"
 name = "oceandata-notebooks"
-description = "Oceandata Jupyter Notebook Tutorials"
-urls.Issues = "https://github.com/gsfc-oel/oceandata-notebooks/issues"
+description = "Tutorials for data from NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC)"
 urls.Repository = "https://github.com/gsfc-oel/oceandata-notebooks"
 license.text = "Apache-2.0"
 requires-python = ">=3.9"
@@ -10,10 +9,12 @@ readme = "README.md"
 maintainers = [
   { "name" = "Ian Carroll", "email" = "ian.t.carroll@nasa.gov" },
 ]
-dependencies = [
-  # every package used in an import or by a backend (e.g. h5netcdf)
-  # TODO: torch, torchvision
-  "cartopy>=0.22.0",
+
+[dependency-groups]
+# every package used in an import or by a backend (e.g. h5netcdf)
+# TODO: torch, torchvision
+notebooks = [
+  "cartopy>=0.23.0",
   "cf-xarray>=0.9.4",
   "cmocean>=4.0.3",
   "dask[distributed]>=2024.4.1",
@@ -34,15 +35,16 @@ dependencies = [
   "tqdm>=4.66.5",
   "xarray>=2024.3.0",
 ]
-optional-dependencies.kernel = [
-  # additional packages for book/setup.py
+# additional packages for book/setup.py
+kernel = [
   "bash-kernel>=0.9.3",
   "ipykernel>=6.29.3",
   "ipywidgets>=8.1.2",
+  "jupyter-server>=2.16.0",
 ]
-optional-dependencies.docker = [
-  # additional packages for book/setup.py
-  # TODO: async-timeout is a possible unlisted dep of jupyter-vscode-proxy?
+# additional packages for docker/requirements.in
+# TODO: async-timeout is a possible unlisted dep of jupyter-vscode-proxy?
+docker = [
   "async-timeout>=4.0.3",
   "bash-kernel>=0.9.3",
   "black>=24.10.0",
@@ -66,28 +68,33 @@ optional-dependencies.docker = [
   "uv>=0.4.27",
   "zarr>=2.18.2",
 ]
-
-[dependency-groups]
-dev = [
-  "jupyter-book>=1.0.3",
+# packages that provide command-line tools for maintainers
+tools = [
+  "jupyter-book>=2.0.0-a3",
   "jupyter-repo2docker>=2024.7.0",
   "pre-commit>=4.0.1",
   "ruff>=0.7.1",
 ]
 
 [tool.jupytext]
-formats = { "notebooks" = "ipynb", "src" = "py" }
-notebook_metadata_filter = "-all,jupytext,language_info.name"
+formats = { "notebooks" = "ipynb", "book/notebooks" = "md:myst" }
+notebook_metadata_filter = "-all,kernelspec"
 cell_metadata_filter = "all,-trusted"
 
 [tool.ruff.lint]
 extend-select = ["I", "D"]
 ignore = [
-  "D101", "D102", "D103",  # TODO: better docstrings for all functions, methods, and classes
-  "D203", "D213",  # preference over convlicting styles D211 and D212, respectively
-  "D417",  # TODO: parameter descriptions for all docstrings
-  "F841",  # TODO: reconsider defining variables that aren't used to prevent display
+  "D101",
+  "D102",
+  "D103", # TODO: better docstrings for all functions, methods, and classes
+  "D203",
+  "D213", # preference over convlicting styles D211 and D212, respectively
+  "D417", # TODO: parameter descriptions for all docstrings
+  "F841", # TODO: reconsider defining variables that aren't used to prevent display
 ]
+
+[tool.uv]
+default-groups = ["notebooks", "kernel"]
 
 # [tool.uv]
 #   index-strategy = "unsafe-best-match"

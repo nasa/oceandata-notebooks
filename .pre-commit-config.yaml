@@ -29,11 +29,11 @@ repos:
       - id: uv-lock
       - id: pip-compile
         name: compile-kernel-dependencies
-        args: [-q, --extra, kernel, -o, requirements.txt, pyproject.toml]
+        args: [-q, --group, notebooks, --group, kernel, -o, requirements.txt, pyproject.toml]
         files: ^uv\.lock$
       - id: pip-compile
         name: compile-docker-dependencies
-        args: [-q, --extra, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml]
+        args: [-q, --group, notebooks, --group, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml]
         files: ^(uv\.lock|docker/requirements\.in)$
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.0
