@@ -188,7 +188,9 @@ sr_src = sr_src.transpose("wavelength_3d", ...)
 sr_src
 # -
 
-# The `rhos` variable is now in dimension order (Z, Y, X), which will allow QGIS and other software with the same requirement to properly handle the surface reflectance data. We can now complete the rest of the steps above to reproject the data.
+# The `rhos` variable is now in dimension order (Z, Y, X), which will allow QGIS and other software with the same requirement to properly handle the surface reflectance data. Note that we are setting `sr_src` to include only `rhos` and not `l2_flags`. We separate these variables to allow for exporting in Section 3, as the `rio.to_raster` method cannot handle two dataarrays with different dimensions (i.e., 3D for `rhos` and 2D for `l2_flags`). That means if you want your surface reflectance data masked with any of the flags we explained above, you'll have to do it before the step above. 
+#
+# We can now complete the rest of the steps above to reproject the data.
 
 # +
 sr_src.coords["longitude"] = sr_dt["navigation_data"]["longitude"]
@@ -258,9 +260,9 @@ vi_dst.rio.to_raster(vi_dst_name, **profile)
 
 # -
 
-# The files should be successfully converted, and able to be analyzed properly in QGIS and other software!
-
-# To do this in one step with a function, see the cell below:
+# The files should be successfully converted, and able to be analyzed properly in QGIS and other software! To make a nice quick true colour image in your program of choice, you can set R = 655 nm (band 60), G = 555 nm (band 42), and B = 470 nm (band 25). 
+#
+# To do the format conversion and reprojection in one step, please see the function below:
 
 def nc_to_gtiff(fpath):
     """
@@ -328,7 +330,6 @@ nc_to_gtiff(vi_path)
 # First, let's download a Level-3 Global Mapped Surface Reflectance file.
 
 # +
-# changed to LANDVI bc smaller files, less of a memory burden working locally
 results = earthaccess.search_data(
     short_name = 'PACE_OCI_L3M_LANDVI',
     granule_name = 'PACE_OCI.20240601_20240630.L3m.MO.LANDVI.V3_0.0p1deg.nc')
@@ -336,7 +337,6 @@ results = earthaccess.search_data(
 paths = earthaccess.download(results, local_path="data")
 
 # +
-# Keep watch on this part - we might not be producing 0.1 degree data for terrestrial soon, will double check
 if "SFREFL" in paths[0]:
     ds = xr.open_dataset(paths[0]).rhos.transpose("wavelength", ...)
 elif "LANDVI" in paths[0]:
