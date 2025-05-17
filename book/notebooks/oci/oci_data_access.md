@@ -1,3 +1,10 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
+---
+
 # Access Data from the Ocean Color Instrument (OCI)
 
 **Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
@@ -65,7 +72,7 @@ At the end of this notebook you will know:
 
 We begin by importing the packages used in this notebook.
 
-```{code-cell}
+```{code-cell} ipython3
 import earthaccess
 import xarray as xr
 ```
@@ -95,7 +102,7 @@ it's also harmless) for subsequent calls to `earthaccess.login`.
 
 </div>
 
-```{code-cell}
+```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
 
@@ -110,11 +117,13 @@ Collections on NASA Earthdata are discovered with the
 easy way to get started. Each item in the list of
 collections returned in the search results has a "short-name".
 
-```{code-cell}
+```{code-cell} ipython3
 results = earthaccess.search_datasets(instrument="oci")
 ```
 
-```{code-cell}
+```{code-cell} ipython3
+:scrolled: true
+
 for item in results:
     summary = item.summary()
     print(summary["short-name"])
@@ -134,9 +143,9 @@ search for granules accross collections too).
 
 The `count` argument limits the number of granule records that are returned in the search results.
 
-```{code-cell}
+```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_BGC_NRT",
+    short_name="PACE_OCI_L2_BGC",
     count=1,
 )
 ```
@@ -150,7 +159,7 @@ window and offer to save a file to your local machine. If you are
 running the notebook locally, this may be of use. More likely, you
 want to open or download the granules by following the steps below.
 
-```{code-cell}
+```{code-cell} ipython3
 results[0]
 ```
 
@@ -162,31 +171,25 @@ can even provide a `cloud_cover` threshold to limit files that have
 a lower percetnage of cloud cover. We do not provide a `count`, so
 we'll get all granules that satisfy the constraints.
 
-```{code-cell}
+```{code-cell} ipython3
 tspan = ("2024-05-01", "2024-05-16")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 clouds = (0, 50)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_BGC_NRT",
+    short_name="PACE_OCI_L2_BGC",
     temporal=tspan,
     bounding_box=bbox,
     cloud_cover=clouds,
 )
+len(results)
 ```
 
-```{code-cell}
-results[0]
-```
-
-```{code-cell}
-results[1]
-```
-
-```{code-cell}
-results[2]
+```{code-cell} ipython3
+for item in results:
+    display(item)
 ```
 
 [back to top](#Contents)
@@ -204,9 +207,9 @@ the granule and `earthaccess.open` is the way to go.
 Here is another search, this time for Level-3 granules from a single day, followed by `earthaccess.open`
 on the `results` list.
 
-```{code-cell}
+```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_CHL_NRT",
+    short_name="PACE_OCI_L3M_CHL",
     temporal=("2024-06-01", "2024-06-01"),
 )
 paths = earthaccess.open(results)
@@ -215,25 +218,32 @@ paths = earthaccess.open(results)
 The list of outputs, which we called `paths`, contains references to files on a remote filesystem. They're not
 paths to a local file, but many utilities that expect a file path can also use these "file-like" paths.
 
-```{code-cell}
+```{code-cell} ipython3
 paths
 ```
 
 <div class="alert alert-danger" role="alert">
 
-The string "ob-cumulus-prod-public" is the name of an AWS S3 bucket in the "us-west-2" region. If you don't see
-that string in the output above, then `earthaccess` has determined that you do not have
+If you see `HTTPFileSystem` in the output above, then `earthaccess` has determined that you do not have
 direct access to the NASA Earthdata Cloud.
+It may be [wrong](https://github.com/nsidc/earthaccess/issues/231).
 
 </div>
 
-+++
+```{code-cell} ipython3
+:tags: [remove-cell]
+
+# this cell is tagged to be removed from HTML renders,
+# but we currently want to download when we don't have direct access
+if not earthaccess.__store__.in_region:
+    paths = earthaccess.download(results, "granules")
+```
 
 Despite not having downloaded these granules, we can now access their content with `xarray`. As always,
 the `xarray` package does "lazy loading", so only coordinates are loaded until the daa variables are
 actually needed.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(paths[0])
 dataset
 ```
@@ -259,19 +269,19 @@ than `earthaccess.open` we call `earthaccess.download` on the same search result
 For this function, provide the list returned by `earthaccess.search_data`
 along with a directory for `earthaccess` to use for the downloads.
 
-```{code-cell}
+```{code-cell} ipython3
 paths = earthaccess.download(results, local_path="granules")
 ```
 
 The `paths` list now contains paths to actual files.
 
-```{code-cell}
+```{code-cell} ipython3
 paths
 ```
 
 We can open one of these downnloaded files in just the same way with `xarray`.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(paths[0])
 dataset
 ```

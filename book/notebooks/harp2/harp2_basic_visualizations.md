@@ -1,3 +1,10 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
+---
+
 # Visualize Data from the Hyper-Angular Rainbow Polarimeter (HARP2)
 
 **Authors:** Sean Foley (NASA, MSU), Meng Gao (NASA, SSAI), Ian Carroll (NASA, UMBC)
@@ -49,7 +56,7 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
-```{code-cell}
+```{code-cell} ipython3
 import cartopy.crs as ccrs
 import earthaccess
 import matplotlib.pyplot as plt
@@ -57,6 +64,10 @@ import numpy as np
 import xarray as xr
 from matplotlib import animation
 from scipy.ndimage import gaussian_filter1d
+```
+
+```{code-cell} ipython3
+auth = earthaccess.login(persist=True)
 ```
 
 [back to top](#Contents)
@@ -67,11 +78,7 @@ from scipy.ndimage import gaussian_filter1d
 
 Download some HARP2 Level-1C data using the `short_name` value "PACE_HARP2_L1C_SCI" in `earthaccess.search_data`. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface. Note that this might take a while, depending on the speed of your internet connection, and the progress bar will seem frozen because we're only downloading one file.
 
-```{code-cell}
-auth = earthaccess.login(persist=True)
-```
-
-```{code-cell}
+```{code-cell} ipython3
 tspan = ("2024-05-20", "2024-05-20")
 results = earthaccess.search_data(
     short_name="PACE_HARP2_L1C_SCI",
@@ -80,11 +87,11 @@ results = earthaccess.search_data(
 )
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 paths = earthaccess.open(results)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 prod = xr.open_dataset(paths[0])
 view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
 geo = xr.open_dataset(paths[0], group="geolocation_data").set_coords(
@@ -95,7 +102,7 @@ obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 
 The `prod` dataset, as usual for OB.DAAC products, contains attributes but no variables. Merge it with the "observation_data" and "geolocation_data", setting latitude and longitude as auxiliary (e.e. non-index) coordinates, to get started.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.merge((prod, obs, geo))
 dataset
 ```
@@ -112,14 +119,14 @@ In the HARP2 data, the angles and the spectral bands are combined into one axis.
 
 Pull out the view angles and wavelengths.
 
-```{code-cell}
+```{code-cell} ipython3
 angles = view["sensor_view_angle"]
 wavelengths = view["intensity_wavelength"]
 ```
 
 Create a figure with 2 rows and 1 column and a reasonable size for many screens.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, (ax_angle, ax_wavelength) = plt.subplots(2, 1, figsize=(14, 7))
 ax_angle.set_ylabel("View Angle (degrees)")
 ax_angle.set_xlabel("Index")
@@ -165,7 +172,7 @@ The I, Q, and U components of the Stokes vector are separate variables in the `o
 
 [stokes]: https://en.wikipedia.org/wiki/Stokes_parameters
 
-```{code-cell}
+```{code-cell} ipython3
 stokes = dataset[["i", "q", "u"]]
 ```
 
@@ -174,7 +181,7 @@ Let's make a plot of the I, Q, and U components of our Stokes vector, using the 
 The first 10 channels are green, the next 60 channels are red, and the final 10 channels are blue (we're skipping NIR).
 In each of those groups of channels, we get the index of the minimum absolute value of the camera angle, corresponding to our nadir view.
 
-```{code-cell}
+```{code-cell} ipython3
 green_nadir_idx = np.argmin(np.abs(angles[:10].values))
 red_nadir_idx = 10 + np.argmin(np.abs(angles[10:70].values))
 blue_nadir_idx = 80 + np.argmin(np.abs(angles[80:].values))
@@ -182,7 +189,7 @@ blue_nadir_idx = 80 + np.argmin(np.abs(angles[80:].values))
 
 Then, get the data at the nadir indices.
 
-```{code-cell}
+```{code-cell} ipython3
 rgb_stokes = stokes.isel(
     {
         "number_of_views": [red_nadir_idx, green_nadir_idx, blue_nadir_idx],
@@ -192,14 +199,14 @@ rgb_stokes = stokes.isel(
 
 A few adjustments make the image easier to visualize. First, normalize the data between 0 and 1. Second, bring out some of the darker colors.
 
-```{code-cell}
+```{code-cell} ipython3
 rgb_stokes = (rgb_stokes - rgb_stokes.min()) / (rgb_stokes.max() - rgb_stokes.min())
 rgb_stokes = rgb_stokes ** (3 / 4)
 ```
 
 Since the nadir view is not processed at swath edges, a better image will result from finding a valid window within the dataset. Using just the array for the I component, we crop the `rgb_stokes` dataset using the `where` attribute and some boolean logic applied across different dimensions of the array.
 
-```{code-cell}
+```{code-cell} ipython3
 window = rgb_stokes["i"].notnull().all("number_of_views")
 crop_rgb_stokes = rgb_stokes.where(
     window.any("bins_along_track") & window.any("bins_across_track"),
@@ -209,14 +216,14 @@ crop_rgb_stokes = rgb_stokes.where(
 
 The granule crosses the 180 degree longitude, so we set up the figure and subplots to use a Plate Carree projection shifted to center on a -170 longitude. The data has coordinates from the default (i.e. centered at 0 longitude) Plate Carree projection, so we give that CRS as a `transform`.
 
-```{code-cell}
+```{code-cell} ipython3
 crs_proj = ccrs.PlateCarree(-170)
 crs_data = ccrs.PlateCarree()
 ```
 
 The figure will hav 1 row and 3 columns, for each of the I, Q, and U arrays, spanning a width suitable for many screens.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots(1, 3, figsize=(16, 5), subplot_kw={"projection": crs_proj})
 fig.suptitle(f'{prod.attrs["product_name"]} RGB')
 
@@ -233,7 +240,7 @@ It's pretty plain to see that the I plot makes sense to the eye: we can see clou
 
 Next, let's take a look at the degree of linear polarization (DoLP).
 
-```{code-cell}
+```{code-cell} ipython3
 rgb_dolp = dataset["dolp"].isel(
     {
         "number_of_views": [red_nadir_idx, green_nadir_idx, blue_nadir_idx],
@@ -248,7 +255,7 @@ crop_rgb = xr.merge((crop_rgb_dolp, crop_rgb_stokes))
 
 Create a figure with 1 row and 2 columns, having a good width for many screens, that will use the projection defined above. For the two columns, we iterate over just the I and DoLP arrays.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots(1, 2, figsize=(16, 8), subplot_kw={"projection": crs_proj})
 fig.suptitle(f'{prod.attrs["product_name"]} RGB')
 
@@ -261,12 +268,12 @@ for i, (key, value) in enumerate(crop_rgb[["i", "dolp"]].items()):
 
 For a different perspective on DoLP, line plots of the channels averaged over the two spatial dimensions show the clear minimum associated with the nadir view angle.
 
-```{code-cell}
+```{code-cell} ipython3
 dolp_mean = dataset["dolp"].mean(["bins_along_track", "bins_across_track"])
 dolp_mean = (dolp_mean - dolp_mean.min()) / (dolp_mean.max() - dolp_mean.min())
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(16, 6))
 wv_uq = np.unique(wavelengths.values)
 plot_data = [("b", "o"), ("g", "^"), ("r", "*"), ("k", "s")]
@@ -301,7 +308,7 @@ We can convert radiance into reflectance. For a more in-depth explanation, see [
 
 The radiances collected by HARP2 often need to be converted, using additional properties, to reflectances. Write the conversion as a function, because you may need to repeat it.
 
-```{code-cell}
+```{code-cell} ipython3
 def rad_to_refl(rad, f0, sza, r):
     """Convert radiance to reflectance.
 
@@ -319,7 +326,7 @@ def rad_to_refl(rad, f0, sza, r):
 
 The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
 
-```{code-cell}
+```{code-cell} ipython3
 refl = rad_to_refl(
     rad=dataset["i"],
     f0=view["intensity_f0"],
@@ -328,7 +335,7 @@ refl = rad_to_refl(
 )
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots(1, 2, figsize=(16, 8))
 ax[0].imshow(dataset["i"].sel({"number_of_views": red_nadir_idx}), cmap="gray")
 ax[0].set_title("Radiance")
@@ -339,7 +346,7 @@ plt.show()
 
 Create a line plot of the mean reflectance for each view angle and spectral channel. The flatness of this plot serves as a sanity check that nothing has gone horribly wrong with our data processing.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(16, 6))
 wv_uq = np.unique(wavelengths.values)
 plot_data = [("b", "o"), ("g", "^"), ("r", "*"), ("black", "s")]
@@ -384,26 +391,26 @@ We are going to generate this animation without using the latitude and longitude
 
 Get the reflectances of just the red channel, and normalize the reflectance to lie between 0 and 1.
 
-```{code-cell}
+```{code-cell} ipython3
 refl_red = refl[..., 10:70]
 refl_pretty = (refl_red - refl_red.min()) / (refl_red.max() - refl_red.min())
 ```
 
 A very mild Gaussian filter over the angular axis will improve the animation's smoothness.
 
-```{code-cell}
+```{code-cell} ipython3
 refl_pretty.data = gaussian_filter1d(refl_pretty, sigma=0.5, truncate=2, axis=2)
 ```
 
 Raising the image to the power 2/3 will brighten it a little bit.
 
-```{code-cell}
+```{code-cell} ipython3
 refl_pretty = refl_pretty ** (2 / 3)
 ```
 
 Append all but the first and last frame in reverse order, to get a 'bounce' effect.
 
-```{code-cell}
+```{code-cell} ipython3
 frames = np.arange(refl_pretty.sizes["number_of_views"])
 frames = np.concatenate((frames, frames[-1::-1]))
 frames
@@ -415,7 +422,7 @@ In order to display an animation in a Jupyter notebook, the "backend" for matplo
 
 Now we can use `matplotlib.animation` to create an initial plot, define a function to update that plot for each new frame, and show the resulting animation. When we create the inital plot, we get back the object called `im` below. This object is an instance of `matplotlib.artist.Artist` and is responsible for rendering data on the axes. Our `update` function uses that artist's `set_data` method to leave everything in the plot the same other than the data used to make the image.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots()
 im = ax.imshow(refl_pretty[{"number_of_views": 0}], cmap="gray")
 

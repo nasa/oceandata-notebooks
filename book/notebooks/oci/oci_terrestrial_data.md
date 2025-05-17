@@ -1,8 +1,8 @@
 ---
 kernelspec:
-  display_name: oc
+  name: python3
+  display_name: Python 3 (ipykernel)
   language: python
-  name: oc
 ---
 
 # Orientation to PACE/OCI Terrestrial Products
@@ -48,12 +48,13 @@ We begin by importing the packages used in this notebook. At first glance, the `
 :lines_to_next_cell: 2
 
 import cartopy
-import cartopy.crs as ccrs
 import cf_xarray  # noqa: F401
 import earthaccess
 import hvplot.xarray  # noqa: F401
 import matplotlib.pyplot as plt
 import xarray as xr
+
+crs = cartopy.crs.PlateCarree()
 ```
 
 [back to top](#Contents)
@@ -79,19 +80,16 @@ for item in results:
 ```
 
 ```{code-cell} ipython3
-fs = earthaccess.get_s3_filesystem(results=results)
-try:
-    fs.open(results[0].data_links(access="direct").pop())
-except PermissionError:
-    earthaccess_paths = earthaccess.download
-    earthaccess_kwargs = {"local_path": "data"}
-else:
-    earthaccess_paths = earthaccess.open
-    earthaccess_kwargs = {}
+paths = earthaccess.open(results)
 ```
 
 ```{code-cell} ipython3
-paths = earthaccess_paths(results, **earthaccess_kwargs)
+:tags: [remove-cell]
+
+# this cell is tagged to be removed from HTML renders,
+# but we currently want to download when we don't have direct access
+if not earthaccess.__store__.in_region:
+    paths = earthaccess.download(results, "granules")
 ```
 
 We use `xr.open_datatree()` to access all "groups" of variables (a.k.a. "datasets") within a NetCDF file. It will be easier to work with a single dataset, which we create by merging the data and coordinate variables we need from different groups. Longitude and latitude appear as data variables, however, so they must be explicitly set as coordinates.
@@ -114,7 +112,7 @@ In the above display of our Level-2 file, we have the data variables `rhos` and 
 We can also see which wavelengths we have surface reflectance measurements at by accessing the `wavelength_3d` coordinate:
 
 ```{code-cell} ipython3
-dataset.wavelength_3d
+dataset["wavelength_3d"]
 ```
 
 Note that "wavelength_3d" is an indexed coordinate, which allows us to subset the dataset by slicing or choosing individual wavelengths. The `method="nearest"` argument lets us select one wavelength without knowning its exact value.
@@ -126,9 +124,7 @@ rhos_860 = dataset["rhos"].sel({"wavelength_3d": 860}, method="nearest")
 Now we can plot surface reflectance at this one wavelength in the near-infrared (NIR), where land is bright and we can differentiate land, water, and clouds.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(
-    1, 1, figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()}
-)
+fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": crs})
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.coastlines(linewidth=0.5)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
@@ -150,7 +146,7 @@ Great! We've plotted the surface reflectance at a single band for the whole scen
 Level-2 files usually include information on the quality of each pixel in the scene, presented in the `l2_flags` variable. Let's look at it a little more closely.
 
 ```{code-cell} ipython3
-dataset.l2_flags
+dataset["l2_flags"]
 ```
 
 At first glance, we can see that `l2_flags` is in the same shape as the surface reflectance we plotted above. The attributes look sorta meaningful, but also sorta like random numbers and abbreviations. If we were to plot `l2_flags`, the result wouldn't look like anything useful at all. This is because the values in `l2_flags` include many quality flags compactly encoded in the binary representation of an integer. In order to use the flags applied to each pixel, we need a decoded representation. Since all OB.DAAC data follows the [CF Metadata Conventions](http://cfconventions.org/), we only need to import the `cf_xarray` package to access the decoded flags.
@@ -166,8 +162,9 @@ The statement returned `True`, which means `l2_flags` is recognized as a flag va
 [ocean color flags documentation]: https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/
 
 ```{code-cell} ipython3
-cldwater_mask = (dataset["l2_flags"].cf == "LAND") & ~(
-    dataset["l2_flags"].cf == "CLDICE"
+cldwater_mask = (
+    (dataset["l2_flags"].cf == "LAND")
+    & ~(dataset["l2_flags"].cf == "CLDICE")
 )
 rhos = dataset["rhos"].where(cldwater_mask)
 ```
@@ -181,9 +178,7 @@ rhos_860 = rhos.sel({"wavelength_3d": 860}, method="nearest")
 Then, we can see if the mask worked by plotting the data once again.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(
-    1, 1, figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()}
-)
+fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
 ax.coastlines(linewidth=0.25)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
@@ -244,9 +239,7 @@ ndvi.attrs["long_name"] = "Normalized Difference Vegetation Index (NDVI)"
 ```
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(
-    1, 1, figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()}
-)
+fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
 ax.coastlines(linewidth=0.5)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
@@ -282,9 +275,7 @@ cire.attrs["long_name"] = "Chlorophyll Index Red Edge (CIRE)"
 We can compare these maps side by side to see similarities and differences in the patterns of each VI.
 
 ```{code-cell} ipython3
-fig, (a, b) = plt.subplots(
-    1, 2, figsize=(13, 4), subplot_kw={"projection": ccrs.PlateCarree()}
-)
+fig, (a, b) = plt.subplots(1, 2, figsize=(13, 4), subplot_kw={"projection": crs})
 plot_args = {
     "x": "longitude",
     "y": "latitude",
@@ -311,7 +302,16 @@ If calculating these indices manually felt a little tedious, not to worry! PACE/
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(concept_id="G3407628214-OB_CLOUD")
-paths = earthaccess_paths(results, **earthaccess_kwargs)
+paths = earthaccess.open(results)
+```
+
+```{code-cell} ipython3
+:tags: [remove-cell]
+
+# this cell is tagged to be removed from HTML renders,
+# but we currently want to download when we don't have direct access
+if not earthaccess.__store__.in_region:
+    paths = earthaccess.download(results, "granules")
 ```
 
 The Level-3 data products come binned and gridded on a global projection at multiple temporal and spatial resolutions. The granule shown here is a monthly, 0.1 degree aggregate. We'll conclude by dropping in a nifty interactive visualization brought to you by the `hvplot` package.

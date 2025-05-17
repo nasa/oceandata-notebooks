@@ -1,3 +1,10 @@
+---
+kernelspec:
+  name: bash
+  display_name: Bash
+  language: bash
+---
+
 # Installing and Running OCSSW Command-line Tools
 
 **Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
@@ -103,6 +110,11 @@ Take a look at the different OCSSW "tags" you can install. It is recommended to 
 ./install_ocssw --list_tags
 ```
 
+```{code-cell}
+TAG="$(./install_ocssw --list_tags | grep '^T' | tail -n 1)"
+echo $TAG
+```
+
 Define an environmental variable called "OCSSWROOT" that specifies a directory for your OCSSW installation. Environment variables are set in Bash using the `export` command, and displayed with `printenv`
 
 ```{code-cell}
@@ -126,7 +138,7 @@ Install OCSSW using the `--tag` argument to pick from the list above. Also provi
 *Tip:* The process is not finished as long as the counter to the left of the cell shows `[*]`. It will take some time to install all the tools (7 of 7 installations).
 
 ```{code-cell}
-./install_ocssw --tag=T2024.19 --seadas --oci
+./install_ocssw --tag=$TAG --seadas --oci
 ```
 
 Finish up by calling `source` on the "OCSSW_bash.env" file, which exports additional environment variables. This environment file specifies the locations of all files required by OCSSW, and must be exported in every Terminal or Bash kernel before you run `l2gen` or any other OCSSW command.
@@ -202,24 +214,27 @@ Scroll down in the output above to see updates on processing. Upon completion, y
 ## 4. All-in-One
 
 In case you need to run the sequence above in a terminal regularly, here are all the commands
-to copy and run together. This assumes you already used `wget` to persist the install script
-and `manifest.json` in the current directory.
+to run together.
 
-```{code-cell}
-export OCSSWROOT=/tmp/ocssw
-./install_ocssw --tag=T2024.19 --seadas --oci
-source $OCSSWROOT/OCSSW_bash.env
-```
-
-Or, if that assumption is wrong and you also need to `wget` those files, copy and run the following.
+If you are starting from scratch ...
 
 ```{code-cell}
 wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw
 wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
 chmod +x install_ocssw
 export OCSSWROOT=/tmp/ocssw
-./install_ocssw --tag=T2024.19 --seadas --oci
+TAG="$(./install_ocssw --list_tags | grep '^T' | tail -n 1)"
+./install_ocssw --tag=$TAG --seadas --oci
 source $OCSSWROOT/OCSSW_bash.env
+```
+
+If you have already installed OCSSW and want to update ...
+
+```{code-cell}
+export OCSSWROOT=/tmp/ocssw
+source $OCSSWROOT/OCSSW_bash.env
+TAG="$(install_ocssw --list_tags | grep '^T' | tail -n 1)"
+install_ocssw --tag=$TAG --seadas --oci
 ```
 
 [back to top](#Contents)
