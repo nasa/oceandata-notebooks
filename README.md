@@ -1,34 +1,55 @@
-# Oceandata Notebooks
+---
+kernelspec:
+  display_name: Bash
+  language: bash
+  name: bash
+---
 
-Welcome to the repository of data recipes for users of the Ocean Biology Distributed Active Archive Center ([OB.DAAC]).
+# Oceandata Notebooks
+---
+
+Welcome to the repository of data recipes for users of the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
+
+[OB]: https://www.earthdata.nasa.gov/centers/ob-daac
 
 ## For Users
 
-Navigate to our [Help Hub] to access the published notebooks.
+Head over to our [Help Hub] to access the published notebooks.
+
+[Help Hub]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
 ## For Contributors
 
-> [!IMPORTANT]
+> [!Important]
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
-> - Create new notebooks under the `notebooks` folder, starting from a copy of `COPYME.ipynb`.
+> - Create new notebooks by copying `COPYME.ipynb` into the `notebooks` folder.
+> - When you first clone this repository, the `notebooks` folder will not exist.
 
 Keeping notebooks in a code repository is tough for collaboration and curation because notebooks contain large, binary outputs and metadata that frequently changes.
-This repository uses [Jupytext] to keep notebooks (`.ipynb`) paired with markdown (`.md`) files.
+This repository uses [Jupytext] to keep notebooks (.ipynb) paired with markdown files (.md).
 Although the entire `notebooks` folder is ignored by git, the paired markdown files are not.
 Contributors should compose and edit notebooks in the `notebooks` folder, and commit changes to paired markdown files in the `book/notebooks` folder.
 
+[Jupytext]: https://jupytext.readthedocs.io/
+
 > [!Note]
-> When you first clone this repository, the `notebooks` folder will not exist.
+> This `README.md` is itself recognized by Jupytext to have executable cells.
+> Open it in JupyterLab as a notebook using right-click > "Open With" > "Notebook".
 
-Run the following in Terminal to generate ".ipynb" files, creating the `notebooks` folder if needed.
+To create the `notebooks` folder, or any time you want to manually sync all the notebooks, run the following cell.
+The `jupytext --sync` command will generate or update .ipynb files for every .md file tracke by git.
 
-```shell
+```{code-cell}
+:scrolled: true
+
 jupytext --sync $(git ls-files book/notebooks)
 ```
 
 ## For Maintainers
 
-> [!IMPORTANT]
+The following sub-sections provide additional information on the structure of this repo and maintenance tips.
+
+> [!Warning]
 > If you merge pull requests to `main`, you might be a maintainer.
 
 ### Development Environment: the `uv.lock` file
@@ -39,26 +60,57 @@ If needed, install `uv` with `curl -LsSf https://astral.sh/uv/install.sh | sh` o
 If being conscientious about storage (e.g. on a cloud-based JupyterHub), tell `uv` to use temporary directories.
 On a laptop or on-prem server, there are good reasons not to set these variables.
 
-```shell
+[uv]: https://docs.astral.sh/uv/getting-started/installation
+
+```{code-cell}
 export UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
 export UV_CACHE_DIR=/tmp/uv/cache
 ```
 
 The `uv sync` command creates an isolated development environment based on the `uv.lock` file.
 
-```shell
+```{code-cell}
+:scrolled: true
+
 uv sync
 ```
 
-Execute all notebooks in the isolated development environment by launching the Jupyter Book.
+### Rendering to HTML: the `book` folder
 
-```shell
-cd book
-uv run jupyter book start --execute
+In addition to the ".md" files paired to notebooks, the `book` folder contains configuration for a [Jupyter Book].
+Only notebooks listed in `book/myst.yml` under `site.toc` are included.
+Building the notebooks as one book provides smaller files for tutorial content, a single source of JavaScript and CSS, and tests that all notebooks run without errors.
+
+[Binder]: https://mybinder.org/
+[Jupyter Book]: https://jupyterbook.org/
+
+```{code-cell}
+---
+scrolled: true
+editable: true
+slideshow:
+  slide_type: ''
+tags: []
+---
+jupytext --to ipynb $(git ls-files book/notebooks)
+uv run --directory book jupyter book build .
 ```
 
-The launched server runs until you type `Ctrl-C` in the same Terminal.
-The following sub-sections provide additional information on the structure of this repo and maintenance tips.
+That populates the `book/_build` folder.
+The folder is ignored by git, but its contents can be provided to the website team.
+The `_templates` make the result very plain, on purpose, for the benefit of the website team.
+
+To preview the website, comment out the use of `_templates` in `book/_config.yml` and start a simple web server.
+
+```{code-cell}
+python -m http.server -d book/_build/html &> /dev/null &
+```
+
+The above command was run in the background due to the final `&`, and the next command kills it.
+
+```{code-cell}
+kill %1
+```
 
 ### Automation and Checks: the `.pre-commit-config.yaml` file
 
@@ -66,19 +118,21 @@ We use several automations to get standard code formatting, run lint checks, and
 These are implemented using the [pre-commit] tool from the development environment.
 You can setup git hooks to run these automations, as needed, at every commit.
 
-```shell
+[pre-commit]: https://pre-commit.com/
+
+```{code-cell}
 pre-commit install
 ```
 
 You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
 
-```shell
+```{code-cell}
 pre-commit run --from-ref main --to-ref HEAD
 ```
 
 If you have `docker` available, you can build the image defined in the `docker` folder.
 
-```shell
+```{code-cell}
 pre-commit run --hook-stage manual repo2docker-build
 ```
 
@@ -88,20 +142,23 @@ For every `import` statement, or if a notebook requires a package to be installe
 make sure the package is listed in the `notebooks` array under the `dependency-groups` table in `pyproject.toml`.
 You can add entries manually or using `uv add`.
 
-```shell
+```{code-cell}
 uv add --group notebooks scipy
 ```
 
 The other keys in the `dependency-groups` table provide additional dependencies,
 which are needed for a working Jupyter kernel, for a complete JupyterLab in a Docker image, or for maintenance tasks.
 
-### Container Image: the `docker` folder
+### Image: the `docker` folder
 
 The `docker` folder has configuration files that [repo2docker] uses to build an image suitable for use with a JupyterHub platform.
 The following command builds and runs the image locally, while the [repo2docker-action] pushes built images to GitHub packages.
 You must have `docker` available to use `repo2docker`.
 
-```shell
+[repo2docker]: https://repo2docker.readthedocs.io/
+[repo2docker-action]: https://github.com/marketplace/actions/repo2docker-action
+
+```{code-cell}
 export DOCKER_HOST=unix://${HOME}/.docker/run/docker.sock
 repo2docker \
     --user-id 1000 \
@@ -121,34 +178,13 @@ We use PyPI for Python packages.
 1. `docker/requirements.txt` has the (locked) packages needed in the Docker image
 
 > [!Note]
-> The top-level `requirements.txt` file is also in the location needed for [Binder].
+> The top-level `requirements.txt` file also makes our repo work on [Binder].
 
-### Rendering to HTML: the `book` folder
-
-In addition to the ".md" files paired to notebooks, the `book` folder contains configuration for a [Jupyter Book].
-Only notebooks listed in `book/myst.yml` under `site.toc` are included.
-Building the notebooks as one book provides smaller files for tutorial content, a single source of JavaScript and CSS, and tests that all notebooks run without errors.
-
-```shell
-cd book
-uv run jupyter book build --execute --html
-```
-
-That populates the `book/_build` folder. The folder is ignored by git, but its contents can be provided to the website team.
-The `myst.yml` configu makes the result plain on purpose, so that the notebook content is most of what's included in the HTML files.
++++
 
 ## Acknowledgements
 
 This repository has greatly benefited from works of multiple open-science projects, notably [Learn OLCI] and the [NASA EarthData Cloud Cookbook].
 
-[OB.DAAC]: https://www.earthdata.nasa.gov/centers/ob-daac
-[Help Hub]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
-[Jupytext]: https://jupytext.readthedocs.io/
-[uv]: https://docs.astral.sh/uv/getting-started/installation
-[Jupyter Book]: https://jupyterbook.org/
-[pre-commit]: https://pre-commit.com/
-[Binder]: https://mybinder.org/
-[repo2docker]: https://repo2docker.readthedocs.io/
-[repo2docker-action]: https://github.com/marketplace/actions/repo2docker-action
 [Learn OLCI]: https://github.com/wekeo/learn-olci
 [NASA EarthData Cloud Cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook

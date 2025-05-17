@@ -70,7 +70,7 @@ docker = [
 ]
 # packages that provide command-line tools for maintainers
 tools = [
-  "jupyter-book>=2.0.0-a3",
+  "jupyter-book<2",
   "jupyter-repo2docker>=2024.7.0",
   "pre-commit>=4.0.1",
   "ruff>=0.7.1",
