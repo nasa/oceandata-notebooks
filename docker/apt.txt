@@ -1,7 +1,11 @@
 # # Dependencies for Navteca OSS JupyterHub
 fuse
 
-# # # Dependencies for nbconvert and myst
+# # Fonts
+texlive-fonts-recommended
+ttf-mscorefonts-installer
+
+# # Dependencies for nbconvert and myst
 # # LaTeX tools
 # texlive-xetex
 # texlive-plain-generic
