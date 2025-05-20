@@ -76,19 +76,31 @@ auth = earthaccess.login(persist=True)
 
 ## 2. Get Level-1C Data
 
-Download some HARP2 Level-1C data using the `short_name` value "PACE_HARP2_L1C_SCI" in `earthaccess.search_data`. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface. Note that this might take a while, depending on the speed of your internet connection, and the progress bar will seem frozen because we're only downloading one file.
+Download a granule of HARP2 Level-1C data, which comes from the collection with short-name "PACE_HARP2_L1C_SCI".
+Level-1C corresponds to geolocated imagery.
+This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface.
+Note that access might take a while, depending on the speed of your internet connection, and the progress bar will seem frozen because we're only looking at one file.
 
 ```{code-cell} ipython3
-tspan = ("2024-05-20", "2024-05-20")
-results = earthaccess.search_data(
-    short_name="PACE_HARP2_L1C_SCI",
-    temporal=tspan,
-    count=1,
-)
+results = earthaccess.search_data(concept_id="G3132447081-OB_CLOUD")
+paths = earthaccess.open(results)
 ```
 
+<div class="alert alert-danger" role="alert">
+
+If you see `HTTPFileSystem` in the output when you display `paths`, then `earthaccess` has determined that you do not have
+direct access to the NASA Earthdata Cloud.
+It may be [wrong](https://github.com/nsidc/earthaccess/issues/231).
+
+</div>
+
 ```{code-cell} ipython3
-paths = earthaccess.open(results)
+:tags: [remove-cell]
+
+# this cell is tagged to be removed from HTML renders,
+# but we currently want to download when we don't have direct access
+if not earthaccess.__store__.in_region:
+    paths = earthaccess.download(results, "granules")
 ```
 
 ```{code-cell} ipython3
@@ -246,6 +258,7 @@ rgb_dolp = dataset["dolp"].isel(
         "number_of_views": [red_nadir_idx, green_nadir_idx, blue_nadir_idx],
     }
 )
+rgb_dolp = (rgb_dolp - rgb_dolp.min()) / (rgb_dolp.max() - rgb_dolp.min())
 crop_rgb_dolp = rgb_dolp.where(
     window.any("bins_along_track") & window.any("bins_across_track"),
     drop=True,
@@ -312,14 +325,12 @@ The radiances collected by HARP2 often need to be converted, using additional pr
 def rad_to_refl(rad, f0, sza, r):
     """Convert radiance to reflectance.
 
-    Args:
-        rad: Radiance.
-        f0: Solar irradiance.
-        sza: Solar zenith angle.
-        r: Sun-Earth distance (in AU).
+    :param rad: radiance
+    :param f0: solar irradiance
+    :param sza: solar zenith angle
+    :param r: Sun-Earth distance (in AU)
 
-    Returns: Reflectance.
-
+    :returns: reflectance
     """
     return (r**2) * np.pi * rad / np.cos(sza * np.pi / 180) / f0
 ```

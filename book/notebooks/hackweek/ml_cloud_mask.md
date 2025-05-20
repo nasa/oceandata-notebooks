@@ -1,3 +1,10 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
+---
+
 # Machine Learning Tutorial
 
 **Tutorial Lead:** Sean Foley (NASA, MSU)
@@ -54,7 +61,7 @@ As usual, we will begin by importing some libraries. Some of the more notable on
 - torch: Short for [Pytorch](https://pytorch.org/), this is the machine learning library of choice for this tutorial. This is the most popular machine learning library among researchers as it represents a good balance between flexibility and ease-of-use.
 - tqdm: For progress bars on loops
 
-```{code-cell}
+```{code-cell} ipython3
 import json
 import pathlib
 from functools import cache
@@ -86,7 +93,7 @@ We have pre-processed the cloud mask data and associated OCI imagery into an eas
 
 Let's look at an example. The next cell will open and display the images for a single instance.
 
-```{code-cell}
+```{code-cell} ipython3
 ex_img_idx = 57  # this image index displays a meaningful cloud mask and
 input_imgs = [
     Image.open(CLDMASK_PATH / "input" / f"{ex_img_idx:07d}_{i}.png") for i in range(4)
@@ -117,7 +124,7 @@ Take note of a few things:
 
 So, how many instances are there in this dataset? Let's find out:
 
-```{code-cell}
+```{code-cell} ipython3
 len(list((CLDMASK_PATH / "output").glob("*.png")))
 ```
 
@@ -139,7 +146,7 @@ Another common practice which we will ignore is called "cross validation", where
 
 `generate_split` will generate a random training/validation/test "split" and save it to a JSON file. Go ahead and run it. Careful, as if you've already run this function before with the same split name, it will throw a ValueError, unless you add "replace=True" to the function call.
 
-```{code-cell}
+```{code-cell} ipython3
 def generate_split(name: str, replace: bool = False) -> None:
     """Generate a train/val/test split, replacing an existing split with the same name only if specified.
 
@@ -191,11 +198,11 @@ Usually, `__getitem__` is where most of the work happens. In `CloudMaskDataset._
 
 Run the next cell to define `CloudMaskDataset` and to create a dataset for each of the training, validation, and test sets.
 
-```{code-cell}
+```{code-cell} ipython3
 from io import BytesIO
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 class CloudMaskDataset(Dataset):
     def __init__(self, root_path: pathlib.Path, mode: str, split: dict) -> None:
         """Create a CloudMaskDataset.
@@ -259,7 +266,7 @@ test_dataset = CloudMaskDataset(CLDMASK_PATH, "test", split)
 
 When we iterate over the data while training our model, we want to convert from numpy to torch arrays, to randomly shuffle our data, and we want to load the data in batches of a fixed size. The [`torch.utils.DataLoader`](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader) class will handle this for us, with the `batch_size` and `shuffle` arguments. Another thing it can do for us is create subprocesses to speed up dataloading. We can specify how many subprocesses to use with `num_workers`. Let's go ahead and create a dataloader for the training, validation, and test sets:
 
-```{code-cell}
+```{code-cell} ipython3
 BATCH_SIZE = 16
 train_loader = DataLoader(
     train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4
@@ -272,7 +279,7 @@ test_loader = DataLoader(
 
 Let's check a batch to make sure things are working. We expect to see torch array sizes of (BATCH_SIZE, 64, 64, 12) for the input array, (BATCH_SIZE, 64, 64) for the validity mask, and (BATCH_SIZE, 64, 64) for the cloud mask.
 
-```{code-cell}
+```{code-cell} ipython3
 for inp, validity, labels in train_loader:
     break
 
@@ -289,7 +296,7 @@ Next, let's design a simple multi-layer perceptron (MLP), the simplest form of n
 
 An MLP consists of several linear layers. The output of one layer is processed by an activation function before feeding into the next layer. This activation function must be a non-linear function! Otherwise, no matter how many layers we add to our network, it will always be reducible to a single linear layer. Historically, the activation function of choice was sigmoid, as it (loosely) resembles the activation patterns of human neurons, and it constraints output to lie between 0 and 1. In practice, researchers discovered that this doesn't work well in deeper networks, and it contributes to the [vanishing gradient problem](https://en.wikipedia.org/wiki/Vanishing_gradient_problem). In practice, the [rectified linear unit (ReLU)](https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html), or variants, works better. Let's plot both below:
 
-```{code-cell}
+```{code-cell} ipython3
 x = torch.linspace(-4, 4, 200)  # notice how similar the torch and numpy APIs are!
 y_sigmoid = F.sigmoid(x)
 y_relu = F.relu(x)
@@ -309,7 +316,7 @@ Without activation functions, no matter how many layers we include in our MLP, a
 
 Now that we have our basic components, let's construct our multi-layer perceptron. We'll start off really simple with only three layers. If we don't need anything more complicated than a simple, feed forward network, the [`torch.nn.Sequential`](https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html) module is perfect. We can simply provide all of the layers we want, in order. Recall that our input has 12 channel and our output is a single channel cloud mask. Note that the output size of each layer must match the input size of the next layer. The activation functions don't need to know about sizes since they apply the same operation to each element.
 
-```{code-cell}
+```{code-cell} ipython3
 in_channels = 12  # call this M
 out_channels = 1  # call this N
 simple_mlp_hidden_size = 16  # call this H
@@ -339,7 +346,7 @@ inp.shape, preds.shape
 
 You should see that the inputs are of size (BATCH_SIZE, 64, 64, 12), and the outputs are (BATCH_SIZE * 64 * 64, 1). Let's take a look at what our model spits out for this batch, with inputs on the left half, and the model's outputs on the right half:
 
-```{code-cell}
+```{code-cell} ipython3
 # need to be careful to use the validity mask
 outp_img = torch.zeros((BATCH_SIZE, 64, 64))
 outp_img[valid] = preds[valid.view(-1), 0]
@@ -371,7 +378,7 @@ First, we need to decide what loss function (a.k.a. objective function) to use. 
 
 Cross entropy is a measure of the difference between two probability distributions. Since our task only has two classes, we'll use the binary cross entropy loss. Normally, binary cross entropy loss expects our predictions to probabilities, and thus constrained to lie between 0 and 1. Our outputs are not probabilities, and are instead logits (they can take any value, and must be mapped to probabilities). Therefore, we will use the [BCEWithLogitsLoss](https://pytorch.org/docs/stable/generated/torch.nn.BCEWithLogitsLoss.html).
 
-```{code-cell}
+```{code-cell} ipython3
 objective = torch.nn.BCEWithLogitsLoss()
 loss = objective(preds[:, 0], labels.view(-1).float())
 loss.item()
@@ -387,7 +394,7 @@ If you were to compute the loss (and the gradient) for the entire dataset at onc
 
 Ok, well that sounds like a lot of math. We have to go back and compute all the gradients of every part of our forward pass, right? How do we implement this with code?
 
-```{code-cell}
+```{code-cell} ipython3
 # first, define the optimizer, with a learning rate / step size of 0.1
 optimizer = torch.optim.SGD(simple_mlp.parameters(), lr=0.1)
 
@@ -410,7 +417,7 @@ Let's put it all together. We'll loop over some batches, train our model, and ta
 
 While we run, we're going to track our training loss and training accuracy. Accuracy is simply the number of correctly classified pixels divided by the total number of pixels. At the end we'll display the loss, the running mean of the loss, and the accuracy in a plot.
 
-```{code-cell}
+```{code-cell} ipython3
 BATCH_SIZE = 16
 NUM_BATCHES = 1000
 HIDDEN_SIZE = 32  # H
@@ -470,7 +477,7 @@ for batch_idx, (inp, valid, labels) in tqdm(enumerate(train_loader), total=NUM_B
 running_loss_mean = np.array(losses).cumsum() / (np.arange(len(losses)) + 1)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 plt.figure(figsize=(12, 4))
 plt.plot(np.arange(len(losses)), np.array(losses), label="Train Loss")
 plt.plot(np.arange(len(losses)), running_loss_mean, label="Train Loss: running mean")
@@ -482,7 +489,7 @@ plt.show()
 
 You should be seeing that the training loss goes down, while the accuracy goes up. That's what we want. The model's skill seems to plateau very quickly, and it seems like our accuracy is quite high! Unfortunately, this is a little misleading. Let's take a qualitative look at some examples to see why:
 
-```{code-cell}
+```{code-cell} ipython3
 for inp, valid, labels in train_loader:
     preds = simple_mlp(inp[valid].float() / 255)
     break
@@ -546,13 +553,13 @@ NOTE: To continue on in this notebook, your instance must be running on the "NVI
 
 If you're unsure about whether you're currently running in an instance with a GPU, you can easily check if CUDA is available from torch with the following:
 
-```{code-cell}
+```{code-cell} ipython3
 torch.cuda.is_available()
 ```
 
 So, now that we've ensured you have access to a GPU via CUDA, how do we convert our code to use CUDA? Well, converting a single torch tensor to CUDA is as easy as adding `.cuda()` after it. We can also convert our model with `.cuda()`. Another way to move a tensor between devices is to use the `.to(device=...)` syntax, which allows you to be a little smarter with your allocation, especially in cases where you're using multiple GPUs at the same time. The following cell illustrates the basic functionality:
 
-```{code-cell}
+```{code-cell} ipython3
 :tags: [skip-execution]
 
 print(
@@ -583,7 +590,7 @@ $f * g(t) = \int_{-\inf}^{\inf}f(\tau)g(t-\tau)d\tau$
 
 The [wikipedia article](https://en.wikipedia.org/wiki/Convolution) is a great resource to further understand convolution, but we've also provided you an example of (discrete) convolution below:
 
-```{code-cell}
+```{code-cell} ipython3
 :tags: [skip-execution]
 
 # define some interesting looking functions
@@ -614,7 +621,7 @@ We can convolve an image with different "kernels" or "filters" to achieve specif
 
 Below you'll see what happens when we apply these filters to an image of a checkerboard. You can mostly ignore the code in this next cell (unless you're curious), but pay attention to the plots.
 
-```{code-cell}
+```{code-cell} ipython3
 :lines_to_end_of_cell_marker: 0
 :lines_to_next_cell: 1
 :tags: [skip-execution]
@@ -704,7 +711,7 @@ Now, let's design a simple CNN. Instead of using `torch.nn.Sequential`, we'll cr
 
 You'll notice we're also adding our ReLU activations, like before, and also batch normalization layers. The original [batchnorm paper](https://arxiv.org/abs/1502.03167) is a good read, but the TL;DR is that it will make our training faster.
 
-```{code-cell}
+```{code-cell} ipython3
 :lines_to_next_cell: 1
 :tags: [skip-execution]
 
@@ -749,7 +756,7 @@ class SimpleCNN(nn.Module):
         return x
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :tags: [skip-execution]
 
 # initialize the network and move it to the GPU
@@ -777,7 +784,7 @@ Now we can put it all together to train our CNN on the same data! We can crank t
 
 You'll also probably notice that this script isn't that much faster than the CPU-only training from above. The data loading is currently the bottleneck. This is very often the case in practice.
 
-```{code-cell}
+```{code-cell} ipython3
 :tags: [skip-execution]
 
 # hyperparameters
@@ -850,7 +857,7 @@ for epoch in range(NUM_EPOCHS):
             )  # compute accuracy
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :tags: [skip-execution]
 
 plt.figure(figsize=(12, 4))

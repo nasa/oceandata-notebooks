@@ -1,3 +1,10 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
+---
+
 # Matchups of in situ data with satellite data using the ThoMaS match-up toolkit
 **Authors:** Anna Windle (NASA, SSAI), James Allen (NASA, Morgan State University), Juan Ignacio Gossn (EUMETSAT), Ben Loveday (EUMETSAT)
 
@@ -33,7 +40,7 @@ At the end of this notebook you will know:
 
 Begin by importing all of the packages used in this notebook.
 
-```{code-cell}
+```{code-cell} ipython3
 import os
 import sys
 ```
@@ -42,7 +49,7 @@ We also need to retrieve the toolkit itself. For the hackweek, we have already s
 
 ThoMaS can be used from the [command line](https://gitlab.eumetsat.int/eumetlab/oceans/ocean-science-studies/ThoMaS/-/blob/main/README_examples.md), but here we will use it as a Python library. Lets import ThoMaS into our notebook.
 
-```{code-cell}
+```{code-cell} ipython3
 sys.path.insert(1, "shared/pace-hackweek-2024/lib/ThoMaS")
 from main import ThoMaS_main as ThoMaS
 ```
@@ -75,7 +82,7 @@ Below are our requirements for this workflow:
 
 Let's first define and create the pathto our main output directory
 
-```{code-cell}
+```{code-cell} ipython3
 output_path = os.path.join(os.getcwd(), "Chesapeake_Bay")
 if not os.path.exists(output_path):
     os.mkdir(output_path)
@@ -83,7 +90,7 @@ if not os.path.exists(output_path):
 
 Let's now define out configuration file.
 
-```{code-cell}
+```{code-cell} ipython3
 path_to_config_file = os.path.join(output_path, "config_file.ini")
 config_params = {}
 
@@ -154,7 +161,7 @@ config_params["MDB"]["MDB_stats_protocol"] = "Bailey_and_Werdell_2006"
 
 Now, let's run this configuration and check our outputs
 
-```{code-cell}
+```{code-cell} ipython3
 ThoMaS(path_to_config_file)
 ```
 

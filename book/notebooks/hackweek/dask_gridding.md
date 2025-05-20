@@ -1,3 +1,10 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
+---
+
 # Parallel and Larger-than-Memory Processing
 
 **Authors:** Ian Carroll (NASA, UMBC)
@@ -52,7 +59,7 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
-```{code-cell}
+```{code-cell} ipython3
 import cartopy.crs as ccrs
 import dask.array as da
 import earthaccess
@@ -78,7 +85,7 @@ Yet another package we are skipping over is [rasterio](https://rasterio.readthed
 
 The data used in the demonstration is the `chlor_a` product found in the BGC suite of Level-2 ocean color products from OCI.
 
-```{code-cell}
+```{code-cell} ipython3
 bbox = (-77, 36, -73, 41)
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_BGC_NRT",
@@ -90,15 +97,15 @@ len(results)
 
 The search results include all granules from launch through July of 2024 that intersect a bounding box around the Chesapeake and Delaware Bays. The region is much smaller than an OCI swath, so we do not use the cloud cover search filter which considers the whole swath.
 
-```{code-cell}
+```{code-cell} ipython3
 results[0]
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 paths = earthaccess.open(results[:1])
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 datatree = open_datatree(paths[0])
 dataset = xr.merge(datatree.to_dict().values())
 dataset = dataset.set_coords(("latitude", "longitude"))
@@ -107,7 +114,7 @@ dataset
 
 As a reminder, the Level-2 data has latitude and longitude arrays that give the geolocation of every pixel. The `number_of_line` and `pixels_per_line` dimensions don't have any meaningful coordinates that would be useful for stacking Level-2 files over time.  In a lot of the granules, like the one visualized here, there will be a tiny amount of data within the box. But we don't want to lose a single pixel (if we can help it)!
 
-```{code-cell}
+```{code-cell} ipython3
 fig = plt.figure(figsize=(8, 4))
 axes = fig.add_subplot()
 artist = dataset["chlor_a"].plot.pcolormesh(
@@ -128,7 +135,7 @@ plt.show()
 
 When we get to opening mulitple datasets, we will use a helper function to prepare the datasets for concatenation.
 
-```{code-cell}
+```{code-cell} ipython3
 def time_from_attr(ds):
     """Set the start time attribute as a dataset variable.
 
@@ -152,7 +159,7 @@ def trim_number_of_lines(ds):
 
 Before we get to data, we will play with some random numbers. Whenever you use random numbers, a good practice is to set a fixed but unique seed, such as the result of `secrets.randbits(64)`.
 
-```{code-cell}
+```{code-cell} ipython3
 random = np.random.default_rng(seed=5179916885778238210)
 ```
 
@@ -176,7 +183,7 @@ of how long it takes the cell to run on average.
 
 [timeit]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-timeit
 
-```{code-cell}
+```{code-cell} ipython3
 %%timeit
 n = 10_000
 x = 0
@@ -198,7 +205,7 @@ in your kit is compiled functions. If you use NumPy, you have already checked th
 However, since you may sometimes need `numba`, we're going to start with a comparison
 of functions written in and interpreted by Python with the use of compiled functions.
 
-```{code-cell}
+```{code-cell} ipython3
 def mean_and_std(x):
     """Compute sample statistics with a for-loop.
 
@@ -227,7 +234,7 @@ Confirm the function is working; it should return approximations to
 the mean and standard deviation parameters of the normal
 distribution we use to generate the sample.
 
-```{code-cell}
+```{code-cell} ipython3
 array = random.normal(1, 2, size=100)
 mean_and_std(array)
 ```
@@ -236,11 +243,11 @@ The approximation isn't very good for a small sample! We are motivated
 to use a very big array, say $10^{4}$ numbers, and will compare performance
 using different tools.
 
-```{code-cell}
+```{code-cell} ipython3
 array = random.normal(1, 2, size=10_000)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 %%timeit
 mean_and_std(array)
 ```
@@ -249,7 +256,7 @@ On this system, the baseline implementation takes between 2 and 3 milliseconds. 
 will attempt to compile a Python function and raise an error if it can't. The argument to `numba.njit`
 is the Python function, and the return value is the compiled function.
 
-```{code-cell}
+```{code-cell} ipython3
 compiled_mean_and_std = numba.njit(mean_and_std)
 ```
 
@@ -257,20 +264,20 @@ The actual compilation does not occur until the function is called with an argum
 know the type of data coming in before any performance improvements can be realized. As a result, the first call to `compiled_mean_and_std`
 will not seem very fast.
 
-```{code-cell}
+```{code-cell} ipython3
 compiled_mean_and_std(array)
 ```
 
 But now look at that function go!
 
-```{code-cell}
+```{code-cell} ipython3
 %%timeit
 compiled_mean_and_std(array)
 ```
 
 But why write your own functions when an existing compiled function can do what you need well enough?
 
-```{code-cell}
+```{code-cell} ipython3
 %%timeit
 array.mean(), array.std(ddof=1)
 ```
@@ -323,13 +330,13 @@ if either:
 
 By the way, `numpy` arrays have an `nbytes` attribute that helps you understand how much memory you may need. Note tha most computations require several times the size of an input array to do the math.
 
-```{code-cell}
+```{code-cell} ipython3
 f"{array.nbytes / 2**20} MiB"
 ```
 
 That's not a big array. Here's a "big" 1.0 GiB array.
 
-```{code-cell}
+```{code-cell} ipython3
 array = random.normal(1, 2, size=2**27)
 print(f"{array.nbytes / 2**30} GiB")
 ```
@@ -338,7 +345,7 @@ It's still not too big to fit in memory on most laptops. For demonstration, let'
 
 On this system, the serial approach takes between 8 and 9 seconds.
 
-```{code-cell}
+```{code-cell} ipython3
 %%timeit
 
 n = 3
@@ -376,27 +383,27 @@ C2 -->|result_2| D
 
 In this task graph, the `mean_and_std` deviation function is never used! Somehow, the `apply-mean_and_std` function and `combine-mean_and_std` deviation functions have to be defined. This is another part of what Dask provides.
 
-```{code-cell}
+```{code-cell} ipython3
 client = Client(processes=False, memory_limit="3 GiB")
 client
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 dask_random = da.random.default_rng(random)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 
 dask_array = dask_random.normal(1, 2, size=3 * 2**27, chunks="32 MiB")
 dask_array
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 dask_array.mean()
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 %%timeit
 mean = dask_array.mean().compute()
 ```
@@ -409,7 +416,7 @@ Our concurrent implementation (using `dask.array`), took the strategy of maximiz
 
 The concurrent implementation was a little more than twice as fast.
 
-```{code-cell}
+```{code-cell} ipython3
 client.close()
 ```
 
@@ -427,17 +434,17 @@ one method for stacking Level-2 granules.
 
 Use `pyproj` for the first two steps, noting that the EPSG code of the coordinate reference system (CRS) of the Level-2 files is not recorded in the files. Know that it is the universal default for a CRS with latitudes and longitudes: "EPSG:4326".
 
-```{code-cell}
+```{code-cell} ipython3
 aoi = pyproj.aoi.AreaOfInterest(*bbox)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 pyproj.CRS.from_epsg(4326)
 ```
 
 The `pyproj` database contains all the UTM grids and helps us choose the best one for our AOI.
 
-```{code-cell}
+```{code-cell} ipython3
 crs_list = pyproj.database.query_utm_crs_info(
     datum_name="WGS 84", area_of_interest=aoi, contains=True
 )
@@ -445,29 +452,29 @@ for i in crs_list:
     print(i.auth_name, i.code, ": ", i.name)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 pyproj.CRS.from_epsg(32618)
 ```
 
 Note that the axis order for EPSG:4326 is ("Lat", "Lon"), which is "backwards" from the "X", "Y" used by EPSG:32618. When we use a CRS transformer, this defines the order of arguments.
 
-```{code-cell}
+```{code-cell} ipython3
 t = pyproj.Transformer.from_crs("EPSG:4326", "EPSG:32618", area_of_interest=aoi)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 x_min, y_min = t.transform(aoi.south_lat_degree, aoi.west_lon_degree)
 x_min, y_min
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 x_max, y_max = t.transform(aoi.north_lat_degree, aoi.east_lon_degree)
 x_max, y_max
 ```
 
 Create x, y grid as a new `xarray.Dataset` but then `stack` it into a 1D array of points.
 
-```{code-cell}
+```{code-cell} ipython3
 x_size = int((x_max - x_min) // 1000)
 y_size = int((y_max - y_min) // 1000)
 grid_point = xr.Dataset(
@@ -482,27 +489,27 @@ grid_point
 
 To find corresponding latitudes and longitudes in "EPSG:4326", do the inverse transformation paying attention to the order of arguments and outputs.
 
-```{code-cell}
+```{code-cell} ipython3
 lat, lon = t.transform(grid_point["x"], grid_point["y"], direction="INVERSE")
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 grid_point["lat"] = ("point", lat)
 grid_point["lon"] = ("point", lon)
 grid_point
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 grid_latlon = grid_point.to_dataarray("axis").transpose("point", ...)
 ```
 
 Instead of opening a single granule with `xr.open_dataset`, open all of the granules with `xr.open_mfdataset`. Use the `time_from_attr` function defined above to populate a `time` coordinate from the attributes on each granule.
 
-```{code-cell}
+```{code-cell} ipython3
 paths = earthaccess.open(results[10:20])
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 kwargs = {"combine": "nested", "concat_dim": "time"}
 prod = xr.open_mfdataset(paths, preprocess=time_from_attr, **kwargs)
 nav = xr.open_mfdataset(
@@ -517,7 +524,7 @@ dataset
 
 Notice that using `xr.open_mfdataset` automatically triggers the use of `dask.array` instead of `numpy` for the variables. To get a dashboard, load up the Dask client.
 
-```{code-cell}
+```{code-cell} ipython3
 client = Client(processes=False)
 client
 ```
@@ -526,7 +533,7 @@ Disclaimer: the most generic function that we have available to resample the dat
 
 Due to limitations of `griddata` however, we have to work in a loop. For each slice over the time dimension (i.e. each file), the loop is going to collect that latitudesa and longitudes as `swath_latlon`, resample to `grid_latlon` (which has regular spacing in the projected CRS), and store the result in a list of `xr.DataArray`.
 
-```{code-cell}
+```{code-cell} ipython3
 groups = []
 for key, value in dataset.groupby("time"):
     value = value.squeeze("time")
@@ -544,13 +551,13 @@ for key, value in dataset.groupby("time"):
     groups.append(gridded)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 groups[-1]
 ```
 
 Then there is the final step of getting the whole collection concatenated together and associated with the projected CRS (the `x` and `y` coordinates).
 
-```{code-cell}
+```{code-cell} ipython3
 grid_point["chlor_a"] = xr.concat(groups, dim="time")
 dataset = grid_point.unstack()
 dataset
@@ -558,11 +565,11 @@ dataset
 
 After viewing a map at individual time slices in projected coordinates, you can decide what to do for your next step of analysis. Some of the granules will have good coverage, free of clouds.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset_t = dataset.isel({"time": 4})
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 fig = plt.figure()
 crs = ccrs.UTM(18, southern_hemisphere=False)
 axes = plt.axes(projection=crs)
@@ -574,7 +581,7 @@ plt.show()
 
 Many will not, either because of clouds or because only some portion of the specified bounding box is within the given swath.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset_t = dataset.isel({"time": 8})
 
 fig = plt.figure()

@@ -1,3 +1,10 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
+---
+
 # Matchups of in situ data with satellite data
 
 **Tutorial Leads:** Anna Windle (NASA, SSAI), James Allen (NASA, MSU)
@@ -40,7 +47,7 @@ Note that the `get_f0` function requires the thuillier2003_f0.nc file. For the H
 
 </div>
 
-```{code-cell}
+```{code-cell} ipython3
 :lines_to_end_of_cell_marker: 0
 :lines_to_next_cell: 1
 :tags: [hide-cell]
@@ -1300,7 +1307,7 @@ We will use the function `process_aeronet` to download and process AERONET-OC da
 
 There are three "levels" of AERONET-OC data in terms of data quality: 1, 1.5, and 2. If a complete measurement sequence with the instruments is able to be performed, it is collected and stored as Level 1. These data are then passed through an automated quality control system and stored as Level 1.5 if they pass all tests. Finally, Level 2 data are data from Level 1.5 that are subsequently screened by an experienced scientist and validated. We'll be using Level 1.5 data to pull as much good quality data as possible without the time lag for manual validation. More information on AERONET-OC levels can be found in [Zibordi et al., 2009.](https://doi.org/10.1175/2009JTECHO654.1)
 
-```{code-cell}
+```{code-cell} ipython3
 aoc_cb = process_aeronet(
     aoc_site="Casablanca_Platform",
     start_date="2024-06-01",
@@ -1314,7 +1321,7 @@ aoc_cb.head()
 
 We will use the function `process_satellite` to search for `PACE_OCI_L2_AOP_NRT` data using `earthacces` within the specified time range and at the (lat,lon) coordinate of the Casablanca_Platform AERONET-OC site. This function finds the closest pixel and extracts all data within a 5x5 pixel window, excludes pixels based on L2 flags, calculates the mean to retrive a single Rrs spectra, and computes matchup statistics. The function outputs a pandas dataframe of every `PACE_OCI_L2_AOP_NRT` Rrs spectra for the specified time range. We'll also include an optional list of unique date strings from the AERONET-OC dataframe to "skip" the granules that don't have any field data associated with them.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
@@ -1336,7 +1343,7 @@ sat_cb = process_satellite(
 )
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 sat_cb.head()
 ```
 
@@ -1344,14 +1351,14 @@ sat_cb.head()
 
 We will use the function `match_data` to create a matchup dataframe based on selection criteria. This function defaults to using the [Bailey and Werdell 2006](https://oceancolor.gsfc.nasa.gov/staff/jeremy/bailey_and_werdell_2006_rse.pdf) matchup criteria, which reduces the measurements made at a given station to one representative sample for validating against the satellite spectra. Data are filtered based on the solar zenith angle, their noise level, and the time difference (here 180 minutes from the satellite overpass). Potential satellite matchups are also reduced based on the signal to noise level of the 5x5 pixel aggregation.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
 ?match_data
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
@@ -1369,7 +1376,7 @@ matchups
 
 Pull out wavelengths and Rrs data from matchups
 
-```{code-cell}
+```{code-cell} ipython3
 dict_aoc = get_column_prods(matchups, "aoc")
 waves_aoc = np.array(dict_aoc["rrs"]["wavelengths"])
 rrs_aoc = matchups[dict_aoc["rrs"]["columns"]].to_numpy()
@@ -1383,14 +1390,14 @@ rrs_sat = matchups[dict_sat["rrs"]["columns"]].to_numpy()
 
 We will use the function `plot_BAvsScat` to plot the paired matchup data as Bland_Altman and scatter plots. The Bland-Altman plots provide insights into the bias and precision of the satellite measurements compared to field measurements. A mean difference close to zero indicates good agreement, while the spread of differences (limits of agreement) puts the bias within the context of the variability of the field data. Additionally, a check is done to assess the scale dependency of the bias, such as errors increasing when the magnitude of the observations increases. If a scale dependency exists, the limits of agreement are replaced with a regression line showing its direction and magnitude. Scatter plots complement Bland-Altman plots by showing the strength of the linear relationship between the two datasets, with high correlation coefficients and low RMSE values indicating strong agreement and high accuracy of the satellite-derived measurements.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
 ?plot_BAvsScat
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 MATCH_WAVES = np.array([400, 412, 443, 490, 510, 560, 620, 667])
 
 # Loop through matchup wavelengths

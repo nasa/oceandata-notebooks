@@ -1,3 +1,10 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
+---
+
 # Processing with OCSSW Command Line Interface (CLI)
 
 **Tutorial Lead:** Carina Poulin (NASA, SSAI)
@@ -43,7 +50,7 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
-```{code-cell}
+```{code-cell} ipython3
 import csv
 import os
 
@@ -62,7 +69,7 @@ writing comma-separated values, however, we specify a non-default delimiter to g
 equals-separated values. Not something you usually see in a data file, but it's better than
 writing our own utility from scratch!
 
-```{code-cell}
+```{code-cell} ipython3
 def write_par(path, par):
     """Prepare a "par file" to be read by one of the OCSSW tools.
 
@@ -82,7 +89,7 @@ def write_par(path, par):
 The Python docstring (fenced by triple quotation marks in the function definition) is not
 essential, but it helps describe what the function does.
 
-```{code-cell}
+```{code-cell} ipython3
 help(write_par)
 ```
 
@@ -95,7 +102,7 @@ help(write_par)
 
 Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
 
-```{code-cell}
+```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
 
@@ -103,7 +110,7 @@ We will use the `earthaccess` search method used in the OCI Data Access notebook
 do not include cloud coverage metadata, so we cannot use that filter. In this search, the spatial filter is
 performed on a location given as a point represented by a tuple of latitude and longitude in decimal degrees.
 
-```{code-cell}
+```{code-cell} ipython3
 tspan = ("2024-06-05", "2024-06-05")
 location = (40, 45)
 
@@ -117,13 +124,13 @@ results[0]
 
 Download the granules found in the search.
 
-```{code-cell}
+```{code-cell} ipython3
 paths = earthaccess.download(results, local_path="data")
 ```
 
 While we have the downloaded location stored in the list `paths`, store one in a variable we won't overwrite for future use.
 
-```{code-cell}
+```{code-cell} ipython3
 l2gen_ifile = paths[0]
 ```
 
@@ -132,7 +139,7 @@ On OCI, the reflectances are grouped into blue, red, and short-wave infrared (SW
 the dataset's "observation_data" group in the netCDF file using `xarray` to plot a "rhot_red"
 wavelength.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(l2gen_ifile, group="observation_data")
 artist = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 ```
@@ -159,7 +166,7 @@ We can, however, define the `OCSSWROOT` environment variable in a way that effec
 
 [magic]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands
 
-```{code-cell}
+```{code-cell} ipython3
 os.environ.setdefault("OCSSWROOT", "/opt/ocssw")
 ```
 
@@ -167,7 +174,7 @@ Then we need a couple lines, which will appear in multiple cells below, to begin
 
 Using this pattern, run the `l2gen` command with the single argument `help` to view the extensive list of options available. You can find more information about `l2gen` and other OCSSW functions on the [seadas website](https://seadas.gsfc.nasa.gov/help-8.3.0/processors/ProcessL2gen.html)
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
@@ -182,7 +189,7 @@ To process a L1B file using `l2gen`, at a minimum, you need to set an infile nam
 Parameters can be passed to OCSSW programs through a text file. They can also be passed as arguments, but writing to a text file leaves a clear processing record. Define the parameters in a dictionary, then send it to the `write_par` function
 defined in the [Setup](#1.-Setup) section.
 
-```{code-cell}
+```{code-cell} ipython3
 par = {
     "ifile": l2gen_ifile,
     "ofile": str(l2gen_ifile).replace(".L1B.", ".L2_SFREFL."),
@@ -194,7 +201,7 @@ write_par("l2gen.par", par)
 
 With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
@@ -206,7 +213,7 @@ l2gen par=l2gen.par
 
 If successful, the `l2gen` program created a netCDF file at the `ofile` path. The contents should include the `chlor_a` product from the `BGC` suite of products. Once this process is done, you are ready to visualize your "custom" L2 data. Use the `robust=True` option to ignore outlier chl a values.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
 artist = dataset["rhos"].sel({"wavelength_3d": 25}).plot(cmap="viridis", robust=True)
 ```
@@ -226,7 +233,7 @@ The next step for this tutorial is to merge multiple Level-2 granules together.
 
 One of the most exciting new PACE algorithms for the ocean color community is the MOANA algorithm that produces phytoplankton abundances for three different groups: Synechococcus, Prochlorococcus and picoeukaryotes.
 
-```{code-cell}
+```{code-cell} ipython3
 tspan = ("2024-03-09", "2024-03-09")
 location = (20, -30)
 
@@ -240,7 +247,7 @@ results[0]
 
 Download the granules found in the search.
 
-```{code-cell}
+```{code-cell} ipython3
 paths = earthaccess.download(results, local_path="data")
 ```
 
@@ -249,12 +256,12 @@ On OCI, the reflectances are grouped into blue, red, and short-wave infrared (SW
 the dataset's "observatin_data" group in the NetCDF file using `xarray` to plot a "rhot_red"
 wavelength.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(paths[0], group="observation_data")
 artist = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 ifile = paths[0]
 par = {
     "ifile": ifile,
@@ -268,7 +275,7 @@ write_par("l2gen-moana.par", par)
 
 Now run `l2bin` using your chosen parameters. Be very patient.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
@@ -278,7 +285,7 @@ source $OCSSWROOT/OCSSW_bash.env
 l2gen par=l2gen-moana.par
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
 artist = dataset["picoeuk_moana"].plot(cmap="viridis", robust=True)
 ```
@@ -290,7 +297,7 @@ It can be useful to merge adjacent scenes to create a single, larger image. Let'
 Searching on a location defined as a line, rather than a point, is a good way to get granules that are
 adjacent to eachother. Pass a list of latitude and longitude tuples to the `line` argument of `search_data`.
 
-```{code-cell}
+```{code-cell} ipython3
 tspan = ("2024-04-27", "2024-04-27")
 location = [(-56.5, 49.8), (-55.0, 49.8)]
 
@@ -304,13 +311,13 @@ for item in results:
     display(item)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 paths = earthaccess.download(results, "data")
 ```
 
 While we have the downloaded location stored in the list `paths`, write the list to a text file for future use.
 
-```{code-cell}
+```{code-cell} ipython3
 paths = [str(i) for i in paths]
 with open("l2bin_ifile.txt", "w") as file:
     file.write("\n".join(paths))
@@ -318,7 +325,7 @@ with open("l2bin_ifile.txt", "w") as file:
 
 The OCSSW program that performs merging, also known as "compositing" of remote sensing images, is called `l2bin`. Take a look at the program's options.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
@@ -332,7 +339,7 @@ Write a parameter file with the previously saved list of Level-2 BGC files stand
 for the usual "ifile" value. We can leave the datetime out of the "ofile" name rather than extracing a
 time period from the granules chosen for binning.
 
-```{code-cell}
+```{code-cell} ipython3
 ofile = "data/PACE_OCI.L3B.nc"
 par = {
     "ifile": "l2bin_ifile.txt",
@@ -345,7 +352,7 @@ par = {
 write_par("l2bin.par", par)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
@@ -355,7 +362,7 @@ source $OCSSWROOT/OCSSW_bash.env
 l2bin par=l2bin.par
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(par["ofile"], group="level-3_binned_data")
 dataset
 ```
@@ -368,7 +375,7 @@ dataset
 
 The `l3mapgen` function of OCSSW allows you to create maps with a wide array of options you can see below:
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
@@ -380,7 +387,7 @@ l3mapgen help
 
 Run `l3mapgen` to make a 9km map with a Plate Carree projection.
 
-```{code-cell}
+```{code-cell} ipython3
 ifile = "data/PACE_OCI.L3B.nc"
 ofile = ifile.replace(".L3B.", ".L3M.")
 par = {
@@ -395,7 +402,7 @@ par = {
 write_par("l3mapgen.par", par)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
@@ -407,7 +414,7 @@ l3mapgen par=l3mapgen.par
 
 Open the output with XArray, note that there is no group anymore and that `lat` and `lon` are coordinates as well as indexes.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(par["ofile"])
 dataset
 ```
@@ -416,7 +423,7 @@ Now that we have projected chlorophyll data, we can make a map with coastines an
 argument in the `Dataset.plot` call indicates the projection the data are in. Cartopy does reprojection easilly
 between two projected coordinate reference systems.
 
-```{code-cell}
+```{code-cell} ipython3
 fig = plt.figure(figsize=(10, 3))
 ax = plt.axes(projection=ccrs.AlbersEqualArea(-45))
 artist = dataset["chlor_a"].plot(

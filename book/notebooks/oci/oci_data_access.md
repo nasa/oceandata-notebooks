@@ -136,10 +136,9 @@ directly under the collection name, after clicking on the "i" button for a colle
 
 </div>
 
-Next, we use the `search_data` function (as opposed to `search_datasets`) to
-find granules within a collection. Let's use the `short_name` for the PACE/OCI Level-2
-near real time (NRT) product for biogeochemical properties (although you can
-search for granules accross collections too).
+Next, we use the `search_data` function (as opposed to `search_datasets`) to find granules within a collection.
+You can use `search_data` across collections too, but we'll limit to a single collection by specifying one of the above `short_name` values.
+Let's use the `short_name` for the PACE/OCI Level-2 biogeochemistry (BGC) products.
 
 The `count` argument limits the number of granule records that are returned in the search results.
 
@@ -150,14 +149,11 @@ results = earthaccess.search_data(
 )
 ```
 
-Displaying results shows the direct download link (try it!), along
-with a "quick-look" of some variable within the granule. The
-link will download the granule to your local machine, which may or
-may not be what you want to do. Even if you are running the notebook
-on a remote host, this download link will open a new browser tab or
-window and offer to save a file to your local machine. If you are
-running the notebook locally, this may be of use. More likely, you
-want to open or download the granules by following the steps below.
+Displaying results shows the direct download link (try it!), along with a "quick-look" of some variable within the granule.
+The link will download the granule to your local machine, which may or may not be what you want to do.
+Even if you are running the notebook on a remote host, this download link will open a new browser tab or window and offer to save a file to your local machine.
+If you are running the notebook locally, this may be of use.
+More likely, you want to open or download the granules by following the steps below.
 
 ```{code-cell} ipython3
 results[0]
@@ -218,13 +214,11 @@ paths = earthaccess.open(results)
 The list of outputs, which we called `paths`, contains references to files on a remote filesystem. They're not
 paths to a local file, but many utilities that expect a file path can also use these "file-like" paths.
 
-```{code-cell} ipython3
-paths
-```
++++
 
 <div class="alert alert-danger" role="alert">
 
-If you see `HTTPFileSystem` in the output above, then `earthaccess` has determined that you do not have
+If you see `HTTPFileSystem` in the output when displaying `paths`, then `earthaccess` has determined that you do not have
 direct access to the NASA Earthdata Cloud.
 It may be [wrong](https://github.com/nsidc/earthaccess/issues/231).
 

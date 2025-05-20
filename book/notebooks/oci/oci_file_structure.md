@@ -28,7 +28,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-In this example we will use the `earthaccess` package to access OCI Level-1B (L1B), Level-2 (L2), and Level-3 (L3) NetCDF files and open them using `xarray`. While you can learn alot exploring the datasets in this way, be ready to refer to the full [dataset documentation][user-guides] for details about the data products and processing.
+In this example we will use the `earthaccess` package to access OCI Level-1B (L1B), Level-2 (L2), and Level-3-Mapped (L3M) NetCDF files and open them using `xarray`. While you can learn alot exploring the datasets in this way, be ready to refer to the full [dataset documentation][user-guides] for details about the data products and processing.
 
 **NetCDF** ([Network Common Data Format][netcdf]) is a binary file format for storing multidimensional scientific data (variables). It is optimized for array-oriented data access and support a machine-independent format for representing scientific data. Files ending in `.nc` are NetCDF files.
 
@@ -43,14 +43,14 @@ In this example we will use the `earthaccess` package to access OCI Level-1B (L1
 At the end of this notebok you will know:
 * How to find groups in a NetCDF file
 * How to use `xarray` to open OCI data
-* What key variables are present in the groups within OCI L1B, L2, and L3 files
+* What key variables are present in the groups within OCI L1B, L2, and L3M files
 
 ## Contents
 
 1. [Setup](#1.-Setup)
 2. [Explore L1B File Structure](#2.-Explore-L1B-File-Structure)
 3. [Explore L2 File Structure](#3.-Explore-L2-File-Structure)
-4. [Explore L3 File Structure](#4.-Explore-L3-File-Structure)
+4. [Explore L3M File Structure](#4.-Explore-L3M-File-Structure)
 
 +++
 
@@ -103,17 +103,12 @@ If without direct access, consider the substitution explained in the [Data Acces
 
 [data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 
-```{code-cell} ipython3
-:scrolled: true
-
-paths
-```
++++
 
 <div class="alert alert-danger" role="alert">
 
-If you see `HTTPFileSystem` in the output above, then `earthaccess` has determined that you do not have
-direct access to the NASA Earthdata Cloud.
-It may be [wrong](https://github.com/nsidc/earthaccess/issues/231).
+If you see `HTTPFileSystem` in the output when you display `paths`, then `earthaccess` has determined that you do not have direct access to the NASA Earthdata Cloud.
+Note, at present, it may be [wrong](https://github.com/nsidc/earthaccess/issues/231).
 
 </div>
 
@@ -202,22 +197,24 @@ rrs.sizes
 ```
 
 The Rrs variable has 172 values in the `wavelength_3d`; the blue, red, and SWIR wavelengths have been combined.
-But the variable doesn't have any "Coordinates". That means `wavelength_3d` is only a name of a "Dimension".
-We will get the coordinates variable from the "sensor_band_parameters" group with `xr.merge`.
+Note that `wavelength_3d` is one of the dimensions, but also that the `Rrs` variable doesn't have any "Coordinates" or "Indexes".
+Indices let us look up positions in an array by the value of it's coordinates, so we need to dig more variables out of this L2 file.
+The coordinates variable for `wavelength_3d` is in the "sensor_band_parameters" group.
+When we add this variable to the `rrs` array, `xarray` creates the corresponding index.
 
 ```{code-cell} ipython3
 rrs["wavelength_3d"] = datatree["sensor_band_parameters"]["wavelength_3d"]
 rrs
 ```
 
-Now that `wavelength_3d` is also a "Coordinate", we can reference wavelengths by value.
+Now that `wavelength_3d` shows up under "Coordinates" and "Indexes" we can reference wavelengths by value.
 
 ```{code-cell} ipython3
 plot = rrs.sel({"wavelength_3d": 440}).plot(cmap="viridis", robust=True)
 ```
 
-Right now, the scene is being plotted using `number_of_lines` and `pixels_per_line` as "x" and "y", respectively.
-We need to add more coordinates, the latitude and longitude, create a true map.
+The scene is being plotted using `number_of_lines` and `pixels_per_line` as "x" and "y", respectively.
+We need to add more coordinates, the latitude and longitude, for a true map.
 These coordinates variables are in the "navigation_data" group.
 
 ```{code-cell} ipython3
@@ -227,11 +224,11 @@ rrs
 ```
 
 Although we now have coordinates, they won't immediately help because the data are not gridded by latitude and longitude.
-Level-2 data come in the original instrument swath and have not been resampled to a regular grid.
+L2 data come in the original instrument swath and have not been resampled to a regular grid.
 That is why latitude and longitude are two-dimensional coordinates, and why the are not also "Indexes" like `wavelength_3d`.
-Latitude and longitude are present, but cannot be used immediately to "look-up" values like you can with coordinates that are also indices.
+Latitude and longitude are present, but cannot be used immediately to look up values like you can with coordinates that are also indices.
 
-Let's make a scatter plot of some pixel locations so we can see the irregular spacing.
+Let's make a scatter plot of some pixel locations so we can see the irregular spacing of latitude and longitude.
 By selecting a `slice` with a step size larger than one, we get a subset of the locations for better visualization.
 
 ```{code-cell} ipython3
@@ -243,18 +240,19 @@ plot = datatree["navigation_data"].sel(
 ).dataset.plot.scatter(x="longitude", y="latitude")
 ```
 
-Let's plot this new `xarray.Dataset` the same way as before, but add latitude and longitude.
+Despite not having indices, let's plot `Rrs` the same way as before, except for the addition of latitude and longitude.
 
 ```{code-cell} ipython3
 rrs_sel = rrs.sel({"wavelength_3d": 440})
 plot = rrs_sel.plot(x="longitude", y="latitude", cmap="viridis", robust=True)
 ```
 
-Now you can visualize the data projected onto a grid. If you wanna get fancy, add a coastline.
+Plotting tools can handle non-index Coordinates!
+You can even visualize the data as if projected onto a grid.
+If you wanna get fancy, add a coastline.
 
 ```{code-cell} ipython3
-fig = plt.figure()
-ax = plt.axes(projection=ccrs.PlateCarree())
+fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
 im = rrs_sel.plot(x="longitude", y="latitude", cmap="viridis", robust=True, ax=ax)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
 ax.coastlines()
@@ -269,10 +267,10 @@ Without getting into anything complex, we will use a `where` with logical tests.
 ```{code-cell} ipython3
 rrs_box = rrs.where(
     (
-        (rrs["latitude"] > 37.52)
-        & (rrs["latitude"] < 37.55)
-        & (rrs["longitude"] > -75.46)
-        & (rrs["longitude"] < -75.43)
+        (rrs["latitude"] > 26.0)
+        & (rrs["latitude"] < 26.1)
+        & (rrs["longitude"] > -84.1)
+        & (rrs["longitude"] < -84.0)
     ),
     drop=True,
 )
@@ -280,31 +278,62 @@ rrs_box.sizes
 ```
 
 The line plotting method will only draw a line plot for 1D data, which we can get by stacking
-our two spatial dimensions and choosing to show the new "pixel dimension" as different colors.
+our two spatial dimensions and choosing to show the new "pixel dimension" in different hues.
 
 ```{code-cell} ipython3
 rrs_stack = rrs_box.stack(
     {"pixel": ["number_of_lines", "pixels_per_line"]},
     create_index=False,
 )
-plot = rrs_stack.plot.line(hue="pixel")
+plot = rrs_stack.plot(hue="pixel", add_legend=False)
 ```
-
-We will go over how to plot Rrs spectra with accurate wavelength values on the x-axis in an upcoming notebook.
 
 [back to top](#Contents)
 
 +++
 
-## 4. Explore L3 File Structure
+## 4. Explore L3M File Structure
 
-At Level-3 there are binned (B) and mapped (M) products available for OCI. The L3M remote sensing reflectance (Rrs) files contain global maps of Rrs. We'll use the same `earthaccess` method to find the data.
+At L3M there are binned (B) and mapped (M) products available.
+The L3M remote sensing reflectance (Rrs) files contain global maps of the full spectra, so they can be big!
+We'll use the same `earthaccess` method to find the data.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS",
     temporal=tspan,
 )
+len(results)
+```
+
+The L3M collections contain granules at different temporal and spatial resolutions.
+Let's take a closer look at one of the smaller sized results first, using the metadata available on each one's size.
+
+```{code-cell} ipython3
+for item in results:
+    if item.size() > 2000:
+        display(item)
+        break
+```
+
+Notice some special parts in the granule name:
+1. Right after `L3m` you have a temporal resolution marker.
+   The value `DAY` means a daily aggregate, `8D` means an 8-day aggregate, and `MO` means monthly aggregates.
+1. Right after `chlor_a` you have a spatial resolution marker, as horizontal cell size at the equator given either in `km` or `deg`. Read `p` as a decimal point.
+
+Within a specific collection, `earthaccess` can retrieve granules whose name matches a pattern given in the `granule_name` argument.
+Let's use that to narrow our search to values aggregated to a month and 0.1 degree resolutions.
+
+```{code-cell} ipython3
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_RRS",
+    granule_name="*.MO.*.4km.*",
+    temporal=tspan,
+)
+len(results)
+```
+
+```{code-cell} ipython3
 paths = earthaccess.open(results)
 ```
 
@@ -317,47 +346,36 @@ if not earthaccess.__store__.in_region:
     paths = earthaccess.download(results, "granules")
 ```
 
-Level-3 data do not have any groups, so we can open the dataset without the `group` argument.
-Let's take a look at one of these files, but not just any one!
-We will search for the one that is the largest (i.e. highest resolution)
+L3M data do not have any groups, so we can open as a dataset rather than a datatree.
 
 ```{code-cell} ipython3
-lat = 0
-for item in paths:
-    ds = xr.open_dataset(item)
-    if ds.sizes["lat"] > lat:
-        dataset = ds
+dataset = xr.open_dataset(paths[0])
 dataset
 ```
 
-Notice that OCI L3M data has `lat`, `lon`, and `wavelength` coordinates, so it's easy to slice
+Notice that this L3M granule has `wavelength`, `lat`, and `lon` under "Indexes", so it's easy to slice
 out a bounding box and map the "Rrs" variable at a given wavelength.
 
 ```{code-cell} ipython3
-rrs_slice = dataset["Rrs"].sel({"lat": slice(-25, -45), "lon": slice(10, 30)})
-rrs_slice_442 = rrs_slice.sel({"wavelength": 442}, method="nearest")
-rrs_slice_442
+rrs = dataset["Rrs"]
+rrs_440_bbox = rrs.sel({
+    "wavelength": 440,
+    "lat": slice(bbox[3], bbox[1]),
+    "lon": slice(bbox[0], bbox[2]),
+})
+rrs_440_bbox
 ```
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
-plot = rrs_slice_442.plot(cmap="viridis", robust=True, ax=ax)
+im = rrs_440_bbox.plot(x="lon", y="lat", cmap="viridis", robust=True, ax=ax)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"})
 ax.coastlines()
 plt.show()
 ```
 
-Also becuase the L3M variables have `lat` and `lon` coordinates, it's possible to stack multiple granules along a new dimension that corresponds to time.
-Instead of `xr.open_dataset`, we use `xr.open_mfdataset` to create a single `xarray.Dataset` (the "mf" in `open_mfdataset` stands for multiple files) from an array of paths.
-
-Rather than searching through results for particular resolutions though, we need to augment the CMR query using information
-build into the granule name. Take a look at the attribute on the previous dataset.
-
-```{code-cell} ipython3
-dataset.attrs["product_name"]
-```
-
-We will use a new search filter available in `search_data`: the `granule_name` argument accepts strings with the "*" wildcard. We need this to distinguish daily ("DAY") from eight-day ("8D") composites, as well as to get the desired 0.1 degree resolution projections.
+Also becuase the L3M variables have gridded `lat` and `lon` coordinates, it's possible to stack multiple granules along a new dimension that corresponds to time.
+Using the `granule_name` filter, let's get low spatial-resolution chlorophyll-a data to see daily changes.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
@@ -377,7 +395,10 @@ if not earthaccess.__store__.in_region:
     paths = earthaccess.download(results, "granules")
 ```
 
-The `paths` list is sorted temporally by default, which means the shape of the `paths` array specifies the way we need to tile the files together into larger arrays. We specify `combine="nested"` to combine the files according to the shape of the array of files (or file-like objects), even though `paths` is not a "nested" list in this case. The `concat_dim="date"` argument generates a new dimension in the combined dataset, because "date" is not an existing dimension in the individual files.
+Instead of `xr.open_dataset`, we use `xr.open_mfdataset` to create a single `xarray.Dataset` (the "mf" in `open_mfdataset` stands for multiple files) from an array of paths.
+The `paths` list is sorted temporally by default, which means the shape of the `paths` array specifies the way we need to tile the files together into larger arrays.
+We specify `combine="nested"` to combine the files according to the shape of the array of files (or file-like objects), even though `paths` is not a "nested" list in this case.
+The `concat_dim="date"` argument generates a new dimension in the combined dataset, because "date" is not an existing dimension in the individual files.
 
 ```{code-cell} ipython3
 dataset = xr.open_mfdataset(
@@ -387,7 +408,7 @@ dataset = xr.open_mfdataset(
 )
 ```
 
-Add a date dimension using the dates from the netCDF files.
+Add a date variable as a coordinate using the dates from the netCDF files.
 
 ```{code-cell} ipython3
 dates = [xr.open_dataset(i).attrs["time_coverage_end"] for i in paths]
@@ -408,7 +429,7 @@ chla.attrs.update(
 im = chla.sel(date="2024-05-02").plot(aspect=2, size=4, cmap="GnBu_r")
 ```
 
-... to a map of average values, skipping "NaN" values that result from clouds and the OCI's tilt maneuver.
+... to a map of average values, which ignore missing values due to clouds.
 
 ```{code-cell} ipython3
 chla_avg = chla.mean("date", keep_attrs=True)

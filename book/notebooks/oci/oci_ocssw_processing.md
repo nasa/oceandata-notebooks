@@ -30,7 +30,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-[SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There is also a command line interface (CLI) for the OCSSW libraries, which we can use to write processing scripts and notebooks.
+[SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There is also a command line interface (CLI) for the OCSSW libraries, which we can use to write processing scripts and notebooks without SeaDAS.
 
 This tutorial will show you how to process PACE OCI data using the sequence of OCSSW programs `l2gen`, `l2bin`, and `l3mapgen`.
 
@@ -39,7 +39,7 @@ This tutorial will show you how to process PACE OCI data using the sequence of O
 ## Learning Objectives
 
 At the end of this notebok you will know:
-* How to process Level-1B data to Level-2 with `l2gen`
+* How to process Level-1B (L1B) data to Level-2 (L2) with `l2gen`
 * How to merge two images with `l2bin`
 * How to create a map with `l3mapgen`
 
@@ -67,7 +67,6 @@ import cartopy.crs as ccrs
 import earthaccess
 import matplotlib.pyplot as plt
 import xarray as xr
-from IPython.display import display
 ```
 
 +++ {"lines_to_next_cell": 2}
@@ -80,16 +79,14 @@ equals-separated values. Not something you usually see in a data file, but it's 
 writing our own utility from scratch!
 
 ```{code-cell} ipython3
-def write_par(path, par):
-    """Prepare a "par file" to be read by one of the OCSSW tools.
+def write_par(path: str, par: dict):
+    """Prepare a parameter file to be read by one of the OCSSW tools.
 
-    Using a parameter file is equivalent to specifying parameters
-    on the command line.
+    Using a parameter file (a.k.a. "par file") is equivalent to specifying
+    parameters on the command line.
 
-    Args:
-        path (str): where to write the parameter file
-        par (dict): the parameter names and values included in the file
-
+    :param path: where to write the parameter file
+    :param par: the parameter names and values included in the file
     """
     with open(path, "w") as file:
         writer = csv.writer(file, delimiter="=")
@@ -133,9 +130,6 @@ results = earthaccess.search_data(
     temporal=tspan,
     point=location,
 )
-```
-
-```{code-cell} ipython3
 results[0]
 ```
 
@@ -151,7 +145,7 @@ While we have the downloaded location stored in the list `paths`, store one in a
 l2gen_ifile = paths[0]
 ```
 
-The Level-1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
+The L1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
 On OCI, the reflectances are grouped into blue, red, and short-wave infrared (SWIR) wavelengths. Open
 the dataset's "observatin_data" group in the netCDF file using `xarray` to plot a "rhot_red"
 wavelength.
@@ -161,8 +155,8 @@ dataset = xr.open_dataset(l2gen_ifile, group="observation_data")
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 ```
 
-This tutorial will demonstrate processing this Level-1B granule into a Level-2 granule. Because that can
-take several minutes, we'll also download a couple of Level-2 granules to save time for the next step of compositing multiple Level-2 granules into a single granule.
+This tutorial will demonstrate processing this L1B granule into a Level-2 (L2) granule. Because that can
+take several minutes, we'll also download a couple of L2 granules to save time for the next step of compositing multiple L2 granules into a single granule.
 
 ```{code-cell} ipython3
 location = [(-56.5, 49.8), (-55.0, 49.8)]
@@ -186,7 +180,6 @@ for item in results:
 
 ```{code-cell} ipython3
 paths = earthaccess.download(results, "granules")
-paths
 ```
 
 While we have the downloaded location stored in the list `paths`, write the list to a text file for future use.
@@ -203,7 +196,7 @@ with open("l2bin_ifile.txt", "w") as file:
 
 ## 3. Process L1B Data with `l2gen`
 
-At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to Level-2 and then to Level-3 to get both of those. Note that Level-2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the Level-3 data distributed by the OB.DAAC are global composites, which may cover more Level-2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters.
+At L1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to L2 and then to Level-3-Mapped (L3M) to get both of those. Note that L2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the L3M data distributed by the OB.DAAC are global composites, which may cover more L2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters.
 
 <div class="alert alert-warning">
 
@@ -218,7 +211,8 @@ We can, however, define the `OCSSWROOT` environment variable in a way that effec
 [magic]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands
 
 ```{code-cell} ipython3
-os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
+ocsswroot = os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
+assert os.path.isdir(ocsswroot)
 ```
 
 Then we need a couple lines, which will appear in multiple cells below, to begin a Bash cell initiated with the `OCSSW_bash.env` file.
@@ -267,12 +261,12 @@ dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
 plot = dataset["rhos"].sel({"wavelength_3d": 25}).plot(cmap="viridis", robust=True)
 ```
 
-Feel free to explore `l2gen` options to produce the Level-2 dataset you need! The documentation
+Feel free to explore `l2gen` options to produce the L2 dataset you need! The documentation
 for `l2gen` is kind of interactive, because so much depends on the data product being processed.
 For example, try `l2gen ifile=granules/PACE_OCI.20240427T161654.L1B.nc dump_options=true` to get
 a lot of information about the specifics of what the `l2gen` program generates.
 
-The next step for this tutorial is to merge multiple Level-2 granules together.
+The next step for this tutorial is to merge multiple L2 granules together.
 
 [back to top](#Contents)
 
@@ -291,7 +285,7 @@ source $OCSSWROOT/OCSSW_bash.env
 l2bin help
 ```
 
-Write a parameter file with the previously saved list of Level-2 files standing in
+Write a parameter file with the previously saved list of L2 files standing in
 for the usual "ifile" value. We can leave the datetime out of the "ofile" name rather than extracing a
 time period from the granules chosen for binning.
 

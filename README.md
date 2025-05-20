@@ -22,7 +22,7 @@ Head over to our [Help Hub] to access the published notebooks.
 > [!Important]
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
 > - Create new notebooks by copying `COPYME.ipynb` into the `notebooks` folder.
-> - When you first clone this repository, the `notebooks` folder will not exist.
+> - When you first clone this repository, the `notebooks` folder will not exist!
 
 Keeping notebooks in a code repository is tough for collaboration and curation because notebooks contain large, binary outputs and metadata that frequently changes.
 This repository uses [Jupytext] to keep notebooks (.ipynb) paired with markdown files (.md).
@@ -104,7 +104,7 @@ In addition to the ".md" files paired to notebooks, the `book` folder contains c
 Only notebooks listed in `book/_toc.yml`.
 Building the notebooks as one book provides smaller files for tutorial content, a single source of JavaScript and CSS, and tests that all notebooks run without errors.
 
-Presently, it's best to build from ipynb rather than mystmd, so we generate clean ipynb and exclude (see `book/_config.yml`) the md files.
+Presently (for `jupyter-book<2`), it's best to build from notebooks rather than markdown, so we generate clean notebooks and exclude (see `book/_config.yml`) the markdown files.
 
 [Binder]: https://mybinder.org/
 [Jupyter Book]: https://jupyterbook.org/
@@ -117,7 +117,7 @@ slideshow:
   slide_type: ''
 tags: []
 ---
-jupytext --to ipynb $(git ls-files book/notebooks)
+jupytext --quiet --to ipynb $(git ls-files book/notebooks)
 uv run --directory book jupyter book build .
 ```
 

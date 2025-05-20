@@ -1,3 +1,10 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
+---
+
 # Explore Level-2 Ocean Color Data from the Moderate Resolution Imaging Spectroradiometer (MODIS)
 
 **Authors:** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
@@ -45,7 +52,7 @@ We begin by importing all of the packages used in this notebook. If you have cre
 
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
-```{code-cell}
+```{code-cell} ipython3
 :lines_to_next_cell: 2
 
 import cartopy
@@ -79,7 +86,7 @@ stored in a <code>.netrc</code> file, so the argument is not necessary (but
 it's also harmless) for subsequent calls to <code>earthaccess.login</code>.
 </div>
 
-```{code-cell}
+```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
 
@@ -89,11 +96,11 @@ auth = earthaccess.login(persist=True)
 
 ## 3. Search for Data
 
-The MODIS instrument, on board the Aqua satellite, collects ocean color data, processed from Level-1 through Level-4 and distributed by the OB.DAAC. In this example, we will use the standard Chlorophyll a data from Level-2 ocean color files. To find data we will use the `earthaccess` Python library to search on NASA's CMR API.
+The MODIS instrument, on board the Aqua satellite, collects ocean color data, processed from Level-1 through Level-4 and distributed by the OB.DAAC. In this example, we will use the standard Chlorophyll a data from Level-2 (L2) ocean color files. To find data we will use the `earthaccess` Python library to search on NASA's CMR API.
 
 NASA data collections, i.e. a series of related granules, are discoverable with `earthaccess.search_datasets`. Various search parameters can be used to search collections and granules using metadata attributes. See more details [here](https://github.com/nsidc/earthaccess/blob/main/notebooks/Demo.ipynb). Below, CMR Catalog are queried to find collections with **"L2 ocean color"** keyword in them, with the **MODIS** instrument. The returned response can be used to retrieve the `ShortName` and `concept-id` for each dataset.
 
-```{code-cell}
+```{code-cell} ipython3
 results = earthaccess.search_datasets(
     keyword="L2 ocean color",
     instrument="MODIS",
@@ -102,7 +109,7 @@ results = earthaccess.search_datasets(
 
 Each result has a `summary` method with information such as the collection's short-name.
 
-```{code-cell}
+```{code-cell} ipython3
 set((i.summary()["short-name"] for i in results))
 ```
 
@@ -113,13 +120,10 @@ We are interested in the `MODISA_L2_OC` dataset.
 We can use spatial and temporal arguments to search for granules covering Chesapeake Bay during the time frame of Oct 15 - 23, 2020. We can also add the cloud_cover parameter to filter out granules with too much cloud coverage.
 cloud_cover = (0, 50) # max 50% of cloud coverage
 
-```{code-cell}
+```{code-cell} ipython3
 tspan = ("2020-10-15", "2020-10-23")
 bbox = (-76.75, 36.97, -75.74, 39.01)
 cc = (0, 50)
-```
-
-```{code-cell}
 results = earthaccess.search_data(
     short_name="MODISA_L2_OC",
     temporal=tspan,
@@ -130,20 +134,20 @@ results = earthaccess.search_data(
 
 Now we can print some info about these granules using the built-in methods. We can see how each result prefers to display itself.
 
-```{code-cell}
+```{code-cell} ipython3
 results[0]
 ```
 
 Or we could use the `data_links` and `size` methods provided on each result.
 
-```{code-cell}
+```{code-cell} ipython3
 data_links = [{"links": i.data_links(), "size (MB):": i.size()} for i in results]
 JSON(data_links, expanded=True)
 ```
 
-Or we can interactively inspect all the fields underlying a result.
+Or we can interactively inspect all the fields underlying all results.
 
-```{code-cell}
+```{code-cell} ipython3
 JSON(results)
 ```
 
@@ -155,7 +159,7 @@ JSON(results)
 
 Since the data are not hosted in the Earthdata Cloud (see output from `results[0]` above), we need to download files. This will download the data in a folder called "data" in your working directory.
 
-```{code-cell}
+```{code-cell} ipython3
 paths = earthaccess.download(results, local_path="L2")
 ```
 
@@ -169,7 +173,7 @@ Step-by-step, we'll build a nice map showing the log-transformed chlorophyll a e
 downloaded. The first step is to open some of the "groups" present within the NetCDF files to begin preparing
 a variable to plot.
 
-```{code-cell}
+```{code-cell} ipython3
 prod = xr.open_dataset(paths[0])
 obs = xr.open_dataset(paths[0], group="geophysical_data")
 nav = xr.open_dataset(paths[0], group="navigation_data")
@@ -178,7 +182,7 @@ nav = xr.open_dataset(paths[0], group="navigation_data")
 The "navigation_data" group has geospatial coordinates that we merge into the "geophysical_data" group, which has the
 "chlor_a" product.
 
-```{code-cell}
+```{code-cell} ipython3
 nav = nav.set_coords(("longitude", "latitude")).rename(
     {"pixel_control_points": "pixels_per_line"}
 )
@@ -187,7 +191,7 @@ dataset = xr.merge((prod, obs, nav.coords))
 
 Now, we can pull out and fine-tune the "chlor_a" variable for visualization.
 
-```{code-cell}
+```{code-cell} ipython3
 array = np.log10(dataset["chlor_a"])
 array.attrs.update(
     {
@@ -199,16 +203,15 @@ array.attrs.update(
 The `plot` method from XArray's plotting API is an easy way to take an `xr.Dataset` or `xr.DataArray` to
 a `matplotlib` figure.
 
-```{code-cell}
-im = array.plot(x="longitude", y="latitude", aspect=2, size=4, cmap="jet", robust=True)
+```{code-cell} ipython3
+plot = array.plot(x="longitude", y="latitude", aspect=2, size=4, cmap="jet", robust=True)
 ```
 
 We can enrich the visualiation using `matplotlib` and `cartopy`. The coordinates are latitude and longitude, so if we add the "Plate Carree" coordinate reference system (CRS) to our axes, we will get an improved map.
 
-```{code-cell}
-fig = plt.figure(figsize=(10, 7))
-ax = plt.axes(projection=cartopy.crs.PlateCarree())
-im = array.plot(x="longitude", y="latitude", cmap="jet", robust=True, ax=ax)
+```{code-cell} ipython3
+fig, ax = plt.subplots(figsize=(10, 7), subplot_kw={"projection": cartopy.crs.PlateCarree()})
+plot = array.plot(x="longitude", y="latitude", cmap="jet", robust=True, ax=ax)
 ax.gridlines(draw_labels={"bottom": "x", "left": "y"})
 ax.add_feature(cartopy.feature.STATES, linewidth=0.5)
 ax.set_title(dataset.attrs["product_name"], loc="center")

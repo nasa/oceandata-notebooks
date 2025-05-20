@@ -178,7 +178,7 @@ rhos_860 = rhos.sel({"wavelength_3d": 860}, method="nearest")
 Then, we can see if the mask worked by plotting the data once again.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
+fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": crs})
 ax.coastlines(linewidth=0.25)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
@@ -201,7 +201,7 @@ Now that we have our surface reflectance data masked, we can start doing some an
 Let's take NDVI for example. NDVI is a metric which quantifies plant "greenness", which is related to the abundance and health of the vegetation in a pixel. It is a normalized ratio of the surface reflectance for red ($\rho_{red}$) and near-infrared ($\rho_{NIR}$) bands:
 
 $$
-NDVI = \frac{\rho_{NIR} - \rho_{red}}{\rho_{NIR} + \rho_{red}}
+  NDVI = \frac{\rho_{NIR} - \rho_{red}}{\rho_{NIR} + \rho_{red}}
 $$
 
 You'll notice that the equation does not mention specific wavelengths, but rather just requires a "red" measurement and a "NIR" measurement. With PACE, we have a lot of measurements throughout the red and NIR regions of the spectrum. To visualize the spectra, we want to plot across the wavelength dimension of individual pixels, so we'll take just a small sample from the dataset. We also like to separate the hyperspectral (ultraviolet to NIR wavelengths) and multispectral (NIR to SWIR wavelengths) regions when plotting spectra.
@@ -239,7 +239,7 @@ ndvi.attrs["long_name"] = "Normalized Difference Vegetation Index (NDVI)"
 ```
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
+fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": crs})
 ax.coastlines(linewidth=0.5)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
@@ -318,7 +318,7 @@ The Level-3 data products come binned and gridded on a global projection at mult
 
 ```{code-cell} ipython3
 dataset = xr.open_dataset(paths[0])
-array = dataset.drop_vars("palette").to_array("product")
+array = dataset.drop_vars("palette").to_array("Product")
 array.attrs["long_name"] = "Vegetation Index"
 array.hvplot(
     x="lon",
@@ -327,6 +327,7 @@ array.hvplot(
     aspect=2,
     title="July 2024 Monthly Average",
     rasterize=True,
+    widget_location='top',
 )
 ```
 

@@ -5,20 +5,19 @@ parts:
     chapters:
       - file: notebooks/oci/oci_data_access
       - file: notebooks/oci/oci_file_structure
-      # - file: notebooks/modis/modis_explore_l2
-      #         # TODO: WARNING: skipping unknown output mime type: application/json [mystnb.unknown_mime_type]
-      # - file: notebooks/modis/modis_explore_l3
       # - file: notebooks/oci/oci_ocssw_install
-      #         # FIXME: kernelspec deleted when saving ipynb b/c of global config
       #         # FIXME: needs a data file from oci_data_access
       # - file: notebooks/oci/oci_ocssw_processing
       #         # FIXME: permission denied. trying to overwrite previous file?
-      # - file: notebooks/harp2/harp2_basic_visualizations
-      #         # TODO: WARNING: image file not readable: notebooks/harp2/harp2_red_anim_20240519T235950.gif
-      #         #       current workaround is manual copying of animation to ../../img
-  - caption: Hackweek
-    chapters:
-      - file: notebooks/hackweek/earthdata_cloud_access
+      - file: notebooks/modis/modis_explore_l2
+              # TODO: WARNING: skipping unknown output mime type: application/json [mystnb.unknown_mime_type]
+      - file: notebooks/modis/modis_explore_l3
+      - file: notebooks/oci/oci_terrestrial_data
+              # WARNING: skipping unknown output mime type: application/vnd.holoviews_load.v0+json [mystnb.unknown_mime_type]
+      - file: notebooks/harp2/harp2_basic_visualizations
+  # - caption: Hackweek
+  #   chapters:
+  #     - file: notebooks/hackweek/earthdata_cloud_access
       # - file: notebooks/hackweek/satdata_visualization
       #         # TODO: WARNING: skipping unknown output mime type: application/vnd.holoviews_load.v0+json [mystnb.unknown_mime_type]
       # - file: notebooks/hackweek/satellite_insitu_matchups

@@ -43,8 +43,7 @@ At the end of this notebok you will know:
 
 1. [Setup](#1.-Setup)
 2. [Install OCSSW](#2.-Install-OCSSW)
-3. [Process Data with `l2gen`](#3.-Process-Data-with-`l2gen`)
-4. [All-in-One](#4.-All-in-One)
+3. [All-in-One](#3.-All-in-One)
 
 +++
 
@@ -86,13 +85,13 @@ Confirm the bash kernel is installed by starting a new Launcher. You should see 
 The OCSSW software is not a Python package and not available from `conda` or any other repository. To install it, we begin by aquiring an installer script from the OB.DAAC. This script is actually part of OCSSW, but we can use it independently to download and install the OCSSW binaries suitable for our system.
 
 ```{code-cell}
-wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw
+wget --quiet --no-clobber https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw
 ```
 
 Similarly, we'll need the manifest module imported by the installer.
 
 ```{code-cell}
-wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
+wget --quiet --no-clobber https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
 ```
 
 Before you can use a downloaded script, you need to change its mode to be executable.
@@ -115,23 +114,19 @@ TAG="$(./install_ocssw --list_tags | grep '^T' | tail -n 1)"
 echo $TAG
 ```
 
-Define an environmental variable called "OCSSWROOT" that specifies a directory for your OCSSW installation. Environment variables are set in Bash using the `export` command, and displayed with `printenv`
+Define an environmental variable called "OCSSWROOT" that specifies a directory for your OCSSW installation. Environment variables are persisted in Bash using the `export` command, but we are carefull not to overwrite any existing value for `OCSSWROOT`.
 
 ```{code-cell}
-export OCSSWROOT=/tmp/ocssw
-```
-
-```{code-cell}
-printenv OCSSWROOT
+export OCSSWROOT=${OCSSWROOT:-/tmp/ocssw}
 ```
 
 <div class="alert alert-warning" role="alert">
 
-You will need to [repeat these installation steps](#all) if your OCSSWROOT directory does not persist between sessions.
+You will need to repeat these installation steps (see below) if your OCSSWROOT directory does not persist between sessions.
 
 </div>
 
-The `/tmp/ocssw` folder, for instance, will not be present the next time JupyterHub creates a server. Consider the trade off between installation time, speed, and storage costs when choosing your OCSSWROOT. With the arguments below, the installation takes 11GB of storage space. We use the quick and cheap location for this tutorial.
+The `/tmp/ocssw` folder, for instance, will not be present the next time JupyterHub creates a server. Consider the trade off between installation time, speed, and storage costs when choosing your `OCSSWROOT`. With the arguments below, the installation takes 11GB of storage space. We use the quick and cheap location for this tutorial.
 
 Install OCSSW using the `--tag` argument to pick from the list above. Also provide optional arguments for sensors you will be working with. In this case, we will only be using OCI. A list of optional arguments can be found on the OCSSW webpage or with `./install_ocssw --help`.
 
@@ -147,10 +142,13 @@ Finish up by calling `source` on the "OCSSW_bash.env" file, which exports additi
 source $OCSSWROOT/OCSSW_bash.env
 ```
 
-Confirm the environment has been set by checking that *another* `install_ocssw` script is now discoverable by Bash at the newly installed location.
+Confirm the environment has been set by checking whether `l2gen` is now discoverable by Bash.
+If the following creates an error, check for [instructions] that might be specific to your operating system.
+
+[instructions]: https://seadas.gsfc.nasa.gov/downloads/
 
 ```{code-cell}
-which install_ocssw
+l2gen --version
 ```
 
 You are now ready to run `l2gen`, the Level-2 processing function for all ocean color instruments under the auspices of the GSFC Ocean Biology Processing Group!
@@ -159,59 +157,7 @@ You are now ready to run `l2gen`, the Level-2 processing function for all ocean 
 
 +++
 
-## 3. Process L1B Data with `l2gen`
-
-Run `l2gen` by itself to view the extensive list of options available. You can find more information [on the Seadas website][docs].
-
-[docs]: https://seadas.gsfc.nasa.gov/help-8.3.0/processors/ProcessL2gen.html
-
-```{code-cell}
-:scrolled: true
-:tags: [scroll-output]
-
-l2gen
-```
-
-Feel free to explore all of `l2gen` options to produce a highly customized Level-2 dataset for your research. Here we just scratch the surface.
-
-To process a L1B file using `l2gen` you need, at a minimum, to set an input file name (`ifile`) and an output file name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the Surface Reflectance suite used to make true color images (`SFREFL`). We turn off the atmospheric correction with `atmocor=0` to save processing time.
-
-For this example, we will be using the L1B file downloaded in the OCI Data Access notebook. Confirm that the L1B file to process is at the expected location by listing (with `ls`) the directory contents. If the directory is empty, check that you've completed the prerequiste notebooks for this tutorial!
-
-```{code-cell}
-ls L1B
-```
-
-Create a directory for output files.
-
-```{code-cell}
-mkdir L2
-```
-
-And run! Note, this may take several minutes.
-
-```{code-cell}
-:scrolled: true
-:tags: [scroll-output]
-
-l2gen \
-  ifile=L1B/PACE_OCI.20240501T165311.L1B.nc \
-  ofile=L2/PACE_OCI.20240501T165311.L2.SFREFL.nc \
-  suite=SFREFL \
-  atmocor=0
-```
-
-<div class="alert alert-success" role="alert">
-
-Scroll down in the output above to see updates on processing. Upon completion, you should have a new processed L2 file in your L2 folder.
-
-</div>
-
-[back to top](#Contents)
-
-+++
-
-## 4. All-in-One
+## 3. All-in-One
 
 In case you need to run the sequence above in a terminal regularly, here are all the commands
 to run together.
@@ -219,20 +165,18 @@ to run together.
 If you are starting from scratch ...
 
 ```{code-cell}
-wget https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw
-wget https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
+wget -q -nc https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw
+wget -q -nc https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
 chmod +x install_ocssw
-export OCSSWROOT=/tmp/ocssw
+export OCSSWROOT=${OCSSWROOT:-/tmp/ocssw}
 TAG="$(./install_ocssw --list_tags | grep '^T' | tail -n 1)"
 ./install_ocssw --tag=$TAG --seadas --oci
-source $OCSSWROOT/OCSSW_bash.env
 ```
 
 If you have already installed OCSSW and want to update ...
 
 ```{code-cell}
-export OCSSWROOT=/tmp/ocssw
-source $OCSSWROOT/OCSSW_bash.env
+export OCSSWROOT=${OCSSWROOT:-/tmp/ocssw}
 TAG="$(install_ocssw --list_tags | grep '^T' | tail -n 1)"
 install_ocssw --tag=$TAG --seadas --oci
 ```

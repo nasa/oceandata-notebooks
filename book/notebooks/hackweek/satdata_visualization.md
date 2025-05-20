@@ -1,3 +1,10 @@
+---
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
+---
+
 # Satellite Data Visualization
 
 **Tutorial Leads:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC) and Sean Foley (NASA, MSU)
@@ -43,7 +50,7 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
-```{code-cell}
+```{code-cell} ipython3
 import cartopy.crs as ccrs
 import cmocean
 import earthaccess
@@ -61,7 +68,7 @@ from scipy.ndimage import gaussian_filter1d
 from xarray.backends.api import open_datatree
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :lines_to_next_cell: 2
 
 options = xr.set_options(display_expand_attrs=False)
@@ -73,7 +80,7 @@ In this tutorial, we suppress runtime warnings that show up when calculating log
 
 Define a function to apply enhancements, our own plus generic image enhancements from the Pillow package.
 
-```{code-cell}
+```{code-cell} ipython3
 def enhance(
     rgb,
     scale=0.01,
@@ -178,7 +185,7 @@ def pcolormesh(rgb):
 
 Let's start with the most basic visualization. First, get level-3 chlorophyll map product, which is already gridded on latitudes and longitudes.
 
-```{code-cell}
+```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_CHL_NRT",
     granule_name="*.MO.*.0p1deg.*",
@@ -186,14 +193,14 @@ results = earthaccess.search_data(
 paths = earthaccess.open(results)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(paths[-1])
 chla = dataset["chlor_a"]
 ```
 
 Now we can already create a global map. Let's use a special colormap from `cmocean` to be fancy, but this is not necessary to make a basic map. Use the `robust="true"` option to remove outliers.
 
-```{code-cell}
+```{code-cell} ipython3
 artist = chla.plot(cmap=cmocean.cm.algae, robust="true")
 plt.gca().set_aspect("equal")
 ```
@@ -204,7 +211,7 @@ plt.gca().set_aspect("equal")
 
 True color images use three bands to create a RGB image. Let's still use a level-3 mapped product, this time we use the remote-sensing reflectance (Rrs) product.
 
-```{code-cell}
+```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
     granule_name="*.MO.*.0p1deg.*",
@@ -215,13 +222,13 @@ paths = earthaccess.open(results)
 The Level-3 Mapped files have no groups and have variables that XArray recognizes as "coordinates":
 variables that are named after their only dimension.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(paths[-1])
 ```
 
 Look at all the wavelentghs available!
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
 
@@ -231,7 +238,7 @@ dataset["wavelength"].data
 For a true color image, choose three wavelengths to represent the "Red", "Green", and "Blue"
 channels used to make true color images.
 
-```{code-cell}
+```{code-cell} ipython3
 rrs_rgb = dataset["Rrs"].sel({"wavelength": [645, 555, 368]})
 rrs_rgb
 ```
@@ -243,7 +250,7 @@ For this case, we can attach another variable called "channel" and then swap it 
 "wavelength" to become the third dimension of the data array. We'll actually use these
 values for a choice of `cmap` below, just for fun.
 
-```{code-cell}
+```{code-cell} ipython3
 rrs_rgb["channel"] = ("wavelength", ["Reds", "Greens", "Blues"])
 rrs_rgb = rrs_rgb.swap_dims({"wavelength": "channel"})
 rrs_rgb
@@ -253,7 +260,7 @@ A complicated figure can be assembled fairly easily using the `xarray.Dataset.pl
 which draws on the matplotlib package. For Level-3 data, we can specifically use `imshow`
 to visualize the RGB image on the `lat` and `lon` coordinates.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, axs = plt.subplots(3, 1, figsize=(8, 7), sharex=True)
 for i, item in enumerate(rrs_rgb["channel"]):
     array = rrs_rgb.sel({"channel": item})
@@ -265,13 +272,13 @@ plt.show()
 
 We use the `enhancel3` function defined at the start of the tutorial to make adjusments to the image.
 
-```{code-cell}
+```{code-cell} ipython3
 rrs_rgb_enhanced = enhancel3(rrs_rgb)
 ```
 
 And we create the image using the `imshow` function.
 
-```{code-cell}
+```{code-cell} ipython3
 :lines_to_next_cell: 2
 
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
@@ -280,7 +287,7 @@ plt.gca().set_aspect("equal")
 
 Finally, we can add a grid and coastlines to the map with `cartopy` tools.
 
-```{code-cell}
+```{code-cell} ipython3
 plt.figure(figsize=(7, 5))
 ax = plt.axes(projection=ccrs.PlateCarree())
 artist = rrs_rgb_enhanced.plot.imshow(x="lon", y="lat")
@@ -301,7 +308,7 @@ The best product to create a high-quality true-color image from PACE is the Surf
 
 All files created by a PACE Hackweek tutorial can be found in the `/shared/pace-hackweek-2024/` folder accessible from the JupyterLab file browser. In this tutorial, we'll use a Level-2 file created in advance. Note that the JupyterLab file browser treats `/home/jovyan` (that's your home directory, Jovyan) as the root of the browsable file system.
 
-```{code-cell}
+```{code-cell} ipython3
 path = "/home/jovyan/shared/pace-hackweek-2024/PACE_OCI.20240605T092137.L2_SFREFL.V2.nc"
 datatree = open_datatree(path)
 dataset = xr.merge(datatree.to_dict().values())
@@ -313,21 +320,21 @@ coordinates they cannot be set as an index on the dataset because each array is 
 two-dimensional. The rhos are not on a rectangular grid, but it is still useful to tell
 XArray what will become axis labels.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = dataset.set_coords(("longitude", "latitude"))
 dataset
 ```
 
 We then select the three wavelenghts that will become the red, green and blue chanels in our image.
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_rgb = dataset["rhos"].sel({"wavelength_3d": [645, 555, 368]})
 rhos_rgb
 ```
 
 We are ready to have a look at our image. The most simple adjustment is normalization of the range across the three RGB channels.
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_rgb_max = rhos_rgb.max()
 rhos_rgb_min = rhos_rgb.min()
 rhos_rgb_enhanced = (rhos_rgb - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
@@ -336,19 +343,19 @@ rhos_rgb_enhanced = (rhos_rgb - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
 To visualize these data, we have to use the fairly smart `pcolormesh` artists, which interprets
 the geolocation arrays as pixel centers. TODO: why the warning, though?
 
-```{code-cell}
+```{code-cell} ipython3
 pcolormesh(rhos_rgb_enhanced)
 ```
 
 Let's have a look at the image's histogram that shows the pixel intensity value distribution across the image. Here, we can see that the values are skewed towards the low intensities, which makes the image dark.
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_rgb_enhanced.plot.hist()
 ```
 
 Another type of enhancement involves a logarithmic transform of the data before normalizing to the unit range.
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_rgb_enhanced = rhos_rgb.where(rhos_rgb > 0, np.nan)
 rhos_rgb_enhanced = np.log(rhos_rgb_enhanced / 0.01) / np.log(1 / 0.01)
 rhos_rgb_max = rhos_rgb_enhanced.max()
@@ -360,7 +367,7 @@ pcolormesh(rhos_rgb_enhanced)
 Perhaps it is better to do the unit normalization independently for each channel? We can use
 XArray's ability to use and align labelled dimensions for the calculation.
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_rgb_max = rhos_rgb.max(("number_of_lines", "pixels_per_line"))
 rhos_rgb_min = rhos_rgb.min(("number_of_lines", "pixels_per_line"))
 rhos_rgb_enhanced = (rhos_rgb - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
@@ -369,12 +376,12 @@ pcolormesh(rhos_rgb_enhanced)
 
 Let's go back to the log-transformed image, but this time adjust the minimum and maximum pixel values `vmin` and `vmax`.
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_rgb_enhanced = rhos_rgb.where(rhos_rgb > 0, np.nan)
 rhos_rgb_enhanced = np.log(rhos_rgb_enhanced / 0.01) / np.log(1 / 0.01)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 vmin = 0.01
 vmax = 1.04
 
@@ -382,7 +389,7 @@ rhos_rgb_enhanced = rhos_rgb_enhanced.where(rhos_rgb_enhanced <= vmax, vmax)
 rhos_rgb_enhanced = rhos_rgb_enhanced.where(rhos_rgb_enhanced >= vmin, vmin)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_rgb_max = rhos_rgb.max(("number_of_lines", "pixels_per_line"))
 rhos_rgb_min = rhos_rgb.min(("number_of_lines", "pixels_per_line"))
 rhos_rgb_enhanced = (rhos_rgb_enhanced - rhos_rgb_min) / (rhos_rgb_max - rhos_rgb_min)
@@ -391,20 +398,20 @@ pcolormesh(rhos_rgb_enhanced)
 
 This image looks much more balanced. The histogram is also going to indicate this:
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_rgb_enhanced.plot.hist()
 ```
 
 Everything we've been trying is already built into the `enhance` function, including extra goodies from the Pillow package of generic image processing filters.
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_rgb_enhanced = enhance(rhos_rgb)
 pcolormesh(rhos_rgb_enhanced)
 ```
 
 Since every image is unique, we can further adjust the parameters.
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_rgb_enhanced = enhance(rhos_rgb, contrast=1.2, brightness=1.1, saturation=0.8)
 pcolormesh(rhos_rgb_enhanced)
 ```
@@ -421,11 +428,11 @@ We can use the same RGB image method, this time with different bands, to create 
 
 For example, using a combination of infrared bands can highlight ice clouds in the atmosphere, versus regular water vapor clouds. Let's try it:
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_ice = dataset["rhos"].sel({"wavelength_3d": [1618, 2131, 2258]})
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 rhos_ice_enhanced = enhance(
     rhos_ice,
     vmin=0,
@@ -455,7 +462,7 @@ A uniquely innovative type of product from PACE is the phytoplankton community c
 
 We first open the dataset that is created with l2gen. This will be covered in the OCSSW tutorial.
 
-```{code-cell}
+```{code-cell} ipython3
 path = "/home/jovyan/shared/pace-hackweek-2024/PACE_OCI.20240309T115927.L2_MOANA.V2.nc"
 
 datatree = open_datatree(path)
@@ -465,13 +472,13 @@ dataset
 
 We can see the MOANA products, RGB bands and other level-2 products in the dataset. We still need to set the spatial variables as coordinates of the dataset.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = dataset.set_coords(("longitude", "latitude"))
 ```
 
 Let's make a quick MOANA product plot to see if everything looks normal.
 
-```{code-cell}
+```{code-cell} ipython3
 artist = dataset["picoeuk_moana"].plot(
     x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true"
 )
@@ -480,7 +487,7 @@ plt.gca().set_aspect("equal")
 
 Now we create a RGB image using our three rhos bands and the usual log-transform, vmin/vmax adjustments and normalization. We also project the map using cartopy.
 
-```{code-cell}
+```{code-cell} ipython3
 # OCI True Color 1 band -min/max adjusted
 vmin = 0.01
 vmax = 1.04  # Above 1 because whites can be higher than 1
@@ -516,7 +523,7 @@ artist = axes.imshow(
 
 We then enhance the image.
 
-```{code-cell}
+```{code-cell} ipython3
 :lines_to_next_cell: 0
 
 # Image adjustments: change values from 0 to 2, 1 being unchanged
@@ -560,7 +567,7 @@ artist = axes.imshow(
 
 We then project the MOANA products on the same grid. We can look at Synechococcus as an example.
 
-```{code-cell}
+```{code-cell} ipython3
 fig = plt.figure(figsize=(5, 5))
 axes = fig.add_subplot(projection=ccrs.PlateCarree())
 extent = (
@@ -584,7 +591,7 @@ artist = axes.imshow(
 
 To layer the three products on our true-color image, we will add transparency to our colormaps for the three plankton products. Look at the Synechococcus product again.
 
-```{code-cell}
+```{code-cell} ipython3
 cmap_greens = pl.cm.Greens  # Get original color map
 my_cmap_greens = cmap_greens(np.arange(cmap_greens.N))
 my_cmap_greens[:, -1] = np.linspace(0, 1, cmap_greens.N)  # Set alpha for transparency
@@ -621,7 +628,7 @@ artist = axes.imshow(
 
 We finally assemble the image using the plankton layers and the true-color base layer.
 
-```{code-cell}
+```{code-cell} ipython3
 fig = plt.figure(figsize=(7, 7))
 axes = plt.subplot(projection=ccrs.PlateCarree())
 extent = (
@@ -692,13 +699,13 @@ and give it a try!
 
 The holoview library and its bokeh extension allow us to explore datasets interactively.
 
-```{code-cell}
+```{code-cell} ipython3
 hv.extension("bokeh")
 ```
 
 Let's open a level 3 Rrs map.
 
-```{code-cell}
+```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_RRS_NRT",
     granule_name="*.MO.*.1deg.*",
@@ -708,11 +715,11 @@ paths = earthaccess.open(results)
 
 We can create a map from a single band in the dataset and see the Rrs value by hovering over the map.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.open_dataset(paths[-1])
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 def single_band(w):
     array = dataset.sel({"wavelength": w})
     return hv.Image(array, kdims=["lon", "lat"], vdims=["Rrs"]).opts(
@@ -720,7 +727,7 @@ def single_band(w):
     )
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :lines_to_next_cell: 2
 
 single_band(368)
@@ -730,26 +737,26 @@ single_band(368)
 
 In order to explore the hyperspectral datasets from PACE, we can have a look at the Rrs Spectrum at a certain location.
 
-```{code-cell}
+```{code-cell} ipython3
 def spectrum(x, y):
     array = dataset.sel({"lon": x, "lat": y}, method="nearest")
     return hv.Curve(array, kdims=["wavelength"]).redim.range(Rrs=(-0.01, 0.04))
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 spectrum(0, 0)
 ```
 
 Now we can build a truly interactive map with a slider to change the mapped band and a capability to show the spectrum where we click on the map. First, we build the slider and its interactivity with the map:
 
-```{code-cell}
+```{code-cell} ipython3
 slider = pnw.DiscreteSlider(name="wavelength", options=list(dataset["wavelength"].data))
 band_dmap = hv.DynamicMap(single_band, streams={"w": slider.param.value})
 ```
 
 Then we build the capability to show the Rrs spectrum at the point where we click on the map.
 
-```{code-cell}
+```{code-cell} ipython3
 points = hv.Points([])
 tap = Tap(source=points, x=0, y=0)
 spectrum_dmap = hv.DynamicMap(spectrum, streams=[tap])
@@ -757,11 +764,11 @@ spectrum_dmap = hv.DynamicMap(spectrum, streams=[tap])
 
 Now try it!
 
-```{code-cell}
+```{code-cell} ipython3
 slider
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 (band_dmap * points + spectrum_dmap).opts(shared_axes=False)
 ```
 
@@ -773,7 +780,7 @@ slider
 
 Let's look at the multi-angular datasets from HARP2. First, download some HARP2 Level-1C data using the short_name value "PACE_HARP2_L1C_SCI" in earthaccess.search_data. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface.
 
-```{code-cell}
+```{code-cell} ipython3
 tspan = ("2024-05-20", "2024-05-20")
 results = earthaccess.search_data(
     short_name="PACE_HARP2_L1C_SCI",
@@ -782,11 +789,11 @@ results = earthaccess.search_data(
 )
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 paths = earthaccess.open(results)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 prod = xr.open_dataset(paths[0])
 view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
 geo = xr.open_dataset(paths[0], group="geolocation_data").set_coords(
@@ -797,7 +804,7 @@ obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 
 The `prod` dataset, as usual for OB.DAAC products, contains attributes but no variables. Merge it with the "observation_data" and "geolocation_data", setting latitude and longitude as auxiliary (e.e. non-index) coordinates, to get started.
 
-```{code-cell}
+```{code-cell} ipython3
 dataset = xr.merge((prod, obs, geo))
 dataset
 ```
@@ -810,7 +817,7 @@ In the HARP2 data, the angles and the spectral bands are combined into one axis.
 
 Pull out the view angles and wavelengths.
 
-```{code-cell}
+```{code-cell} ipython3
 :lines_to_next_cell: 2
 
 angles = view["sensor_view_angle"]
@@ -823,7 +830,7 @@ wavelengths = view["intensity_wavelength"]
 
 We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). This conversion compensates for the differences in appearance due to the viewing angle and sun angle. Write the conversion as a function, because you may need to repeat it.
 
-```{code-cell}
+```{code-cell} ipython3
 def rad_to_refl(rad, f0, sza, r):
     """Convert radiance to reflectance.
 
@@ -841,7 +848,7 @@ def rad_to_refl(rad, f0, sza, r):
 
 The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
 
-```{code-cell}
+```{code-cell} ipython3
 refl = rad_to_refl(
     rad=dataset["i"],
     f0=view["intensity_f0"],
@@ -866,26 +873,26 @@ We are going to generate this animation without using the latitude and longitude
 
 Get the reflectances of just the red channel, and normalize the reflectance to lie between 0 and 1.
 
-```{code-cell}
+```{code-cell} ipython3
 refl_red = refl[..., 10:70]
 refl_pretty = (refl_red - refl_red.min()) / (refl_red.max() - refl_red.min())
 ```
 
 A very mild Gaussian filter over the angular axis will improve the animation's smoothness.
 
-```{code-cell}
+```{code-cell} ipython3
 refl_pretty.data = gaussian_filter1d(refl_pretty, sigma=0.5, truncate=2, axis=2)
 ```
 
 Raising the image to the power 2/3 will brighten it a little bit.
 
-```{code-cell}
+```{code-cell} ipython3
 refl_pretty = refl_pretty ** (2 / 3)
 ```
 
 Append all but the first and last frame in reverse order, to get a 'bounce' effect.
 
-```{code-cell}
+```{code-cell} ipython3
 frames = np.arange(refl_pretty.sizes["number_of_views"])
 frames = np.concatenate((frames, frames[-1::-1]))
 frames
@@ -897,7 +904,7 @@ In order to display an animation in a Jupyter notebook, the "backend" for matplo
 
 Now we can use `matplotlib.animation` to create an initial plot, define a function to update that plot for each new frame, and show the resulting animation. When we create the inital plot, we get back the object called `im` below. This object is an instance of `matplotlib.artist.Artist` and is responsible for rendering data on the axes. Our `update` function uses that artist's `set_data` method to leave everything in the plot the same other than the data used to make the image.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots()
 im = ax.imshow(refl_pretty[{"number_of_views": 0}], cmap="gray")
 
