@@ -6,7 +6,6 @@ kernelspec:
 ---
 
 # Oceandata Notebooks
----
 
 Welcome to the repository of data recipes for users of the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
 
@@ -57,14 +56,16 @@ The following sub-sections provide additional information on the structure of th
 Use the `uv` command line tool to maintain a Python environment for maintainer activities.
 If needed, install `uv` with `curl -LsSf https://astral.sh/uv/install.sh | sh` or by one of [many other installation methods][uv].
 
-If being conscientious about storage (e.g. on a cloud-based JupyterHub), tell `uv` to use temporary directories.
+If being conscientious about storage (e.g. if you are `jovyan` on a cloud-based JupyterHub), tell `uv` to use temporary directories.
 On a laptop or on-prem server, there are good reasons not to set these variables.
 
 [uv]: https://docs.astral.sh/uv/getting-started/installation
 
 ```{code-cell}
-export UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
-export UV_CACHE_DIR=/tmp/uv/cache
+if [ $(whoami) = "jovyan" ]; then
+  export UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
+  export UV_CACHE_DIR=/tmp/uv/cache
+fi
 ```
 
 The `uv sync` command creates an isolated development environment based on the `uv.lock` file.
@@ -75,11 +76,35 @@ The `uv sync` command creates an isolated development environment based on the `
 uv sync
 ```
 
+> [!Warning]
+> The subsections below assume you have activated the development environment with the following cell.
+
+```{code-cell}
+source .venv/bin/activate
+```
+
+### Dependencies: the `pyproject.toml` file
+
+For every `import` statement, or if a notebook requires a package to be installed for a backend (e.g. h5netcdf),
+make sure the package is listed in the `notebooks` array under the `dependency-groups` table in `pyproject.toml`.
+You can add entries manually or using `uv add`.
+
+```shell
+uv add --group notebooks scipy
+```
+
+The other keys in the `dependency-groups` table provide additional dependencies,
+which are needed for a working Jupyter kernel, for a complete JupyterLab in a Docker image, or for maintenance tasks.
+
++++
+
 ### Rendering to HTML: the `book` folder
 
 In addition to the ".md" files paired to notebooks, the `book` folder contains configuration for a [Jupyter Book].
-Only notebooks listed in `book/myst.yml` under `site.toc` are included.
+Only notebooks listed in `book/_toc.yml`.
 Building the notebooks as one book provides smaller files for tutorial content, a single source of JavaScript and CSS, and tests that all notebooks run without errors.
+
+Presently, it's best to build from ipynb rather than mystmd, so we generate clean ipynb and exclude (see `book/_config.yml`) the md files.
 
 [Binder]: https://mybinder.org/
 [Jupyter Book]: https://jupyterbook.org/
@@ -98,9 +123,9 @@ uv run --directory book jupyter book build .
 
 That populates the `book/_build` folder.
 The folder is ignored by git, but its contents can be provided to the website team.
-The `_templates` make the result very plain, on purpose, for the benefit of the website team.
+The `_templates` make the website very plain, on purpose, for the benefit of the website team.
 
-To preview the website, comment out the use of `_templates` in `book/_config.yml` and start a simple web server.
+To preview a website with the same content and navigation tools, comment out the `templates_path` part of `book/_config.yml` and start a simple web server.
 
 ```{code-cell}
 python -m http.server -d book/_build/html &> /dev/null &
@@ -121,7 +146,7 @@ You can setup git hooks to run these automations, as needed, at every commit.
 [pre-commit]: https://pre-commit.com/
 
 ```{code-cell}
-pre-commit install
+# pre-commit install
 ```
 
 You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
@@ -135,19 +160,6 @@ If you have `docker` available, you can build the image defined in the `docker` 
 ```{code-cell}
 pre-commit run --hook-stage manual repo2docker-build
 ```
-
-### Dependencies: the `pyproject.toml` file
-
-For every `import` statement, or if a notebook requires a package to be installed for a backend (e.g. h5netcdf),
-make sure the package is listed in the `notebooks` array under the `dependency-groups` table in `pyproject.toml`.
-You can add entries manually or using `uv add`.
-
-```{code-cell}
-uv add --group notebooks scipy
-```
-
-The other keys in the `dependency-groups` table provide additional dependencies,
-which are needed for a working Jupyter kernel, for a complete JupyterLab in a Docker image, or for maintenance tasks.
 
 ### Image: the `docker` folder
 

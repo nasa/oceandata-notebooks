@@ -18,6 +18,7 @@ notebooks = [
   "cf-xarray>=0.9.4",
   "cmocean>=4.0.3",
   "dask[distributed]>=2024.4.1",
+  "datashader>=0.17.0",
   "earthaccess>=0.11.0",
   "h5netcdf>=1.3.0",
   "holoviews>=1.19.1",
@@ -40,7 +41,6 @@ kernel = [
   "bash-kernel>=0.9.3",
   "ipykernel>=6.29.3",
   "ipywidgets>=8.1.2",
-  "jupyter-server>=2.16.0",
 ]
 # additional packages for docker/requirements.in
 # TODO: async-timeout is a possible unlisted dep of jupyter-vscode-proxy?
@@ -94,7 +94,8 @@ ignore = [
 ]
 
 [tool.uv]
-default-groups = ["notebooks", "kernel"]
+# TODO won't need "tools" with https://github.com/astral-sh/uv/issues/13268
+default-groups = ["notebooks", "kernel", "tools"]
 
 # [tool.uv]
 #   index-strategy = "unsafe-best-match"

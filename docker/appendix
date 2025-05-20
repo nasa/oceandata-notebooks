@@ -14,7 +14,7 @@ RUN unzip -q aws*.zip \
  && rm -rf aws*
 
 # install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
-ARG OCSSWTAG=V2024.6
+ARG OCSSWTAG=V2025.9
 ARG OCSSWROOT=/opt/ocssw
 ADD --chown=${NB_USER}:${NB_USER} https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw ./
 ADD --chown=${NB_USER}:${NB_USER} https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py ./
