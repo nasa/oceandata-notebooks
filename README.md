@@ -80,7 +80,7 @@ uv sync
 > The subsections below assume you have activated the development environment with the following cell.
 
 ```{code-cell}
-source .venv/bin/activate
+source ${UV_PROJECT_ENVIRONMENT:-.venv}/bin/activate
 ```
 
 ### Dependencies: the `pyproject.toml` file
@@ -96,8 +96,6 @@ uv add --group notebooks scipy
 The other keys in the `dependency-groups` table provide additional dependencies,
 which are needed for a working Jupyter kernel, for a complete JupyterLab in a Docker image, or for maintenance tasks.
 
-+++
-
 ### Rendering to HTML: the `book` folder
 
 In addition to the ".md" files paired to notebooks, the `book` folder contains configuration for a [Jupyter Book].
@@ -110,13 +108,8 @@ Presently (for `jupyter-book<2`), it's best to build from notebooks rather than 
 [Jupyter Book]: https://jupyterbook.org/
 
 ```{code-cell}
----
-scrolled: true
-editable: true
-slideshow:
-  slide_type: ''
-tags: []
----
+:scrolled: true
+
 jupytext --quiet --to ipynb $(git ls-files book/notebooks)
 uv run --directory book jupyter book build .
 ```

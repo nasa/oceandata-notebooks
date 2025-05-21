@@ -79,14 +79,18 @@ equals-separated values. Not something you usually see in a data file, but it's 
 writing our own utility from scratch!
 
 ```{code-cell} ipython3
-def write_par(path: str, par: dict):
+def write_par(path, par):
     """Prepare a parameter file to be read by one of the OCSSW tools.
 
     Using a parameter file (a.k.a. "par file") is equivalent to specifying
     parameters on the command line.
 
-    :param path: where to write the parameter file
-    :param par: the parameter names and values included in the file
+    Parameters
+    ----------
+    path
+        where to write the parameter file
+    par
+        the parameter names and values included in the file
     """
     with open(path, "w") as file:
         writer = csv.writer(file, delimiter="=")
@@ -95,6 +99,9 @@ def write_par(path: str, par: dict):
 
 The Python docstring (fenced by triple quotation marks in the function definition) is not
 essential, but it helps describe what the function does.
+This docstring follows the NumPy [style guide], which is one of a few common conventions.
+
+[style guide]: https://numpydoc.readthedocs.io/
 
 ```{code-cell} ipython3
 help(write_par)
@@ -136,13 +143,13 @@ results[0]
 Download the granules found in the search.
 
 ```{code-cell} ipython3
-paths = earthaccess.download(results, local_path="L1B")
+paths = earthaccess.download(results, local_path="granules")
 ```
 
 While we have the downloaded location stored in the list `paths`, store one in a variable we won't overwrite for future use.
 
 ```{code-cell} ipython3
-l2gen_ifile = paths[0]
+ifile = paths[0]
 ```
 
 The L1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
@@ -151,7 +158,7 @@ the dataset's "observatin_data" group in the netCDF file using `xarray` to plot 
 wavelength.
 
 ```{code-cell} ipython3
-dataset = xr.open_dataset(l2gen_ifile, group="observation_data")
+dataset = xr.open_dataset(ifile, group="observation_data")
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 ```
 
@@ -159,7 +166,7 @@ This tutorial will demonstrate processing this L1B granule into a Level-2 (L2) g
 take several minutes, we'll also download a couple of L2 granules to save time for the next step of compositing multiple L2 granules into a single granule.
 
 ```{code-cell} ipython3
-location = [(-56.5, 49.8), (-55.0, 49.8)]
+location = [(-56.5, 49.8), (-53.3, 48.4)]
 ```
 
 Searching on a location defined as a line, rather than a point, is a good way to get granules that are
@@ -221,6 +228,7 @@ Using this pattern, run the `l2gen` command with the single argument `help` to v
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
@@ -235,8 +243,8 @@ defined in the [Setup](#1.-Setup) section.
 
 ```{code-cell} ipython3
 par = {
-    "ifile": l2gen_ifile,
-    "ofile": str(l2gen_ifile).replace("L1B", "L2_BGC"),
+    "ifile": ifile,
+    "ofile": str(ifile).replace("L1B", "L2_SFREFL"),
     "suite": "SFREFL",
     "atmocor": 0,
 }
@@ -247,6 +255,7 @@ With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell.
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
@@ -254,11 +263,13 @@ source $OCSSWROOT/OCSSW_bash.env
 l2gen par=l2gen.par
 ```
 
-If successful, the `l2gen` program created a netCDF file at the `ofile` path. The contents should include the `chlor_a` product from the `BGC` suite of products. Once this process is done, you are ready to visualize your "custom" L2 data. Use the `robust=True` option to ignore outlier chl a values.
+If successful, the `l2gen` program created a netCDF file at the `ofile` path. The contents should include the `rhos` product from the `SFREFL` suite of products. Once this process is done, you are ready to visualize your "custom" L2 data. Use the `robust=True` option to ignore outlier chl a values.
 
 ```{code-cell} ipython3
-dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
-plot = dataset["rhos"].sel({"wavelength_3d": 25}).plot(cmap="viridis", robust=True)
+datatree = xr.open_datatree(par["ofile"])
+rhos = datatree["geophysical_data"]["rhos"]
+rhos["wavelength_3d"] = datatree["sensor_band_parameters"]["wavelength_3d"]
+plot = rhos.sel({"wavelength_3d": 470}).plot(cmap="viridis", robust=True)
 ```
 
 Feel free to explore `l2gen` options to produce the L2 dataset you need! The documentation
@@ -278,6 +289,7 @@ It can be useful to merge adjacent scenes to create a single, larger image. The 
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
@@ -296,7 +308,7 @@ par = {
     "ofile": ofile,
     "prodtype": "regional",
     "resolution": 9,
-    "flaguse": "NONE",
+    "flaguse": "",
     "rowgroup": 2000,
 }
 write_par("l2bin.par", par)
@@ -306,6 +318,7 @@ Now run `l2bin` using your chosen parameters:
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
@@ -323,6 +336,7 @@ The `l3mapgen` function of OCSSW allows you to create maps with a wide array of 
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
@@ -349,6 +363,7 @@ write_par("l3mapgen.par", par)
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
@@ -366,7 +381,7 @@ dataset
 Now that we have projected data, we can make a map with coastines and gridlines.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
+fig, ax = plt.subplots(figsize=(10, 3), subplot_kw={"projection": ccrs.PlateCarree()})
 plot = dataset["chlor_a"].plot(x="lon", y="lat", cmap="viridis", robust=True, ax=ax)
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.3)
 ax.coastlines(linewidth=0.5)
