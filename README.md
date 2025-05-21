@@ -185,8 +185,6 @@ We use PyPI for Python packages.
 > [!Note]
 > The top-level `requirements.txt` file also makes our repo work on [Binder].
 
-+++
-
 ## Acknowledgements
 
 This repository has greatly benefited from works of multiple open-science projects, notably [Learn OLCI] and the [NASA EarthData Cloud Cookbook].
