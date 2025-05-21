@@ -178,9 +178,6 @@ results = earthaccess.search_data(
     temporal=tspan,
     line=location,
 )
-```
-
-```{code-cell} ipython3
 for item in results:
     display(item)
 ```
@@ -247,6 +244,10 @@ par = {
     "ofile": str(ifile).replace("L1B", "L2_SFREFL"),
     "suite": "SFREFL",
     "atmocor": 0,
+    "north": location[0][1],
+    "south": location[1][1],
+    "east": location[1][0],
+    "west": location[0][0],
 }
 write_par("l2gen.par", par)
 ```
@@ -263,7 +264,10 @@ source $OCSSWROOT/OCSSW_bash.env
 l2gen par=l2gen.par
 ```
 
-If successful, the `l2gen` program created a netCDF file at the `ofile` path. The contents should include the `rhos` product from the `SFREFL` suite of products. Once this process is done, you are ready to visualize your "custom" L2 data. Use the `robust=True` option to ignore outlier chl a values.
+If successful, the `l2gen` program created a netCDF file at the `ofile` path.
+The contents should include the `rhos` product from the `SFREFL` suite of products and be cropped to a small bounding box.
+Once this process is done, you are ready to visualize your "custom" L2 data.
+Use the `robust=True` option to ignore outlier values.
 
 ```{code-cell} ipython3
 datatree = xr.open_datatree(par["ofile"])
@@ -308,7 +312,7 @@ par = {
     "ofile": ofile,
     "prodtype": "regional",
     "resolution": 9,
-    "flaguse": "",
+    "flaguse": "NONE",
     "rowgroup": 2000,
 }
 write_par("l2bin.par", par)

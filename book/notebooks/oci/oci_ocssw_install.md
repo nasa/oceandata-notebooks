@@ -110,8 +110,8 @@ Take a look at the different OCSSW "tags" you can install. It is recommended to 
 ```
 
 ```{code-cell}
-TAG="$(./install_ocssw --list_tags | grep '^T' | tail -n 1)"
-echo $TAG
+export TAG="$(./install_ocssw --list_tags | grep '^V' | tail -n 1)"
+printenv TAG
 ```
 
 Define an environmental variable called "OCSSWROOT" that specifies a directory for your OCSSW installation. Environment variables are persisted in Bash using the `export` command, but we are carefull not to overwrite any existing value for `OCSSWROOT`.
@@ -169,7 +169,7 @@ wget -q -nc https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw
 wget -q -nc https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
 chmod +x install_ocssw
 export OCSSWROOT=${OCSSWROOT:-/tmp/ocssw}
-TAG="$(./install_ocssw --list_tags | grep '^T' | tail -n 1)"
+export TAG="$(./install_ocssw --list_tags | grep '^V' | tail -n 1)"
 ./install_ocssw --tag=$TAG --seadas --oci
 ```
 
@@ -177,7 +177,7 @@ If you have already installed OCSSW and want to update ...
 
 ```{code-cell}
 export OCSSWROOT=${OCSSWROOT:-/tmp/ocssw}
-TAG="$(install_ocssw --list_tags | grep '^T' | tail -n 1)"
+export TAG="$(install_ocssw --list_tags | grep '^V' | tail -n 1)"
 install_ocssw --tag=$TAG --seadas --oci
 ```
 
