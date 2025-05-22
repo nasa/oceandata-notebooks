@@ -23,6 +23,7 @@ Head over to our [Help Hub] to access the published notebooks.
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
 > - Create new notebooks by copying `COPYME.ipynb` into the `notebooks` folder.
 > - When you first clone this repository, the `notebooks` folder will not exist!
+> - Run the Jupytext cell below to create the `notebooks` folder or any new notebooks.
 
 Keeping notebooks in a code repository is tough for collaboration and curation because notebooks contain large, binary outputs and metadata that frequently changes.
 This repository uses [Jupytext] to keep notebooks (.ipynb) paired with markdown files (.md).
@@ -35,7 +36,7 @@ Contributors should compose and edit notebooks in the `notebooks` folder, and co
 > This `README.md` is itself recognized by Jupytext to have executable cells.
 > Open it in JupyterLab as a notebook using right-click > "Open With" > "Notebook".
 
-To create the `notebooks` folder, or any time you want to manually sync all the notebooks, run the following cell.
+To create the `notebooks` folder, or any time a new notebook has been added to the repository, run the following cell.
 The `jupytext --sync` command will generate or update .ipynb files for every .md file tracke by git.
 
 ```{code-cell}
@@ -47,41 +48,77 @@ jupytext --sync $(git ls-files book/notebooks)
 ## For Maintainers
 
 The following sub-sections provide additional information on the structure of this repo and maintenance tips.
+Maintainers are responsible for building HTML files for hosting the content online, which also tests that the notebooks run successfully in an isolated Python environment.
 
 > [!Warning]
 > If you merge pull requests to `main`, you might be a maintainer.
 
-### Development Environment: the `uv.lock` file
-
 Use the `uv` command line tool to maintain a Python environment for maintainer activities.
-If needed, install `uv` with `curl -LsSf https://astral.sh/uv/install.sh | sh` or by one of [many other installation methods][uv].
+If needed, install `uv` as below or by one of [many other installation methods][uv].
+Once `uv` is installed, it will keep the Python environment up to date, so you only need to install `uv` once.
 
+```shell
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+[uv]: https://docs.astral.sh/uv/getting-started/installation
+
++++
+
+### Isolated Python Environment: the `uv.lock` file
+
+The `uv.lock` file defines the envrionment used by maintainers, and `uv` will install packages based on its content.
 If being conscientious about storage (e.g. if you are `jovyan` on a cloud-based JupyterHub), tell `uv` to use temporary directories.
 On a laptop or on-prem server, there are good reasons not to set these variables.
 
-[uv]: https://docs.astral.sh/uv/getting-started/installation
++++
+
+> [!Important]
+> The subsections below assume you have run the following cell to configure and activate the development environment.
 
 ```{code-cell}
 if [ $(whoami) = "jovyan" ]; then
   export UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
   export UV_CACHE_DIR=/tmp/uv/cache
 fi
+source ${UV_PROJECT_ENVIRONMENT:-.venv}/bin/activate
 ```
 
-The `uv sync` command creates an isolated development environment based on the `uv.lock` file.
+### Rendering to HTML: the `book` folder
+
+In addition to the ".md" files paired to notebooks, the `book` folder contains configuration for a [Jupyter Book].
+Building the notebooks as one book provides smaller files for tutorial content, a single source of JavaScript and CSS, and tests that all notebooks run without errors.
+
+> [!Important]
+> Only notebooks listed in `book/_toc.yml` are built, so adding a new notebook requires updating `book/_toc.yml`.
+
+The next cell builds the HTML in `book/_build/html`.
+Presently (for `jupyter-book<2`), it's best to build from .ipynb rather than .md, so we generate clean notebooks and exclude (see `book/_config.yml`) the markdown files.
+
+[Jupyter Book]: https://jupyterbook.org/
 
 ```{code-cell}
 :scrolled: true
 
-uv sync
+jupytext --quiet --to ipynb $(git ls-files book/notebooks)
+uv run --directory book jupyter book build .
 ```
 
-> [!Warning]
-> The subsections below assume you have activated the development environment with the following cell.
+That populates the `book/_build` folder.
+The folder is ignored by git, but its contents can be provided to the website team.
+The `_templates` make the website very plain, on purpose, for the benefit of the website team.
+For a website with the same content but including navigation tools, comment out the `templates_path` part of `book/_config.yml` and rebuild the website.
+
+Run the cell below to preview the website.
+Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 
 ```{code-cell}
-source ${UV_PROJECT_ENVIRONMENT:-.venv}/bin/activate
+:scrolled: true
+
+python -m http.server -d book/_build/html
 ```
+
++++ {"jp-MarkdownHeadingCollapsed": true}
 
 ### Dependencies: the `pyproject.toml` file
 
@@ -96,39 +133,7 @@ uv add --group notebooks scipy
 The other keys in the `dependency-groups` table provide additional dependencies,
 which are needed for a working Jupyter kernel, for a complete JupyterLab in a Docker image, or for maintenance tasks.
 
-### Rendering to HTML: the `book` folder
-
-In addition to the ".md" files paired to notebooks, the `book` folder contains configuration for a [Jupyter Book].
-Only notebooks listed in `book/_toc.yml`.
-Building the notebooks as one book provides smaller files for tutorial content, a single source of JavaScript and CSS, and tests that all notebooks run without errors.
-
-Presently (for `jupyter-book<2`), it's best to build from notebooks rather than markdown, so we generate clean notebooks and exclude (see `book/_config.yml`) the markdown files.
-
-[Binder]: https://mybinder.org/
-[Jupyter Book]: https://jupyterbook.org/
-
-```{code-cell}
-:scrolled: true
-
-jupytext --quiet --to ipynb $(git ls-files book/notebooks)
-uv run --directory book jupyter book build .
-```
-
-That populates the `book/_build` folder.
-The folder is ignored by git, but its contents can be provided to the website team.
-The `_templates` make the website very plain, on purpose, for the benefit of the website team.
-
-To preview a website with the same content and navigation tools, comment out the `templates_path` part of `book/_config.yml` and start a simple web server.
-
-```{code-cell}
-python -m http.server -d book/_build/html &> /dev/null &
-```
-
-The above command was run in the background due to the final `&`, and the next command kills it.
-
-```{code-cell}
-kill %1
-```
++++
 
 ### Automation and Checks: the `.pre-commit-config.yaml` file
 
@@ -139,7 +144,7 @@ You can setup git hooks to run these automations, as needed, at every commit.
 [pre-commit]: https://pre-commit.com/
 
 ```{code-cell}
-# pre-commit install
+# pre-commit install ## TODO don't install yet, not working
 ```
 
 You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
@@ -189,5 +194,6 @@ We use PyPI for Python packages.
 
 This repository has greatly benefited from works of multiple open-science projects, notably [Learn OLCI] and the [NASA EarthData Cloud Cookbook].
 
+[Binder]: https://mybinder.org/
 [Learn OLCI]: https://github.com/wekeo/learn-olci
 [NASA EarthData Cloud Cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook
