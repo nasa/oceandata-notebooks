@@ -47,13 +47,13 @@ jupytext --sync $(git ls-files book/notebooks)
 
 ## For Maintainers
 
-The following sub-sections provide additional information on the structure of this repo and maintenance tips.
+The following subsections provide additional information on the structure of this repo and maintenance tips.
 Maintainers are responsible for building HTML files for hosting the content online, which also tests that the notebooks run successfully in an isolated Python environment.
 
 > [!Warning]
 > If you merge pull requests to `main`, you might be a maintainer.
 
-Use the `uv` command line tool to maintain a Python environment for maintainer activities.
+Use the `uv` command line tool to create a Python environment for maintainer actions.
 If needed, install `uv` as below or by one of [many other installation methods][uv].
 Once `uv` is installed, it will keep the Python environment up to date, so you only need to install `uv` once.
 
