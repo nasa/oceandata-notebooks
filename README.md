@@ -63,15 +63,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 [uv]: https://docs.astral.sh/uv/getting-started/installation
 
-+++
-
 ### Isolated Python Environment: the `uv.lock` file
 
 The `uv.lock` file defines the envrionment used by maintainers, and `uv` will install packages based on its content.
 If being conscientious about storage (e.g. if you are `jovyan` on a cloud-based JupyterHub), tell `uv` to use temporary directories.
 On a laptop or on-prem server, there are good reasons not to set these variables.
-
-+++
 
 > [!Important]
 > The subsections below assume you have run the following cell to configure and activate the development environment.
@@ -118,8 +114,6 @@ Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 python -m http.server -d book/_build/html
 ```
 
-+++ {"jp-MarkdownHeadingCollapsed": true}
-
 ### Dependencies: the `pyproject.toml` file
 
 For every `import` statement, or if a notebook requires a package to be installed for a backend (e.g. h5netcdf),
@@ -132,8 +126,6 @@ uv add --group notebooks scipy
 
 The other keys in the `dependency-groups` table provide additional dependencies,
 which are needed for a working Jupyter kernel, for a complete JupyterLab in a Docker image, or for maintenance tasks.
-
-+++
 
 ### Automation and Checks: the `.pre-commit-config.yaml` file
 
