@@ -21,23 +21,22 @@ Head over to our [Help Hub] to access the published notebooks.
 
 > [!Important]
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
-> - Create new notebooks by copying `COPYME.ipynb` into the `notebooks` folder.
-> - When you first clone this repository, the `notebooks` folder will not exist!
-> - Run the Jupytext cell below to create the `notebooks` folder or any new notebooks.
+> - This README is also recognized by Jupytext: use right-click > "Open With" > "Notebook".
 
-Keeping notebooks in a code repository is tough for collaboration and curation because notebooks contain large, binary outputs and metadata that frequently changes.
-This repository uses [Jupytext] to keep notebooks (.ipynb) paired with markdown files (.md).
-Although the entire `notebooks` folder is ignored by git, the paired markdown files are not.
-Contributors should compose and edit notebooks in the `notebooks` folder, and commit changes to paired markdown files in the `book/notebooks` folder.
+Keeping notebooks (.ipynb) in a code repository is tough for collaboration because notebooks contain large, binary outputs and metadata that frequently changes.
+By means of the [Jupytext] extension, markdown (.md) files can behave like notebooks without those bulky outputs.
+To get the benefits of notebooks with saved outputs *while only* storing markdown files in a code repository, we let the Jupytext extension keep a paired markdown file synchronized with each notebook.
+Contributors should compose and edit notebooks in the `notebooks` folder and commit the paired markdown files in the `book/notebooks` folder.
 
 [Jupytext]: https://jupytext.readthedocs.io/
 
-> [!Note]
-> This `README.md` is itself recognized by Jupytext to have executable cells.
-> Open it in JupyterLab as a notebook using right-click > "Open With" > "Notebook".
+### Edit Notebooks
 
-To create the `notebooks` folder, or any time a new notebook has been added to the repository, run the following cell.
-The `jupytext --sync` command will generate or update .ipynb files for every .md file tracke by git.
+> [!Note]
+> When you first clone this repository, the `notebooks` folder will not exist!
+
+To create the `notebooks` folder, or any time a notebook does not appear under `notebooks`, run the following cell.
+It will synchronize the .ipynb files paired with the .md files tracked by git.
 
 ```{code-cell}
 :scrolled: true
@@ -45,9 +44,16 @@ The `jupytext --sync` command will generate or update .ipynb files for every .md
 jupytext --sync $(git ls-files book/notebooks)
 ```
 
+### Create a New Notebook
+
+> [!Note]
+> Create new notebooks by copying `COPYME.ipynb` into the `notebooks` folder.
+
+When you save your new notebook, watch for a new markdown file to appear in the `book/notebooks` folder and add that file to your commit.
+
 ## For Maintainers
 
-The following subsections provide additional information on the structure of this repo and maintenance tips.
+The following subsections provide additional information on the structure of this repo and maintenaner tasks.
 Maintainers are responsible for building HTML files for hosting the content online, which also tests that the notebooks run successfully in an isolated Python environment.
 
 > [!Warning]
