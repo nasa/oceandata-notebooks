@@ -36,7 +36,7 @@ Contributors should compose and edit notebooks in the `notebooks` folder and com
 > When you first clone this repository, the `notebooks` folder will not exist!
 
 To create the `notebooks` folder, or any time a notebook does not appear under `notebooks`, run the following cell.
-It will synchronize the .ipynb files paired with the .md files tracked by git.
+It will synchronize your .ipynb files with all the .md files tracked by git.
 
 ```{code-cell}
 :scrolled: true
