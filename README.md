@@ -1,8 +1,8 @@
 ---
 kernelspec:
-  display_name: Bash
-  language: bash
   name: bash
+  language: bash
+  display_name: Bash
 ---
 
 # Oceandata Notebooks
@@ -79,10 +79,13 @@ On a laptop or on-prem server, there are good reasons not to set these variables
 > The subsections below assume you have run the following cell to configure and activate the development environment.
 
 ```{code-cell}
+:scrolled: true
+
 if [ $(whoami) = "jovyan" ]; then
   export UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
   export UV_CACHE_DIR=/tmp/uv/cache
 fi
+uv sync
 source ${UV_PROJECT_ENVIRONMENT:-.venv}/bin/activate
 ```
 
@@ -111,8 +114,11 @@ The folder is ignored by git, but its contents can be provided to the website te
 The `_templates` make the website very plain, on purpose, for the benefit of the website team.
 For a website with the same content but including navigation tools, comment out the `templates_path` part of `book/_config.yml` and rebuild the website.
 
-Run the cell below to preview the website.
+Run the next cell to preview the website.
 Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
+
+> [!Note]
+> On JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
 
 ```{code-cell}
 :scrolled: true
