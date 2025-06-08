@@ -4158,6 +4158,7 @@ notebooks = [
 tools = [
     { name = "jupyter-book" },
     { name = "jupyter-repo2docker" },
+    { name = "jupytext" },
     { name = "pre-commit" },
     { name = "ruff" },
 ]
@@ -4220,6 +4221,7 @@ notebooks = [
 tools = [
     { name = "jupyter-book", specifier = "<2" },
     { name = "jupyter-repo2docker", specifier = ">=2024.7.0" },
+    { name = "jupytext", specifier = ">=1.17.1" },
     { name = "pre-commit", specifier = ">=4.0.1" },
     { name = "ruff", specifier = ">=0.7.1" },
 ]
