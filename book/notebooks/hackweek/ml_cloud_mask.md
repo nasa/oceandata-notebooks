@@ -15,6 +15,8 @@ The following notebooks are **prerequisites** for this tutorial:
 
 - [Earthdata Cloud Access](../earthdata_cloud_access)
 
+**NOTE**: If you are not running this notebook as part of the PACE Hack Week, you will have to download the [cloud mask dataset](https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek-2024/cldmask_dataset.tar.gz) to your local machine and extract it. Update CLDMASK_PATH to point to the location where you extracted the dataset.
+
 </div>
 
 ## Summary
@@ -76,6 +78,8 @@ from PIL import Image, UnidentifiedImageError
 from torch.utils.data import DataLoader, Dataset
 from tqdm.notebook import tqdm
 
+# if you're running this outside of the hackweek, make sure to download the dataset as described
+#  in the NOTE above, then update this path
 CLDMASK_PATH = pathlib.Path("/home/jovyan/shared/pace-hackweek-2024/cldmask_dataset")
 ```
 
@@ -213,6 +217,7 @@ class CloudMaskDataset(Dataset):
             split: Dictionary containing indices belonging to each dataset mode.
 
         """
+        super().__init__()
         self.root_path = root_path
         self.mode = mode
         self.img_idxs = split[self.mode]
