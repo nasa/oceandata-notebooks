@@ -72,6 +72,7 @@ docker = [
 tools = [
   "jupyter-book<2",
   "jupyter-repo2docker>=2024.7.0",
+  "jupytext>=1.17.1",
   "pre-commit>=4.0.1",
   "ruff>=0.7.1",
 ]

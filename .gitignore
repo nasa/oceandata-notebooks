@@ -3,6 +3,10 @@ __pycache__
 /.python-version
 /notebooks
 
+# Mac
+.DS_Store
+.DS_Store?
+
 # TODO better build isolation could improve this mess
 /book/notebooks/*
 !/book/notebooks/oci
