@@ -69,6 +69,7 @@ import pathlib
 from functools import cache
 
 import matplotlib.pyplot as plt
+import multiprocessing
 import numpy as np
 import torch
 import torch.nn as nn
@@ -81,6 +82,9 @@ from tqdm.notebook import tqdm
 # if you're running this outside of the hackweek, make sure to download the dataset as described
 #  in the NOTE above, then update this path
 CLDMASK_PATH = pathlib.Path("/home/jovyan/shared/pace-hackweek-2024/cldmask_dataset")
+
+# this is needed to get dataloader to work with workers from an ipython environment
+multiprocessing.set_start_method('fork')
 ```
 
 [back to top](#Contents)
