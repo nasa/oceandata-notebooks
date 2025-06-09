@@ -76,7 +76,7 @@ If being conscientious about storage (e.g. if you are `jovyan` on a cloud-based 
 On a laptop or on-prem server, there are good reasons not to set these variables.
 
 > [!Important]
-> The subsections below assume you have run the following cell to configure and activate the development environment.
+> The subsections below assume you have run the following cell to configure and activate the development environment. The last line ensures you can run a bash kernel from jupyter.
 
 ```{code-cell}
 :scrolled: true
@@ -87,6 +87,7 @@ if [ $(whoami) = "jovyan" ]; then
 fi
 uv sync
 source ${UV_PROJECT_ENVIRONMENT:-.venv}/bin/activate
+uv run python -m bash_kernel.install --sys-prefix
 ```
 
 ### Rendering to HTML: the `book` folder
