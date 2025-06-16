@@ -100,7 +100,7 @@ print("Surface reflectance dimensions: ", sr_dt.geophysical_data.rhos.dims)
 print("Vegetation index dimensions: ", vi_dt.geophysical_data.cire.dims)
 # -
 
-# As we can see, the dimensions between the variables in both datasets differ. The surface reflectances contained in the `rhos` variable have 3 dimensions corresponding to (rows, columns, wavelengths), while each VI variable (e.g., `ndvi` or `cire`) is a 2D variable with (row, column) dimensions. 
+# As we can see, the dimensions between the variables in both datasets differ. The surface reflectance contained in the `rhos` variable have 3 dimensions corresponding to (rows, columns, wavelength), while each VI variable (e.g., `ndvi` or `cire`) is a 2D variable with (row, column) dimensions. 
 #
 # If we plot one of these variables, we'll see that they aren't on any sort of regular spatial grid, and will instead be plotted by their row (`number_of_lines`) and column (`pixels_per_line`) indices as any non-geospatial array would be.
 
@@ -121,7 +121,9 @@ plt.show()
 vi_src = vi_dt["geophysical_data"].to_dataset()
 vi_src
 
-# The `cf_xarray` package allows us to access and use `l2_flags` to mask our data. There are multiple flags we could apply, but here we will only mask for `CLDICE`, the flag for clouds. More information on each flag can be found at [this link](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/).
+# The `cf_xarray` package allows us to interpret [CF-compliant](http://cfconventions.org/) attributes with xarray - for our dataset, this means we can use the data in `l2_flags` to mask for certain quality issues, like cloudy pixels or stray light conditions. [See their documentation](https://cf-xarray.readthedocs.io/en/latest/) for more information. 
+#
+# L2 PACE data has multiple quality flags we could apply, but here we will only mask for `CLDICE`, the flag for cloudy pixels. The names of each available flag and what they mean can be found at [this link](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/).
 
 if vi_src.l2_flags.cf.is_flag_variable:
     cloud_mask = ~(vi_src.l2_flags.cf=="CLDICE")
@@ -152,6 +154,8 @@ vi_dst = vi_src.rio.reproject(
     ),
 )
 
+# Note that if you print the `vi_dst` dataset, the coordinate names are converted to "x" and "y" instead of "longitude" and "latitude" respectively. This is a quirk of `rioxarray` and won't affect the projection or the export in Section 3. However, if you would prefer to return the coordinates to their proper names, simply add the line `vi_dst = vi_dst.rename({"x":"longitude", "y":"latitude"})` at the end of the cell above. 
+#
 # We can plot the data with a basemap to see that it was correctly georeferenced and reprojected.
 
 fig, ax = plt.subplots(
@@ -178,7 +182,7 @@ plt.show()
 #
 # Before this, we include code that renames the wavelength_3d variable to the center wavelength of each band. This makes it easier to select bands based on wavelength values versus just 1-122 numerical ordering. 
 
-sr_dt['geophysical_data'] = sr_dt['geophysical_data'].to_dataset().assign_coords(sr_dt["sensor_band_parameters"].coords)
+sr_dt["geophysical_data"] = sr_dt["geophysical_data"].to_dataset().assign_coords(sr_dt["sensor_band_parameters"].coords)
 sr_dt["geophysical_data"]
 
 # +
@@ -190,7 +194,7 @@ sr_src
 
 # The `rhos` variable is now in dimension order (Z, Y, X), which will allow QGIS and other software with the same requirement to properly handle the surface reflectance data. Note that we are setting `sr_src` to include only `rhos` and not `l2_flags`. We separate these variables to allow for exporting in Section 3, as the `rio.to_raster` method cannot handle two dataarrays with different dimensions (i.e., 3D for `rhos` and 2D for `l2_flags`). That means if you want your surface reflectance data masked with any of the flags we explained above, you'll have to do it before the step above. 
 #
-# We can now complete the rest of the steps above to reproject the data.
+# We can now complete the rest of the steps above to reproject the data. Remember that the coordinates of `sr_dst` will be renamed as "x" and "y" after the reprojection step, and while this has no effect on the results or the export, it can be fixed by adding the line `sr_dst = sr_dst.rename({"x":"longitude", "y":"latitude"})` to the end of the cell below. 
 
 # +
 sr_src.coords["longitude"] = sr_dt["navigation_data"]["longitude"]
@@ -216,7 +220,7 @@ ax.coastlines(linewidth=0.5)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
-sr_dst.sel({'wavelength_3d':860}).plot(cmap="Greys_r", vmin=0, vmax=1, zorder=101)
+sr_dst.sel({"wavelength_3d":860}).plot(cmap="Greys_r", vmin=0, vmax=1, zorder=101)
 plt.title("")
 plt.show()
 
@@ -331,8 +335,8 @@ nc_to_gtiff(vi_path)
 
 # +
 results = earthaccess.search_data(
-    short_name = 'PACE_OCI_L3M_LANDVI',
-    granule_name = 'PACE_OCI.20240601_20240630.L3m.MO.LANDVI.V3_0.0p1deg.nc')
+    short_name = "PACE_OCI_L3M_LANDVI",
+    granule_name = "PACE_OCI.20240601_20240630.L3m.MO.LANDVI.V3_0.0p1deg.nc")
 
 paths = earthaccess.download(results, local_path="data")
 
