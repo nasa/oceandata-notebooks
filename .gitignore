@@ -7,10 +7,6 @@ __pycache__
 .DS_Store
 .DS_Store?
 
-# cloud mask dataset
-cldmask_dataset
-cldmask_dataset.tar.gz
-
 # TODO better build isolation could improve this mess
 /book/notebooks/*
 !/book/notebooks/oci
