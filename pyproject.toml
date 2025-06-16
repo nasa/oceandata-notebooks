@@ -12,7 +12,6 @@ maintainers = [
 
 [dependency-groups]
 # every package used in an import or by a backend (e.g. h5netcdf)
-# TODO: torch, torchvision
 notebooks = [
   "cartopy>=0.23.0",
   "cf-xarray>=0.9.4",
