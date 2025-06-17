@@ -13,6 +13,7 @@ parts:
       - file: notebooks/oci/oci_terrestrial_data
               # WARNING: skipping unknown output mime type: application/vnd.holoviews_load.v0+json [mystnb.unknown_mime_type]
       - file: notebooks/harp2/harp2_basic_visualizations
+      - file: notebooks/oci/ml_cloud_mask
   # - caption: Hackweek
   #   chapters:
   #     - file: notebooks/hackweek/earthdata_cloud_access
@@ -25,6 +26,4 @@ parts:
       #         # TODO: try with image
       # - file: notebooks/hackweek/dask_gridding
       #         # TODO: try again!
-      # - file: notebooks/hackweek/ml_cloud_mask
-      #         # FIXME: cannot get torch installation right with uv (without conda)
-      #         # NB: requires data on cryocloud at ~/shared/pace-hackweek-2024/
+

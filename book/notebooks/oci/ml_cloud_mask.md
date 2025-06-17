@@ -15,6 +15,8 @@ The following notebooks are **prerequisites** for this tutorial:
 
 - [Earthdata Cloud Access](../earthdata_cloud_access)
 
+**NOTE**: This notebook will download a [cloud mask dataset](https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek-2024/cldmask_dataset.tar.gz) to your local machine and extract it. Update CLDMASK_DOWNLOAD_PATH and CLDMASK_PATH if you'd like this to be downloaded or extracted elsewhere.
+
 </div>
 
 ## Summary
@@ -64,19 +66,45 @@ As usual, we will begin by importing some libraries. Some of the more notable on
 ```{code-cell} ipython3
 import json
 import pathlib
+import shutil
+import tarfile
 from functools import cache
 
 import matplotlib.pyplot as plt
+import multiprocessing
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from matplotlib.patches import Patch
 from PIL import Image, UnidentifiedImageError
+import requests
 from torch.utils.data import DataLoader, Dataset
 from tqdm.notebook import tqdm
 
-CLDMASK_PATH = pathlib.Path("/home/jovyan/shared/pace-hackweek-2024/cldmask_dataset")
+# change this if you'd like the cloud mask dataset to be downloaded or extracted elsewhere
+CLDMASK_DOWNLOAD_PATH = pathlib.Path("cldmask_dataset.tar.gz")  # download path
+CLDMASK_PATH = pathlib.Path("cldmask_dataset/")  # extract path
+
+# this is needed to get dataloader to work with workers from an ipython environment
+if multiprocessing.get_start_method() != 'fork':
+    multiprocessing.set_start_method('fork')
+```
+
+Download and extract the cloud mask dataset. This will take several minutes.
+
+```{code-cell} ipython3
+if not pathlib.Path(CLDMASK_PATH).exists():
+    if not pathlib.Path(CLDMASK_DOWNLOAD_PATH).exists():
+        r = requests.get('https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek-2024/cldmask_dataset.tar.gz')
+        with open(CLDMASK_DOWNLOAD_PATH, 'wb') as f:
+            f.write(r.content)
+    tar = tarfile.open(CLDMASK_DOWNLOAD_PATH, 'r:gz')
+    tar.extractall(CLDMASK_PATH, filter='data')
+    tar.close()
+    shutil.move(pathlib.Path(CLDMASK_PATH, "cldmask_dataset"), "_temp_cldmask_dataset")
+    shutil.rmtree(pathlib.Path(CLDMASK_PATH))
+    shutil.move("_temp_cldmask_dataset", pathlib.Path(CLDMASK_PATH))
 ```
 
 [back to top](#Contents)
@@ -213,6 +241,7 @@ class CloudMaskDataset(Dataset):
             split: Dictionary containing indices belonging to each dataset mode.
 
         """
+        super().__init__()
         self.root_path = root_path
         self.mode = mode
         self.img_idxs = split[self.mode]
