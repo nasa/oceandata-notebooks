@@ -1,8 +1,12 @@
 ---
-kernelspec:
-  display_name: custom
-  language: python
-  name: custom
+jupytext:
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.16.7
+language_info:
+  name: python
 ---
 
 # Exploring nitrogen dioxide (NO$_\mathrm{2}$) data from OCI 
@@ -14,7 +18,7 @@ Modified from a notebook by Zachary Fasnacht (NASA, SSAI),
 
 The following notebooks are **prerequisites** for this tutorial.
 
-- 
+- [File Structure (OCI Example)](https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-file-structure/)
 
 </div>
 
@@ -98,7 +102,7 @@ subprocess.run(["wget", url, "-O", filename], stderr=subprocess.DEVNULL)
 
 ## 3. Read in data using `xarray` and plot
 
-We will use `xarray`'s open_datatree function to open and merge multiple groups of the netcdf as well as swapping the lat, lon dimensions. 
+We will use `xarray`'s open_datatree function to open and merge multiple groups of the netcdf as well as swapping the lat, lon dimensions.
 
 ```{code-cell} ipython3
 dat = open_datatree(filename)
@@ -111,16 +115,20 @@ If you expand the 'nitrogen_dioxide_total_vertical_column' variable, you'll see 
 Let's plot it!
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(figsize=(8,6), subplot_kw={"projection": ccrs.PlateCarree()})
+fig, ax = plt.subplots(figsize=(9,5), subplot_kw={"projection": ccrs.PlateCarree()})
 
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.coastlines(linewidth=0.5)
 ax.add_feature(cfeature.BORDERS, linewidth=0.5)
+ax.add_feature(cfeature.OCEAN, linewidth=0.5)
+ax.add_feature(cfeature.LAKES, linewidth=0.5)
+ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.5)
 
 cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightgrey","cyan","yellow","orange","red","darkred"])
 
-dat.nitrogen_dioxide_total_vertical_column.T.plot(
-    vmin=3e15, vmax=10e15, cmap=cmap)
+dat.nitrogen_dioxide_total_vertical_column.plot(
+    x="longitude", y="latitude", vmin=3e15, vmax=10e15, 
+    cmap=cmap, zorder=100)
 
 plt.show()
 ```
@@ -128,24 +136,28 @@ plt.show()
 Let's zoom in to Los Angeles, California.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(figsize=(8,6), subplot_kw={"projection": ccrs.PlateCarree()})
+fig, ax = plt.subplots(figsize=(9,5), subplot_kw={"projection": ccrs.PlateCarree()})
 
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.coastlines(linewidth=0.5)
 ax.add_feature(cfeature.BORDERS, linewidth=0.5)
+ax.add_feature(cfeature.OCEAN, linewidth=0.5)
+ax.add_feature(cfeature.LAKES, linewidth=0.5)
+ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.5)
 
 cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightgrey","cyan","yellow","orange","red","darkred"])
 
-dat.nitrogen_dioxide_total_vertical_column.T.plot(
-    vmin=3e15, vmax=10e15, cmap=cmap)
+dat.nitrogen_dioxide_total_vertical_column.plot(
+    x="longitude", y="latitude", vmin=3e15, vmax=10e15, 
+    cmap=cmap, zorder=100)
 
 ax.set_extent([-125,-110,30,40])
 plt.show()
 ```
 
-## 4. Interactive NO$_\mathrm{2}$  plot
+## 4. Interactive NO$_\mathrm{2}$ plot
 
-An interative plot allows you to engage with the data such as zooming, panning, and hovering over for more information. We will use the Python module `hvplot` to make an interactive plot of the single file we downloaded above. 
+An interative plot allows you to engage with the data such as zooming, panning, and hovering over for more information. We will use the Python module `hvplot` to make an interactive plot of the single file we downloaded above.
 
 ```{code-cell} ipython3
 dat.nitrogen_dioxide_total_vertical_column.hvplot(
@@ -155,9 +167,10 @@ dat.nitrogen_dioxide_total_vertical_column.hvplot(
     clim=(3e15, 10e15),
     aspect=2,
     title="Total vertical column NO₂ April 2024",
-    widget_location='top',
+    widget_location="top",
     geo=True,
-    coastline=True  
+    coastline=True,
+    tiles="EsriWorldStreetMap"
 )
 ```
 
@@ -166,23 +179,20 @@ dat.nitrogen_dioxide_total_vertical_column.hvplot(
 Since there are many NO$_\mathrm{2}$ files in the public directory, we can make a time series of NO$_\mathrm{2}$ concentrations over time. First, we have to download all the files locally. This code will download all of the files in a folder called "no2_files".
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
+:scrolled: true
+
 # 1. Set the URL of the directory listing
 base_url = "https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/NO2_L3_Gridded_NAmerica/"
 
 # 2. Download the page and parse file links
 response = requests.get(base_url)
 response.raise_for_status()
-soup = BeautifulSoup(response.text, 'html.parser')
+soup = BeautifulSoup(response.text, "html.parser")
 
 file_links = []
-for link in soup.find_all('a'):
-    href = link.get('href')
-    if href and not href.endswith('/') and href != '../':  # skip directories
+for link in soup.find_all("a"):
+    href = link.get("href")
+    if href and "PACE_NO2_Gridded" in href:  # grab only PACE files
         full_url = urljoin(base_url, href)
         file_links.append(full_url)
 
@@ -204,7 +214,7 @@ for file_url in file_links:
         print(f"File {local_path} already exists, skipping.")
 ```
 
-Now we will combine the files into one `xarray` dataset. We will include a new time dimension by grabbing the date in the filename. 
+Now we will combine the files into one `xarray` dataset. We will include a new time dimension by grabbing the date in the filename.
 
 ```{code-cell} ipython3
 folder = "no2_files"
@@ -215,7 +225,7 @@ files = sorted([
 
 def extract_time(filename):
     # Extract pattern like 2024m0401 → 2024-04-01
-    match = re.search(r'(\d{4})m(\d{2})(\d{2})', filename)
+    match = re.search(r"(\d{4})m(\d{2})(\d{2})", filename)
     if match:
         year, month, day = match.groups()
         return pd.to_datetime(f"{year}-{month}-{day}")
@@ -231,44 +241,44 @@ for f in files:
     datasets.append(ds)
 
 # Concatenate along the time dimension
-all_no2_dat = xr.concat(datasets, dim='time')
+all_no2_dat = xr.concat(datasets, dim="time")
 all_no2_dat
 ```
 
-Let's select the nearest pixel at 34, -118. 
+Let's select the nearest pixel at 34, -118.
 
 ```{code-cell} ipython3
 no2_sel = all_no2_dat.sel(latitude=34, longitude=-118, method="nearest")
 no2_sel
 ```
 
-You can see how this selection creates a new 1D dataset with values for one pixel across time. Let's plot it using `hvplot`. 
+You can see how this selection creates a new 1D dataset with values for one pixel across time. Let's plot it using `hvplot`.
 
 ```{code-cell} ipython3
 line = no2_sel.hvplot.line(
-    x='time',
-    y='nitrogen_dioxide_total_vertical_column',
+    x="time",
+    y="nitrogen_dioxide_total_vertical_column",
     line_width=2,
-    color='darkblue',
+    color="darkblue",
     alpha=0.8,
 )
 
 dots = no2_sel.hvplot.scatter(
-    x='time',
-    y='nitrogen_dioxide_total_vertical_column',
+    x="time",
+    y="nitrogen_dioxide_total_vertical_column",
     size=20,
-    color='crimson',
-    marker='o',
+    color="crimson",
+    marker="o",
     alpha=0.7
 )
 
 # Combine and add styling
 (line * dots).opts(
-    title='Time series of total vertical column NO₂ at (34, -118)',
+    title="Time series of total vertical column NO₂ at (34, -118)",
     width=800,
     height=400,
-    xlabel='Time',
-    ylabel='NO₂ (molecules cm⁻²)',
+    xlabel="Time",
+    ylabel="NO₂ (molecules cm⁻²)",
     show_grid=True,
 )
 ```
