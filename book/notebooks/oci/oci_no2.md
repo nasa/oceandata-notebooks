@@ -80,9 +80,9 @@ import pandas as pd
 
 ## 2. Download NO$_\mathrm{2}$ Data
 
-The NO$_\mathrm{2}$ products have been made available at
+Currently, the NO$_\mathrm{2}$ product has been made available at
 [NASA’s Aura Validation Data Center
-(AVDC)][aura]. We need to manually download files from this site using the Python modules `subprocess` and `wget`. `subprocess` enables the execution of `wget`, which is a command-line utility for retrieving files from web serviers using https protocols. 
+(AVDC)][aura]. While the data are hosted there, we need to manually download files from this site using the Python modules `subprocess` and `wget`. `subprocess` enables the execution of `wget`, which is a command-line utility for retrieving files from web serviers using https protocols.  However, this product is in the process of implementation and will soon be available through the `earthaccess` package. This tutorial will be updated to use that data download method once it is applicable. 
 
 [aura]: https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/
 
