@@ -1,4 +1,4 @@
-# Jupyter Notebooks
+# Oceandata Notebooks
 
 ## About
 
@@ -31,28 +31,6 @@ execute `pipx run setup.py --help`. The `pipx` documenation provides
 [install instructions](https://pipx.pypa.io/stable/installation/) that include the
 simple approach of `pip install --user pipx`. Uninstall kernels with `jupyter kernelspec`.
 
-## Notebooks
-
-### Learn with OCI
-
-1. Data Access
-1. **Earthdata Cloud** File Structure at Three Processing Levels
-1. Installing and Running OCSSW Command-line Tools
-1. Processing with OCSSW Tools: l2gen, l2bin, and l3mapgen
-1. More comming soon!
-
-### Learn with HARP2
-
-1. **Earthdata Cloud** Data Visualization
-
-### Learn with SpexONE
-
-1. Coming soon!
-
-### Learn with MODIS
-
-1. Explore Level-2 Ocean Color Data
-1. Explore Level-3 Ocean Color Data
 
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 [jupyterlab]: https://jupyter.org/
