@@ -1,14 +1,14 @@
 ---
 kernelspec:
-  name: python3
-  display_name: Python 3 (ipykernel)
+  display_name: custom
   language: python
+  name: custom
 ---
 
 # Exploring nitrogen dioxide (NO$_\mathrm{2}$) data from OCI 
 
 **Authors:** Anna Windle (NASA, SSAI) <br>
-Modified from a notebook by Zachary Fasnacht (NASA, SSAI), 
+Modified from a notebook by Zachary Fasnacht (NASA, SSAI)
 
 <div class="alert alert-success" role="alert">
 
@@ -20,10 +20,9 @@ The following notebooks are **prerequisites** for this tutorial.
 
 ## Summary
 
-This tutorial describes how to access and download nitrogen dioxide (NO$_\mathrm{2}$) data products developed from PACE OCI data. More information on how these products were created can be found [in this manuscript preprint][paper] and in this [presentation][pres]. This notebook will also include examples on how to plot NO$_\mathrm{2}$ data as a static and interactive map, as well as how to plot an interactive time series plot. 
+This tutorial describes how to access and download nitrogen dioxide (NO$_\mathrm{2}$) data products developed from PACE OCI data. More information on how these products were created can be found in [Fasnacht et al. (2025)][paper]. This notebook will also include examples on how to plot NO$_\mathrm{2}$ data as a static and interactive map, as well as how to plot an interactive time series plot. 
 
-[paper]:[file:///Users/awindled/Downloads/pace_paper.pdf]
-[pres]:[https://pace.oceansciences.org/docs/2025_01_30-Fasnacht_PACE_No2_Applications.pdf]
+[paper]:[10.1088/1748-9326/addfef]
 
 ## Learning Objectives
 
@@ -54,19 +53,19 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 
 ```{code-cell} ipython3
 import subprocess
+import os
+import re 
+import requests
+
 import xarray as xr
-from xarray.backends.api import open_datatree
 import matplotlib.pyplot as plt
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.colors
 import hvplot.xarray 
-import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-import os
-import re 
 import pandas as pd
 ```
 
@@ -78,7 +77,7 @@ import pandas as pd
 
 Currently, the NO$_\mathrm{2}$ product has been made available at
 [NASA’s Aura Validation Data Center
-(AVDC)][aura]. While the data are hosted there, we need to manually download files from this site using the Python modules `subprocess` and `wget`. `subprocess` enables the execution of `wget`, which is a command-line utility for retrieving files from web serviers using https protocols.  However, this product is in the process of implementation and will soon be available through the `earthaccess` package. This tutorial will be updated to use that data download method once it is applicable. 
+(AVDC)][aura]. While the data are hosted there, we need to manually download files from this site using the Python modules `subprocess` and `wget`. `subprocess` enables the execution of `wget`, which is a command-line utility for retrieving files from web serviers using https protocols.  However, this product is in the process of implementation and will soon be available in the EarthData Cloud. This tutorial will be updated to use the `earthaccess` Python package to access data once available. 
 
 [aura]: https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/
 
@@ -101,7 +100,7 @@ subprocess.run(["wget", url, "-O", filename], stderr=subprocess.DEVNULL)
 We will use `xarray`'s open_datatree function to open and merge multiple groups of the netcdf as well as swapping the lat, lon dimensions.
 
 ```{code-cell} ipython3
-dat = open_datatree(filename)
+dat = xr.open_datatree(filename)
 dat = xr.merge(dat.to_dict().values())
 dat = dat.swap_dims({"nlat":"latitude", "nlon":"longitude"})
 dat
@@ -150,6 +149,10 @@ dat.nitrogen_dioxide_total_vertical_column.plot(
 ax.set_extent([-125,-110,30,40])
 plt.show()
 ```
+
+You'll also see other variables in the dataset 'U10M', and 'V10M. These are 10-meter Eastward Wind, and 10-meter Northward Wind, respectively. 
+
++++
 
 ## 4. Interactive NO$_\mathrm{2}$ plot
 
@@ -230,7 +233,7 @@ def extract_time(filename):
 
 datasets = []
 for f in files:
-    ds = open_datatree(f)  
+    ds = xr.open_datatree(f)  
     ds = xr.merge(ds.to_dict().values())
     ds = ds.swap_dims({"nlat":"latitude", "nlon":"longitude"})
     ds = ds.expand_dims(time=[extract_time(f)])
