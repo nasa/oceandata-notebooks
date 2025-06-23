@@ -1,12 +1,8 @@
 ---
-jupytext:
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.16.7
-language_info:
-  name: python
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
 ---
 
 # Exploring nitrogen dioxide (NO$_\mathrm{2}$) data from OCI 
