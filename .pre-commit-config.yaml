@@ -1,11 +1,8 @@
 fail_fast: true
 repos:
-  - repo: https://github.com/mwouts/jupytext
-    rev: v1.16.7
-    hooks:
-      - id: jupytext
-        entry: jupytext --sync
-        files: ^book/src/.*\.py$
+  # - repo: meta
+  #   hooks:
+  #     - id: identity
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -24,27 +21,28 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.6.6
+    rev: 0.7.5
     hooks:
       - id: uv-lock
       - id: pip-compile
         name: compile-kernel-dependencies
-        args: [-q, --extra, kernel, -o, requirements.txt, pyproject.toml]
+        args: [-q, --group, notebooks, --group, kernel, -o, requirements.txt, pyproject.toml]
         files: ^uv\.lock$
       - id: pip-compile
         name: compile-docker-dependencies
-        args: [-q, --extra, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml]
+        args: [-q, --group, notebooks, --group, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml]
         files: ^(uv\.lock|docker/requirements\.in)$
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.0
-    hooks:
-      - id: ruff
-        args: ["--fix", "--exit-non-zero-on-fix"]
-        # prefer to lint the ipynbs
-        exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
-      - id: ruff-format
-        # prefer to format the ipynbs
-        exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
+  # FIXME don't know how to do this with md:myst
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  #   rev: v0.11.10
+  #   hooks:
+  #     - id: ruff
+  #       args: ["--fix", "--exit-non-zero-on-fix"]
+  #       # prefer to lint the ipynbs
+  #       exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
+  #     - id: ruff-format
+  #       # prefer to format the ipynbs
+  #       exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
   - repo: local
     hooks:
       - id: update-setup-py

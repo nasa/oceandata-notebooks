@@ -1,67 +1,57 @@
-# ---
-# jupyter:
-#   jupytext:
-#     cell_metadata_filter: all,-trusted
-#     notebook_metadata_filter: all,-kernelspec
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.16.4
-#   language_info:
-#     codemirror_mode:
-#       name: ipython
-#       version: 3
-#     file_extension: .py
-#     mimetype: text/x-python
-#     name: python
-#     nbconvert_exporter: python
-#     pygments_lexer: ipython3
-#     version: 3.12.7
-# ---
+---
+kernelspec:
+  name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
+---
 
-# # Matchups of in situ data with satellite data
-#
-# **Tutorial Leads:** Anna Windle (NASA, SSAI), James Allen (NASA, MSU)
-#
-# ## Summary
-#
-# In this example we will conduct matchups of in situ AERONET-OC Rrs data with PACE OCI Rrs data. The Aerosol Robotic Network (AERONET) was developed to sustain atmospheric studies at various scales with measurements from worldwide distributed autonomous sun-photometers. This has been extended to support marine applications, called AERONET – Ocean Color [(AERONET-OC)](https://aeronet.gsfc.nasa.gov/new_web/ocean_levels_versions.html), and provides the additional capability of measuring the radiance emerging from the sea (i.e., water-leaving radiance) with modified sun-photometers installed on offshore platforms like lighthouses, oceanographic and oil towers. AERONET-OC is instrumental in satellite ocean color validation activities.
-#
-# In this tutorial, we will be collecting Rrs data from the  [Casablanca Platform](https://aeronet.gsfc.nasa.gov/cgi-bin/data_display_seaprism_v3?site=Casablanca_Platform&nachal=2&level=3&place_code=10) AERONET-OC site located at 40.7N, 1.4W in the western Mediterranean Sea which is typically characterized as oligotrophic/mesotrophic (ocean color signals tend to strongly covary with chlorophyll a).
-#
-# We will be collecting PACE OCI Rrs data in a 5x5 pixel window around the AERONET-OC site to compare to the AERONET-OC Rrs data.
-#
-# ## Learning Objectives
-#
-# At the end of this notebook you will know:
-#
-# * How to access Rrs data from a specific AERONET-OC site and time
-# * How to access PACE OCI Rrs data from a specific location and time
-# * How to match in situ and satellite data
-# * How to apply statistics and plot matchup data
-#
-# ## Contents
-#
-# 1. [Setup](#1.-Setup)
-# 2. [Process AERONET-OC data](#2.-Process-AERONET-OC-data)
-# 3. [Process PACE OCI data](#3.-Process-PACE-OCI-data)
-# 4. [Apply matchup code](#4.-Apply-matchup-code)
-# 5. [Make plots](#5.-Make-plots)
+# Matchups of in situ data with satellite data
 
-# + [markdown] jp-MarkdownHeadingCollapsed=true
-# ## 1. Setup
-#
-# We begin by loading a set of utility functions that work behind the scenes to do the majority of the work for us.
-# Collapse this for now and just run the cell, but feel free to dig into it and see how things work!
-#
-# <div class="alert alert-block alert-warning">
-#
-# Note that the `get_f0` function requires the thuillier2003_f0.nc file. For the Hackweek, this is being pulled from the shared-public directory. For others trying to run the notebook, the .nc file can be found [here](https://oceancolor.gsfc.nasa.gov/docs/rsr/f0.txt).
-#
-# </div>
+**Tutorial Leads:** Anna Windle (NASA, SSAI), James Allen (NASA, MSU)
 
-# + tags=["hide-cell"]
+## Summary
+
+In this example we will conduct matchups of in situ AERONET-OC Rrs data with PACE OCI Rrs data. The Aerosol Robotic Network (AERONET) was developed to sustain atmospheric studies at various scales with measurements from worldwide distributed autonomous sun-photometers. This has been extended to support marine applications, called AERONET – Ocean Color [(AERONET-OC)](https://aeronet.gsfc.nasa.gov/new_web/ocean_levels_versions.html), and provides the additional capability of measuring the radiance emerging from the sea (i.e., water-leaving radiance) with modified sun-photometers installed on offshore platforms like lighthouses, oceanographic and oil towers. AERONET-OC is instrumental in satellite ocean color validation activities.
+
+In this tutorial, we will be collecting Rrs data from the  [Casablanca Platform](https://aeronet.gsfc.nasa.gov/cgi-bin/data_display_seaprism_v3?site=Casablanca_Platform&nachal=2&level=3&place_code=10) AERONET-OC site located at 40.7N, 1.4W in the western Mediterranean Sea which is typically characterized as oligotrophic/mesotrophic (ocean color signals tend to strongly covary with chlorophyll a).
+
+We will be collecting PACE OCI Rrs data in a 5x5 pixel window around the AERONET-OC site to compare to the AERONET-OC Rrs data.
+
+## Learning Objectives
+
+At the end of this notebook you will know:
+
+* How to access Rrs data from a specific AERONET-OC site and time
+* How to access PACE OCI Rrs data from a specific location and time
+* How to match in situ and satellite data
+* How to apply statistics and plot matchup data
+
+## Contents
+
+1. [Setup](#1.-Setup)
+2. [Process AERONET-OC data](#2.-Process-AERONET-OC-data)
+3. [Process PACE OCI data](#3.-Process-PACE-OCI-data)
+4. [Apply matchup code](#4.-Apply-matchup-code)
+5. [Make plots](#5.-Make-plots)
+
++++ {"jp-MarkdownHeadingCollapsed": true}
+
+## 1. Setup
+
+We begin by loading a set of utility functions that work behind the scenes to do the majority of the work for us.
+Collapse this for now and just run the cell, but feel free to dig into it and see how things work!
+
+<div class="alert alert-block alert-warning">
+
+Note that the `get_f0` function requires the thuillier2003_f0.nc file. For the Hackweek, this is being pulled from the shared-public directory. For others trying to run the notebook, the .nc file can be found [here](https://oceancolor.gsfc.nasa.gov/docs/rsr/f0.txt).
+
+</div>
+
+```{code-cell} ipython3
+:lines_to_end_of_cell_marker: 0
+:lines_to_next_cell: 1
+:tags: [hide-cell]
+
 """Helper functions for PACE Hackweek Validation Tutorial.
 
 Authors:
@@ -1309,14 +1299,15 @@ def plot_BAvsScat(
         "RMSE": regress_metrics["rmse"],
         "MAE": regress_metrics["mae"],
     }
-# -
+```
 
-# ## 2. Process AERONET-OC data
-#
-# We will use the function `process_aeronet` to download and process AERONET-OC data from the 'Casablanca_Platform' site. We will filter Level 1.5 data from the dates June 1, 2024 to July 31, 2024. This function will output a pandas dataframe of every AERONET-OC record between the dates.
-#
-# There are three "levels" of AERONET-OC data in terms of data quality: 1, 1.5, and 2. If a complete measurement sequence with the instruments is able to be performed, it is collected and stored as Level 1. These data are then passed through an automated quality control system and stored as Level 1.5 if they pass all tests. Finally, Level 2 data are data from Level 1.5 that are subsequently screened by an experienced scientist and validated. We'll be using Level 1.5 data to pull as much good quality data as possible without the time lag for manual validation. More information on AERONET-OC levels can be found in [Zibordi et al., 2009.](https://doi.org/10.1175/2009JTECHO654.1)
+## 2. Process AERONET-OC data
 
+We will use the function `process_aeronet` to download and process AERONET-OC data from the 'Casablanca_Platform' site. We will filter Level 1.5 data from the dates June 1, 2024 to July 31, 2024. This function will output a pandas dataframe of every AERONET-OC record between the dates.
+
+There are three "levels" of AERONET-OC data in terms of data quality: 1, 1.5, and 2. If a complete measurement sequence with the instruments is able to be performed, it is collected and stored as Level 1. These data are then passed through an automated quality control system and stored as Level 1.5 if they pass all tests. Finally, Level 2 data are data from Level 1.5 that are subsequently screened by an experienced scientist and validated. We'll be using Level 1.5 data to pull as much good quality data as possible without the time lag for manual validation. More information on AERONET-OC levels can be found in [Zibordi et al., 2009.](https://doi.org/10.1175/2009JTECHO654.1)
+
+```{code-cell} ipython3
 aoc_cb = process_aeronet(
     aoc_site="Casablanca_Platform",
     start_date="2024-06-01",
@@ -1324,12 +1315,16 @@ aoc_cb = process_aeronet(
     data_level=15,
 )
 aoc_cb.head()
+```
 
-# ## 3. Process PACE OCI data
-#
-# We will use the function `process_satellite` to search for `PACE_OCI_L2_AOP_NRT` data using `earthacces` within the specified time range and at the (lat,lon) coordinate of the Casablanca_Platform AERONET-OC site. This function finds the closest pixel and extracts all data within a 5x5 pixel window, excludes pixels based on L2 flags, calculates the mean to retrive a single Rrs spectra, and computes matchup statistics. The function outputs a pandas dataframe of every `PACE_OCI_L2_AOP_NRT` Rrs spectra for the specified time range. We'll also include an optional list of unique date strings from the AERONET-OC dataframe to "skip" the granules that don't have any field data associated with them.
+## 3. Process PACE OCI data
 
-# + scrolled=true tags=["scroll-output"]
+We will use the function `process_satellite` to search for `PACE_OCI_L2_AOP_NRT` data using `earthacces` within the specified time range and at the (lat,lon) coordinate of the Casablanca_Platform AERONET-OC site. This function finds the closest pixel and extracts all data within a 5x5 pixel window, excludes pixels based on L2 flags, calculates the mean to retrive a single Rrs spectra, and computes matchup statistics. The function outputs a pandas dataframe of every `PACE_OCI_L2_AOP_NRT` Rrs spectra for the specified time range. We'll also include an optional list of unique date strings from the AERONET-OC dataframe to "skip" the granules that don't have any field data associated with them.
+
+```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
 # Pull out coordinates
 aoc_lat = aoc_cb["aoc_latitude"][0]
 aoc_lon = aoc_cb["aoc_longitude"][0]
@@ -1346,18 +1341,27 @@ sat_cb = process_satellite(
     sat="PACE",
     selected_dates=unique_days_str,
 )
-# -
+```
 
+```{code-cell} ipython3
 sat_cb.head()
+```
 
-# ## 3. Apply matchup code
-#
-# We will use the function `match_data` to create a matchup dataframe based on selection criteria. This function defaults to using the [Bailey and Werdell 2006](https://oceancolor.gsfc.nasa.gov/staff/jeremy/bailey_and_werdell_2006_rse.pdf) matchup criteria, which reduces the measurements made at a given station to one representative sample for validating against the satellite spectra. Data are filtered based on the solar zenith angle, their noise level, and the time difference (here 180 minutes from the satellite overpass). Potential satellite matchups are also reduced based on the signal to noise level of the 5x5 pixel aggregation.
+## 3. Apply matchup code
 
-# + scrolled=true tags=["scroll-output"]
-# ?match_data
+We will use the function `match_data` to create a matchup dataframe based on selection criteria. This function defaults to using the [Bailey and Werdell 2006](https://oceancolor.gsfc.nasa.gov/staff/jeremy/bailey_and_werdell_2006_rse.pdf) matchup criteria, which reduces the measurements made at a given station to one representative sample for validating against the satellite spectra. Data are filtered based on the solar zenith angle, their noise level, and the time difference (here 180 minutes from the satellite overpass). Potential satellite matchups are also reduced based on the signal to noise level of the 5x5 pixel aggregation.
 
-# + scrolled=true tags=["scroll-output"]
+```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
+?match_data
+```
+
+```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
 matchups = match_data(
     sat_cb,
     aoc_cb,
@@ -1368,11 +1372,11 @@ matchups = match_data(
     std_max=1.5,
 )
 matchups
-# -
+```
 
-# Pull out wavelengths and Rrs data from matchups
+Pull out wavelengths and Rrs data from matchups
 
-# +
+```{code-cell} ipython3
 dict_aoc = get_column_prods(matchups, "aoc")
 waves_aoc = np.array(dict_aoc["rrs"]["wavelengths"])
 rrs_aoc = matchups[dict_aoc["rrs"]["columns"]].to_numpy()
@@ -1380,16 +1384,20 @@ rrs_aoc = matchups[dict_aoc["rrs"]["columns"]].to_numpy()
 dict_sat = get_column_prods(matchups, "oci")
 waves_sat = np.array(dict_sat["rrs"]["wavelengths"])
 rrs_sat = matchups[dict_sat["rrs"]["columns"]].to_numpy()
-# -
+```
 
-# ## 4. Make plots
-#
-# We will use the function `plot_BAvsScat` to plot the paired matchup data as Bland_Altman and scatter plots. The Bland-Altman plots provide insights into the bias and precision of the satellite measurements compared to field measurements. A mean difference close to zero indicates good agreement, while the spread of differences (limits of agreement) puts the bias within the context of the variability of the field data. Additionally, a check is done to assess the scale dependency of the bias, such as errors increasing when the magnitude of the observations increases. If a scale dependency exists, the limits of agreement are replaced with a regression line showing its direction and magnitude. Scatter plots complement Bland-Altman plots by showing the strength of the linear relationship between the two datasets, with high correlation coefficients and low RMSE values indicating strong agreement and high accuracy of the satellite-derived measurements.
+## 4. Make plots
 
-# + scrolled=true tags=["scroll-output"]
-# ?plot_BAvsScat
+We will use the function `plot_BAvsScat` to plot the paired matchup data as Bland_Altman and scatter plots. The Bland-Altman plots provide insights into the bias and precision of the satellite measurements compared to field measurements. A mean difference close to zero indicates good agreement, while the spread of differences (limits of agreement) puts the bias within the context of the variability of the field data. Additionally, a check is done to assess the scale dependency of the bias, such as errors increasing when the magnitude of the observations increases. If a scale dependency exists, the limits of agreement are replaced with a regression line showing its direction and magnitude. Scatter plots complement Bland-Altman plots by showing the strength of the linear relationship between the two datasets, with high correlation coefficients and low RMSE values indicating strong agreement and high accuracy of the satellite-derived measurements.
 
-# +
+```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
+?plot_BAvsScat
+```
+
+```{code-cell} ipython3
 MATCH_WAVES = np.array([400, 412, 443, 490, 510, 560, 620, 667])
 
 # Loop through matchup wavelengths
@@ -1423,3 +1431,4 @@ df_stats = pd.DataFrame(stats_list)
 df_stats.set_index("wavelength", inplace=True)
 df_stats = df_stats.fillna(-999)
 df_stats
+```
