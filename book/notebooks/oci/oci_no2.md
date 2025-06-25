@@ -1,14 +1,13 @@
 ---
 kernelspec:
-  display_name: custom
+  name: python3
+  display_name: Python 3 (ipykernel)
   language: python
-  name: custom
 ---
 
-# Exploring nitrogen dioxide (NO$_\mathrm{2}$) data from OCI 
+# Exploring nitrogen dioxide (NO<sub>2</sub>) data from OCI 
 
-**Authors:** Anna Windle (NASA, SSAI) <br>
-Modified from a notebook by Zachary Fasnacht (NASA, SSAI)
+**Authors:** Anna Windle (NASA, SSAI), Zachary Fasnacht (NASA, SSAI)
 
 <div class="alert alert-success" role="alert">
 
@@ -20,27 +19,25 @@ The following notebooks are **prerequisites** for this tutorial.
 
 ## Summary
 
-This tutorial describes how to access and download nitrogen dioxide (NO$_\mathrm{2}$) data products developed from PACE OCI data. More information on how these products were created can be found in [Fasnacht et al. (2025)][paper]. This notebook will also include examples on how to plot NO$_\mathrm{2}$ data as a static and interactive map, as well as how to plot an interactive time series plot. 
+This tutorial describes how to access and download nitrogen dioxide (NO<sub>2</sub>) data products developed from PACE OCI data. More information on how these products were created can be found in [Fasnacht et al. (2025)][paper]. This notebook will also include examples on how to plot NO<sub>2</sub> data as a static and interactive map, as well as how to plot an interactive time series plot. 
 
-[paper]:[10.1088/1748-9326/addfef]
+[paper]: http://doi.org/10.1088/1748-9326/addfef
 
 ## Learning Objectives
 
 At the end of this notebook you will know:
 
-- How to access and download PACE NO$_\mathrm{2}$ data through the NASA Aura Validation Data Center
-- How to open those data using `xarray's` datatree function
-- How to plot NO$_\mathrm{2}$ vertical column retrievals as a static and interactive map
-- How to create a time series of NO$_\mathrm{2}$ data collected at a single location
-
+- Where to access NO<sub>2</sub> data products in development for the PACE Mission at the NASA Aura Validation Data Center
+- What to select from the XArray `DataTree` objects representing hierarchichal datasets
+- Where to find high NO<sub>2</sub> vertical column retrievals (hint: it's a big city)
+- How to create a time series of NO<sub>2</sub> data collected at a single location
 
 ## Contents
 
 1. [Setup](#1.-Setup)
-2. [Download NO$_\mathrm{2}$ Data](#2.-Download-NO$_\mathrm{2}$-Data)
-3. [Read in data using `xarray` and plot
-](#3.-Read-in-data-using-xarray-and-plot)
-4. [Interactive NO$_\mathrm{2}$ plot](#4.-Interactive-NO$_\mathrm{2}$-plot)
+2. [Download NO<sub>2</sub> Data](#2.-Download-NO<sub>2</sub>-Data)
+3. [Read in data using `xarray` and plot](#3.-Read-in-data-using-xarray-and-plot)
+4. [Interactive NO<sub>2</sub> plot](#4.-Interactive-NO<sub>2</sub>-plot)
 5. [Time Series](#5.-Time-Series)
 
 +++
@@ -52,114 +49,104 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 ```{code-cell} ipython3
-import subprocess
-import os
-import re 
-import requests
+from datetime import datetime
 
-import xarray as xr
-import matplotlib.pyplot as plt
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import fsspec
+import hvplot.xarray
 import matplotlib.colors
-import hvplot.xarray 
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+import matplotlib.pyplot as plt
 import pandas as pd
+import xarray as xr
+
+swap_dims = {"nlon": "longitude", "nlat": "latitude"}
 ```
 
 [back to top](#Contents)
 
 +++
 
-## 2. Download NO$_\mathrm{2}$ Data
+## 2. Download NO<sub>2</sub> Data
 
-Currently, the NO$_\mathrm{2}$ product has been made available at
+While under development, the NO<sub>2</sub> product is available at
 [NASA’s Aura Validation Data Center
-(AVDC)][aura]. While the data are hosted there, we need to manually download files from this site using the Python modules `subprocess` and `wget`. `subprocess` enables the execution of `wget`, which is a command-line utility for retrieving files from web serviers using https protocols.  However, this product is in the process of implementation and will soon be available in the EarthData Cloud. This tutorial will be updated to use the `earthaccess` Python package to access data once available. 
+(AVDC)][aura]. While the data are hosted there, we can access files from this site using the `fsspec` package. Once this product is implemented by the PACE Mission Science Data Segment (SDS), it will be available in the Earthdata Cloud and accessible as usual using the `earthaccess` package.
 
 [aura]: https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/
 
-For this exercise, we will download the file named 'PACE_NO2_Gridded_NAmerica_2024m0501.nc'. Running this cell should save the file in the directory you're working in. 
-
-</div>
-
 ```{code-cell} ipython3
 url = "https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/NO2_L3_Gridded_NAmerica/PACE_NO2_Gridded_NAmerica_2024m0401.nc"
-filename = "PACE_NO2_Gridded_NAmerica_2024m0401.nc"
-subprocess.run(["wget", url, "-O", filename], stderr=subprocess.DEVNULL)
+fs = fsspec.filesystem("https")
+path = fs.open(url, cache_type="blockcache")
 ```
 
 [back to top](#Contents)
 
 +++
 
-## 3. Read in data using `xarray` and plot
+## 3. Preview this hierarchical dataset
 
-We will use `xarray`'s open_datatree function to open and merge multiple groups of the netcdf as well as swapping the lat, lon dimensions.
+We will use `xarray.open_datatree` to open all groups in the NetCDF and then merge them into a single dataset. We need to clean up some superfluous data stored as `nlat` and `nlon` along the way.
 
 ```{code-cell} ipython3
-dat = xr.open_datatree(filename)
-dat = xr.merge(dat.to_dict().values())
-dat = dat.swap_dims({"nlat":"latitude", "nlon":"longitude"})
-dat
+datatree = xr.open_datatree(path)
+datatree["/"].dataset = datatree["/"].dataset.drop_vars(swap_dims)
+dataset = xr.merge(datatree.to_dict().values()).swap_dims(swap_dims)
+dataset
 ```
 
-If you expand the 'nitrogen_dioxide_total_vertical_column' variable, you'll see that it is a 2D variable consisting of total vertical column NO$_\mathrm{2}$ measurements with units of molecules cm$^\mathrm{-2}$. 
+If you expand the `nitrogen_dioxide_total_vertical_column` variable, you'll see that it is a 2D variable consisting of total vertical column NO<sub>2</sub> measurements with units of molecules cm<sup>-2</sup>. 
 Let's plot it!
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(figsize=(9,5), subplot_kw={"projection": ccrs.PlateCarree()})
-
+fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.coastlines(linewidth=0.5)
 ax.add_feature(cfeature.BORDERS, linewidth=0.5)
 ax.add_feature(cfeature.OCEAN, linewidth=0.5)
 ax.add_feature(cfeature.LAKES, linewidth=0.5)
 ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.5)
-
-cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightgrey","cyan","yellow","orange","red","darkred"])
-
-dat.nitrogen_dioxide_total_vertical_column.plot(
-    x="longitude", y="latitude", vmin=3e15, vmax=10e15, 
-    cmap=cmap, zorder=100)
-
+cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
+    "",
+    ["lightgrey", "cyan", "yellow", "orange", "red", "darkred"],
+)
+dataset["nitrogen_dioxide_total_vertical_column"].plot(
+    x="longitude", y="latitude", vmin=3e15, vmax=10e15, cmap=cmap, zorder=100
+)
 plt.show()
 ```
 
-Let's zoom in to Los Angeles, California.
+Let's zoom in to Los Angeles, California ... i.e. the bright red blob in the lower left.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(figsize=(9,5), subplot_kw={"projection": ccrs.PlateCarree()})
-
+fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.coastlines(linewidth=0.5)
 ax.add_feature(cfeature.BORDERS, linewidth=0.5)
 ax.add_feature(cfeature.OCEAN, linewidth=0.5)
 ax.add_feature(cfeature.LAKES, linewidth=0.5)
 ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.5)
-
-cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightgrey","cyan","yellow","orange","red","darkred"])
-
-dat.nitrogen_dioxide_total_vertical_column.plot(
-    x="longitude", y="latitude", vmin=3e15, vmax=10e15, 
-    cmap=cmap, zorder=100)
-
-ax.set_extent([-125,-110,30,40])
+dataset["nitrogen_dioxide_total_vertical_column"].plot(
+    x="longitude", y="latitude", vmin=3e15, vmax=10e15, cmap=cmap, zorder=100
+)
+ax.set_extent([-125, -110, 30, 40])
 plt.show()
 ```
 
-You'll also see other variables in the dataset 'U10M', and 'V10M. These are 10-meter Eastward Wind, and 10-meter Northward Wind, respectively. 
+You'll also see other variables in the dataset `U10M`, and `V10M`.
+These are 10-meter Eastward Wind, and 10-meter Northward Wind, respectively.
 
 +++
 
-## 4. Interactive NO$_\mathrm{2}$ plot
+## 4. Interactive NO<sub>2</sub> plot
 
-An interative plot allows you to engage with the data such as zooming, panning, and hovering over for more information. We will use the Python module `hvplot` to make an interactive plot of the single file we downloaded above.
+An interative plot allows you to engage with the data such as zooming, panning, and hovering over for more information. We will use the `hvplot` accessor on XArray data structures to make an interactive plot of the single file we accessed above.
 
 ```{code-cell} ipython3
-dat.nitrogen_dioxide_total_vertical_column.hvplot(
+# FIXME resolve `WARNING:param.Image00346: Image dimension longitude is  not evenly sampled to relative tolerance of 0.001. Please use the QuadMesh element for irregularly sampled data or set a higher tolerance on hv.config.image_rtol or the rtol parameter in the Image constructor.`
+dataset["nitrogen_dioxide_total_vertical_column"].hvplot(
     x="longitude",
     y="latitude",
     cmap=cmap,
@@ -169,109 +156,65 @@ dat.nitrogen_dioxide_total_vertical_column.hvplot(
     widget_location="top",
     geo=True,
     coastline=True,
-    tiles="EsriWorldStreetMap"
+    tiles="EsriWorldStreetMap",
 )
 ```
 
 # 5. Time Series
 
-Since there are many NO$_\mathrm{2}$ files in the public directory, we can make a time series of NO$_\mathrm{2}$ concentrations over time. First, we have to download all the files locally. This code will download all of the files in a folder called "no2_files".
+Since there are many NO<sub>2</sub> granules available for testing, we can make a time series of NO<sub>2</sub> concentrations over time. First, we have to get URLs for all the granules and "open" them for streaming. Alternatively, `fs.get` could be used to download files locally, but we don't want to duplicate data storage if working in the commercial cloud.
 
 ```{code-cell} ipython3
-:scrolled: true
-
-# 1. Set the URL of the directory listing
-base_url = "https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/NO2_L3_Gridded_NAmerica/"
-
-# 2. Download the page and parse file links
-response = requests.get(base_url)
-response.raise_for_status()
-soup = BeautifulSoup(response.text, "html.parser")
-
-file_links = []
-for link in soup.find_all("a"):
-    href = link.get("href")
-    if href and "PACE_NO2_Gridded" in href:  # grab only PACE files
-        full_url = urljoin(base_url, href)
-        file_links.append(full_url)
-
-print(f"Found {len(file_links)} files to download.")
-
-# 3. Create local download folder
-download_folder = "no2_files"
-os.makedirs(download_folder, exist_ok=True)
-
-# 4. Download files with wget via subprocess
-for file_url in file_links:
-    local_path = os.path.join(download_folder, os.path.basename(file_url))
-    if not os.path.exists(local_path):
-        print(f"Downloading {file_url} ...")
-        subprocess.run(["wget", "-nc", "-P", download_folder, file_url],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL)
-    else:
-        print(f"File {local_path} already exists, skipping.")
+pattern = "https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/NO2_L3_Gridded_NAmerica/PACE_NO2_Gridded_*.nc"
+results = fs.glob(pattern)
+paths = [fs.open(i, cache_type="blockcache") for i in results]
 ```
 
-Now we will combine the files into one `xarray` dataset. We will include a new time dimension by grabbing the date in the filename.
+Now we will combine the files into one `xarray` dataset, for which we have to access one group at a time within the hierarchichal datasets.
 
 ```{code-cell} ipython3
-folder = "no2_files"
-files = sorted([
-    os.path.join(folder, f)
-    for f in os.listdir(folder)
-    if f.endswith(".nc")])
-
-def extract_time(filename):
-    # Extract pattern like 2024m0401 → 2024-04-01
-    match = re.search(r"(\d{4})m(\d{2})(\d{2})", filename)
-    if match:
-        year, month, day = match.groups()
-        return pd.to_datetime(f"{year}-{month}-{day}")
-    else:
-        raise ValueError(f"Can't parse date from filename: {filename}")
-
-datasets = []
-for f in files:
-    ds = xr.open_datatree(f)  
-    ds = xr.merge(ds.to_dict().values())
-    ds = ds.swap_dims({"nlat":"latitude", "nlon":"longitude"})
-    ds = ds.expand_dims(time=[extract_time(f)])
-    datasets.append(ds)
-
-# Concatenate along the time dimension
-all_no2_dat = xr.concat(datasets, dim="time")
-all_no2_dat
+%%time
+# FIXME determine whether this is the fastest it can be
+dataset = xr.open_mfdataset(
+    paths,
+    group="geophysical_data",
+    concat_dim="time",
+    combine="nested",
+)
 ```
 
-Let's select the nearest pixel at 34, -118.
+We can get the spatial coordinates from the first granule, since these are invariant.
+We have concatenated along a new dimension (i.e. a dimension not present in the datasets). To incorporate the temporal coordinates, we can add a variable for the "time" dimension by grabbing it from the filename.
 
 ```{code-cell} ipython3
-no2_sel = all_no2_dat.sel(latitude=34, longitude=-118, method="nearest")
-no2_sel
+space = xr.open_dataset(paths[0], group="navigation_data")
+time = [datetime.strptime(i[-12:-3], "%Ym%m%d") for i in results]
+dataset = (
+    xr.merge((dataset, space, {"time": ("time", time)}))
+    .swap_dims(swap_dims)
+)
+```
+
+Let's select the nearest pixel to 34°N, 118°W.
+
+```{code-cell} ipython3
+array = (
+    dataset["nitrogen_dioxide_total_vertical_column"]
+    .sel({"latitude": 34, "longitude": -118}, method="nearest")
+)
+array
 ```
 
 You can see how this selection creates a new 1D dataset with values for one pixel across time. Let's plot it using `hvplot`.
 
 ```{code-cell} ipython3
-line = no2_sel.hvplot.line(
-    x="time",
-    y="nitrogen_dioxide_total_vertical_column",
-    line_width=2,
-    color="darkblue",
-    alpha=0.8,
-)
+line = array.hvplot.line(line_width=2, color="darkblue", alpha=0.8)
+dots = array.hvplot.scatter(size=20, color="crimson", marker="o", alpha=0.7)
+```
 
-dots = no2_sel.hvplot.scatter(
-    x="time",
-    y="nitrogen_dioxide_total_vertical_column",
-    size=20,
-    color="crimson",
-    marker="o",
-    alpha=0.7
-)
+We've created two plots, and now we combine them, add styling, and display.
 
-# Combine and add styling
+```{code-cell} ipython3
 (line * dots).opts(
     title="Time series of total vertical column NO₂ at (34, -118)",
     width=800,
@@ -286,6 +229,6 @@ dots = no2_sel.hvplot.scatter(
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook introducing NO$_\mathrm{2}$ data products from OCI. We suggest looking at the notebook on "Orientation to PACE/OCI Terrestrial Products" tutorial to learn more about the terrestrial data products that can be derived from PACE. 
+You have completed the notebook introducing NO<sub>2</sub> data products from OCI. We suggest looking at the notebook on "Orientation to PACE/OCI Terrestrial Products" tutorial to learn more about the terrestrial data products that can be derived from PACE. 
 
 </div>
