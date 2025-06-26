@@ -30,12 +30,14 @@ By the end of this tutorial you will be able to:
 
 ## 1. Setup
 
+```{code-cell} ipython3
 from matplotlib.pyplot import imshow
 from pystac_client import Client
 import rasterio as rio
 import boto3
 import xarray as xr
 import rioxarray
+```
 
 ## 2. Search
 
