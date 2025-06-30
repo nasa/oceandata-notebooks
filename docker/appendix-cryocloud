@@ -1,0 +1,38 @@
+USER root
+
+# helpful system configurations
+# TODO: https://github.com/jupyterlab/jupyterlab-git/issues/1369
+RUN git config --system credential.helper 'cache --timeout=36000 --socket /tmp/.git-credential-cache/socket' \
+ && sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
+COPY src/prefix/ ${NB_PYTHON_PREFIX}/
+
+# install aws cli
+ADD https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip ./
+RUN unzip -q aws*.zip \
+ && ./aws/install \
+ && rm -rf aws*
+
+# install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
+ARG OCSSWTAG=V2025.1
+ARG OCSSWROOT=/opt/ocssw
+ADD https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw ./
+ADD https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py ./
+RUN chmod +x install_ocssw \
+ && ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt \
+ && ln -s /home/${NB_USER}/shared-public/pace-hackweek/ocssw/share ${OCSSWROOT} \
+ && ln -s /home/${NB_USER}/shared-public/pace-hackweek/ocssw/var ${OCSSWROOT} \
+ && rm install_ocssw manifest.py
+
+USER ${NB_USER}
+
+# install (locked) dependencies for oceandata-notebooks[docker]
+RUN pip install --no-cache-dir --no-deps \
+      --no-binary h5py \
+      --no-binary netcdf4 \
+      -r requirements.txt
+
+# environment variables
+ENV EDITOR=nano OCSSWROOT=${OCSSWROOT}
+
+# TODO: https://github.com/jupyterhub/repo2docker/issues/1374
+CMD ["jupyter", "lab", "--no-browser", "--ip", "0.0.0.0"]
