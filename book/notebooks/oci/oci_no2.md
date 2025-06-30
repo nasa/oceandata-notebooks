@@ -1,8 +1,8 @@
 ---
 kernelspec:
-  name: python3
-  display_name: Python 3 (ipykernel)
+  display_name: custom
   language: python
+  name: custom
 ---
 
 # Exploring nitrogen dioxide (NO<sub>2</sub>) data from OCI 
@@ -60,6 +60,8 @@ import matplotlib.colors
 import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
+import holoviews
+holoviews.config.image_rtol = 1e-2 
 
 swap_dims = {"nlon": "longitude", "nlat": "latitude"}
 ```
@@ -118,7 +120,7 @@ dataset["nitrogen_dioxide_total_vertical_column"].plot(
 plt.show()
 ```
 
-Let's zoom in to Los Angeles, California ... i.e. the bright red blob in the lower left.
+Let's zoom in to Los Angeles, California ... i.e., the bright red blob in the lower left.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
@@ -145,7 +147,9 @@ These are 10-meter Eastward Wind, and 10-meter Northward Wind, respectively.
 An interative plot allows you to engage with the data such as zooming, panning, and hovering over for more information. We will use the `hvplot` accessor on XArray data structures to make an interactive plot of the single file we accessed above.
 
 ```{code-cell} ipython3
-# FIXME resolve `WARNING:param.Image00346: Image dimension longitude is  not evenly sampled to relative tolerance of 0.001. Please use the QuadMesh element for irregularly sampled data or set a higher tolerance on hv.config.image_rtol or the rtol parameter in the Image constructor.`
+import holoviews as hv
+hv.config.image_rtol = 1e-2 
+
 dataset["nitrogen_dioxide_total_vertical_column"].hvplot(
     x="longitude",
     y="latitude",
@@ -165,6 +169,8 @@ dataset["nitrogen_dioxide_total_vertical_column"].hvplot(
 Since there are many NO<sub>2</sub> granules available for testing, we can make a time series of NO<sub>2</sub> concentrations over time. First, we have to get URLs for all the granules and "open" them for streaming. Alternatively, `fs.get` could be used to download files locally, but we don't want to duplicate data storage if working in the commercial cloud.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 pattern = "https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/NO2_L3_Gridded_NAmerica/PACE_NO2_Gridded_*.nc"
 results = fs.glob(pattern)
 paths = [fs.open(i, cache_type="blockcache") for i in results]
@@ -184,7 +190,7 @@ dataset = xr.open_mfdataset(
 ```
 
 We can get the spatial coordinates from the first granule, since these are invariant.
-We have concatenated along a new dimension (i.e. a dimension not present in the datasets). To incorporate the temporal coordinates, we can add a variable for the "time" dimension by grabbing it from the filename.
+We have concatenated along a new dimension (i.e., a dimension not present in the datasets). To incorporate the temporal coordinates, we can add a variable for the "time" dimension by grabbing it from the filename.
 
 ```{code-cell} ipython3
 space = xr.open_dataset(paths[0], group="navigation_data")
