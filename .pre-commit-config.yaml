@@ -69,5 +69,5 @@ repos:
         additional_dependencies:
           - jupyter-repo2docker==2024.7.0
         pass_filenames: false
-        entry: repo2docker --appendix "$(< docker/appendix)" --no-run docker
+        entry: repo2docker --Repo2Docker.platform=linux/amd64 --appendix "$(< docker/appendix)" --no-run docker
         files: ^docker/.*$
