@@ -6,12 +6,6 @@ RUN git config --system credential.helper 'cache --timeout=36000 --socket /tmp/.
  && sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
 COPY src/prefix/ ${NB_PYTHON_PREFIX}/
 
-# install aws cli
-ADD https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip ./
-RUN unzip -q aws*.zip \
- && ./aws/install \
- && rm -rf aws*
-
 # install OCSSW core files (i.e. without $OCSSWROOT/share or $OCSSWROOT/var)
 ARG OCSSWTAG=V2025.1
 ARG OCSSWROOT=/opt/ocssw
@@ -31,7 +25,4 @@ RUN pip install --no-cache-dir --no-deps \
       -r requirements.txt
 
 # environment variables
-ENV EDITOR=nano OCSSWROOT=${OCSSWROOT}
-
-# TODO: https://github.com/jupyterhub/repo2docker/issues/1374
-CMD ["jupyter", "lab", "--no-browser", "--ip", "0.0.0.0"]
+ENV OCSSWROOT=${OCSSWROOT}
