@@ -57,17 +57,7 @@ repos:
         stages: [ manual ]
         language: python
         additional_dependencies:
-          - jupyter-repo2docker==2024.7.0
+          - "jupyter-repo2docker @ git+https://github.com/jupyterhub/repo2docker@5d3a946b24608f1856218eb89861d552e9b826af"
         pass_filenames: false
         entry: repo2docker --Repo2Docker.platform=linux/amd64 --volume docker/requirements.in:./out docker sh -c "pip list --format=freeze > out"
         files: ^docker/environment\.yml$
-      - id: repo2docker-build
-        name: repo2docker-build
-        description: Call repo2docker (with --no-run) to confirm successfull build.
-        stages: [ manual ]
-        language: python
-        additional_dependencies:
-          - jupyter-repo2docker==2024.7.0
-        pass_filenames: false
-        entry: repo2docker --Repo2Docker.platform=linux/amd64 --appendix "$(< docker/appendix)" --no-run docker
-        files: ^docker/.*$

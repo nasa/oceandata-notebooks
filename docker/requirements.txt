@@ -525,7 +525,7 @@ multipledispatch==1.0.0
     # via datashader
 mypy-extensions==1.0.0
     # via black
-narwhals==1.44.0
+narwhals==1.45.0
     # via
     #   -r docker/requirements.in
     #   bokeh
