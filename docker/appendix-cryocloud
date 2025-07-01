@@ -27,7 +27,6 @@ USER ${NB_USER}
 
 # install (locked) dependencies for oceandata-notebooks[docker]
 RUN pip install --no-cache-dir --no-deps \
-      --no-binary h5py \
       --no-binary netcdf4 \
       -r requirements.txt
 
