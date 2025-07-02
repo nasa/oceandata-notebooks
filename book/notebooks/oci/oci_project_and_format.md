@@ -1,8 +1,8 @@
 ---
 kernelspec:
-  name: python3
   display_name: Python 3 (ipykernel)
   language: python
+  name: python3
 ---
 
 # Reprojecting and Formatting PACE OCI Data
@@ -60,7 +60,7 @@ from xarray.backends.api import open_datatree
 
 The goal of this tutorial is to reproject and convert L2 PACE data between formats, but L2 PACE data comes in many forms. We'll cover two examples here - one with 3-dimensional surface reflectance (SFREFL) data, and one with 2-dimensional vegetation index (VI) data - to illustrate how these datasets need to be handled.
 
-The following cells use `earthaccess` to set and persist your Earthdata login credentials, then search for and download the relevant datasets for a scene covering eastern North America. 
+The following cells use `earthaccess` to set and persist your Earthdata login credentials, then search for and download the relevant datasets for a scene covering eastern North America.
 
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
@@ -141,7 +141,7 @@ vi_src.cire.plot(cmap="magma", vmin=0, vmax=5)
 plt.show()
 ```
 
-Now that our dataset represents only (relatively) clear-sky pixels, we can move on to steps 2 - 4 of the reprojection, that is, assigning coordinates, spatial reference, and a CRS to the data. Note that this has to be done after the masking due to issues in the reprojection step if the order if flipped. 
+Now that our dataset represents only (relatively) clear-sky pixels, we can move on to steps 2 - 4 of the reprojection, that is, assigning coordinates, spatial reference, and a CRS to the data. Note that this has to be done after the masking due to issues in the reprojection step if the order if flipped.
 
 ```{code-cell} ipython3
 vi_src.coords["longitude"] = vi_dt["navigation_data"]["longitude"]
@@ -153,7 +153,7 @@ vi_src
 
 If we compare `vi_src` before and after these steps, it looks like nothing much has changed. However, you can see that under `Coordinates` we now have `longitude` and `latitude`, as well as the `spatial_ref` variable, which contains the spatial reference information necessary to reproject the data.
 
-In the next cell, we create a destination dataset, `vi_dst`, the projected version of the source dataset. The key parameter in this step is the `src_geoloc_array`, which is how we're able to feed the function our coordinate arrays and get out a projected dataset. In this example, we project into EPSG 4326, but any defined CRS can be used for the `dst_crs`. 
+In the next cell, we create a destination dataset, `vi_dst`, the projected version of the source dataset. The key parameter in this step is the `src_geoloc_array`, which is how we're able to feed the function our coordinate arrays and get out a projected dataset. In this example, we project into EPSG 4326, but any defined CRS can be used for the `dst_crs`.
 
 ```{code-cell} ipython3
 vi_dst = vi_src.rio.reproject(
@@ -193,7 +193,7 @@ Recalling from above, the surface reflectance variable `rhos` has dimensions (ro
 
 To put PACE reflectances in the correct dimensional order, all we have to do is transpose the data so that the wavelength dimension, `wavelength_3d`, is first. 
 
-Before this, we include code that renames the wavelength_3d variable to the center wavelength of each band. This makes it easier to select bands based on wavelength values versus just 1-122 numerical ordering. 
+Before this, we include code that renames the wavelength_3d variable to the center wavelength of each band. This makes it easier to select bands based on wavelength values versus just 1-122 numerical ordering.
 
 ```{code-cell} ipython3
 sr_dt["geophysical_data"] = sr_dt["geophysical_data"].to_dataset().assign_coords(sr_dt["sensor_band_parameters"].coords)
@@ -209,7 +209,7 @@ sr_src
 
 The `rhos` variable is now in dimension order (Z, Y, X), which will allow QGIS and other software with the same requirement to properly handle the surface reflectance data. Note that we are setting `sr_src` to include only `rhos` and not `l2_flags`. We separate these variables to allow for exporting in Section 3, as the `rio.to_raster` method cannot handle two dataarrays with different dimensions (i.e., 3D for `rhos` and 2D for `l2_flags`). That means if you want your surface reflectance data masked with any of the flags we explained above, you'll have to do it before the step above. 
 
-We can now complete the rest of the steps above to reproject the data. Remember that the coordinates of `sr_dst` will be renamed as "x" and "y" after the reprojection step, and while this has no effect on the results or the export, it can be fixed by adding the line `sr_dst = sr_dst.rename({"x":"longitude", "y":"latitude"})` to the end of the cell below. 
+We can now complete the rest of the steps above to reproject the data. Remember that the coordinates of `sr_dst` will be renamed as "x" and "y" after the reprojection step, and while this has no effect on the results or the export, it can be fixed by adding the line `sr_dst = sr_dst.rename({"x":"longitude", "y":"latitude"})` to the end of the cell below.
 
 ```{code-cell} ipython3
 sr_src.coords["longitude"] = sr_dt["navigation_data"]["longitude"]
@@ -243,14 +243,16 @@ plt.show()
 
 ## 3. Exporting to GeoTIFF
 
-Now that we have two georeferenced, projected datasets of surface reflectances and VIs, you can export them to your preferred format. Here, we export to GeoTIFF using the "GTiff" driver and applicable profile options. 
+Now that we have two georeferenced, projected datasets of surface reflectances and VIs, you can export them to your preferred format. Here, we export to a Cloud Optimized Geotiff, or COG, using the "COG" driver with applicable profile options. 
+
+COGs are a subset of Geotiffs which have been optimized to work in cloud environments - if you are not working in the cloud, you don't have to worry, as COGs are backwards compatible with Geotiffs. That is, any software that can be used to analyze a Geotiff can also be used with COGs. For more information on the COG format, please see the [cogeo website](https://cogeo.org/). There is also a very useful plug in for rasterio called `rio-cogeo` for creating/validating COGs, documentation for which can be found [here](https://cogeotiff.github.io/rio-cogeo/).
 
 We do this by creating a profile from the destination datasets (`sr_dst` or `vi_dst`) and using the `rio.to_raster()` method. Each of the profile options is necessary for the format conversion, but can be changed to user preference as necessary. For example, if you prefer a different `nodata` value or have a specific Affine `transform` for the dataset that would better serve your needs, substitute those values in the dictionaries below.
 
 ```{code-cell} ipython3
-sr_dst_name = Path(sr_path).with_suffix(".tif") 
+sr_dst_name = "data/sr_whole_script_cog_test.tif"#Path(sr_path).with_suffix(".tif") 
 profile = {
-    "driver": "GTiff",
+    "driver": "COG",
     "width": sr_dst.shape[2],
     "height": sr_dst.shape[1],
     "count": sr_dst.shape[0],
@@ -258,14 +260,13 @@ profile = {
     "dtype": sr_dst.dtype,
     "transform": sr_dst.rio.transform(),
     "compress": "lzw",
-    "nodata": np.nan,
-    "tiled": True                           
+    "nodata": np.nan                      
     }
 sr_dst.rio.to_raster(sr_dst_name, **profile)
 
-vi_dst_name = Path(vi_path).with_suffix(".tif")
+vi_dst_name = "data/vi_whole_script_cog_test.tif"#Path(vi_path).with_suffix(".tif")
 profile = {
-    "driver": "GTiff",
+    "driver": "COG",
     "width": vi_dst.cire.shape[1],
     "height": vi_dst.cire.shape[0],
     "count": 11,
@@ -273,8 +274,7 @@ profile = {
     "dtype": vi_dst.cire.dtype,
     "transform": vi_dst.rio.transform(),
     "compress": "lzw",
-    "nodata": np.nan,
-    "tiled": True                           
+    "nodata": np.nan                        
     }
 vi_dst.rio.to_raster(vi_dst_name, **profile)
 ```
@@ -326,7 +326,7 @@ def nc_to_gtiff(fpath):
         
     dst_name = Path(fpath).with_suffix(".tif")
     profile = {
-        "driver": "GTiff", 
+        "driver": "COG", 
         "width": width,
         "height": height,
         "count": count,
@@ -334,8 +334,7 @@ def nc_to_gtiff(fpath):
         "dtype": dtype,
         "transform": dst.rio.transform(),
         "compress": "lzw",
-        "nodata": np.nan,
-        "tiled": True
+        "nodata": np.nan
     }
     
     dst.rio.to_raster(dst_name, **profile)
@@ -368,7 +367,7 @@ elif "LANDVI" in paths[0]:
     ds = xr.open_dataset(paths[0]).drop_vars("palette")
     
 ds = ds.rio.write_crs("epsg:4326")
-ds.rio.to_raster(Path(paths[0]).with_suffix(".tif"))
+ds.rio.to_raster(Path(paths[0]).with_suffix(".tif"), driver="COG")
 ```
 
 [back to top](#Contents)
