@@ -24,7 +24,7 @@ This notebook will use `rioxarray` to reproject PACE OCI data from the instrumen
 
 ## Learning Objectives
 
-At the end of this notebook you will know:
+At the end of this notebook you will know how to:
 
 - Open PACE OCI surface reflectance and vegetation index products
 - Reproject those data into defined coordinate reference systems
@@ -33,15 +33,15 @@ At the end of this notebook you will know:
 ## Contents
 
 1. [Setup](#1.-Setup)
-2. [Reprojecting Level 2 PACE Data](#2.-Reprojecting-L2-PACE-Data)
+2. [Reprojecting Level-2 PACE Data](#2.-Reprojecting-Level-2-PACE-Data)
 3. [Exporting to GeoTIFF](#3.-Exporting-to-GeoTIFF)
-4. [About Converting Level 3 Data to GeoTIFF](#4.-A-Note-Converting-About-Level-3-Data)
+4. [Converting Level-3 Data to GeoTIFF](#4.-Converting-Level-3-Data-to-GeoTIFF)
 
 +++
 
 ## 1. Setup
 
-Begin by importing all of the packages used in this notebook. Please ensure your environment has the most recent versions of `rioxarray` and `rasterio`, as the functionality allowing us to correctly convert PACE Level 2 (L2) files to GeoTIFF is relatively new.
+Begin by importing all of the packages used in this notebook. Please ensure your environment has the most recent versions of `rioxarray` and `rasterio`, as the functionality allowing us to correctly convert PACE Level-2 (L2) files to GeoTIFF is relatively new.
 
 ```{code-cell} ipython3
 from pathlib import Path
@@ -68,11 +68,8 @@ results = earthaccess.search_data(
     short_name=["PACE_OCI_L2_SFREFL", "PACE_OCI_L2_LANDVI"],
     granule_name="*20240701T175112*",
 )
-results[0]
-```
-
-```{code-cell} ipython3
-results[1]
+for item in results:
+    display(item)
 ```
 
 ```{code-cell} ipython3
@@ -83,7 +80,8 @@ paths = earthaccess.download(results, local_path="data")
 
 +++
 
-## 2. Reprojecting L2 PACE Data
+## 2. Reprojecting Level-2 PACE Data
+
 ### 2.1. 2D Variables - Vegetation Indices
 
 All of PACE's L2 data are still in the instrument swath - in other words, they are not projected to any sort of regular grid, which makes comparing between satellites, or even between two PACE granules in the same location, difficult. However, each pixel is geolocated (i.e., has an associated latitude and longitude), meaning we can reproject our data onto a grid to make working with it more intuitive. 
@@ -348,9 +346,9 @@ def nc_to_gtiff(fpath):
 nc_to_gtiff(vi_path)
 ```
 
-## 4. A Note About Converting Level 3 Data to GeoTIFF
+## 4. Converting Level-3 Data to GeoTIFF
 
-Level 3 PACE data is already mapped to a Plate Carrée projection - in other words, unless you want the data in another projection, you don't need to reproject as we did for the Level 2 data above. In order to convert these files from NetCDF to GeoTIFF, all you need is to transpose the datasets as necessary and assign a CRS.
+Level-3 data is already mapped to a Plate Carrée projection--in other words, unless you want the data in another projection, you don't need to reproject as we did for the Level-2 data above. In order to convert these files from NetCDF to GeoTIFF, all you need is to transpose the datasets as necessary and assign a CRS.
 
 +++
 
