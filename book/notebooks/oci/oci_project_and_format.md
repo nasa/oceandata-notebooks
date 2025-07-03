@@ -96,8 +96,8 @@ vi_path, sr_path = paths[0], paths[1]
 sr_dt = xr.open_datatree(sr_path)
 vi_dt = xr.open_datatree(vi_path)
 
-print("Surface reflectance dimensions: ", sr_dt.geophysical_data.rhos.dims)
-print("Vegetation index dimensions: ", vi_dt.geophysical_data.cire.dims)
+print("Surface reflectance dimensions: ", sr_dt["geophysical_data"]["rhos"].dims)
+print("Vegetation index dimensions: ", vi_dt["geophysical_data"]["cire"].dims)
 ```
 
 As we can see, the dimensions between the variables in both datasets differ. The surface reflectance contained in the `rhos` variable have 3 dimensions corresponding to (rows, columns, wavelength), while each VI variable (e.g., `ndvi` or `cire`) is a 2D variable with (row, column) dimensions. 
@@ -105,7 +105,7 @@ As we can see, the dimensions between the variables in both datasets differ. The
 If we plot one of these variables, we'll see that they aren't on any sort of regular spatial grid, and will instead be plotted by their row (`number_of_lines`) and column (`pixels_per_line`) indices as any non-geospatial array would be.
 
 ```{code-cell} ipython3
-vi_dt.geophysical_data.cire.plot(cmap="magma", vmin=0, vmax=5)
+vi_dt["geophysical_data"]["cire"].plot(cmap="magma", vmin=0, vmax=5)
 plt.show()
 ```
 
@@ -130,8 +130,8 @@ The `cf_xarray` package allows us to interpret [CF-compliant](http://cfconventio
 L2 PACE data has multiple quality flags we could apply, but here we will only mask for `CLDICE`, the flag for cloudy pixels. The names of each available flag and what they mean can be found at [this link](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/).
 
 ```{code-cell} ipython3
-if vi_src.l2_flags.cf.is_flag_variable:
-    cloud_mask = ~(vi_src.l2_flags.cf == "CLDICE")
+if vi_src["l2_flags"].cf.is_flag_variable:
+    cloud_mask = ~(vi_src["l2_flags"].cf == "CLDICE")
     vi_src = vi_src.where(cloud_mask)
 ```
 
@@ -178,7 +178,7 @@ ax.coastlines(linewidth=0.5)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
-vi_dst.cire.plot(cmap="magma", vmin=0, vmax=5)
+vi_dst["cire"].plot(cmap="magma", vmin=0, vmax=5)
 plt.title("")
 plt.show()
 ```
@@ -272,11 +272,11 @@ sr_dst.rio.to_raster(sr_dst_name, **profile)
 vi_dst_name = "data/vi_whole_script_cog_test.tif"  # Path(vi_path).with_suffix(".tif")
 profile = {
     "driver": "COG",
-    "width": vi_dst.cire.shape[1],
-    "height": vi_dst.cire.shape[0],
+    "width": vi_dst["cire"].shape[1],
+    "height": vi_dst["cire"].shape[0],
     "count": 11,
     "crs": vi_dst.rio.crs,
-    "dtype": vi_dst.cire.dtype,
+    "dtype": vi_dst["cire"].dtype,
     "transform": vi_dst.rio.transform(),
     "compress": "lzw",
     "nodata": np.nan,
@@ -302,8 +302,8 @@ def nc_to_gtiff(fpath):
         src = dt["geophysical_data"]["rhos"].transpose("wavelength_3d", ...)
     elif "LANDVI" in fpath:
         src = dt["geophysical_data"].to_dataset()
-        if src.l2_flags.cf.is_flag_variable:
-            cloud_mask = ~(src.l2_flags.cf == "CLDICE")
+        if src["l2_flags"].cf.is_flag_variable:
+            cloud_mask = ~(src["l2_flags"].cf == "CLDICE")
             src = src.where(cloud_mask)
     else:
         print(
@@ -325,8 +325,8 @@ def nc_to_gtiff(fpath):
         width, height, count = dst.shape[2], dst.shape[1], dst.shape[0]
         dtype = dst.dtype
     elif "LANDVI" in fpath:
-        width, height, count = dst.cire.shape[1], dst.cire.shape[0], 11
-        dtype = dst.cire.dtype
+        width, height, count = dst["cire"].shape[1], dst["cire"].shape[0], 11
+        dtype = dst["cire"].dtype
 
     dst_name = Path(fpath).with_suffix(".tif")
     profile = {
