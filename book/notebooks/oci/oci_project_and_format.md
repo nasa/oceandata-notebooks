@@ -46,15 +46,15 @@ Begin by importing all of the packages used in this notebook. Please ensure your
 ```{code-cell} ipython3
 from pathlib import Path
 
-import earthaccess
-import rasterio
-import xarray as xr
-import numpy as np
-import rioxarray as rio
 import cartopy
 import cartopy.crs as ccrs
-import matplotlib.pyplot as plt
 import cf_xarray  # noqa: F401
+import earthaccess
+import matplotlib.pyplot as plt
+import numpy as np
+import rasterio
+import rioxarray as rio
+import xarray as xr
 ```
 
 The goal of this tutorial is to reproject and convert L2 PACE data between formats, but L2 PACE data comes in many forms. We'll cover two examples here - one with 3-dimensional surface reflectance (SFREFL) data, and one with 2-dimensional vegetation index (VI) data - to illustrate how these datasets need to be handled.
@@ -65,7 +65,7 @@ The following cells use `earthaccess` to set and persist your Earthdata login cr
 auth = earthaccess.login(persist=True)
 
 results = earthaccess.search_data(
-    short_name=["PACE_OCI_L2_SFREFL","PACE_OCI_L2_LANDVI"],
+    short_name=["PACE_OCI_L2_SFREFL", "PACE_OCI_L2_LANDVI"],
     granule_name="*20240701T175112*",
 )
 results[0]
@@ -131,7 +131,7 @@ L2 PACE data has multiple quality flags we could apply, but here we will only ma
 
 ```{code-cell} ipython3
 if vi_src.l2_flags.cf.is_flag_variable:
-    cloud_mask = ~(vi_src.l2_flags.cf=="CLDICE")
+    cloud_mask = ~(vi_src.l2_flags.cf == "CLDICE")
     vi_src = vi_src.where(cloud_mask)
 ```
 
@@ -146,7 +146,8 @@ Now that our dataset represents only (relatively) clear-sky pixels, we can move 
 vi_src.coords["longitude"] = vi_dt["navigation_data"]["longitude"]
 vi_src.coords["latitude"] = vi_dt["navigation_data"]["latitude"]
 
-vi_src = vi_src.rio.set_spatial_dims("pixels_per_line", "number_of_lines").rio.write_crs("epsg:4326")
+vi_src = vi_src.rio.set_spatial_dims("pixels_per_line", "number_of_lines")
+vi_src = vi_src.rio.write_crs("epsg:4326")
 vi_src
 ```
 
@@ -195,7 +196,11 @@ To put PACE reflectances in the correct dimensional order, all we have to do is 
 Before this, we include code that renames the wavelength_3d variable to the center wavelength of each band. This makes it easier to select bands based on wavelength values versus just 1-122 numerical ordering.
 
 ```{code-cell} ipython3
-sr_dt["geophysical_data"] = sr_dt["geophysical_data"].to_dataset().assign_coords(sr_dt["sensor_band_parameters"].coords)
+sr_dt["geophysical_data"] = (
+    sr_dt["geophysical_data"]
+    .to_dataset()
+    .assign_coords(sr_dt["sensor_band_parameters"].coords)
+)
 sr_dt["geophysical_data"]
 ```
 
@@ -214,7 +219,8 @@ We can now complete the rest of the steps above to reproject the data. Remember 
 sr_src.coords["longitude"] = sr_dt["navigation_data"]["longitude"]
 sr_src.coords["latitude"] = sr_dt["navigation_data"]["latitude"]
 
-sr_src = sr_src.rio.set_spatial_dims("pixels_per_line", "number_of_lines").rio.write_crs("epsg:4326")
+sr_src = sr_src.rio.set_spatial_dims("pixels_per_line", "number_of_lines")
+sr_src = sr_src.rio.write_crs("epsg:4326")
 
 sr_dst = sr_src.rio.reproject(
     dst_crs=sr_src.rio.crs,
@@ -222,7 +228,7 @@ sr_dst = sr_src.rio.reproject(
         sr_src.coords["longitude"],
         sr_src.coords["latitude"],
     ),
-    nodata=np.nan
+    nodata=np.nan,
 )
 ```
 
@@ -235,7 +241,7 @@ ax.coastlines(linewidth=0.5)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
 ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
-sr_dst.sel({"wavelength_3d":860}).plot(cmap="Greys_r", vmin=0, vmax=1, zorder=101)
+sr_dst.sel({"wavelength_3d": 860}).plot(cmap="Greys_r", vmin=0, vmax=1, zorder=101)
 plt.title("")
 plt.show()
 ```
@@ -249,7 +255,7 @@ COGs are a subset of Geotiffs which have been optimized to work in cloud environ
 We do this by creating a profile from the destination datasets (`sr_dst` or `vi_dst`) and using the `rio.to_raster()` method. Each of the profile options is necessary for the format conversion, but can be changed to user preference as necessary. For example, if you prefer a different `nodata` value or have a specific Affine `transform` for the dataset that would better serve your needs, substitute those values in the dictionaries below.
 
 ```{code-cell} ipython3
-sr_dst_name = "data/sr_whole_script_cog_test.tif"#Path(sr_path).with_suffix(".tif") 
+sr_dst_name = "data/sr_whole_script_cog_test.tif"  # Path(sr_path).with_suffix(".tif")
 profile = {
     "driver": "COG",
     "width": sr_dst.shape[2],
@@ -259,11 +265,11 @@ profile = {
     "dtype": sr_dst.dtype,
     "transform": sr_dst.rio.transform(),
     "compress": "lzw",
-    "nodata": np.nan                      
-    }
+    "nodata": np.nan,
+}
 sr_dst.rio.to_raster(sr_dst_name, **profile)
 
-vi_dst_name = "data/vi_whole_script_cog_test.tif"#Path(vi_path).with_suffix(".tif")
+vi_dst_name = "data/vi_whole_script_cog_test.tif"  # Path(vi_path).with_suffix(".tif")
 profile = {
     "driver": "COG",
     "width": vi_dst.cire.shape[1],
@@ -273,8 +279,8 @@ profile = {
     "dtype": vi_dst.cire.dtype,
     "transform": vi_dst.rio.transform(),
     "compress": "lzw",
-    "nodata": np.nan                        
-    }
+    "nodata": np.nan,
+}
 vi_dst.rio.to_raster(vi_dst_name, **profile)
 ```
 
@@ -291,30 +297,29 @@ def nc_to_gtiff(fpath):
         fpath - Path to NetCDF file to convert
     """
     dt = xr.open_datatree(fpath)
-    
+
     if "SFREFL" in fpath:
         src = dt["geophysical_data"]["rhos"].transpose("wavelength_3d", ...)
     elif "LANDVI" in fpath:
         src = dt["geophysical_data"].to_dataset()
         if src.l2_flags.cf.is_flag_variable:
-            cloud_mask = ~(src.l2_flags.cf =="CLDICE")
+            cloud_mask = ~(src.l2_flags.cf == "CLDICE")
             src = src.where(cloud_mask)
     else:
-        print("File is neither the SFREFL nor LANDVI PACE suite, you'll have to adapt these methods yourself!")
+        print(
+            "File is neither the SFREFL nor LANDVI PACE suite, you'll have to adapt these methods yourself!"
+        )
         return
-        
+
     src.coords["longitude"] = dt["navigation_data"]["longitude"]
     src.coords["latitude"] = dt["navigation_data"]["latitude"]
-    src = (
-        src.rio.set_spatial_dims("pixels_per_line", "number_of_lines").rio.write_crs("epsg:4326")
-    )
+    src = src.rio.set_spatial_dims("pixels_per_line", "number_of_lines")
+    src = src.rio.write_crs("epsg:4326")
 
     dst = src.rio.reproject(
-        dst_crs=src.rio.crs, 
-        src_geoloc_array=(
-            src.coords["longitude"], 
-            src.coords["latitude"]),
-        )
+        dst_crs=src.rio.crs,
+        src_geoloc_array=(src.coords["longitude"], src.coords["latitude"]),
+    )
 
     if "SFREFL" in fpath:
         width, height, count = dst.shape[2], dst.shape[1], dst.shape[0]
@@ -322,10 +327,10 @@ def nc_to_gtiff(fpath):
     elif "LANDVI" in fpath:
         width, height, count = dst.cire.shape[1], dst.cire.shape[0], 11
         dtype = dst.cire.dtype
-        
+
     dst_name = Path(fpath).with_suffix(".tif")
     profile = {
-        "driver": "COG", 
+        "driver": "COG",
         "width": width,
         "height": height,
         "count": count,
@@ -333,9 +338,9 @@ def nc_to_gtiff(fpath):
         "dtype": dtype,
         "transform": dst.rio.transform(),
         "compress": "lzw",
-        "nodata": np.nan
+        "nodata": np.nan,
     }
-    
+
     dst.rio.to_raster(dst_name, **profile)
 ```
 
@@ -353,8 +358,9 @@ First, let's download a Level-3 Global Mapped Surface Reflectance file.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name = "PACE_OCI_L3M_LANDVI",
-    granule_name = "PACE_OCI.20240601_20240630.L3m.MO.LANDVI.V3_0.0p1deg.nc")
+    short_name="PACE_OCI_L3M_LANDVI",
+    granule_name="PACE_OCI.20240601_20240630.L3m.MO.LANDVI.V3_0.0p1deg.nc",
+)
 
 paths = earthaccess.download(results, local_path="data")
 ```
@@ -364,7 +370,7 @@ if "SFREFL" in paths[0]:
     ds = xr.open_dataset(paths[0]).rhos.transpose("wavelength", ...)
 elif "LANDVI" in paths[0]:
     ds = xr.open_dataset(paths[0]).drop_vars("palette")
-    
+
 ds = ds.rio.write_crs("epsg:4326")
 ds.rio.to_raster(Path(paths[0]).with_suffix(".tif"), driver="COG")
 ```
