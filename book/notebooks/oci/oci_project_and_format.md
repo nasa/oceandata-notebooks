@@ -55,7 +55,6 @@ import cartopy
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import cf_xarray  # noqa: F401
-from xarray.backends.api import open_datatree
 ```
 
 The goal of this tutorial is to reproject and convert L2 PACE data between formats, but L2 PACE data comes in many forms. We'll cover two examples here - one with 3-dimensional surface reflectance (SFREFL) data, and one with 2-dimensional vegetation index (VI) data - to illustrate how these datasets need to be handled.
@@ -94,8 +93,8 @@ As mentioned above, we're working with two data products in this tutorial. We'll
 ```{code-cell} ipython3
 vi_path, sr_path = paths[0], paths[1]
 
-sr_dt = open_datatree(sr_path)
-vi_dt = open_datatree(vi_path)
+sr_dt = xr.open_datatree(sr_path)
+vi_dt = xr.open_datatree(vi_path)
 
 print("Surface reflectance dimensions: ", sr_dt.geophysical_data.rhos.dims)
 print("Vegetation index dimensions: ", vi_dt.geophysical_data.cire.dims)
