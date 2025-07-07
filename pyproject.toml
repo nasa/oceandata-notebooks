@@ -62,7 +62,6 @@ docker = [
   "jupyterlab-h5web>=12.3.0",
   "jupytext>=1.16.4",
   "lz4>=4.3.3",
-  "pyinterp>=2024.6.0",
   "scikit-image>=0.24.0",
   "scikit-learn>=1.5.2",
   "uv>=0.4.27",
@@ -71,7 +70,6 @@ docker = [
 # packages that provide command-line tools for maintainers
 tools = [
   "jupyter-book<2",
-  "jupyter-repo2docker>=2024.7.0",
   "jupytext>=1.17.1",
   "pre-commit>=4.0.1",
   "ruff>=0.7.1",

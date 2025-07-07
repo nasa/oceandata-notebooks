@@ -1,9 +1,9 @@
 channels:
   - conda-forge
 dependencies:
+  - python=3.11
   - libnetcdf>=4.9.2
   - libgdal-core>=3.10.3
   - code-server>=4.23.1
   - pyinterp>=2024.11.0
-  - numpy<2.1 # limited by numba==0.60
-  - bokeh<3.5 # limited by geoviews==1.12
+  - numpy<2.3  # limited by numba==0.61.2

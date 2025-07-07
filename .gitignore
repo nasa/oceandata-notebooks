@@ -1,20 +1,5 @@
 .ipynb_checkpoints
 __pycache__
+.DS_Store
 /.python-version
 /notebooks
-
-# Mac
-.DS_Store
-.DS_Store?
-
-# TODO better build isolation could improve this mess
-/book/notebooks/*
-!/book/notebooks/oci
-/book/notebooks/oci/*
-!/book/notebooks/harp2
-/book/notebooks/harp2/*
-!/book/notebooks/modis
-/book/notebooks/modis/*
-!/book/notebooks/hackweek
-/book/notebooks/hackweek/*
-!/book/notebooks/**/*.md
