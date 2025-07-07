@@ -3,6 +3,7 @@ root: index
 parts:
   - caption: Help Hub Core
     chapters:
+      - file: notebooks/test
       - file: notebooks/oci/oci_data_access
       - file: notebooks/oci/oci_file_structure
       - file: notebooks/oci/oci_ocssw_install
@@ -26,4 +27,3 @@ parts:
       #         # TODO: try with image
       # - file: notebooks/hackweek/dask_gridding
       #         # TODO: try again!
-
