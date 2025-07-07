@@ -1,13 +1,5 @@
-"""Install kernels for Jupyter.
-
-The script installs an IPython kernel and a bash kernel from whatever Python
-interpreter was invoked. Because dependencies are defined, a "tool" manager
-(e.g. `pipx` or `uv`) will install these dependencies in an isolated environment
-before running the script from that envrionment.
-"""
-
 # /// script
-# requires-python = ">=3.12"
+# requires-python = ">=3.11"
 # dependencies = [
 #     "affine==2.4.0",
 #     "aiobotocore==2.15.1",
@@ -44,6 +36,7 @@ before running the script from that envrionment.
 #     "distributed==2024.9.1",
 #     "earthaccess==0.11.0",
 #     "executing==2.1.0",
+#     "filelock==3.18.0",
 #     "fonttools==4.54.1",
 #     "frozenlist==1.4.1",
 #     "fsspec==2024.9.0",
@@ -73,12 +66,14 @@ before running the script from that envrionment.
 #     "matplotlib-inline==0.1.7",
 #     "mdit-py-plugins==0.4.2",
 #     "mdurl==0.1.2",
+#     "mpmath==1.3.0",
 #     "msgpack==1.1.0",
 #     "multidict==6.1.0",
 #     "multimethod==1.12",
 #     "multipledispatch==1.0.0",
 #     "nest-asyncio==1.6.0",
 #     "netcdf4==1.7.1.post2",
+#     "networkx==3.5",
 #     "numba==0.60.0",
 #     "numpy==2.0.2",
 #     "packaging==24.1",
@@ -112,13 +107,16 @@ before running the script from that envrionment.
 #     "s3fs==2024.9.0",
 #     "scipy==1.14.1",
 #     "seaborn==0.13.2",
+#     "setuptools==80.9.0",
 #     "shapely==2.0.6",
 #     "six==1.16.0",
 #     "sortedcontainers==2.4.0",
 #     "stack-data==0.6.3",
+#     "sympy==1.14.0",
 #     "tblib==3.0.0",
 #     "tinynetrc==1.3.1",
 #     "toolz==0.12.1",
+#     "torch==2.7.1",
 #     "tornado==6.4.1",
 #     "tqdm==4.66.5",
 #     "traitlets==5.14.3",
@@ -136,6 +134,13 @@ before running the script from that envrionment.
 #     "zict==3.0.0",
 # ]
 # ///
+"""Install kernels for Jupyter.
+
+The script installs an IPython kernel and a bash kernel from whatever Python
+interpreter was invoked. Because dependencies are defined, a "tool" manager
+(e.g. `pipx` or `uv`) will install these dependencies in an isolated environment
+before running the script from that envrionment.
+"""
 from argparse import ArgumentParser
 
 import bash_kernel.install
