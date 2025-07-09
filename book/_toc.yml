@@ -1,20 +1,19 @@
 format: jb-book
 root: index
 parts:
-  - caption: Help Hub Core
+  - caption: Help Hub
     chapters:
-      - file: notebooks/test
+      - file: notebooks/harp2/harp2_basic_visualizations
+      - file: notebooks/modis/modis_explore_l2
+              # WARNING: skipping unknown output mime type: application/json [mystnb.unknown_mime_type]
+      - file: notebooks/modis/modis_explore_l3
       - file: notebooks/oci/oci_data_access
       - file: notebooks/oci/oci_file_structure
       - file: notebooks/oci/oci_ocssw_install
       - file: notebooks/oci/oci_ocssw_processing
-      - file: notebooks/modis/modis_explore_l2
-              # WARNING: skipping unknown output mime type: application/json [mystnb.unknown_mime_type]
-      - file: notebooks/modis/modis_explore_l3
+      - file: notebooks/oci/ml_cloud_mask
       - file: notebooks/oci/oci_terrestrial_data
               # WARNING: skipping unknown output mime type: application/vnd.holoviews_load.v0+json [mystnb.unknown_mime_type]
-      - file: notebooks/harp2/harp2_basic_visualizations
-      - file: notebooks/oci/ml_cloud_mask
   # - caption: Hackweek
   #   chapters:
   #     - file: notebooks/hackweek/earthdata_cloud_access

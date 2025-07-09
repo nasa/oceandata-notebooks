@@ -100,25 +100,20 @@ python -m http.server -d book/_build/html
 > [!Note]
 > On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
 
-+++
-
 The `_templates` make the website very plain, on purpose, for the benefit of the website.
 For a navigable website with the same content, comment out the `templates_path` part of `book/_config.yml` and rebuild the website.
-
-+++
 
 ## Dependencies
 
 For every `import` statement, or if a notebook requires a package to be installed for a backend (e.g. h5netcdf),
 make sure the package is listed in the `notebooks` array under the `dependency-groups` table in `pyproject.toml`.
-You can add entries manually or using `uv add`.
+You can add entries manually or using `uv add`, for example:
 
-```shell
-uv add --group notebooks scipy
+```{code-cell}
+uv add --group notebooks xarray
 ```
 
-The other keys in the `dependency-groups` table provide additional dependencies,
-which are needed for a working Jupyter kernel, for a complete JupyterLab in a Docker image, or for maintenance tasks.
+The other keys in the `dependency-groups` table provide the additional dependencies needed for a working Jupyter kernel, for a complete JupyterLab in a container image, or for maintenance tasks.
 
 > [!Important]
 > - No `requirements.*` file in this repository should be manually edited.
@@ -126,7 +121,18 @@ which are needed for a working Jupyter kernel, for a complete JupyterLab in a Do
 >   - python: docker/environment.yml
 >   - jupyter-repo2docker: .pre-commit-config.yaml
 
-+++
+The ontology of the `requirements.*` files is a bit complicated, but updates happen automatically by `pre-commit` when necessary, i.e. when there are changes to `pyproject.toml`, `docker/environment.yml`, or the `repo2docker` version.
+The `docker/environment.yml` file is there for non-Python packages needed from conda-forge, as well as some special Python packages.
+We use PyPI for Python packages when able.
+
+1. `requirements.txt` lists the packages needed in `book/setup.py` (compile-kernel-dependencies)
+1. `docker/requirements.txt` lists the packages needed in the container image (compile-docker-dependencies)
+1. `docker/requirements.in` lists the packages resulting from `repo2docker` and `docker/environment.yml` (repo2docker-requirements)
+
+> [!Note]
+> Having a top-level `requirements.txt` file also makes our tutorials work on [Binder] ... most of them anyways.
+
+[Binder]: https://mybinder.org/
 
 ## (WIP) Automation and Checks
 
@@ -164,19 +170,6 @@ repo2docker \
     --appendix "$(< docker/appendix-cryocloud)" \
     --user-id 1000 \
     --user-name jovyan \
-    --no-run
+    --no-run \
     docker
 ```
-
-The configuration files are a bit complicated, but updated automatically by `pre-commit` when necessary, i.e. when there are changes to `pyproject.toml` or `docker/environment.yml`.
-The `docker/environment.yml` file is there for non-Python packages needed from conda-forge.
-We use PyPI for Python packages.
-
-1. `requirements.txt` has the packages needed in `book/setup.py`
-1. `docker/requirements.in` has the packages from repo2docker and `docker/environment.yml`
-1. `docker/requirements.txt` has the packages needed in the Docker image
-
-> [!Note]
-> Having a top-level `requirements.txt` file also makes our tutorials work on [Binder] ... most of them anyways.
-
-[Binder]: https://mybinder.org/
