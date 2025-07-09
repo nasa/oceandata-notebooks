@@ -5,35 +5,34 @@ kernelspec:
   display_name: Bash
 ---
 
-# Contributor's Guide
+# Maintainer's Guide
 
-We are happy to have your help maintaining the repo of data recipes for  of the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
+We are glad you're here to help maintain tutorials for the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
+
 The following subsections provide additional information on the structure of this repo and maintenaner tasks.
 Maintainers are responsible for building HTML files for publishing the content on the [Help Hub], which also tests that the notebooks run successfully in an isolated Python environment.
-Here is how select contents of this repo map to the sections below:
+Here is how some of the contents of this repo map to the subsections below:
 
 ```shell
 .
 ├── CONTRIBUTING.md          # YOU ARE HERE
-├── uv.lock                  # Isolated Environment
-├── book                     # Rendering to HTML
-├── pyproject.toml           # Dependencies
-├── .pre-commit-config.yaml  # Automation and Checks
-└── docker                   # Image for a JupyterHub
+├── uv.lock                  # -> Isolated Environment
+├── book                     # -> Rendering to HTML
+├── pyproject.toml           # -> Dependencies
+├── .pre-commit-config.yaml  # -> Automation and Checks
+└── docker                   # -> Container Image for a JupyterHub
 ```
 
 [OB]: https://www.earthdata.nasa.gov/centers/ob-daac
 [Help Hub]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
 
-
 Use the `uv` command line tool to create a Python environment for maintainer actions.
-If needed, install `uv` as shown next or by one of [many other installation methods][uv].
-Once `uv` is installed, it will keep the Python environment up to date, so you only need to install `uv` once.
-
-> [!Important]
-> This guide is itself a Jupytext Notebook: use right-click > "Open With" > "Notebook" and use the `bash` kernel to run code cells.
+Install `uv` as shown next or by one of [many other installation methods][uv].
 
 [uv]: https://docs.astral.sh/uv/getting-started/installation
+
+> [!Important]
+> This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells.
 
 ```{code-cell}
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -63,8 +62,8 @@ uv run python -m bash_kernel.install --sys-prefix
 
 ## Rendering to HTML
 
-In addition to the ".md" files paired to notebooks, the `book` folder contains configuration for a [Jupyter Book].
-Building the notebooks as one book provides smaller files for tutorial content, a single source of JavaScript and CSS, and tests that all notebooks run without errors.
+The `book` folder contains configuration for a [Jupyter Book], along with its content (the tutorials as MyST Markdown).
+Rendering the tutorials to HTML with Jupyter Book results in smaller files for tutorial content, a single source of JavaScript and CSS, the ability to cache unchanged tutorials, and some confirmation that all notebooks run without errors.
 
 > [!Important]
 > Only notebooks listed in `book/_toc.yml` are built, so adding a new notebook requires updating `book/_toc.yml`.
@@ -80,20 +79,14 @@ Presently (for `jupyter-book<2`), it's best to build from .ipynb rather than .md
 uv run jupytext --quiet --to ipynb $(git ls-files book/notebooks)
 ```
 
-```{code-cell}
-uv run jupyter --paths
-```
+Now use `jupyter-book` to generate or update the `book/_build` folder.
+This folder is ignored by git, but its contents are provided to the website team.
 
 ```{code-cell}
 :scrolled: true
 
 uv run jupyter-book build book
 ```
-
-That populates the `book/_build` folder.
-The folder is ignored by git, but its contents can be provided to the website team.
-The `_templates` make the website very plain, on purpose, for the benefit of the website team.
-For a website with the same content but including navigation tools, comment out the `templates_path` part of `book/_config.yml` and rebuild the website.
 
 Run the next cell to preview the website.
 Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
@@ -106,6 +99,11 @@ python -m http.server -d book/_build/html
 
 > [!Note]
 > On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
+
++++
+
+The `_templates` make the website very plain, on purpose, for the benefit of the website.
+For a navigable website with the same content, comment out the `templates_path` part of `book/_config.yml` and rebuild the website.
 
 +++
 
@@ -122,9 +120,15 @@ uv add --group notebooks scipy
 The other keys in the `dependency-groups` table provide additional dependencies,
 which are needed for a working Jupyter kernel, for a complete JupyterLab in a Docker image, or for maintenance tasks.
 
+> [!Important]
+> - No `requirements.*` file in this repository should be manually edited.
+> - Note where critical versions are pinned
+>   - python: docker/environment.yml
+>   - jupyter-repo2docker: .pre-commit-config.yaml
+
 +++
 
-## Automation and Checks
+## (WIP) Automation and Checks
 
 We use several automations to get standard code formatting, run lint checks, and ensure consistency between ".md" and ".ipynb" files.
 These are implemented using the [pre-commit] tool from the development environment.
@@ -133,7 +137,7 @@ You can setup git hooks to run these automations, as needed, at every commit.
 [pre-commit]: https://pre-commit.com/
 
 ```{code-cell}
-# pre-commit install ## TODO don't install yet, not working
+pre-commit install
 ```
 
 You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
@@ -142,23 +146,15 @@ You can also run checks over all files chaged on a feature branch or the current
 pre-commit run --from-ref main --to-ref HEAD
 ```
 
-## Image for a JupyterHub
+## Container Image for a JupyterHub
 
-The `docker` folder has configuration files that [repo2docker] uses to build an image suitable for use with a JupyterHub platform.
-The following command builds and runs the image locally, while the [repo2docker-action] pushes built images to GitHub packages.
-You must have `docker` available to use `repo2docker`.
+The `docker` folder has configuration files that [repo2docker] uses to build a container image suitable for use with a JupyterHub platform.
+The following command builds and runs the image locally, while the [repo2docker-action] builds images on GitHub and distributes them via the GitHub Container Registry.
+
+If you have `docker` available, you can build the image defined in the `docker` folder.
 
 [repo2docker]: https://repo2docker.readthedocs.io/
 [repo2docker-action]: https://github.com/marketplace/actions/repo2docker-action
-
-```{code-cell}
-:scrolled: true
-
-# just need the latest repo2docker ...
-# but, still need to resolve python version consistently
-```
-
-If you have `docker` available, you can build the image defined in the `docker` folder.
 
 ```{code-cell}
 :scrolled: true
@@ -168,29 +164,19 @@ repo2docker \
     --appendix "$(< docker/appendix-cryocloud)" \
     --user-id 1000 \
     --user-name jovyan \
-    --no-run \
+    --no-run
     docker
 ```
 
-> [!Important]
-> - No `requirements.*` file in this repository should be manually edited.
-> - Note where critical versions are pinned
->   - python: docker/environment.yml
->   - jupyter-repo2docker: .pre-commit-config.yaml
-
-The configuration files are a bit complicated, but updated automatically by `pre-commit` hooks following changes to `pyproject.toml` and `docker/environment.yml`.
+The configuration files are a bit complicated, but updated automatically by `pre-commit` when necessary, i.e. when there are changes to `pyproject.toml` or `docker/environment.yml`.
 The `docker/environment.yml` file is there for non-Python packages needed from conda-forge.
 We use PyPI for Python packages.
 
-1. `requirements.txt` has the (locked) packages needed in `book/setup.py`
-1. `docker/requirements.in` has the (frozen) packages from repo2docker and `docker/environment.yml`
-1. `docker/requirements.txt` has the (locked) packages needed in the Docker image
+1. `requirements.txt` has the packages needed in `book/setup.py`
+1. `docker/requirements.in` has the packages from repo2docker and `docker/environment.yml`
+1. `docker/requirements.txt` has the packages needed in the Docker image
 
 > [!Note]
-> The top-level `requirements.txt` file also makes our repo work on [Binder].
+> Having a top-level `requirements.txt` file also makes our tutorials work on [Binder] ... most of them anyways.
 
 [Binder]: https://mybinder.org/
-
-```{code-cell}
-
-```
