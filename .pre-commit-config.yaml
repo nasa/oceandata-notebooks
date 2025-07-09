@@ -26,11 +26,11 @@ repos:
       - id: uv-lock
       - id: pip-compile
         name: compile-kernel-dependencies
-        args: [-q, --group, notebooks, --group, kernel, -o, requirements.txt, pyproject.toml]
+        args: [ -q, --group, notebooks, --group, kernel, -o, requirements.txt, pyproject.toml ]
         files: ^uv\.lock$
       - id: pip-compile
         name: compile-docker-dependencies
-        args: [-q, --group, notebooks, --group, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml]
+        args: [ -q, --group, notebooks, --group, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml ]
         files: ^(uv\.lock|docker/requirements\.in)$
   # FIXME don't know how to do this with md:myst
   # - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -54,20 +54,10 @@ repos:
       - id: repo2docker-requirements
         name: repo2docker-requirements
         description: Generate docker/requirements.in with prerequisites from repo2docker.
-        stages: [manual]
+        stages: [ manual ]
         language: python
         additional_dependencies:
-          - jupyter-repo2docker==2024.7.0
+          - "jupyter-repo2docker @ git+https://github.com/jupyterhub/repo2docker@5d3a946b24608f1856218eb89861d552e9b826af"
         pass_filenames: false
-        entry: repo2docker --volume docker/requirements.in:./out docker sh -c "pip list --format=freeze > out"
-        files: ^(uv\.lock|docker/environment\.yml)$
-      - id: repo2docker-build
-        name: repo2docker-build
-        description: Call repo2docker (with --no-run) to confirm successfull build.
-        stages: [manual]
-        language: python
-        additional_dependencies:
-          - jupyter-repo2docker==2024.7.0
-        pass_filenames: false
-        entry: repo2docker --appendix "$(< docker/appendix)" --no-run docker
-        files: ^docker/.*$
+        entry: repo2docker --Repo2Docker.platform=linux/amd64 --volume docker/requirements.in:./out docker sh -c "pip list --format=freeze > out"
+        files: ^docker/environment\.yml$
