@@ -228,6 +228,7 @@ numpy==2.0.2
     #   pandas
     #   pvlib
     #   rasterio
+    #   rioxarray
     #   scipy
     #   seaborn
     #   shapely
@@ -246,6 +247,7 @@ packaging==24.1
     #   ipykernel
     #   matplotlib
     #   panel
+    #   rioxarray
     #   xarray
 pandas==2.2.3
     # via
@@ -311,6 +313,7 @@ pyproj==3.7.0
     # via
     #   oceandata-notebooks (pyproject.toml:notebooks)
     #   cartopy
+    #   rioxarray
 pyshp==2.3.1
     # via cartopy
 python-cmr==0.13.0
@@ -340,7 +343,9 @@ pyzmq==26.2.0
     #   ipykernel
     #   jupyter-client
 rasterio==1.4.3
-    # via oceandata-notebooks (pyproject.toml:notebooks)
+    # via
+    #   oceandata-notebooks (pyproject.toml:notebooks)
+    #   rioxarray
 requests==2.32.3
     # via
     #   datashader
@@ -348,6 +353,8 @@ requests==2.32.3
     #   panel
     #   pvlib
     #   python-cmr
+rioxarray==0.19.0
+    # via oceandata-notebooks (pyproject.toml:notebooks)
 s3fs==2024.9.0
     # via earthaccess
 scipy==1.14.1
@@ -433,6 +440,7 @@ xarray==2024.9.0
     #   oceandata-notebooks (pyproject.toml:notebooks)
     #   cf-xarray
     #   datashader
+    #   rioxarray
 xyzservices==2024.9.0
     # via bokeh
 yarl==1.13.1

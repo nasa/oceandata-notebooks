@@ -14,6 +14,7 @@ parts:
               # WARNING: skipping unknown output mime type: application/vnd.holoviews_load.v0+json [mystnb.unknown_mime_type]
       - file: notebooks/harp2/harp2_basic_visualizations
       - file: notebooks/oci/ml_cloud_mask
+      - file: notebooks/oci/oci_project_and_format
   # - caption: Hackweek
   #   chapters:
   #     - file: notebooks/hackweek/earthdata_cloud_access

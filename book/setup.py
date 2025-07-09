@@ -104,6 +104,7 @@
 #     "pyzmq==26.2.0",
 #     "rasterio==1.4.3",
 #     "requests==2.32.3",
+#     "rioxarray==0.19.0",
 #     "s3fs==2024.9.0",
 #     "scipy==1.14.1",
 #     "seaborn==0.13.2",

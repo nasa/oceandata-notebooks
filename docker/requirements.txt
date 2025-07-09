@@ -525,7 +525,7 @@ multipledispatch==1.0.0
     # via datashader
 mypy-extensions==1.0.0
     # via black
-narwhals==1.45.0
+narwhals==1.46.0
     # via
     #   -r docker/requirements.in
     #   bokeh
@@ -701,7 +701,7 @@ pexpect==4.9.0
     #   jupyterlab-git
 pickleshare==0.7.5
     # via -r docker/requirements.in
-pillow==11.2.1
+pillow==11.3.0
     # via
     #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml:notebooks)
@@ -831,7 +831,7 @@ pyzmq==26.2.1
     #   jupyter-client
     #   jupyter-resource-usage
     #   jupyter-server
-rasterio==1.4.2
+rasterio==1.4.3
     # via
     #   oceandata-notebooks (pyproject.toml:notebooks)
     #   rioxarray
@@ -863,8 +863,8 @@ rfc3986-validator==0.1.1
     #   -r docker/requirements.in
     #   jsonschema
     #   jupyter-events
-rioxarray==0.17.0
-    # via oceandata-notebooks (pyproject.toml:docker)
+rioxarray==0.19.0
+    # via oceandata-notebooks (pyproject.toml:notebooks)
 rpds-py==0.22.3
     # via
     #   -r docker/requirements.in
@@ -1067,7 +1067,7 @@ widgetsnbextension==4.0.13
     #   ipywidgets
 wrapt==1.16.0
     # via aiobotocore
-xarray==2025.6.1
+xarray==2025.7.0
     # via
     #   -r docker/requirements.in
     #   oceandata-notebooks (pyproject.toml:notebooks)
