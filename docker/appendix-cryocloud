@@ -7,7 +7,7 @@ RUN git config --system credential.helper 'cache --timeout=36000 --socket /tmp/.
 COPY src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # install OCSSW core files (i.e. no $OCSSWROOT/share or $OCSSWROOT/var)
-ARG OCSSWTAG=V2025.1
+ARG OCSSWTAG=T2025.13
 ARG OCSSWROOT=/opt/ocssw
 ARG OCSSWROOT_PUBLIC=/home/${NB_USER}/shared-public/pace-hackweek/ocssw
 ENV OCSSWROOT=${OCSSWROOT}
