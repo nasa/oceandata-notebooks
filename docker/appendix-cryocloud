@@ -31,3 +31,5 @@ RUN python -m bash_kernel.install --sys-prefix
 
 # environment variables
 ENV OCSSWROOT=${OCSSWROOT}
+ENV GH_SCOPED_CREDS_APP_URL="https://github.com/apps/cryocloud-github-access"
+ENV GH_SCOPED_CREDS_CLIENT_ID="Iv1.bd27058fd393e285"  # See https://github.com/jupyterhub/gh-scoped-creds#github-app-configuration
