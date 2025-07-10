@@ -9,14 +9,15 @@ COPY src/prefix/ ${NB_PYTHON_PREFIX}/
 # install OCSSW core files (i.e. no $OCSSWROOT/share or $OCSSWROOT/var)
 ARG OCSSWTAG=V2025.1
 ARG OCSSWROOT=/opt/ocssw
-ARG OCSSW_PUBLIC=/home/${NB_USER}/shared-public/pace-hackweek/ocssw
+ARG OCSSWROOT_PUBLIC=/home/${NB_USER}/shared-public/pace-hackweek/ocssw
+ENV OCSSWROOT=${OCSSWROOT}
 ADD https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw ./
 ADD https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py ./
 RUN chmod +x install_ocssw \
  && ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt --python \
  && rm install_ocssw manifest.py \
- && ln -s ${OCSSW_PUBLIC}/var ${OCSSWROOT} \
- && ln -s ${OCSSW_PUBLIC}/share ${OCSSWROOT} \
+ && ln -s ${OCSSWROOT_PUBLIC}/var ${OCSSWROOT} \
+ && ln -s ${OCSSWROOT_PUBLIC}/share ${OCSSWROOT} \
  && chown ${NB_USER}:${NB_USER} ${OCSSWROOT}/*.json ${OCSSWROOT}/python/*.json
 
 USER ${NB_USER}
@@ -29,7 +30,7 @@ RUN pip install --no-cache-dir --no-deps \
 # set up the bash kernel
 RUN python -m bash_kernel.install --sys-prefix
 
-# environment variables
-ENV OCSSWROOT=${OCSSWROOT}
+# tell gh-scoped-creds which GitHub app to use for push access
+# see https://github.com/jupyterhub/gh-scoped-creds#github-app-configuration
+ENV GH_SCOPED_CREDS_CLIENT_ID="Iv1.bd27058fd393e285"
 ENV GH_SCOPED_CREDS_APP_URL="https://github.com/apps/cryocloud-github-access"
-ENV GH_SCOPED_CREDS_CLIENT_ID="Iv1.bd27058fd393e285"  # See https://github.com/jupyterhub/gh-scoped-creds#github-app-configuration
