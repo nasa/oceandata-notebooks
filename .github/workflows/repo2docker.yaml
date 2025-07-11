@@ -35,5 +35,6 @@ jobs:
           DOCKER_USERNAME: ${{ github.repository_owner }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_REGISTRY: ghcr.io
+          REPO_DIR: /srv/docker
           APPENDIX_FILE: appendix-cryocloud
           FORCE_REPO2DOCKER_VERSION: "git+https://github.com/jupyterhub/repo2docker@5d3a946b24608f1856218eb89861d552e9b826af"
