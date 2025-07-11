@@ -24,6 +24,7 @@ USER ${NB_USER}
 
 # install (locked) dependencies for oceandata-notebooks[docker]
 RUN pip install --no-cache-dir --no-deps \
+      --extra-index-url "https://download.pytorch.org/whl/cu128" \
       --no-binary netcdf4 \
       -r requirements.txt
 
