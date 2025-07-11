@@ -29,8 +29,6 @@ anyio==4.8.0
     #   -r docker/requirements.in
     #   httpx
     #   jupyter-server
-appnope==0.1.4
-    # via ipykernel
 argon2-cffi==23.1.0
     # via
     #   -r docker/requirements.in
@@ -256,7 +254,9 @@ gitdb==4.0.11
 gitpython==3.1.43
     # via nbdime
 greenlet==3.1.1
-    # via -r docker/requirements.in
+    # via
+    #   -r docker/requirements.in
+    #   sqlalchemy
 h11==0.14.0
     # via
     #   -r docker/requirements.in
@@ -608,6 +608,43 @@ numpy==2.2.6
     #   tifffile
     #   xarray
     #   zarr
+nvidia-cublas-cu12==12.8.3.14
+    # via
+    #   nvidia-cudnn-cu12
+    #   nvidia-cusolver-cu12
+    #   torch
+nvidia-cuda-cupti-cu12==12.8.57
+    # via torch
+nvidia-cuda-nvrtc-cu12==12.8.61
+    # via torch
+nvidia-cuda-runtime-cu12==12.8.57
+    # via torch
+nvidia-cudnn-cu12==9.7.1.26
+    # via torch
+nvidia-cufft-cu12==11.3.3.41
+    # via torch
+nvidia-cufile-cu12==1.13.0.11
+    # via torch
+nvidia-curand-cu12==10.3.9.55
+    # via torch
+nvidia-cusolver-cu12==11.7.2.55
+    # via torch
+nvidia-cusparse-cu12==12.5.7.53
+    # via
+    #   nvidia-cusolver-cu12
+    #   torch
+nvidia-cusparselt-cu12==0.6.3
+    # via torch
+nvidia-nccl-cu12==2.26.2
+    # via torch
+nvidia-nvjitlink-cu12==12.8.61
+    # via
+    #   nvidia-cufft-cu12
+    #   nvidia-cusolver-cu12
+    #   nvidia-cusparse-cu12
+    #   torch
+nvidia-nvtx-cu12==12.8.55
+    # via torch
 oauthlib==3.2.2
     # via
     #   -r docker/requirements.in
@@ -833,7 +870,7 @@ pyzmq==26.2.1
     #   jupyter-client
     #   jupyter-resource-usage
     #   jupyter-server
-rasterio==1.4.2
+rasterio==1.4.3
     # via
     #   oceandata-notebooks (pyproject.toml:notebooks)
     #   rioxarray
@@ -865,7 +902,7 @@ rfc3986-validator==0.1.1
     #   -r docker/requirements.in
     #   jsonschema
     #   jupyter-events
-rioxarray==0.17.0
+rioxarray==0.19.0
     # via oceandata-notebooks (pyproject.toml:docker)
 rpds-py==0.22.3
     # via
@@ -897,6 +934,7 @@ setuptools==75.8.0
     # via
     #   -r docker/requirements.in
     #   jupyterlab
+    #   triton
 shapely==2.0.6
     # via
     #   cartopy
@@ -965,7 +1003,7 @@ toolz==1.0.0
     #   datashader
     #   distributed
     #   partd
-torch==2.7.1
+torch==2.7.1+cu128
     # via oceandata-notebooks (pyproject.toml:notebooks)
 tornado==6.4.2
     # via
@@ -1006,6 +1044,8 @@ traitlets==5.14.3
     #   nbclient
     #   nbconvert
     #   nbformat
+triton==3.3.1
+    # via torch
 types-python-dateutil==2.9.0.20241206
     # via
     #   -r docker/requirements.in
