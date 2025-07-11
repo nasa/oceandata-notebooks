@@ -14,7 +14,7 @@ Head over to our [Help Hub] to access the published tutorials.
 
 Please take a minute to familiarize yourself with the following information about our tutorials, which are stored as MyST Markdown rather than as Jupyter Notebooks.
 
-### Editing Notebooks & Commiting Markdown
+### Edit Notebooks & Commit Markdown
 
 > [!Important]
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
