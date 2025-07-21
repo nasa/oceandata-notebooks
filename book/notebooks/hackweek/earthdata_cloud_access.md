@@ -8,7 +8,7 @@ kernelspec:
 # Orientation to Earthdata Cloud Access
 
 **Tutorial Lead:** Anna Windle (NASA, SSAI) <br>
-Last updated: July 16, 2025
+Last updated: July 21, 2025
 
 <div class="alert alert-info" role="alert">
 
