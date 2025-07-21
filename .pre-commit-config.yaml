@@ -21,17 +21,17 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.7.5
+    rev: 0.8.0
     hooks:
       - id: uv-lock
-      - id: pip-compile
-        name: compile-kernel-dependencies
-        args: [ -q, --group, notebooks, --group, kernel, -o, requirements.txt, pyproject.toml ]
+      - id: uv-export
+        name: export-kernel-dependencies
+        args: [ -q, --group, notebooks, --group, kernel, -o, requirements.txt ]
         files: ^uv\.lock$
-      - id: pip-compile
-        name: compile-docker-dependencies
-        args: [ -q, --group, notebooks, --group, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml ]
-        files: ^(uv\.lock|docker/requirements\.in)$
+      - id: uv-export
+        name: export-docker-dependencies
+        args: [ -q, --group, notebooks, --group, docker, -o, docker/requirements.txt ]
+        files: ^uv\.lock$
   # FIXME don't know how to do this with md:myst
   # - repo: https://github.com/astral-sh/ruff-pre-commit
   #   rev: v0.11.10
@@ -53,6 +53,7 @@ repos:
         files: ^requirements\.txt$
       - id: repo2docker-requirements
         name: repo2docker-requirements
+        # FIXME: updates pyproject.toml "constraints" group, rm docker/requirements.in
         description: Generate docker/requirements.in with prerequisites from repo2docker.
         stages: [ manual ]
         language: python
