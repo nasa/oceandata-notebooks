@@ -24,14 +24,24 @@ repos:
     rev: 0.7.5
     hooks:
       - id: uv-lock
-      - id: pip-compile
-        name: compile-kernel-dependencies
-        args: [ -q, --group, notebooks, --group, kernel, -o, requirements.txt, pyproject.toml ]
+      - id: uv-export
+        name: export-kernel-dependencies
+        args: [ -q, --group, notebooks, --group, kernel, -o, requirements.txt ]
         files: ^uv\.lock$
-      - id: pip-compile
-        name: compile-docker-dependencies
-        args: [ -q, --group, notebooks, --group, docker, -o, docker/requirements.txt, docker/requirements.in, pyproject.toml ]
-        files: ^(uv\.lock|docker/requirements\.in)$
+      - id: uv-export
+        name: export-docker-dependencies
+        args: [ -q, --group, notebooks, --group, docker, -o, docker/requirements.txt ]
+        files: ^uv\.lock$
+      # FIXME how to automate syncing with uv add --group constraints -r docker/requirements.in
+      # - id: pip-compile
+      #   name: compile-docker-dependencies
+      #   args:
+      #     - "--index=https://download.pytorch.org/whl/cu128"
+      #     - "--index-strategy=unsafe-best-match"
+      #     - "--output-file=docker/requirements.txt"
+      #     - "--overrides=docker/requirements.in"
+      #     - "requirements.txt"
+      #   files: ^(uv\.lock|docker/requirements\.in)$
   # FIXME don't know how to do this with md:myst
   # - repo: https://github.com/astral-sh/ruff-pre-commit
   #   rev: v0.11.10
