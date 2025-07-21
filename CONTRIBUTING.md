@@ -7,7 +7,7 @@ kernelspec:
 
 # Maintainer's Guide
 
-We are glad you're here to help maintain tutorials for the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
+We are glad to have your help maintaining tutorials for the [Help Hub] at the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
 
 The following subsections provide additional information on the structure of this repo and maintenaner tasks.
 Maintainers are responsible for building HTML files for publishing the content on the [Help Hub], which also tests that the notebooks run successfully in an isolated Python environment.
@@ -15,7 +15,7 @@ Here is how some of the contents of this repo map to the subsections below:
 
 ```shell
 .
-├── CONTRIBUTING.md          # YOU ARE HERE
+├── CONTRIBUTING.md          # (this document)
 ├── uv.lock                  # -> Isolated Environment
 ├── book                     # -> Rendering to HTML
 ├── pyproject.toml           # -> Dependencies
