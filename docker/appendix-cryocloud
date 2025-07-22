@@ -7,14 +7,14 @@ RUN git config --system credential.helper 'cache --timeout=36000 --socket /tmp/.
 COPY src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # install OCSSW core files (i.e. no $OCSSWROOT/share or $OCSSWROOT/var)
-ARG OCSSWTAG=T2025.13
+ARG OCSSWTAG=v3.3.0
 ARG OCSSWROOT=/opt/ocssw
 ARG OCSSWROOT_PUBLIC=/home/${NB_USER}/shared-public/pace-hackweek/ocssw
 ENV OCSSWROOT=${OCSSWROOT}
 ADD https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw ./
 ADD https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py ./
 RUN chmod +x install_ocssw \
- && ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt --python \
+ && ./install_ocssw --tag=${OCSSWTAG} -a odps --root --bin --opt --python \
  && rm install_ocssw manifest.py \
  && ln -s ${OCSSWROOT_PUBLIC}/var ${OCSSWROOT} \
  && ln -s ${OCSSWROOT_PUBLIC}/share ${OCSSWROOT} \
