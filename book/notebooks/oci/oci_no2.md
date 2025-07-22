@@ -1,13 +1,14 @@
 ---
 kernelspec:
-  display_name: custom
+  name: python3
+  display_name: Python 3 (ipykernel)
   language: python
-  name: custom
 ---
 
 # Exploring nitrogen dioxide (NO<sub>2</sub>) data from OCI 
 
-**Authors:** Anna Windle (NASA, SSAI), Zachary Fasnacht (NASA, SSAI)
+**Authors:** Anna Windle (NASA, SSAI), Zachary Fasnacht (NASA, SSAI) <br>
+Last updated: July 22, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -147,9 +148,6 @@ These are 10-meter Eastward Wind, and 10-meter Northward Wind, respectively.
 An interative plot allows you to engage with the data such as zooming, panning, and hovering over for more information. We will use the `hvplot` accessor on XArray data structures to make an interactive plot of the single file we accessed above.
 
 ```{code-cell} ipython3
-import holoviews as hv
-hv.config.image_rtol = 1e-2 
-
 dataset["nitrogen_dioxide_total_vertical_column"].hvplot(
     x="longitude",
     y="latitude",
