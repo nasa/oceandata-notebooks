@@ -46,11 +46,13 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 ```{code-cell} ipython3
+import requests
+
+import cartopy.crs as ccrs
+import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 from xarray.backends.api import open_datatree
-import cartopy.crs as ccrs
-import matplotlib.pyplot as plt
 ```
 
 [back to top](#Contents)
@@ -59,10 +61,17 @@ import matplotlib.pyplot as plt
 
 ## 2. Get Level-2 Data
 
-HARP2 L2 data is currently in the test phase with data only available on OB.DAAC, not on earth data cloud yet. We can use wget tool to download data directly from OB.DAAC. The following command line tool download one HARP2 FastMAPOL L2 granule at the time stamps at 2025/01/09 20:00:19 UTC.
+HARP2 L2 data is currently in the test phase with data only available on OB.DAAC, not on earth data cloud yet. We can use the requests library to download data directly from OB.DAAC. The following command line tool downloads one HARP2 FastMAPOL L2 granule at the time stamp 2025/01/09 20:00:19 UTC.
 
 ```{code-cell} ipython3
-!wget --content-disposition "https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/PACE_HARP2.20250109T200019.L2.MAPOL_OCEAN.V3_0.nc"
+HARP2_L2_MAPOL_FILENAME = "PACE_HARP2.20250109T200019.L2.MAPOL_OCEAN.V3_0.nc"
+HARP2_L2_MAPOL_URL = f"https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/{HARP2_L2_MAPOL_FILENAME}"
+
+response = requests.get(HARP2_L2_MAPOL_URL)
+
+with open(HARP2_L2_MAPOL_FILENAME, 'wb') as writer:
+    for chunk in response.iter_content(chunk_size=100 * 1024 * 1024):
+        writer.write(chunk)
 ```
 
 <div class="alert alert-danger" role="alert">
@@ -80,8 +89,7 @@ PACE polarimeter L2 products for both HARP2 and SPEXone include four data groups
 - sensor_band_parameters
 
 ```{code-cell} ipython3
-path = './PACE_HARP2.20250109T200019.L2.MAPOL_OCEAN.V3_0.nc'
-datatree = open_datatree(path)
+datatree = open_datatree(HARP2_L2_MAPOL_FILENAME)
 datatree
 ```
 
@@ -218,23 +226,11 @@ data = fvf
 plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='jet')
 ```
 
-```{code-cell} ipython3
-
-```
-
-```{code-cell} ipython3
-
-```
-
 ## 5. Improve data quality: filter low AOD pixels
 
 +++ {"lines_to_next_cell": 2}
 
-Aerosol absorption and microphysics have larger uncertainties when aerosol loading is low. User can further remove low AOD cases when necessary. We can clearly see, two type of aerosol events with relatively high AOD, the upper one with high absorption (low SSA) and small size (high FVF), probably smoke due to fire; the lower one with less absorption (high SSA) and large size (low FVF), probably dust. 
-
-```{code-cell} ipython3
-
-```
+Aerosol absorption and microphysics have larger uncertainties when aerosol loading is low. User can further remove low AOD cases when necessary. We can clearly see, two type of aerosol events with relatively high AOD, the upper one with high absorption (low SSA) and small size (high FVF), probably smoke due to fire; the lower one with less absorption (high SSA) and large size (low FVF), probably dust.
 
 ```{code-cell} ipython3
 # Create the plot
@@ -268,7 +264,7 @@ Since the retrieval algorithm is based on optimal estimation by minimizing a $\c
 
 $\chi^2 = \frac{1}{N} \sum (f - m)^2/\sigma^2$
 
-Here N is the total number of measureents used in retreival. The algorithm also adaptively evalue fitting performance, if the fitting perform poor, it will be removed from the retreival process. Therefore, the $\chi^2$ and $N$ can be used to evaluate retrieval performance, the pixels with small $\chi^2$ (good fitting) and large $N$ (more pixels can be fitted) will better quality. A more quantitatively approach based on error propogation can be also used to compute retrieval uncertainty, which will be include in future product. 
+Here N is the total number of measureents used in retreival. The algorithm also adaptively evalue fitting performance, if the fitting perform poor, it will be removed from the retreival process. Therefore, the $\chi^2$ and $N$ can be used to evaluate retrieval performance, the pixels with small $\chi^2$ (good fitting) and large $N$ (more pixels can be fitted) will better quality. A more quantitatively approach based on error propogation can be also used to compute retrieval uncertainty, which will be include in future product.
 
 ```{code-cell} ipython3
 chi2 = dataset['chi2'].values
@@ -312,7 +308,7 @@ Note that $\chi^2$ converges reasonably well with slight under fitting (averaged
 
 +++
 
-As mentioned previously, FastMAPOL algorithm conducted internal adaptive data screening on each HARP2 angle, the data mask are provided for both reflectance and DoLP. value 0 means the measurements are used in the retrievals, value 1 or NAN means the measurements are removed from retrieval. Therefore, the adaptive data mask can be also used to evaluate fitting quality and measurement quality at each angle. In the example below, please note the difference pattern for reflectance and polarization, which may indicates different calibration perforance. 
+As mentioned previously, FastMAPOL algorithm conducted internal adaptive data screening on each HARP2 angle, the data mask are provided for both reflectance and DoLP. value 0 means the measurements are used in the retrievals, value 1 or NAN means the measurements are removed from retrieval. Therefore, the adaptive data mask can be also used to evaluate fitting quality and measurement quality at each angle. In the example below, please note the difference pattern for reflectance and polarization, which may indicates different calibration perforance.
 
 ```{code-cell} ipython3
 mask_ref = dataset['mask_ref'].values
@@ -342,8 +338,4 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 
 - Gao, M., Franz, B. A., Knobelspiesse, K., Zhai, P.-W., Martins, V., Burton, S., Cairns, B., Ferrare, R., Gales, J., Hasekamp, O., Hu, Y., Ibrahim, A., McBride, B., Puthukkudy, A., Werdell, P. J., and Xu, X.: Efficient multi-angle polarimetric inversion of aerosols and ocean color powered by a deep neural network forward model, Atmos. Meas. Tech., 14, 4083–4110, https://doi.org/10.5194/amt-14-4083-2021, 2021.
   
-- Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, Atmos. Meas. Tech., 16, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023. 
-
-```{code-cell} ipython3
-
-```
+- Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, Atmos. Meas. Tech., 16, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023.
