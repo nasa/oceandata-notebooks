@@ -9,6 +9,12 @@ kernelspec:
 
 **Authors:** Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU), Guangliang Fu (SRON)
 
+<div class="alert alert-info" role="alert">
+
+An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+
+</div>
+
 [edl]: https://urs.earthdata.nasa.gov/
 [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 
@@ -44,11 +50,16 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 ```{code-cell} ipython3
+import cartopy.crs as ccrs
+import earthaccess
+import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 from xarray.backends.api import open_datatree
-import cartopy.crs as ccrs
-import matplotlib.pyplot as plt
+```
+
+```{code-cell} ipython3
+auth = earthaccess.login(persist=True)
 ```
 
 [back to top](#Contents)
@@ -57,19 +68,25 @@ import matplotlib.pyplot as plt
 
 ## 2. Get Level-2 Data
 
-SPEXone L2 data is available on both OB.DAAC and earth data cloud. Please refer L1C notebook on the access of cloud. Here we can use wget tool to download data directly from OB.DAAC. The following command line tool download one SPEXone RemoTAP L2 granule at the time stamps at 2025/01/09 20:00:19 UTC.
+SPEXone L2 data is available on both OB.DAAC and earth data cloud. Please refer L1C notebook on the access of cloud. The following block retrieves a single SPEXOne granule.
 
 ```{code-cell} ipython3
-!wget --content-disposition "https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/PACE_SPEXONE.20250109T200019.L2.RTAP_OC.V3_0.nc"
+results = earthaccess.search_data(
+    short_name="PACE_SPEXONE_L2_AER_RTAPOCEAN",
+    temporal=("2025-01-09T20:00:20", "2025-01-09T20:00:21"),
+    count=1
+)
+paths = earthaccess.open(results)
 ```
 
-<div class="alert alert-danger" role="alert">
+```{code-cell} ipython3
+:tags: [remove-cell]
 
-When HARP2 L2 data in provisional level, it will be available through the earth data cloud tools as for the L1C data.
-
-</div>
-
-+++
+# this cell is tagged to be removed from HTML renders,
+# but we currently want to download when we don't have direct access
+if not earthaccess.__store__.in_region:
+    paths = earthaccess.download(results, "granules")
+```
 
 PACE polarimeter L2 products for both HARP2 and SPEXone include four data groups
 - geolocation_data
@@ -78,8 +95,7 @@ PACE polarimeter L2 products for both HARP2 and SPEXone include four data groups
 - sensor_band_parameters
 
 ```{code-cell} ipython3
-path = './PACE_SPEXONE.20250109T200019.L2.RTAP_OC.V3_0.nc'
-datatree = open_datatree(path)
+datatree = open_datatree(paths[0], decode_timedelta=True)
 datatree
 ```
 
@@ -212,7 +228,7 @@ data = fvf
 plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='jet')
 ```
 
-We can clearly see the aerosol event with less absorption (high SSA) and large size (low FVF), probably dust. 
+We can clearly see the aerosol event with less absorption (high SSA) and large size (low FVF), probably dust.
 
 +++
 
@@ -220,7 +236,7 @@ We can clearly see the aerosol event with less absorption (high SSA) and large s
 
 +++ {"lines_to_next_cell": 2}
 
-Aerosol absorption and microphysics have larger uncertainties when aerosol loading is low. User can further remove low AOD cases when necessary. 
+Aerosol absorption and microphysics have larger uncertainties when aerosol loading is low. User can further remove low AOD cases when necessary.
 
 ```{code-cell} ipython3
 # Create the plot
@@ -298,7 +314,3 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 ## 8.  Reference
 
 Guangliang Fu,  Jeroen Rietjens,  Raul Laasner,  Laura van der Schaaf,  Richard van Hees,  Zihao Yuan,  Bastiaan van Diedenhoven,  Neranga Hannadige,  Jochen Landgraf,  Martijn Smit,  Kirk Knobelspiesse,  Brian Cairns,  Meng Gao,  Bryan Franz,  Jeremy Werdell,  Otto Hasekamp (2025). Aerosol retrievals from SPEXone on the NASA PACE mission: First results and validation. Geophysical Research Letters, 52, e2024GL113525. https://doi.org/10.1029/2024GL113525
-
-```{code-cell} ipython3
-
-```
