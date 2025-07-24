@@ -37,11 +37,11 @@ This notebook was desgined to use cloud-enabled OCSSW programs, which are availa
 
 ## Summary
 
-The [OceanColor Science SoftWare][ocssw] (OCSSW) repository is the operational data processing software package of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC). OCSSW is publically available through the OB.DAAC's [Sea, earth, and atmosphere Data Analysis System][seadas] (SeaDAS), which provides a complete suite of tools to process, display and analyze ocean color data. SeaDAS is a desktop application that provides GUI access to OCSSW, but command line interfaces (CLI) also exist, which we can use to write processing scripts and notebooks without SeaDAS.
+The [OceanColor Science SoftWare][ocssw] (OCSSW) repository is the operational data processing software package of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC). OCSSW is publically available through the OB.DAAC's [Sea, earth, and atmosphere Data Analysis System][seadas] (SeaDAS) application, which provides a complete suite of tools to process, display and analyze ocean color data. SeaDAS provides a graphical user interface (GUI) for OCSSW, but a command line interfaces (CLI) also exist, which we can use to write processing scripts and notebooks without the desktop application.
 
-The Level-2 Generator (`l2gen`) program included in OCSSW is used to generate aquatic Level-2 (L2) data products from calibrated top-of-atmosphere (TOA) radiances. Specifically, `l2gen` atmospherically corrects spectral TOA Level-1B (L1B) radiances to obtain geophysical products, such as spectral remote-sensing reflectances (Rrs) and near-surface concentrations of the photosynthetic pigment chlorophyll-a. More information on `l2gen` methods can be found in the [Rrs Algorithm Theoretrical Basis Document]. 
+The Level-2 Generator (`l2gen`) program included in OCSSW is used to generate aquatic Level-2 (L2) data products from calibrated top-of-atmosphere (TOA) radiances. Specifically, `l2gen` atmospherically corrects spectral TOA Level-1B (L1B) radiances to obtain geophysical products, such as spectral remote-sensing reflectances (Rrs) and near-surface concentrations of the photosynthetic pigment chlorophyll-a. More information on `l2gen` methods can be found in the [Rrs Algorithm Theoretrical Basis Document].
 
-This tutorial will demonstrate how to process PACE OCI L1B data through the `l2gen` default settings to retrieve the standard L2 ocean color 'OC' data suite. Done right, this data should be *exactly* what you would download from the NASA EarthData Cloud. This tutorial will also demonstrate how to modify the operation of `l2gen` configurations based on your research needs. 
+This tutorial will demonstrate how to process PACE OCI L1B data through the `l2gen` default settings to retrieve the standard L2 ocean color (OC) data suite. Done right, this data should be *exactly* what you would download from the NASA Earthdata Cloud. This tutorial will also demonstrate how to modify the operation of `l2gen` configurations based on your research needs. 
 
 [seadas]: https://seadas.gsfc.nasa.gov/
 [ocssw]: https://oceandata.sci.gsfc.nasa.gov/ocssw
@@ -75,6 +75,7 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 ```{code-cell} ipython3
 import csv
 import os
+from pathlib import Path
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -94,38 +95,40 @@ OCSSW programs are typically run using the Bash CLI.  Here, we employ a Bash ter
 
 </div>
 
-Every `%%bash` cell that calls an OCSSW program needs to `source` this environment definition file shipped with OCSSW, as the environment and environmental variables it establishes are not retained from one cell to the next. We can, however, define the `OCSSWROOT` environmental variable in a way that effects every `%%bash` cell.
+Every `%%bash` cell that calls an OCSSW program needs to `source` this environment definition file shipped with OCSSW, as the environment and environmental variables it establishes are not retained from one cell to the next. We can, however, define the `OCSSWROOT` environmental variable in a way that effects every `%%bash` cell. This `OCSSWROOT` variable is just the path to where OCSSW is installed on your system.
 
 [magic]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands
 
 ```{code-cell} ipython3
-ocsswroot = os.environ.setdefault("OCSSWROOT", "/opt/ocssw")
-assert os.path.isdir(ocsswroot)
+ocsswroot = os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
 ```
 
 In every cell where we wish to call an OCSSW command, several lines of code need to appear first to establish the required environment. These are shown below, followed by a call to the OCSSW program `install_ocssw` to see which version (tag) of OCSSW is installed.
 
 ```{code-cell} ipython3
-:scrolled: true
-
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
 install_ocssw --installed_tag
 ```
 
-V tags are operational tags while T tags are testing tags. To install to a different tag, ______.
-
-<b>TODO: Should we include information on how to install a different tag? Maybe not because they won't be able to in CC?
+Tags beginning with "V" are operational tags, while "T" tags are equivalent to a "beta" release for evaluation by advanced users. This notebook uses OCSSW's new S3 authentication feature, which is still in testing.
 
 +++
 
 ## Setting up AWS S3 credentials
 
-<b> TODO: Ian- can you add more information on why these are required, please? and why they only work for one hour?
+Accessing data from NASA's Earthdata Cloud, regardless of the tool, requires authentication.
+The `earthaccess` package works behind-the-cences to use the Earthdata Login credentials you provide to generate temporary AWS credentials for direct access to the Earthdata Cloud.
 
 ```{code-cell} ipython3
+earthaccess.login(persist=True)
 credentials = earthaccess.get_s3_credentials(provider="OB_CLOUD")
+```
+
+The OCSSW software accepts AWS credentials in all the usual methods, including via environment variables that we set in the next cell.
+
+```{code-cell} ipython3
 os.environ.update(
     {
         "AWS_ACCESS_KEY_ID": credentials["accessKeyId"],
@@ -135,11 +138,19 @@ os.environ.update(
 )
 ```
 
+<div class="alert alert-warning">
+
+Earthdata Cloud sets a one-hour lifespan on your temporary AWS credentials. If you get an `access denied` error, re-run the cell above to generate new AWS credentials.
+
+<div>
+
++++
+
 ## Navigating OCSSW
 
 +++
 
-Within the OCSSW directory, there are sub-directories that contain files that control OCSSW processing and set default parameterizations of the various codes. Let's look at the files in the `~/occsw/share/common` directory, which includes the files available to all satellite instruments considered in the OCSSW ecosystem:
+Within the OCSSW directory, there are sub-directories that contain files that control OCSSW processing and set default parameterizations of the various codes. Let's look at the files in the `share/common` sub-directory, which includes the files available to all satellite instruments considered in the OCSSW ecosystem:
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -150,19 +161,19 @@ source $OCSSWROOT/OCSSW_bash.env
 ls $OCSSWROOT/share/common
 ```
 
-Clearly, there are an intimidatingly large number of files required to process satellite ocean color data!  The most valuable to the scientific end user are the .par (for parameter) files. .par files are plain text files used to store configuration settings for OCSSW programs. They typically define the inputs, outputs, and the different options one can modify for each program.
+<div class="alert alert-info">
 
-Tip: You can click on the blue vertical bar on the left side of an output to collapse it.
+You can click within the area to the left side of an output cell to expand or collapse it.
 
-+++
+</div>
+
+Clearly, there are an intimidatingly large number of files required to process satellite ocean color data!  The most valuable to the scientific end user are those ending in ".par". These "par files" are plain text files that configure, or parameterize, OCSSW programs. They typically define the inputs, outputs, and the different options one can modify for each program.
 
 <div class="alert alert-warning">
     
 Fun fact: `l2gen` used to be named "Multi Sensor Level 1 to 2", or MSL12. That is why many .par files start with 'msl12'. The OB.DAAC renamed most programs with names like 'l2gen', or 'l3mapgen' to more clearly identify their purpose. But, the .par files for use with l2gen still have names that begin with 'msl12'. Just remember msl12 = l2gen.
 
 </div>
-
-+++
 
 Now, let's look at the PACE OCI-specific files within the `~/ocssw/share/oci` directory:
 
@@ -175,7 +186,7 @@ source $OCSSWROOT/OCSSW_bash.env
 ls $OCSSWROOT/share/oci
 ```
 
-Let's open 'msl12_defaults.par', where the `l2gen` default parameters for OCI are defined:
+Let's print "msl12_defaults.par", where the `l2gen` default parameters for OCI are defined:
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -186,9 +197,7 @@ source $OCSSWROOT/OCSSW_bash.env
 cat $OCSSWROOT/share/oci/msl12_defaults.par
 ```
 
-This .par file lists the default configuration for standard `l2gen` processing. If nothing is modified from this .par file, `l2gen` will process a L1B file to L2 containing the 'OC' data suite products and it will be *exactly* the same as the L2 data file that OBPG processes and ingests into NASA EarthData.
-
-+++
+This par file lists the default configuration for standard `l2gen` processing. If nothing is modified from this par file, `l2gen` will process a L1B file to L2 containing the OC suite of data products, and it will be *exactly* the same as the L2 data file that OBPG processes and ingests into NASA Earthdata.
 
 <div class="alert alert-warning">
     
@@ -202,16 +211,15 @@ This .par file lists the default configuration for standard `l2gen` processing. 
 
 </div>
 
-+++
+<div class="alert alert-info">
 
-Tip: You can also see OCSSW parameter options by running 'l2gen --help':
+You can also see OCSSW parameter options by running 'l2gen --help'.
+
+</div>
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
+:scrolled: true
+
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
@@ -224,21 +232,26 @@ l2gen --help
 
 User-generated parameter files provide a convenient way to control `l2gen` processing. 
 
-For example, from a CLI, providing `l2gen` the names of the input L1B and output L2 files can be accomplished via:<br>
-`l2gen ifile=data/PACE_OCI.20250507T170659.L1B.V3.nc ofile=data/PACE_OCI.20250507T170659.L2.V3.nc`
+For example, from a Terminal, providing `l2gen` the names of the input L1B and output L2 files can be accomplished via:
 
-Alternatively, a user-defined par file, say <i>l2gen.par</i>, can be created with the following two lines of content:
-<pre>ifile=data/PACE_OCI.20250507T170659.L1B.V3.nc
-ofile=data/PACE_OCI.20250507T170659.L2.V3.nc</pre>
+```bash
+l2gen ifile=data/PACE_OCI.20250507T170659.L1B.V3.nc ofile=data/PACE_OCI.20250507T170659.L2.V3.nc
+```
 
-and, `l2gen` can now be called as:<br>
-`l2gen par=l2gen.par`
+Alternatively, a user-defined par file, say "l2gen.par", can be created with the following two lines of content:
 
-You can imagine that the .par file option becomes far more convenient when many changes from default are desired.
+    ifile=data/PACE_OCI.20250507T170659.L1B.V3.nc
+    ofile=data/PACE_OCI.20250507T170659.L2.V3.nc
 
-+++
+and, `l2gen` can now be called using the single argument `par`:
 
-We will define a function to help write OCSSW parameter files, which is needed several times in this tutorial. To write the results in the format understood by OCSSW, this function uses the csv.writer from the Python Standard Library. Instead of writing comma-separated values, however, we specify a non-default delimiter to get equals-separated values. Not something you usually see in a data file, but it's better than writing our own utility from scratch!
+```bash
+l2gen par=l2gen.par
+```
+
+You can imagine that the par file option becomes far more convenient when many changes from default are desired.
+
+So let's define a function to help write OCSSW parameter files, which is needed several times in this tutorial. To write the results in the format understood by OCSSW, this function uses the `csv.writer` from the Python Standard Library. Instead of writing comma-separated values, however, we specify a non-default delimiter to get equals-separated values. Not something you usually see in a data file, but it's better than writing our own utility from scratch!
 
 ```{code-cell} ipython3
 def write_par(path, par):
@@ -267,12 +280,6 @@ def write_par(path, par):
 
 Let's use the `earthaccess` Python package to search and download a L1B and a L2 file.
 
-Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
-
-```{code-cell} ipython3
-auth = earthaccess.login(persist=True)
-```
-
 ```{code-cell} ipython3
 tspan = ("2025-05-07", "2025-05-07")
 bbox = (-76.75, 36.97, -74.74, 39.01)
@@ -286,10 +293,7 @@ results[0]
 ```
 
 ```{code-cell} ipython3
-:scrolled: true
-
 l1b_paths = earthaccess.open(results)
-l1b_paths
 ```
 
 Now let's do the same for the corresponding L2 file, which we'll use later.
@@ -303,16 +307,11 @@ results = earthaccess.search_data(
 results[0]
 ```
 
-```{code-cell} ipython3
-:scrolled: true
-
-l2_paths = earthaccess.open(results)
-l2_paths
-```
-
 Next, let's define variables with the path of the input file to process using `l2gen`and a corresponding L2 output file that we'll create.
 
-+++
+```{code-cell} ipython3
+l2_paths = earthaccess.open(results)
+```
 
 And let's do a quick plot of a `rhot_red` wavelength to see what the data looks like:
 
@@ -335,79 +334,77 @@ plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 
 Let's now run `l2gen` using its default configuration. 
 
-Before we do this, however, there is one additional step required to <i>exactly</i> replicate an OB.DAAC-generated L2 file. The algorithms within `l2gen` require ancillary data such as meterological information, ozone concentrations, and sea surface temperatures. To use the corresponding ancillary data for the given date and region, we need to run the `getanc` OCSSW function. If `getanc` is not used, `l2gen` uses climatological data found in `~/occsw/share/common`. 
+Before we do this, however, there is one additional step required to <i>exactly</i> replicate an L2 file from the OB.DAAC. The algorithms within `l2gen` require ancillary data such as meterological information, ozone concentrations, and sea surface temperatures. To use the corresponding ancillary data for the given date and region, we need to run the `getanc` OCSSW function. If `getanc` is not used, `l2gen` uses climatological data found in `share/common`.
 
 We can run `getanc -h` to see options for the program:
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
+:scrolled: true
+
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
 getanc -h
 ```
 
-Let's run it on our L1B file:
+Let's run it on our L1B file, using the `-u` parameter to parse only the filename for datetime informtion.
+The filename from `l1b_paths` can be passed to the `%%bash` magic if assigned to its own variable.
 
 ```{code-cell} ipython3
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-getanc s3://ob-cumulus-prod-public/PACE_OCI.20250507T170659.L1B.V3.nc -u 
+l1b_name = Path(l1b_paths[0].full_name).name
 ```
 
-You'll notice that a file named "PACE_OCI.202507T170659.L1B.V3.nc.anc" now appears in your working directory. Reading this file, you can see that ancillary files are saved in the `~/ocssw/var/anc/` directory.  Note that this file also provides text in the correct format for use in a .par file.  
+```{code-cell} ipython3
+%%bash -s "$l1b_name"
+source $OCSSWROOT/OCSSW_bash.env
 
-Now, we'll make a .par file that has an ifile, ofile, corresponding ancillary data, and latitude and longitude boundaries. Trust us ... subsetting the L1B file to a smaller region makes processing time faster for this demo!
+getanc -u "$1"
+```
+
+You'll notice that a file named "PACE_OCI.202507T170659.L1B.V3.anc" now appears in your working directory. Reading this file, you can see that ancillary files are saved in the `var/anc/` directory.  Note that this file also provides text in the correct format for use in a par file.
+
+```{code-cell} ipython3
+anc_name = Path(filename).with_suffix(".anc")
+with open(anc_name) as f:
+    print(f.read())
+```
+
+Now, we'll make a par file that has an ifile, ofile, corresponding ancillary data, and latitude and longitude boundaries. Trust us ... subsetting the L1B file to a smaller region makes processing time faster for this demo!
 
 <b> TODO: explain that turning off uncertaintities makes it goes faster, but have to take out Rrs_unc in l2prod... want to discuss if this is worth it or not
 
 Let's first make a folder called 'data' to store the outputs:
 
 ```{code-cell} ipython3
-os.makedirs("data", exist_ok=True)
+data = Path("data")
+data.mkdir(exist_ok=True)
 ```
+
+Use the `write_par` function to create the following "l2gen.par" file in your current working directory.
 
 ```{code-cell} ipython3
 par = {
-    "ifile": "s3://ob-cumulus-prod-public/PACE_OCI.20250507T170659.L1B.V3.nc",
-    "ofile": "data/PACE_OCI.20250507T170659.L2.V3.nc",
+    "ifile": l1b_paths[0].full_name,
+    "ofile": data / l1b_name.replace("L1B", "L2"),
     "north": 39,
     "south": 35,
     "west": -76,
     "east": -74.5,
-    "icefile": "/opt/ocssw/var/anc/2025/127/20250507120000-CMC-L4_GHRSST-SSTfnd-CMC0.1deg-GLOB-v02.0-fv03.0.nc",
-    "met1": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T170000.MET.nc",
-    "met2": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "met3": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "ozone1": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T170000.MET.nc",
-    "ozone2": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "ozone3": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "sstfile": "/opt/ocssw/var/anc/2025/127/20250507120000-CMC-L4_GHRSST-SSTfnd-CMC0.1deg-GLOB-v02.0-fv03.0.nc",
     "l2prod": "Rrs,aot_865,angstrom,avw,nflh",
     "proc_uncertainty": 0,
 }
 write_par("l2gen.par", par)
 ```
 
-A file named "l2gen.par" should now appear in your working directory.
-
 Now, let's run l2gen using this new .par file. This can take several minutes.
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
-%%bash
+:scrolled: true
+
+%%bash -s $anc_name
 source $OCSSWROOT/OCSSW_bash.env
 
-l2gen par=l2gen.par 2>/dev/null
+l2gen par=l2gen.par par=$1
 ```
 
 You'll know `l2gen` processing is finished when you see "Processing Completed" at the end of the cell output. 
@@ -415,7 +412,7 @@ You'll know `l2gen` processing is finished when you see "Processing Completed" a
 Let's open up this new L2 data using XArray's open_datatree function:
 
 ```{code-cell} ipython3
-dat = xr.open_datatree(par["ofile"], decode_timedelta=True)
+dat = xr.open_datatree(par["ofile"])
 dat = xr.merge(dat.to_dict().values())
 dat = dat.set_coords(("longitude", "latitude"))
 dat
@@ -424,7 +421,7 @@ dat
 We can see the variables included in the standard OC data suite. Let's do a quick plot of Rrs at 550 nm:
 
 ```{code-cell} ipython3
-dat["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
+plot = dat["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
 ```
 
 [back to top](#Contents)
