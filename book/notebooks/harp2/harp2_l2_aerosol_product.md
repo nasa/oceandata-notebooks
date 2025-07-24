@@ -36,6 +36,8 @@ By the end of this notebook, you will understand:
 5. [Improve data quality: filter low AOD pixels](#5.-Improve-data-quality:-filter-low-AOD-pixels)
 6. [Advanced quality assessment](#6.-Advanced-quality-assessment)
 7. [Optional: Multi-angle data mask for cloud and data screening](#7.-Optional:-Multi-angle-data-mask-for-cloud-and-data-screening)
+8. [Optional: pixel level uncertainty estimation](#8.-Optional:-pixel-level-uncertainty-estimation)
+9. [Reference](#9.-Reference)
 
 +++
 
@@ -188,10 +190,11 @@ def plot_l2_product(data, plot_range, label, title, vmin, vmax, figsize=(12, 4),
     # Histogram subplot
     ax_hist = fig.add_subplot(gs[1])
     flattened_data = data[~np.isnan(data)]  # Remove NaNs for histogram
-    ax_hist.hist(flattened_data, bins=40, color='gray', edgecolor='black')
+    valid_count = np.sum(~np.isnan(flattened_data))
+    ax_hist.hist(flattened_data, bins=40, color='gray', range=[vmin, vmax], edgecolor='black')
     ax_hist.set_xlabel(label)
     ax_hist.set_ylabel("Count")
-    ax_hist.set_title("Histogram")
+    ax_hist.set_title("Histogram: N="+str(valid_count))
 
     #plt.tight_layout()
     plt.show()
@@ -266,10 +269,17 @@ $\chi^2 = \frac{1}{N} \sum (f - m)^2/\sigma^2$
 
 Here N is the total number of measureents used in retreival. The algorithm also adaptively evalue fitting performance, if the fitting perform poor, it will be removed from the retreival process. Therefore, the $\chi^2$ and $N$ can be used to evaluate retrieval performance, the pixels with small $\chi^2$ (good fitting) and large $N$ (more pixels can be fitted) will better quality. A more quantitatively approach based on error propogation can be also used to compute retrieval uncertainty, which will be include in future product.
 
+To support L3 data processing, a quality flag is also defined, which is usually based on $\chi^2$ and $N$. For the HARP2 test data, we choose 
+- quality_flag = 0: when $\chi^2<1.5$ and $N_{ref}>60$ and $N_{DoLP}>60$
+- quality_flag = 1: when $\chi^2<1.5$ and $N_{ref}>40$ and $N_{DoLP}>40$
+- quality_flag > 1: for higher value $\chi^2$ and lower values of $N_{ref}$ and $N_{DoLP}$
+Quality flag will be updated with future L1 data calibration improvement.
+
 ```{code-cell} ipython3
 chi2 = dataset['chi2'].values
 nv_ref = dataset['nv_ref'].values
 nv_dolp = dataset['nv_dolp'].values
+quality_flag = dataset['quality_flag'].values
 ```
 
 ```{code-cell} ipython3
@@ -301,6 +311,20 @@ np.nanmean(chi2), np.nanmean(nv_ref), np.nanmean(nv_dolp)
 ```
 
 Note that $\chi^2$ converges reasonably well with slight under fitting (averaged around 1.6, peaked around 1.3). Since HARP2 measures 90 angles across 4 bands, the average number of measurement satisfied good fitting are only 52 for reflectance and 42 for polarization, which indicate   potential discrepany between forward model and measurements, due to forward model assumptions or likely measurement calibrations.
+
+```{code-cell} ipython3
+# Create the plot
+title = 'Retrieval quality flag'
+label = 'quality_flag'
+data = quality_flag
+plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=2, cmap='cool')
+```
+
+We can evaluate quality flag based on the $\chi^2$ and $N$, and only a small portion of data near center of swath reach best quality as we defined as quality_flag=0. With the future improvement of data calibration, more data with better quality will be vailable. 
+
++++
+
+[back to top](#Contents)
 
 +++
 
@@ -334,8 +358,45 @@ data = mask_dolp[:, :,angle_index,0]
 plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='cool')
 ```
 
-## 8.  Reference
+```{code-cell} ipython3
+
+```
+
+```{code-cell} ipython3
+
+```
+
+[back to top](#Contents)
+
++++
+
+## 8. Optional: pixel level uncertainty estimation. 
+
++++
+
+
+As mentioned previously, pixel level uncertainty can be evalated through error propagation, which propgation measurement uncertainty through Jacobian of the forward model. The estimated uncertainties are discussed in (Gao et al 2021) for HARP2 and AirHARP, but currently not included in the HARP2 L2 products. 
+
+```{code-cell} ipython3
+
+```
+
+[back to top](#Contents)
+
++++
+
+## 9. Reference
 
 - Gao, M., Franz, B. A., Knobelspiesse, K., Zhai, P.-W., Martins, V., Burton, S., Cairns, B., Ferrare, R., Gales, J., Hasekamp, O., Hu, Y., Ibrahim, A., McBride, B., Puthukkudy, A., Werdell, P. J., and Xu, X.: Efficient multi-angle polarimetric inversion of aerosols and ocean color powered by a deep neural network forward model, Atmos. Meas. Tech., 14, 4083–4110, https://doi.org/10.5194/amt-14-4083-2021, 2021.
-  
+
+- Gao, M., Knobelspiesse, K., Franz, B. A., Zhai, P.-W., Sayer, A. M., Ibrahim, A., Cairns, B., Hasekamp, O., Hu, Y., Martins, V., Werdell, P. J., and Xu, X.: Effective uncertainty quantification for multi-angle polarimetric aerosol remote sensing over ocean, Atmos. Meas. Tech., 15, 4859–4879, https://doi.org/10.5194/amt-15-4859-2022, 2022.
+
 - Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, Atmos. Meas. Tech., 16, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023.
+
++++
+
+[back to top](#Contents)
+
+```{code-cell} ipython3
+
+```
