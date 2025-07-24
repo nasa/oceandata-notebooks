@@ -285,6 +285,10 @@ To support L3 data processing, a quality flag is also defined, which is usually 
 - flag_23 : land-water adjacent, cloud adjacent.
 - flag_123 : large chi2, land-water adjacent, cloud adjacent
 
+Specifically for quality flag 0 and 1:
+- quality_flag = 0: when $\chi^2<5$ over land and $\chi^2<10$ over ocean, not land-water-adjacent, not cloud-adjacent
+- quality_flag = 1: when $\chi^2 \ge 5$ over land and $\chi^2 \ge 10$ over ocean
+
 ```{code-cell} ipython3
 chi2 = dataset['chi2'].values
 quality_flag = dataset['quality_flag'].values
