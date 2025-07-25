@@ -7,7 +7,8 @@ kernelspec:
 
 # Reprojecting and Formatting PACE OCI Data
 
-**Authors:** Skye Caplan (NASA, SSAI)
+**Authors:** Skye Caplan (NASA, SSAI) <br>
+Last updated: July 25, 2025
 
 <div class="alert alert-info" role="alert">
 
@@ -41,7 +42,7 @@ At the end of this notebook you will know how to:
 
 ## 1. Setup
 
-Begin by importing all of the packages used in this notebook. Please ensure your environment has the most recent versions of `rioxarray` and `rasterio`, as the functionality allowing us to correctly convert PACE Level-2 (L2) files to GeoTIFF is relatively new.
+Begin by importing all of the packages used in this notebook. Please ensure your environment has the most recent versions of `rioxarray` (>=0.19.0) and `rasterio` (>=1.4.3), as the functionality allowing us to correctly convert PACE Level-2 (L2) files to GeoTIFF is relatively new.
 
 ```{code-cell} ipython3
 from pathlib import Path
@@ -58,7 +59,7 @@ import xarray as xr
 from rasterio.enums import Resampling
 ```
 
-The goal of this tutorial is to reproject and convert L2 PACE data between formats, but L2 PACE data comes in many forms. We'll cover two examples here - one with 3-dimensional surface reflectance (SFREFL) data, and one with 2-dimensional vegetation index (VI) data - to illustrate how these datasets need to be handled.
+The goal of this tutorial is to reproject and convert Level-2 (L2) PACE OCI data between formats, but L2 PACE OCI data comes in many forms. We'll cover two examples here - one with 3-dimensional surface reflectance (SFREFL) data, and one with 2-dimensional vegetation index (VI) data - to illustrate how these datasets need to be handled.
 
 The following cells use `earthaccess` to set and persist your Earthdata login credentials, then search for and download the relevant datasets for a scene covering eastern North America.
 
@@ -85,7 +86,7 @@ paths = earthaccess.download(results, local_path="data")
 
 ### 2.1. 2D Variables - Vegetation Indices
 
-All of PACE's L2 data are still in the instrument swath - in other words, they are not projected to any sort of regular grid, which makes comparing between satellites, or even between two PACE granules in the same location, difficult. However, each pixel is geolocated (i.e., has an associated latitude and longitude), meaning we can reproject our data onto a grid to make working with it more intuitive. 
+All of PACE OCI's L2 data are still in the instrument swath - in other words, they are not projected to any sort of regular grid, which makes comparing between satellites, or even between two PACE OCI granules in the same location, difficult. However, each pixel is geolocated (i.e., has an associated latitude and longitude), meaning we can reproject our data onto a grid to make working with it more intuitive. 
 
 As mentioned above, we're working with two data products in this tutorial. We'll open both as `xarray` datatrees and display their different dimensional architecture:
 
@@ -114,7 +115,7 @@ The basic steps for reprojection are:
   1. Mask for any quality issues or obscured pixels
   2. Set the coordinates to the latitudes and longitudes from the `navigation_data` group
   3. Assign the spatial dimensions as the columns (or the x coordinate, `pixels_per_line`) and rows (or the y coordinate, `number_of_lines`)
-  4. Assign the source Coordinate Reference System (CRS). Since we are working with unprojected PACE lat/lons based on the WGS84 datum, we'll use EPSG 4326 as our source CRS.
+  4. Assign the source Coordinate Reference System (CRS). Since we are working with unprojected PACE OCI lat/lons based on the WGS84 datum, we'll use EPSG 4326 as our source CRS.
   5. Use `rio.reproject` to project our source dataset
 
 We can see in the plot above that the VI datasets come masked for water, but we should also mask out any cloudy pixels for a clean dataset as well. If we print out the `geophysical_data` group of either of our datasets, there will be a variable called `l2_flags` at the bottom of the list, in which the quality flag information is stored:
@@ -126,7 +127,7 @@ vi_src
 
 The `cf_xarray` package allows us to interpret [CF-compliant](http://cfconventions.org/) attributes with xarray - for our dataset, this means we can use the data in `l2_flags` to mask for certain quality issues. [See their documentation](https://cf-xarray.readthedocs.io/en/latest/) for more information. 
 
-L2 PACE data has multiple quality flags we could apply, but here we will only mask for `CLDICE`, the flag for pixels contaminated with clouds and/or ice. The names of each available flag and what they mean can be found at [this link](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/).
+L2 PACE OCI data has multiple quality flags we could apply, but here we will only mask for `CLDICE`, the flag for pixels contaminated with clouds and/or ice. The names of each available flag and what they mean can be found at [this link](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/).
 
 ```{code-cell} ipython3
 if vi_src["l2_flags"].cf.is_flag_variable:
@@ -194,11 +195,11 @@ The VI data is now masked and reprojected! Now let's start with our 3D surface r
 
 ### 2.2. 3D Variables - Surface Reflectance 
 
-Typically, you'd be able to repeat the process we completed for the VIs above for most 3D data, and if you tried it with PACE surface reflectances, it would work. However, in addition to reprojecting PACE data, another goal of this tutorial is to export the data into GeoTIFF format for use in a GIS software. Many of these programs, and specifically the popular [QGIS](https://qgis.org/) software, require that data dimensions are ordered (Z, Y, X), where Y and X are positional coordinates like latitude and longitude and Z is a third dimension, like wavelength. 
+Typically, you'd be able to repeat the process we completed for the VIs above for most 3D data, and if you tried it with PACE OCI surface reflectances, it would work. However, in addition to reprojecting PACE OCI data, another goal of this tutorial is to export the data into GeoTIFF format for use in a GIS software. Many of these programs, and specifically the popular [QGIS](https://qgis.org/) software, require that data dimensions are ordered (Z, Y, X), where Y and X are positional coordinates like latitude and longitude and Z is a third dimension, like wavelength. 
 
-Recalling from above, the surface reflectance variable `rhos` has dimensions (rows, columns, wavelengths) - in other words, (Y, X, Z). Without resolving this issue, trying to load PACE surface reflectance data in QGIS will result in what looks like nonsensical lines and squares instead of a rich reflectance data cube.
+Recalling from above, the surface reflectance variable `rhos` has 3 dimensions (rows, columns, wavelengths) - in other words, (Y, X, Z). Without resolving this issue, trying to load PACE OCI surface reflectance data in QGIS will result in what looks like nonsensical lines and squares instead of a rich reflectance data cube.
 
-To put PACE reflectances in the correct dimensional order, all we have to do is transpose the data so that the wavelength dimension, `wavelength_3d`, is first. 
+To put PACE OCI reflectances in the correct dimensional order, all we have to do is transpose the data so that the wavelength dimension, `wavelength_3d`, is first. 
 
 Before this, we include code that assigns the wavelength_3d variable as a coordinate, so that each band can be selected by its center wavelength rather than its 0-121 numerical index ordering.
 
@@ -369,7 +370,7 @@ nc_to_gtiff(vi_path)
 
 ## 4. Converting Level-3 Data to GeoTIFF
 
-Level-3 data is already mapped to a Plate Carrée projection--in other words, unless you want the data in another projection, you don't need to reproject as we did for the Level-2 data above. In order to convert these files from NetCDF to GeoTIFF, all you need is to transpose the datasets as necessary and assign a CRS.
+Level-3 Mapped (L3M) data is already mapped to a Plate Carrée projection--in other words, unless you want the data in another projection, you don't need to reproject as we did for the L2 data above. In order to convert these files from NetCDF to GeoTIFF, all you need is to transpose the datasets as necessary and assign a CRS.
 
 +++
 
@@ -401,7 +402,3 @@ ds.rio.to_raster(Path(paths[0]).with_suffix(".tif"), driver="COG")
 You have completed the notebook on reprojecting and format conversion of PACE OCI L2 data. We suggest looking at the notebook on "Machine Learning with Satellite Data" to explore some more advanced analysis methods.
 
 </div>
-
-```{code-cell} ipython3
-
-```
