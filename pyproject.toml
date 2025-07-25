@@ -4,7 +4,7 @@ name = "oceandata-notebooks"
 description = "Tutorials for data from NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC)"
 urls.Repository = "https://github.com/gsfc-oel/oceandata-notebooks"
 license.text = "Apache-2.0"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 readme = "README.md"
 maintainers = [
   { "name" = "Ian Carroll", "email" = "ian.t.carroll@nasa.gov" },
@@ -30,6 +30,7 @@ notebooks = [
   "pvlib>=0.11.1",
   "pyproj>=3.6.1",
   "rasterio>=1.4.1",
+  "rioxarray>=0.19.0",
   "scipy>=1.13.1",
   "seaborn>=0.13.2",
   "torch>=2.7.0",
@@ -61,8 +62,6 @@ docker = [
   "jupyterlab-h5web>=12.3.0",
   "jupytext>=1.16.4",
   "lz4>=4.3.3",
-  "pyinterp>=2024.6.0",
-  "rioxarray>=0.15.0",
   "scikit-image>=0.24.0",
   "scikit-learn>=1.5.2",
   "uv>=0.4.27",
@@ -71,7 +70,6 @@ docker = [
 # packages that provide command-line tools for maintainers
 tools = [
   "jupyter-book<2",
-  "jupyter-repo2docker>=2024.7.0",
   "jupytext>=1.17.1",
   "pre-commit>=4.0.1",
   "ruff>=0.7.1",

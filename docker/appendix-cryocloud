@@ -1,0 +1,33 @@
+USER root
+
+# helpful system configurations
+# TODO: https://github.com/jupyterlab/jupyterlab-git/issues/1369
+RUN git config --system credential.helper 'cache --timeout=36000 --socket /tmp/.git-credential-cache/socket' \
+ && sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
+COPY src/prefix/ ${NB_PYTHON_PREFIX}/
+
+# install OCSSW core files (i.e. no $OCSSWROOT/share or $OCSSWROOT/var)
+ARG OCSSWTAG=V2025.1
+ARG OCSSWROOT=/opt/ocssw
+ARG OCSSW_PUBLIC=/home/${NB_USER}/shared-public/pace-hackweek/ocssw
+ADD https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw ./
+ADD https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py ./
+RUN chmod +x install_ocssw \
+ && ./install_ocssw --tag=${OCSSWTAG} --root --bin --opt --python \
+ && rm install_ocssw manifest.py \
+ && ln -s ${OCSSW_PUBLIC}/var ${OCSSWROOT} \
+ && ln -s ${OCSSW_PUBLIC}/share ${OCSSWROOT} \
+ && chown ${NB_USER}:${NB_USER} ${OCSSWROOT}/*.json ${OCSSWROOT}/python/*.json
+
+USER ${NB_USER}
+
+# install (locked) dependencies for oceandata-notebooks[docker]
+RUN pip install --no-cache-dir --no-deps \
+      --no-binary netcdf4 \
+      -r requirements.txt
+
+# set up the bash kernel
+RUN python -m bash_kernel.install --sys-prefix
+
+# environment variables
+ENV OCSSWROOT=${OCSSWROOT}
