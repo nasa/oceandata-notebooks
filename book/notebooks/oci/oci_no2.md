@@ -8,7 +8,7 @@ kernelspec:
 # Exploring nitrogen dioxide (NO<sub>2</sub>) data from OCI 
 
 **Authors:** Anna Windle (NASA, SSAI), Zachary Fasnacht (NASA, SSAI) <br>
-Last updated: July 22, 2025
+Last updated: July 28, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -174,11 +174,9 @@ results = fs.glob(pattern)
 paths = [fs.open(i, cache_type="blockcache") for i in results]
 ```
 
-Now we will combine the files into one `xarray` dataset, for which we have to access one group at a time within the hierarchichal datasets.
+Now we will combine the files into one `xarray` dataset, for which we have to access one group at a time within the hierarchichal datasets. This can take several minutes. 
 
 ```{code-cell} ipython3
-%%time
-# FIXME determine whether this is the fastest it can be
 dataset = xr.open_mfdataset(
     paths,
     group="geophysical_data",
@@ -233,6 +231,8 @@ We've created two plots, and now we combine them, add styling, and display.
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook introducing NO<sub>2</sub> data products from OCI. We suggest looking at the notebook on "Orientation to PACE/OCI Terrestrial Products" tutorial to learn more about the terrestrial data products that can be derived from PACE. 
+You have completed the notebook introducing NO<sub>2</sub> data products from OCI. We suggest looking at the notebook on [Orientation to PACE/OCI Terrestrial Products][terrestrial] tutorial to learn more about the terrestrial data products that can be derived from PACE OCI data. 
+
+[terrestrial]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-terrestrial-data/)
 
 </div>
