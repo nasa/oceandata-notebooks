@@ -37,7 +37,7 @@ This notebook was desgined to use cloud-enabled OCSSW programs, which are availa
 
 ## Summary
 
-The [OceanColor Science SoftWare][ocssw] (OCSSW) repository is the operational data processing software package of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC). OCSSW is publically available through the OB.DAAC's [Sea, earth, and atmosphere Data Analysis System][seadas] (SeaDAS) application, which provides a complete suite of tools to process, display and analyze ocean color data. SeaDAS provides a graphical user interface (GUI) for OCSSW, but a command line interfaces (CLI) also exist, which we can use to write processing scripts and notebooks without the desktop application.
+The [OceanColor Science SoftWare][ocssw] (OCSSW) repository is the operational data processing software package of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC). OCSSW is publically available through the OB.DAAC's [Sea, earth, and atmosphere Data Analysis System][seadas] (SeaDAS) application, which provides a complete suite of tools to process, display and analyze ocean color data. SeaDAS provides a graphical user interface (GUI) for OCSSW, but command line interfaces (CLI) also exist, which we can use to write processing scripts and notebooks without the desktop application.
 
 The Level-2 Generator (`l2gen`) program included in OCSSW is used to generate aquatic Level-2 (L2) data products from calibrated top-of-atmosphere (TOA) radiances. Specifically, `l2gen` atmospherically corrects spectral TOA Level-1B (L1B) radiances to obtain geophysical products, such as spectral remote-sensing reflectances (Rrs) and near-surface concentrations of the photosynthetic pigment chlorophyll-a. More information on `l2gen` methods can be found in the [Rrs Algorithm Theoretrical Basis Document].
 
@@ -91,16 +91,16 @@ Next, we'll set up the OCSSW programs.
 
 <div class="alert alert-warning">
 
-OCSSW programs are typically run using the Bash CLI.  Here, we employ a Bash terminal-in-a-cell using the [IPython magic][magic] command `%%bash`. In the specific case of OCSSW programs, the required Bash environment and environmental variables needed for that cell must be set up by loading `$OCSSWROOT/OCSSW_bash.env`.
+OCSSW programs are typically run using the Bash shell. Here, we employ a Bash shell-in-a-cell using the [IPython magic][magic] command `%%bash` to launch an independent subprocess. In the specific case of OCSSW programs, a suite of required environment variables must be set by executing `source $OCSSWROOT/OCSSW_bash.env`.
 
 </div>
 
-Every `%%bash` cell that calls an OCSSW program needs to `source` this environment definition file shipped with OCSSW, as the environment and environmental variables it establishes are not retained from one cell to the next. We can, however, define the `OCSSWROOT` environmental variable in a way that effects every `%%bash` cell. This `OCSSWROOT` variable is just the path to where OCSSW is installed on your system.
+Every `%%bash` cell that calls an OCSSW program needs to `source` this environment definition file shipped with OCSSW, as the environment variables it establishes are not retained from one cell to the next. We do, however, define the `OCSSWROOT` environmental variable in a way that effects every `%%bash` cell. This `OCSSWROOT` variable is just the path to where OCSSW is installed on your system.
 
 [magic]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands
 
 ```{code-cell} ipython3
-ocsswroot = os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
+os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
 ```
 
 In every cell where we wish to call an OCSSW command, several lines of code need to appear first to establish the required environment. These are shown below, followed by a call to the OCSSW program `install_ocssw` to see which version (tag) of OCSSW is installed.
@@ -112,7 +112,7 @@ source $OCSSWROOT/OCSSW_bash.env
 install_ocssw --installed_tag
 ```
 
-Tags beginning with "V" are operational tags, while "T" tags are equivalent to a "beta" release for evaluation by advanced users. This notebook uses OCSSW's new S3 authentication feature, which is still in testing.
+Tags beginning with "V" are operational tags, while "T" tags are equivalent to a "beta" release for testing by advanced users. This notebook uses OCSSW's new S3 authentication feature, which is still in testing.
 
 +++
 
@@ -171,11 +171,11 @@ Clearly, there are an intimidatingly large number of files required to process s
 
 <div class="alert alert-warning">
     
-Fun fact: `l2gen` used to be named "Multi Sensor Level 1 to 2", or MSL12. That is why many .par files start with 'msl12'. The OB.DAAC renamed most programs with names like 'l2gen', or 'l3mapgen' to more clearly identify their purpose. But, the .par files for use with l2gen still have names that begin with 'msl12'. Just remember msl12 = l2gen.
+Fun fact: `l2gen` used to be named "Multi Sensor Level 1 to 2", or MSL12. That is why many par files start with 'msl12'. The OB.DAAC renamed most programs with names like 'l2gen', or 'l3mapgen' to more clearly identify their purpose. But, the par files for use with l2gen still have names that begin with 'msl12'. Just remember msl12 = l2gen.
 
 </div>
 
-Now, let's look at the PACE OCI-specific files within the `~/ocssw/share/oci` directory:
+Now, let's look at the PACE OCI-specific files within the `share/oci` directory:
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -347,31 +347,36 @@ source $OCSSWROOT/OCSSW_bash.env
 getanc -h
 ```
 
-Let's run it on our L1B file, using the `-u` parameter to parse only the filename for datetime informtion.
-The filename from `l1b_paths` can be passed to the `%%bash` magic if assigned to its own variable.
+Let's run it on our L1B file, using the `-u` parameter to parse only the filename for datetime information.
+The filename from `l1b_paths` can be passed to the `%%bash` magic via the `-s` argument, but first must be assigned to a `str` variable.
 
 ```{code-cell} ipython3
-l1b_name = Path(l1b_paths[0].full_name).name
+l1b_path = l1b_paths[0].full_name
+l1b_name = Path(l1b_path).name
 ```
 
 ```{code-cell} ipython3
-%%bash -s "$l1b_name"
+%%bash -s $l1b_name
 source $OCSSWROOT/OCSSW_bash.env
 
-getanc -u "$1"
+getanc -u $1
 ```
 
 You'll notice that a file named "PACE_OCI.202507T170659.L1B.V3.anc" now appears in your working directory. Reading this file, you can see that ancillary files are saved in the `var/anc/` directory.  Note that this file also provides text in the correct format for use in a par file.
 
 ```{code-cell} ipython3
-anc_name = Path(filename).with_suffix(".anc")
-with open(anc_name) as f:
-    print(f.read())
+anc_name = Path(l1b_name).with_suffix(".anc").name
+```
+
+```{code-cell} ipython3
+%%bash -s $anc_name
+
+cat $1
 ```
 
 Now, we'll make a par file that has an ifile, ofile, corresponding ancillary data, and latitude and longitude boundaries. Trust us ... subsetting the L1B file to a smaller region makes processing time faster for this demo!
 
-<b> TODO: explain that turning off uncertaintities makes it goes faster, but have to take out Rrs_unc in l2prod... want to discuss if this is worth it or not
+<b> TODO: explain that turning off uncertaintities makes it goes faster, but have to take out Rrs_unc in l2prod... want to discuss if this is worth it or not. Why do all other l2prod?
 
 Let's first make a folder called 'data' to store the outputs:
 
@@ -384,7 +389,7 @@ Use the `write_par` function to create the following "l2gen.par" file in your cu
 
 ```{code-cell} ipython3
 par = {
-    "ifile": l1b_paths[0].full_name,
+    "ifile": l1b_path,
     "ofile": data / l1b_name.replace("L1B", "L2"),
     "north": 39,
     "south": 35,
@@ -396,7 +401,7 @@ par = {
 write_par("l2gen.par", par)
 ```
 
-Now, let's run l2gen using this new .par file. This can take several minutes.
+Now, let's run l2gen using this new par file AND the ancillary information in the par file generated by `getanc`. This can take several minutes.
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -407,7 +412,7 @@ source $OCSSWROOT/OCSSW_bash.env
 l2gen par=l2gen.par par=$1
 ```
 
-You'll know `l2gen` processing is finished when you see "Processing Completed" at the end of the cell output. 
+You'll know `l2gen` processing is finished successfully when you see "Processing Completed" at the end of the cell output. 
 
 Let's open up this new L2 data using XArray's open_datatree function:
 
@@ -438,43 +443,57 @@ Note, however, that the L2 file we downloaded includes the full granule, whereas
 
 First, we'll use the program `lonlat2pixline` to identify the scan line and pixel boundaries that correspond to our latitude and longitude coordinates within the full L2 granule.  Recall that you can see all the options for OCSSW programs by calling them without any arguments.
 
+We need the full path to the input file (this will become the `$1` argument).
+
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
-%%bash
+l2_path = l2_paths[0].full_name
+```
+
+And we need to specify the bounding box in the standard order: west, south, east, north
+
+```{code-cell} ipython3
+%%bash -s $l2_path
 source $OCSSWROOT/OCSSW_bash.env
 
-# the order to input coordinates is west, south, east, north
-lonlat2pixline s3://ob-cumulus-prod-public/PACE_OCI.20250507T170659.L2.OC_AOP.V3_0.NRT.nc -76.0 35.0 -74.5 39.0
+lonlat2pixline $1 -76.0 35.0 -74.5 39.0
 ```
 
 This output gets fed into `l2extract` to create a new, smaller file that only includes our defined geographic boundaries. The arguments are input file, start pixel, end pixel, start line, end line, sampling substep for pixels and lines (where 1 = every pixel), and output file.
 
 ```{code-cell} ipython3
+par = {
+    "ifile": l2_path,
+    "ofile": data / l1b_name.replace("L1B", "L2_sub"),
+    "spix": 175,
+    "epix": 310,
+    "sline": 1270,
+    "eline": 1651,
+    # "pix_sub": 1, TODO these are not documented, are they needed?
+    # "sc_sub": 1,
+}
+write_par("l2extract.par", par)
+```
+
+```{code-cell} ipython3
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
-l2extract s3://ob-cumulus-prod-public/PACE_OCI.20250507T170659.L2.OC_AOP.V3_0.NRT.nc 175 310 1270 1651 1 1 data/PACE_OCI.20250507T170659.L2.OC_AOP.V3_0.NRT_sub.nc
+l2extract par=l2extract.par
 ```
 
-This should have created a file named "PACE_OCI.20250507T170659.L2.OC_AOP.V3_0.NRT_sub.nc" in the data subdirectory.
+This should have created a new file including "L2_sub" in the data subdirectory.
 
 Let's open it and see how it compares with the L2 file we generated.
 
 ```{code-cell} ipython3
-:scrolled: true
-
-dat_sub = xr.open_datatree("data/PACE_OCI.20250507T170659.L2.OC_AOP.V3_0.NRT_sub.nc", decode_timedelta=True)
+dat_sub = xr.open_datatree(par["ofile"])
 dat_sub = xr.merge(dat_sub.to_dict().values())
 dat_sub = dat_sub.set_coords(("longitude", "latitude"))
 dat_sub
 ```
 
 ```{code-cell} ipython3
-dat_sub["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
+plot = dat_sub["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
 ```
 
 The two maps of Rrs(550) look extremely similar.  But, let's compare the data in a scatter plot to be sure.
@@ -497,7 +516,7 @@ plt.show()
 
 Other than a negligible number of oddball points, the data are identical. This shows that an end-user can exactly reproduce the data distributed by the OB.DAAC!
 
-<b> TODO: Sometimes I run it, and it's 1:1 with a few oddball points. Other times there is more noise. Not sure why this is happening... </b>
+<b> TODO: Sometimes I run it, and it's 1:1 with a few oddball points. Other times there is more noise. Not sure why this is happening... (Ian:) I didn't get oddball points. </b>
 
 +++
 
@@ -528,44 +547,33 @@ Let's write a new .par file named "l2gen_mod.par" to define the L2 products list
 
 ```{code-cell} ipython3
 par = {
-    "ifile": "s3://ob-cumulus-prod-public/PACE_OCI.20250507T170659.L1B.V3.nc",
-    "ofile": "data/PACE_OCI.20250507T170659.L2_mod.V3.nc",
+    "ifile": l1b_path,
+    "ofile": data / l1b_name.replace("L1B", "L2_mod"),
     "l2prod": "Rrs_vvv,chlor_a,poc,l2_flags",
     "north": 39,
     "south": 35,
     "west": -76,
     "east": -74.5,
-    "icefile": "/opt/ocssw/var/anc/2025/127/20250507120000-CMC-L4_GHRSST-SSTfnd-CMC0.1deg-GLOB-v02.0-fv03.0.nc",
-    "met1": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T170000.MET.nc",
-    "met2": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "met3": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "ozone1": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T170000.MET.nc",
-    "ozone2": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "ozone3": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "sstfile": "/opt/ocssw/var/anc/2025/127/20250507120000-CMC-L4_GHRSST-SSTfnd-CMC0.1deg-GLOB-v02.0-fv03.0.nc",
 }
 write_par("l2gen_mod.par", par)
 ```
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
-%%bash
+:scrolled: true
+
+%%bash -s $anc_name
 source $OCSSWROOT/OCSSW_bash.env
 
-l2gen par=l2gen_mod.par
+l2gen par=l2gen_mod.par par=$1
 ```
 
 A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot the chlorophyll-a product:
 
 ```{code-cell} ipython3
-dat_mod = xr.open_datatree(par["ofile"], decode_timedelta=True)
+dat_mod = xr.open_datatree(par["ofile"])
 dat_mod = xr.merge(dat_mod.to_dict().values())
 dat_mod = dat_mod.set_coords(("longitude", "latitude"))
-dat_mod.chlor_a.plot(norm=LogNorm(vmin=0.01, vmax=2))
+plot = dat_mod["chlor_a"].plot(norm=LogNorm(vmin=0.01, vmax=2))
 ```
 
 For fun, let's plot chlor_a again, but with some additional plotting functions.
@@ -573,7 +581,7 @@ For fun, let's plot chlor_a again, but with some additional plotting functions.
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
 
-dat_mod.chlor_a.plot(
+dat_mod["chlor_a"].plot(
     ax=ax,
     x="longitude",
     y="latitude",
@@ -596,26 +604,18 @@ plt.show()
 
 As a final example of the far-reaching utility that `l2gen` provides an end user, let's exercise one more example where we disable the standard bidirectional reflectance distribution function (BRDF) correction and see how it changes the retrieved chlor_a values. The default BRDF is 'brdf_opt=7', which is Morel f/Q + Fresnel solar + Fresnel sensor.
 
-While a rather simple case-study, we hope it will introduce the practioner to an improved understanding of `l2gen`'s operation and the sensitivity of derived reflectances (and, therefore, biogeochemical variables) to choices made within the standard processing scheme.
+While a rather simple case-study, we hope it will introduce the practioner to an improved understanding of `l2gen` and the sensitivity of derived reflectances (and, therefore, biogeochemical variables) to choices made within the standard processing scheme.
 
 ```{code-cell} ipython3
 par = {
-    "ifile": "s3://ob-cumulus-prod-public/PACE_OCI.20250507T170659.L1B.V3.nc",
-    "ofile": "data/PACE_OCI.20250507T170659.L2_brdf.V3.nc",
+    "ifile": l1b_path,
+    "ofile": data / l1b_name.replace("L1B", "L2_brdf"),
     "l2prod": "Rrs_vvv,chlor_a,poc,l2_flags",
     "brdf_opt": 0,
     "north": 39,
     "south": 35,
     "west": -76,
     "east": -74.5,
-    "icefile": "/opt/ocssw/var/anc/2025/127/20250507120000-CMC-L4_GHRSST-SSTfnd-CMC0.1deg-GLOB-v02.0-fv03.0.nc",
-    "met1": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T170000.MET.nc",
-    "met2": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "met3": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "ozone1": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T170000.MET.nc",
-    "ozone2": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "ozone3": "/opt/ocssw/var/anc/2025/127/GMAO_MERRA2.20250507T180000.MET.nc",
-    "sstfile": "/opt/ocssw/var/anc/2025/127/20250507120000-CMC-L4_GHRSST-SSTfnd-CMC0.1deg-GLOB-v02.0-fv03.0.nc",
 }
 write_par("l2gen_brdf.par", par)
 ```
@@ -626,23 +626,23 @@ collapsed: true
 jupyter:
   outputs_hidden: true
 ---
-%%bash
+%%bash -s $anc_name
 source $OCSSWROOT/OCSSW_bash.env
 
-l2gen par=l2gen_brdf.par
+l2gen par=l2gen_brdf.par par=$1
 ```
 
 A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot the chlorophyll-a product:
 
 ```{code-cell} ipython3
-dat_brdf = xr.open_datatree(par["ofile"], decode_timedelta=True)
+dat_brdf = xr.open_datatree(par["ofile"])
 dat_brdf = xr.merge(dat_brdf.to_dict().values())
 dat_brdf = dat_brdf.set_coords(("longitude", "latitude"))
 dat_brdf
 ```
 
 ```{code-cell} ipython3
-dat_brdf.chlor_a.plot(norm=LogNorm(vmin=0.01, vmax=2))
+dat_brdf["chlor_a"].plot(norm=LogNorm(vmin=0.01, vmax=2))
 ```
 
 This figure looks similar to what we produced in Section 3, but let's make a scatter plot to be sure ...
@@ -650,8 +650,8 @@ This figure looks similar to what we produced in Section 3, but let's make a sca
 ```{code-cell} ipython3
 fig, ax = plt.subplots()
 
-x = dat_mod.chlor_a
-y = dat_brdf.chlor_a
+x = dat_mod["chlor_a"]
+y = dat_brdf["chlor_a"]
 
 ax.scatter(x, y, s=20)
 ax.set_xlabel("default Chl a")
