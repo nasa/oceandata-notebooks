@@ -119,7 +119,7 @@ Tags beginning with "V" are operational tags, while "T" tags are equivalent to a
 ## Setting up AWS S3 credentials
 
 Accessing data from NASA's Earthdata Cloud, regardless of the tool, requires authentication.
-The `earthaccess` package works behind-the-cences to use the Earthdata Login credentials you provide to generate temporary AWS credentials for direct access to the Earthdata Cloud.
+The `earthaccess` package works behind-the-scenes using the Earthdata Login credentials you provide to generate temporary AWS credentials for direct access to the Earthdata Cloud.
 
 ```{code-cell} ipython3
 earthaccess.login(persist=True)
@@ -192,7 +192,6 @@ Let's print "msl12_defaults.par", where the `l2gen` default parameters for OCI a
 :scrolled: true
 
 %%bash
-source $OCSSWROOT/OCSSW_bash.env
 
 cat $OCSSWROOT/share/oci/msl12_defaults.par
 ```
@@ -232,7 +231,7 @@ l2gen --help
 
 User-generated parameter files provide a convenient way to control `l2gen` processing. 
 
-For example, from a Terminal, providing `l2gen` the names of the input L1B and output L2 files can be accomplished via:
+Without a par file, providing `l2gen` the names of the input L1B and output L2 files from the Terminal looks like this:
 
 ```bash
 l2gen ifile=data/PACE_OCI.20250507T170659.L1B.V3.nc ofile=data/PACE_OCI.20250507T170659.L2.V3.nc
@@ -243,7 +242,7 @@ Alternatively, a user-defined par file, say "l2gen.par", can be created with the
     ifile=data/PACE_OCI.20250507T170659.L1B.V3.nc
     ofile=data/PACE_OCI.20250507T170659.L2.V3.nc
 
-and, `l2gen` can now be called using the single argument `par`:
+Now `l2gen` can now be called using the single argument `par` while generating the same result:
 
 ```bash
 l2gen par=l2gen.par
@@ -278,12 +277,11 @@ def write_par(path, par):
 
 # 2. Search and access L1B data 
 
-Let's use the `earthaccess` Python package to search and download a L1B and a L2 file.
+Let's use the `earthaccess` Python package to access a L1B and a corresponding L2 file.
 
 ```{code-cell} ipython3
 tspan = ("2025-05-07", "2025-05-07")
 bbox = (-76.75, 36.97, -74.74, 39.01)
-
 results = earthaccess.search_data(
     short_name="PACE_OCI_L1B_SCI",
     temporal=tspan,
@@ -347,7 +345,7 @@ source $OCSSWROOT/OCSSW_bash.env
 getanc -h
 ```
 
-Let's run it on our L1B file, using the `-u` parameter to parse only the filename for datetime information.
+Let's run it on our L1B file, using the `--use_filename` parameter to parse only the filename for datetime information.
 The filename from `l1b_paths` can be passed to the `%%bash` magic via the `-s` argument, but first must be assigned to a `str` variable.
 
 ```{code-cell} ipython3
@@ -359,19 +357,15 @@ l1b_name = Path(l1b_path).name
 %%bash -s $l1b_name
 source $OCSSWROOT/OCSSW_bash.env
 
-getanc -u $1
+getanc --use_filename $1 --ofile l2gen.anc
 ```
 
-You'll notice that a file named "PACE_OCI.202507T170659.L1B.V3.anc" now appears in your working directory. Reading this file, you can see that ancillary files are saved in the `var/anc/` directory.  Note that this file also provides text in the correct format for use in a par file.
+You'll notice that a file named "l1b.anc" now appears in your working directory. Reading this file, you can see that ancillary files are saved in the `var/anc/` directory.  Note that this file also provides text in the correct format for use in a par file.
 
 ```{code-cell} ipython3
-anc_name = Path(l1b_name).with_suffix(".anc").name
-```
+%%bash
 
-```{code-cell} ipython3
-%%bash -s $anc_name
-
-cat $1
+cat l2gen.anc
 ```
 
 Now, we'll make a par file that has an ifile, ofile, corresponding ancillary data, and latitude and longitude boundaries. Trust us ... subsetting the L1B file to a smaller region makes processing time faster for this demo!
@@ -406,10 +400,10 @@ Now, let's run l2gen using this new par file AND the ancillary information in th
 ```{code-cell} ipython3
 :scrolled: true
 
-%%bash -s $anc_name
+%%bash
 source $OCSSWROOT/OCSSW_bash.env
 
-l2gen par=l2gen.par par=$1
+l2gen par=l2gen.par par=l2gen.anc
 ```
 
 You'll know `l2gen` processing is finished successfully when you see "Processing Completed" at the end of the cell output. 
@@ -468,7 +462,7 @@ par = {
     "epix": 310,
     "sline": 1270,
     "eline": 1651,
-    # "pix_sub": 1, TODO these are not documented, are they needed?
+    # "pix_sub": 1, #TODO these are not documented, are they needed?
     # "sc_sub": 1,
 }
 write_par("l2extract.par", par)
@@ -516,7 +510,7 @@ plt.show()
 
 Other than a negligible number of oddball points, the data are identical. This shows that an end-user can exactly reproduce the data distributed by the OB.DAAC!
 
-<b> TODO: Sometimes I run it, and it's 1:1 with a few oddball points. Other times there is more noise. Not sure why this is happening... (Ian:) I didn't get oddball points. </b>
+<b> TODO: Sometimes I run it, and it's 1:1 with a few oddball points. Other times there is more noise. Not sure why this is happening... </b>
 
 +++
 
@@ -561,10 +555,10 @@ write_par("l2gen_mod.par", par)
 ```{code-cell} ipython3
 :scrolled: true
 
-%%bash -s $anc_name
+%%bash
 source $OCSSWROOT/OCSSW_bash.env
 
-l2gen par=l2gen_mod.par par=$1
+l2gen par=l2gen_mod.par par=l2gen.anc
 ```
 
 A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot the chlorophyll-a product:
@@ -621,15 +615,12 @@ write_par("l2gen_brdf.par", par)
 ```
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
-%%bash -s $anc_name
+:scrolled: true
+
+%%bash
 source $OCSSWROOT/OCSSW_bash.env
 
-l2gen par=l2gen_brdf.par par=$1
+l2gen par=l2gen_brdf.par par=l2gen.anc
 ```
 
 A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot the chlorophyll-a product:
