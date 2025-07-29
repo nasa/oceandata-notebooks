@@ -35,6 +35,7 @@ jobs:
           DOCKER_USERNAME: ${{ github.repository_owner }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_REGISTRY: ghcr.io
+          IMAGE_NAME: oceandata-cryocloud
           LATEST_TAG_OFF: true
           REPO_DIR: /srv/docker
           APPENDIX_FILE: appendix
