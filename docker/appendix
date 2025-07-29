@@ -38,3 +38,6 @@ ENV GH_SCOPED_CREDS_APP_URL="https://github.com/apps/cryocloud-github-access"
 
 # ignore select Python warnings
 ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
+
+# connect to repository
+LABEL org.opencontainers.image.source=https://github.com/nasa/oceandata-notebooks
