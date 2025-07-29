@@ -19,7 +19,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 
 ## Summary
-This notebook explores the SPEXone Level 2 (L2) aerosol product derived from the joint aerosol and surface retrieval algorithm: RemoTAP. For more detailed information about the algorithm, please refer to the relevant documentation.
+This notebook explores the SPEXone Level 2 (L2) aerosol product derived from the joint aerosol and surface retrieval algorithm: RemoTAP (Remote Sensing of Trace Gases and Aerosol Products algorithm). For more detailed information about the algorithm, please refer to the relevant documentation.
 
 Similar to the HARP2 notebook, we analyze a scene from the Los Angeles wildfire, which includes both smoke and dust events (as observed by OCI and HARP2). However, due to the narrow swath of SPEXone data, the dust event will be the main focus of this tutorial. We will evaluate aerosol optical depth, aerosol absorption, and particle size information.
 
@@ -57,7 +57,8 @@ import earthaccess
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-from xarray.backends.api import open_datatree
+#uncomment if open_datatree is not already in xarray
+#from xarray.backends.api import open_datatree
 ```
 
 ```{code-cell} ipython3
@@ -97,7 +98,7 @@ PACE polarimeter L2 products for both HARP2 and SPEXone include four data groups
 - sensor_band_parameters
 
 ```{code-cell} ipython3
-datatree = open_datatree(paths[0], decode_timedelta=True)
+datatree = xr.open_datatree(paths[0], decode_timedelta=True)
 datatree
 ```
 
@@ -313,7 +314,7 @@ Note that $\chi^2$ converges reasonably well with peak at 1. There are also pixe
 title = 'Retrieval quality flag'
 label = 'quality_flag'
 data = quality_flag
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=2, cmap='cool')
+plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap='cool')
 ```
 
 We can evaluate quality flag based on the $\chi^2$ and $N$, and most pixels have reach to the best quality with quality_flag=0. 
@@ -368,6 +369,7 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 ```
 
 ```{code-cell} ipython3
+plt.figure(figsize=(8,4))
 plt.plot(aot[:,:,wavelength_index], aot_unc[:,:,wavelength_index], 'b.', alpha=0.3)
 plt.ylim(0,0.02)
 plt.xlim(0,0.3)
@@ -390,7 +392,3 @@ Guangliang Fu,  Jeroen Rietjens,  Raul Laasner,  Laura van der Schaaf,  Richard 
 +++
 
 [back to top](#Contents)
-
-```{code-cell} ipython3
-
-```

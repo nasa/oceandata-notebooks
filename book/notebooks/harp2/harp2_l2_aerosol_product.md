@@ -7,13 +7,13 @@ kernelspec:
 
 # Visualize HARP2 L2 aerosol product (FastMAPOL)
 
-**Authors:** Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU)
+**Authors:** Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU), Kamal Aryal (UMBC)
 
 [edl]: https://urs.earthdata.nasa.gov/
 [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 
 ## Summary
-This notebook explores the HARP2 Level 2 (L2) aerosol product derived from the joint aerosol and surface retrieval algorithm: FastMAPOL. For more detailed information about the algorithm, please refer to the relevant documentation.
+This notebook explores the HARP2 Level 2 (L2) aerosol product derived from the joint aerosol and surface retrieval algorithm: FastMAPOL (Fast Multi-Angle Polarimetric Ocean and Land algorithm). For more detailed information about the algorithm, please refer to the relevant documentation.
 
 Similar to the SPEXone notebook, we will analyze a scene from the Los Angeles wildfire, which includes both smoke and dust events. The analysis will focus on aerosol optical depth, absorption, and size information.
 
@@ -49,12 +49,17 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 
 ```{code-cell} ipython3
 import requests
-
+import earthaccess
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-from xarray.backends.api import open_datatree
+#uncomment if open_datatree is not already in xarray
+#from xarray.backends.api import open_datatree
+```
+
+```{code-cell} ipython3
+auth = earthaccess.login(persist=True)
 ```
 
 [back to top](#Contents)
@@ -74,6 +79,9 @@ response = requests.get(HARP2_L2_MAPOL_URL)
 with open(HARP2_L2_MAPOL_FILENAME, 'wb') as writer:
     for chunk in response.iter_content(chunk_size=100 * 1024 * 1024):
         writer.write(chunk)
+
+#another way of download
+#!wget --content-disposition "https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/PACE_HARP2.20250109T200019.L2.MAPOL_OCEAN.V3_0.nc"
 ```
 
 <div class="alert alert-danger" role="alert">
@@ -91,7 +99,7 @@ PACE polarimeter L2 products for both HARP2 and SPEXone include four data groups
 - sensor_band_parameters
 
 ```{code-cell} ipython3
-datatree = open_datatree(HARP2_L2_MAPOL_FILENAME)
+datatree = xr.open_datatree(HARP2_L2_MAPOL_FILENAME)
 datatree
 ```
 
@@ -134,6 +142,8 @@ The remote sensing reflectance characterizes ocean-leaving reflectance. It is de
 There are two versions of remote sensing reflectance: Rrs1 (before BRDF correction) and Rrs2 (after BRDF correction). Due to the large size of Rrs1 and Rrs2, they are optional outputs in the standard L2 file. Instead, their angular means and standard deviations are typically included as Rrs1_mean/std and Rrs2_mean/std.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 datatree['geophysical_data']
 ```
 
@@ -317,7 +327,7 @@ Note that $\chi^2$ converges reasonably well with slight under fitting (averaged
 title = 'Retrieval quality flag'
 label = 'quality_flag'
 data = quality_flag
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=2, cmap='cool')
+plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=4, cmap='cool')
 ```
 
 We can evaluate quality flag based on the $\chi^2$ and $N$, and only a small portion of data near center of swath reach best quality as we defined as quality_flag=0. With the future improvement of data calibration, more data with better quality will be vailable. 
@@ -342,7 +352,7 @@ mask_ref.shape, mask_dolp.shape
 
 ```{code-cell} ipython3
 # Create the plot
-angle_index = 2
+angle_index = 5
 title = 'Adaptive data mask on reflectance: angle index ' + str(angle_index)
 label = 'mask_ref'
 data = mask_ref[:, :,angle_index,0]
@@ -358,14 +368,6 @@ data = mask_dolp[:, :,angle_index,0]
 plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='cool')
 ```
 
-```{code-cell} ipython3
-
-```
-
-```{code-cell} ipython3
-
-```
-
 [back to top](#Contents)
 
 +++
@@ -377,9 +379,7 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 
 As mentioned previously, pixel level uncertainty can be evalated through error propagation, which propgation measurement uncertainty through Jacobian of the forward model. The estimated uncertainties are discussed in (Gao et al 2021) for HARP2 and AirHARP, but currently not included in the HARP2 L2 products. 
 
-```{code-cell} ipython3
-
-```
++++
 
 [back to top](#Contents)
 
@@ -396,7 +396,3 @@ As mentioned previously, pixel level uncertainty can be evalated through error p
 +++
 
 [back to top](#Contents)
-
-```{code-cell} ipython3
-
-```
