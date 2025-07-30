@@ -8,11 +8,17 @@ kernelspec:
 # Reprojecting and Formatting PACE OCI Data
 
 **Authors:** Skye Caplan (NASA, SSAI) <br>
-Last updated: July 25, 2025
+Last updated: July 28, 2025
 
 <div class="alert alert-info" role="alert">
 
 An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA PACE data.
+
+</div>
+
+<div class="alert alert-warning" role="alert">
+
+Executing this notebook requires an instance with up to 8GB of memory.
 
 </div>
 
@@ -178,9 +184,7 @@ We can plot the data with a basemap to see that it was correctly georeferenced a
 Also of note: the coordinate names "longitude" and "latitude" get converted to "x" and "y", respectively, during the reprojection. This is a quirk of `rioxarray` and does not affect the projection or the export in Section 3. We rename the coordinates with `.rename({"x":"longitude", "y":"latitude"})` at the end of the cell above to avoid confusion.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(
-    1, 1, figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()}
-)
+fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.coastlines(linewidth=0.5)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
@@ -215,7 +219,6 @@ sr_dt["geophysical_data"]
 ```{code-cell} ipython3
 sr_src = sr_dt["geophysical_data"]["rhos"]
 sr_src = sr_src.transpose("wavelength_3d", ...)
-
 sr_src
 ```
 
@@ -242,9 +245,7 @@ sr_dst = sr_src.rio.reproject(
 ```
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(
-    1, 1, figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()}
-)
+fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
 ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
 ax.coastlines(linewidth=0.5)
 ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
@@ -312,10 +313,11 @@ def nc_to_gtiff(fpath):
         fpath - Path to NetCDF file to convert
     """
     dt = xr.open_datatree(fpath)
+    fpath_s = str(fpath)
 
-    if "SFREFL" in fpath:
+    if "SFREFL" in fpath_s:
         src = dt["geophysical_data"]["rhos"].transpose("wavelength_3d", ...)
-    elif "LANDVI" in fpath:
+    elif "LANDVI" in fpath_s:
         src = dt["geophysical_data"].to_dataset()
         if src["l2_flags"].cf.is_flag_variable:
             cloud_mask = ~(src["l2_flags"].cf == "CLDICE")
@@ -338,10 +340,10 @@ def nc_to_gtiff(fpath):
         resampling=Resampling.nearest,
     )
 
-    if "SFREFL" in fpath:
+    if "SFREFL" in fpath_s:
         width, height, count = dst.shape[2], dst.shape[1], dst.shape[0]
         dtype = dst.dtype
-    elif "LANDVI" in fpath:
+    elif "LANDVI" in fpath_s:
         width, height, count = dst["cire"].shape[1], dst["cire"].shape[0], 11
         dtype = dst["cire"].dtype
 
@@ -381,14 +383,13 @@ results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_LANDVI",
     granule_name="PACE_OCI.20240601_20240630.L3m.MO.LANDVI.V3_0.0p1deg.nc",
 )
-
 paths = earthaccess.download(results, local_path="data")
 ```
 
 ```{code-cell} ipython3
-if "SFREFL" in paths[0]:
+if "SFREFL" in str(paths[0]):
     ds = xr.open_dataset(paths[0]).rhos.transpose("wavelength", ...)
-elif "LANDVI" in paths[0]:
+elif "LANDVI" in str(paths[0]):
     ds = xr.open_dataset(paths[0]).drop_vars("palette")
 
 ds = ds.rio.write_crs("epsg:4326")
