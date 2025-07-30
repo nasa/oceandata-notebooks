@@ -386,3 +386,9 @@ plt.show()
 ```
 
 [back to top](#Contents)
+
+<div class="alert alert-info" role="alert">
+
+You have completed the notebook giving a first look at SPEXone data. More notebooks are coming soon!
+
+</div>
