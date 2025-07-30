@@ -5,6 +5,8 @@
 /notebooks/oci/*
 !/notebooks/harp2
 /notebooks/harp2/*
+!/notebooks/spexone
+/notebooks/spexone/*
 !/notebooks/modis
 /notebooks/modis/*
 !/notebooks/hackweek
