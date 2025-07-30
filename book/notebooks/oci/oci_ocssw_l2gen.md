@@ -321,8 +321,6 @@ l2_paths = earthaccess.open(results)
 
 And let's do a quick plot of a `rhot_red` wavelength to see what the data looks like:
 
-<b> TODO: This plotting takes a long time, is there a better way to do this?
-
 ```{code-cell} ipython3
 dataset = xr.open_datatree(l1b_paths[0])
 dataset = xr.merge(dataset.to_dict().values())
