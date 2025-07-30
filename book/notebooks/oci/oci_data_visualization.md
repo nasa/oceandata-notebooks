@@ -16,7 +16,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 <div class="alert alert-warning" role="alert">
 
-You need at least 13GB of memory to run this notebook
+You need at least 14GB of memory to run this notebook
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
