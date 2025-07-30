@@ -8,7 +8,7 @@ kernelspec:
 # Run Level-2 Generator (l2gen) OCSSW program on OCI data
 
 **Authors:** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA) <br>
-Last updated: July 23, 2025
+Last updated: July 30, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -27,7 +27,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 <div class="alert alert-info" role="alert">
 
-This notebook was desgined to use cloud-enabled OCSSW programs, which are available in OCSSW tag ___ or higher. Cloud-enabled OCSSW programs can only be run on an AWS EC2 instance, such as CryoCloud.  **TODO: Add more info here on setting AWS credentials for this to work...**
+This notebook was desgined to use cloud-enabled OCSSW programs, which are available in OCSSW tag V2025.2 or higher. Cloud-enabled OCSSW programs can only be run on an AWS EC2 instance, such as CryoCloud.
 
 </div>
 
@@ -106,6 +106,8 @@ os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
 In every cell where we wish to call an OCSSW command, several lines of code need to appear first to establish the required environment. These are shown below, followed by a call to the OCSSW program `install_ocssw` to see which version (tag) of OCSSW is installed.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
@@ -217,8 +219,12 @@ You can also see OCSSW parameter options by running 'l2gen --help'.
 </div>
 
 ```{code-cell} ipython3
-:scrolled: true
-
+---
+scrolled: true
+collapsed: true
+jupyter:
+  outputs_hidden: true
+---
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
@@ -291,6 +297,8 @@ results[0]
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+
 l1b_paths = earthaccess.open(results)
 ```
 
@@ -337,8 +345,12 @@ Before we do this, however, there is one additional step required to <i>exactly<
 We can run `getanc -h` to see options for the program:
 
 ```{code-cell} ipython3
-:scrolled: true
-
+---
+scrolled: true
+collapsed: true
+jupyter:
+  outputs_hidden: true
+---
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
@@ -368,9 +380,9 @@ You'll notice that a file named "l1b.anc" now appears in your working directory.
 cat l2gen.anc
 ```
 
-Now, we'll make a par file that has an ifile, ofile, corresponding ancillary data, and latitude and longitude boundaries. Trust us ... subsetting the L1B file to a smaller region makes processing time faster for this demo!
+Now, we'll make a par file that has an ifile, ofile, corresponding ancillary data, and latitude and longitude boundaries. Trust us ... subsetting the L1B file to a smaller region makes processing time faster for this demo! <br>
 
-<b> TODO: explain that turning off uncertaintities makes it goes faster, but have to take out Rrs_unc in l2prod... want to discuss if this is worth it or not. Why do all other l2prod?
+We will output the Rrs variable by listing l2prod to "Rrs". And we wil also set proc_uncertainity to 0, which means we are not calculating uncertainites for Rrs. This makes `l2gen` process faster. 
 
 Let's first make a folder called 'data' to store the outputs:
 
@@ -389,7 +401,7 @@ par = {
     "south": 35,
     "west": -76,
     "east": -74.5,
-    "l2prod": "Rrs,aot_865,angstrom,avw,nflh",
+    "l2prod": "Rrs",
     "proc_uncertainty": 0,
 }
 write_par("l2gen.par", par)
@@ -417,7 +429,7 @@ dat = dat.set_coords(("longitude", "latitude"))
 dat
 ```
 
-We can see the variables included in the standard OC data suite. Let's do a quick plot of Rrs at 550 nm:
+Let's do a quick plot of Rrs at 550 nm:
 
 ```{code-cell} ipython3
 plot = dat["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
@@ -480,6 +492,8 @@ This should have created a new file including "L2_sub" in the data subdirectory.
 Let's open it and see how it compares with the L2 file we generated.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 dat_sub = xr.open_datatree(par["ofile"])
 dat_sub = xr.merge(dat_sub.to_dict().values())
 dat_sub = dat_sub.set_coords(("longitude", "latitude"))
@@ -510,8 +524,6 @@ plt.show()
 
 Other than a negligible number of oddball points, the data are identical. This shows that an end-user can exactly reproduce the data distributed by the OB.DAAC!
 
-<b> TODO: Sometimes I run it, and it's 1:1 with a few oddball points. Other times there is more noise. Not sure why this is happening... </b>
-
 +++
 
 [back to top](#Contents)
@@ -528,9 +540,9 @@ Other than a negligible number of oddball points, the data are identical. This s
 
 Let's say you want to run `l2gen` to retrieve biogeochemical data products, such as chlorophyll a concentrations. There are two ways to do so. First, you can assign a specific product suite.  For chlorophyll, this is done by adding "suite=BGC" to your .par file.  Second, you can explicitly define your output products in a list using the "l2prod" keyword. Consider this example:
 
-<pre>l2prod=Rrs_vvv,chlor_a,poc,l2flags</pre>
+<pre>l2prod=Rrs,chlor_a,poc,l2flags</pre>
 
-"Rrs_vvv" indicates all visible Rrs, "chlor_a" is chlorophyll-a, "poc" is particulate organic carbon, and "[l2flags][l2flags]" is the bitwise operator that identifies processing flags assigned to each pixel (you <b>always</b> want to include [l2flags][l2flags] as an output product!). 
+"Rrs" includes all Rrs wavelengths, "chlor_a" is chlorophyll-a, "poc" is particulate organic carbon, and "[l2flags][l2flags]" is the bitwise operator that identifies processing flags assigned to each pixel (you <b>always</b> want to include [l2flags][l2flags] as an output product!). 
 
 Tip: You can run `get_product_info l sensor=oci` to see the many many products l2gen can produce. 
 
@@ -543,7 +555,7 @@ Let's write a new .par file named "l2gen_mod.par" to define the L2 products list
 par = {
     "ifile": l1b_path,
     "ofile": data / l1b_name.replace("L1B", "L2_mod"),
-    "l2prod": "Rrs_vvv,chlor_a,poc,l2_flags",
+    "l2prod": "Rrs,chlor_a,poc,l2_flags",
     "north": 39,
     "south": 35,
     "west": -76,
@@ -604,7 +616,7 @@ While a rather simple case-study, we hope it will introduce the practioner to an
 par = {
     "ifile": l1b_path,
     "ofile": data / l1b_name.replace("L1B", "L2_brdf"),
-    "l2prod": "Rrs_vvv,chlor_a,poc,l2_flags",
+    "l2prod": "Rrs,chlor_a,poc,l2_flags",
     "brdf_opt": 0,
     "north": 39,
     "south": 35,
