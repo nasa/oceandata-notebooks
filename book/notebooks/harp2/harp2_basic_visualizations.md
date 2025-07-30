@@ -82,7 +82,11 @@ This means the imagery coming from the satellite has been calibrated and assigne
 Note that access might take a while, depending on the speed of your internet connection, and the progress bar will seem frozen because we're only looking at one file.
 
 ```{code-cell} ipython3
-results = earthaccess.search_data(concept_id="G3132447081-OB_CLOUD")
+results = earthaccess.search_data(
+    short_name="PACE_HARP2_L1C_SCI",
+    temporal=("2025-07-20", "2025-07-20"),
+    count=1
+)
 paths = earthaccess.open(results)
 ```
 
@@ -353,6 +357,8 @@ ax[0].set_title("Radiance")
 ax[1].imshow(refl.sel({"number_of_views": red_nadir_idx}), cmap="gray")
 ax[1].set_title("Reflectance")
 plt.show()
+print(f"Mean radiance: {dataset["i"].mean():.3f}")
+print(f"Mean reflectance: {refl
 ```
 
 Create a line plot of the mean reflectance for each view angle and spectral channel. The flatness of this plot serves as a sanity check that nothing has gone horribly wrong with our data processing.
@@ -394,9 +400,9 @@ WARNING: there is some flickering in the animation displayed in this section.
 
 </div>
 
-All that is great for looking at a single angle at a time, but it doesn't capture the multi-angle nature of the instrument. Multi-angle data innately captures information about 3D structure. To get a sense of that, we'll make an animation of the scene with the 60 viewing angles available for the red band.
+Multi-angle data innately captures information about 3D structure. To get a sense of that, we'll make an animation of the scene with the 60 viewing angles available for the red band.
 
-We are going to generate this animation without using the latitude and longitude coordinates. If you use XArray's `plot` as above with coordinates, you could use a projection. However, that can be a little slow for all animation "frames" available with HARP2. This means there will be some stripes of what seems like missing data at certain angles. These stripes actually result from the gridding of the multi-angle data, and are not a bug.
+We will generate this animation without using the latitude and longitude coordinates. If you use XArray's `plot` as above with coordinates, you could use a projection. However, that can be a little slow for all animation "frames" available with HARP2. This means there will be some stripes of what seems like missing data at certain angles. These stripes actually result from the gridding of the multi-angle data, and are not a bug.
 
 +++
 
@@ -413,10 +419,10 @@ A very mild Gaussian filter over the angular axis will improve the animation's s
 refl_pretty.data = gaussian_filter1d(refl_pretty, sigma=0.5, truncate=2, axis=2)
 ```
 
-Raising the image to the power 2/3 will brighten it a little bit.
+We can apply some simple tone mapping to brighten up the scene for visualization purposes.
 
 ```{code-cell} ipython3
-refl_pretty = refl_pretty ** (2 / 3)
+refl_pretty = refl_pretty / (refl_pretty + 1.5 * refl_pretty.mean())
 ```
 
 Append all but the first and last frame in reverse order, to get a 'bounce' effect.
@@ -453,7 +459,7 @@ This scene is a great example of multi-layer clouds. You can use the parallax ef
 
 The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
 
-![A multi-angle HARP2 animation](harp2_red_anim_20240519T235950.gif)
+![A multi-angle HARP2 animation](harp2_red_anim_20250719T235621.gif)
 
 Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By default, `matplotlib` will not display an animation. To view the animation, we saved it as a file and displayed the result in the next cell. Alternatively, you could change the default by executing `%matplotlib widget`. The `widget` setting, which works in Jupyter Lab but not on a static website, you can use `plt.show()` as well as `an.pause()` and `an.resume()`.
 
@@ -463,6 +469,6 @@ Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By d
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook giving a first look at HARP2 data. More notebooks are comming soon!
+You have completed the notebook giving a first look at HARP2 data. More notebooks are coming soon!
 
 </div>
