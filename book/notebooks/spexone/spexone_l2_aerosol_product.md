@@ -57,8 +57,6 @@ import earthaccess
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-#uncomment if open_datatree is not already in xarray
-#from xarray.backends.api import open_datatree
 ```
 
 ```{code-cell} ipython3
@@ -98,7 +96,7 @@ PACE polarimeter L2 products for both HARP2 and SPEXone include four data groups
 - sensor_band_parameters
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(paths[0], decode_timedelta=True)
+datatree = xr.open_datatree(paths[0])
 datatree
 ```
 
@@ -171,8 +169,9 @@ For future L2 product, the wavelength variable will be called simple `wavelength
 </div>
 
 ```{code-cell} ipython3
-# function to make map and histogram (default)
 def plot_l2_product(data, plot_range, label, title, vmin, vmax, figsize=(12, 4), cmap='viridis'):
+    """Make map and histogram (default)"""
+    
     # Create a figure with two subplots: 1 for map, 1 for histogram
     fig = plt.figure(figsize=figsize)
     gs = fig.add_gridspec(1, 2, width_ratios=[3,1], wspace=0.3)
@@ -203,7 +202,6 @@ def plot_l2_product(data, plot_range, label, title, vmin, vmax, figsize=(12, 4),
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
 title = 'Aerosol Optical Depth (AOD): ' + str(wavelength[wavelength_index]) +' nm'
 label = 'AOD'
@@ -211,10 +209,7 @@ data = aot[:,:,wavelength_index]
 plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax = 0.3, cmap='jet')
 ```
 
-[back to top](#Contents)
-
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
 title = 'Single scattering albedo (SSA): ' + str(wavelength[wavelength_index]) +' nm'
 label = 'SSA'
@@ -224,7 +219,6 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0.7,
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
 title = 'Fine mode fraction'
 label = 'FVF'
@@ -236,6 +230,10 @@ We can clearly see the aerosol event with less absorption (high SSA) and large s
 
 +++
 
+[back to top](#Contents)
+
++++
+
 ## 5. Improve data quality: filter low AOD pixels
 
 +++ {"lines_to_next_cell": 2}
@@ -243,7 +241,6 @@ We can clearly see the aerosol event with less absorption (high SSA) and large s
 Aerosol absorption and microphysics have larger uncertainties when aerosol loading is low. User can further remove low AOD cases when necessary.
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
 aot_min  = 0.05
 title = 'Filtered single scattering albedo (SSA): ' + str(wavelength[wavelength_index]) +' nm (AOD 550>'+str(aot_min)+')'
@@ -255,7 +252,6 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0.7,
 The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
 aot_min  = 0.05
 title = 'Fine mode fraction (AOD 550>'+str(aot_min)+')'
@@ -296,7 +292,6 @@ quality_flag = dataset['quality_flag'].values
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 title = r'Retrieval cost function: $\chi^2$'
 label = r'$\chi^2$'
 data = chi2
@@ -310,14 +305,13 @@ np.nanmean(chi2)
 Note that $\chi^2$ converges reasonably well with peak at 1. There are also pixels which do not converge well with relatively high cost function. These pixels need to be removed for more detailed analysis.
 
 ```{code-cell} ipython3
-# Create the plot
 title = 'Retrieval quality flag'
 label = 'quality_flag'
 data = quality_flag
 plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap='cool')
 ```
 
-We can evaluate quality flag based on the $\chi^2$ and $N$, and most pixels have reach to the best quality with quality_flag=0. 
+We can evaluate quality flag based on the $\chi^2$ and $N$, and most pixels have reach to the best quality with quality_flag=0.
 
 +++
 
@@ -337,7 +331,6 @@ cloud_fraction.shape
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 title = 'Cloud fraction'
 label = 'cloud_fraction'
 data = cloud_fraction
@@ -352,7 +345,7 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 
 +++
 
-As mentioned previously, pixel level uncertainty can be evalated through error propagation, which propgation measurement uncertainty through Jacobian of the forward model. The estimated uncertainties are availalbe in the SPEXone RemmoTAP product. Here we look at the uncertainties of AOD. 
+As mentioned previously, pixel level uncertainty can be evalated through error propagation, which propgation measurement uncertainty through Jacobian of the forward model. The estimated uncertainties are availalbe in the SPEXone RemmoTAP product. Here we look at the uncertainties of AOD.
 
 ```{code-cell} ipython3
 aot_unc = dataset['aot_uncertainty'].values
@@ -360,7 +353,6 @@ aot_unc.shape
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
 title = 'Aerosol Optical Depth (AOD) Uncertainty: ' + str(wavelength[wavelength_index]) +' nm'
 label = 'AOD'
@@ -377,7 +369,7 @@ plt.xlabel("AOD")
 plt.ylabel("AOD Uncertainty")
 ```
 
-As shown above, the AOD uncertainties increase with the AOD value. You can play with other retrieval uncertainties and evaluate how they vary with AOD. 
+As shown above, the AOD uncertainties increase with the AOD value. You can play with other retrieval uncertainties and evaluate how they vary with AOD.
 
 +++
 

@@ -84,8 +84,6 @@ When HARP2 L2 data in provisional level, it will be available through the earth 
 
 </div>
 
-+++
-
 PACE polarimeter L2 products for both HARP2 and SPEXone include four data groups
 - geolocation_data
 - geophysical_data
@@ -136,8 +134,6 @@ The remote sensing reflectance characterizes ocean-leaving reflectance. It is de
 There are two versions of remote sensing reflectance: Rrs1 (before BRDF correction) and Rrs2 (after BRDF correction). Due to the large size of Rrs1 and Rrs2, they are optional outputs in the standard L2 file. Instead, their angular means and standard deviations are typically included as Rrs1_mean/std and Rrs2_mean/std.
 
 ```{code-cell} ipython3
-:scrolled: true
-
 datatree['geophysical_data']
 ```
 
@@ -173,8 +169,9 @@ For future L2 product, the wavelength variable will be called simple `wavelength
 </div>
 
 ```{code-cell} ipython3
-# function to make map and histogram (default)
 def plot_l2_product(data, plot_range, label, title, vmin, vmax, figsize=(12, 4), cmap='viridis'):
+    """Make map and histogram (default)."""
+    
     # Create a figure with two subplots: 1 for map, 1 for histogram
     fig = plt.figure(figsize=figsize)
     gs = fig.add_gridspec(1, 2, width_ratios=[3,1], wspace=0.3)
@@ -205,7 +202,6 @@ def plot_l2_product(data, plot_range, label, title, vmin, vmax, figsize=(12, 4),
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 1
 title = 'Aerosol Optical Depth (AOD): ' + str(wavelength[wavelength_index]) +' nm'
 label = 'AOD'
@@ -213,10 +209,7 @@ data = aot[:,:,wavelength_index]
 plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax = 0.5, cmap='jet')
 ```
 
-[back to top](#Contents)
-
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 1
 title = 'Single scattering albedo (SSA): ' + str(wavelength[wavelength_index]) +' nm'
 label = 'SSA'
@@ -225,13 +218,16 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0.7,
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 1
 title = 'Fine mode fraction'
 label = 'FVF'
 data = fvf
 plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='jet')
 ```
+
+[back to top](#Contents)
+
++++
 
 ## 5. Improve data quality: filter low AOD pixels
 
@@ -240,7 +236,6 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 Aerosol absorption and microphysics have larger uncertainties when aerosol loading is low. User can further remove low AOD cases when necessary. We can clearly see, two type of aerosol events with relatively high AOD, the upper one with high absorption (low SSA) and small size (high FVF), probably smoke due to fire; the lower one with less absorption (high SSA) and large size (low FVF), probably dust.
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 1
 aot_min  = 0.15
 title = 'Filtered single scattering albedo (SSA): ' + str(wavelength[wavelength_index]) +' nm (AOD 550>'+str(aot_min)+')'
@@ -252,7 +247,6 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0.7,
 The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 1
 aot_min  = 0.15
 title = 'Fine mode fraction (AOD 550>'+str(aot_min)+')'
@@ -287,7 +281,6 @@ quality_flag = dataset['quality_flag'].values
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 title = r'Retrieval cost function: $\chi^2$'
 label = r'$\chi^2$'
 data = chi2
@@ -295,7 +288,6 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 title = r'Total number of reflectance measurements'
 label = r'$N_{ref}$'
 data = nv_ref
@@ -303,7 +295,6 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 title = r'Total number of reflectance measurements'
 label = r'$N_{dolp}$'
 data = nv_dolp
@@ -317,14 +308,13 @@ np.nanmean(chi2), np.nanmean(nv_ref), np.nanmean(nv_dolp)
 Note that $\chi^2$ converges reasonably well with slight under fitting (averaged around 1.6, peaked around 1.3). Since HARP2 measures 90 angles across 4 bands, the average number of measurement satisfied good fitting are only 52 for reflectance and 42 for polarization, which indicate   potential discrepany between forward model and measurements, due to forward model assumptions or likely measurement calibrations.
 
 ```{code-cell} ipython3
-# Create the plot
 title = 'Retrieval quality flag'
 label = 'quality_flag'
 data = quality_flag
 plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=4, cmap='cool')
 ```
 
-We can evaluate quality flag based on the $\chi^2$ and $N$, and only a small portion of data near center of swath reach best quality as we defined as quality_flag=0. With the future improvement of data calibration, more data with better quality will be vailable. 
+We can evaluate quality flag based on the $\chi^2$ and $N$, and only a small portion of data near center of swath reach best quality as we defined as quality_flag=0. With the future improvement of data calibration, more data with better quality will be vailable.
 
 +++
 
@@ -345,7 +335,6 @@ mask_ref.shape, mask_dolp.shape
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 angle_index = 5
 title = 'Adaptive data mask on reflectance: angle index ' + str(angle_index)
 label = 'mask_ref'
@@ -354,7 +343,6 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 angle_index = 5
 title = 'Adaptive data mask on DoLP: angle index' + str(angle_index)
 label = 'mask_DOLP'
@@ -366,12 +354,11 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 
 +++
 
-## 8. Optional: pixel level uncertainty estimation. 
+## 8. Optional: pixel level uncertainty estimation.
 
 +++
 
-
-As mentioned previously, pixel level uncertainty can be evalated through error propagation, which propgation measurement uncertainty through Jacobian of the forward model. The estimated uncertainties are discussed in (Gao et al 2021) for HARP2 and AirHARP, but currently not included in the HARP2 L2 products. 
+As mentioned previously, pixel level uncertainty can be evalated through error propagation, which propgation measurement uncertainty through Jacobian of the forward model. The estimated uncertainties are discussed in (Gao et al 2021) for HARP2 and AirHARP, but currently not included in the HARP2 L2 products.
 
 +++
 
