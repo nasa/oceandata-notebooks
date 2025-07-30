@@ -48,18 +48,18 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 ```{code-cell} ipython3
+from pathlib import Path
 import requests
 import earthaccess
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-#uncomment if open_datatree is not already in xarray
-#from xarray.backends.api import open_datatree
 ```
 
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
+fs = earthaccess.get_fsspec_https_session()
 ```
 
 [back to top](#Contents)
@@ -71,17 +71,11 @@ auth = earthaccess.login(persist=True)
 HARP2 L2 data is currently in the test phase with data only available on OB.DAAC, not on earth data cloud yet. We can use the requests library to download data directly from OB.DAAC. The following command line tool downloads one HARP2 FastMAPOL L2 granule at the time stamp 2025/01/09 20:00:19 UTC.
 
 ```{code-cell} ipython3
+OB_DAAC_PROVISIONAL = "https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/"
 HARP2_L2_MAPOL_FILENAME = "PACE_HARP2.20250109T200019.L2.MAPOL_OCEAN.V3_0.nc"
-HARP2_L2_MAPOL_URL = f"https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/{HARP2_L2_MAPOL_FILENAME}"
-
-response = requests.get(HARP2_L2_MAPOL_URL)
-
-with open(HARP2_L2_MAPOL_FILENAME, 'wb') as writer:
-    for chunk in response.iter_content(chunk_size=100 * 1024 * 1024):
-        writer.write(chunk)
-
-#another way of download
-#!wget --content-disposition "https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/PACE_HARP2.20250109T200019.L2.MAPOL_OCEAN.V3_0.nc"
+fs.get(f"{OB_DAAC_PROVISIONAL}/{HARP2_L2_MAPOL_FILENAME}", "data/")
+paths = list(Path("data").glob("*.nc"))
+paths
 ```
 
 <div class="alert alert-danger" role="alert">
@@ -99,7 +93,7 @@ PACE polarimeter L2 products for both HARP2 and SPEXone include four data groups
 - sensor_band_parameters
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(HARP2_L2_MAPOL_FILENAME)
+datatree = xr.open_datatree(paths[0])
 datatree
 ```
 
