@@ -7,7 +7,7 @@ RUN git config --system credential.helper 'cache --timeout=36000 --socket /tmp/.
 COPY src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # install OCSSW core files (i.e. no $OCSSWROOT/share or $OCSSWROOT/var)
-ARG OCSSWTAG=T2025.14
+ARG OCSSWTAG=V2025.2
 ARG OCSSWROOT=/opt/ocssw
 ARG OCSSWROOT_PUBLIC=/home/${NB_USER}/shared-public/pace-hackweek/ocssw
 ENV OCSSWROOT=${OCSSWROOT}
@@ -38,3 +38,9 @@ ENV GH_SCOPED_CREDS_APP_URL="https://github.com/apps/cryocloud-github-access"
 
 # ignore select Python warnings
 ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
+
+# configure uv tool
+ENV UV_NO_CACHE=1 UV_NO_SYNC=1 UV_CONSTRAINT=/srv/docker/requirements.txt
+
+# connect to repository
+LABEL org.opencontainers.image.source="https://github.com/nasa/oceandata-notebooks"
