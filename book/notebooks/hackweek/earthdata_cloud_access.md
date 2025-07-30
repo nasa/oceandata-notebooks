@@ -7,7 +7,8 @@ kernelspec:
 
 # Orientation to Earthdata Cloud Access
 
-**Tutorial Lead:** Anna Windle (NASA, SSAI)
+**Tutorial Lead:** Anna Windle (NASA, SSAI) <br>
+Last updated: July 21, 2025
 
 <div class="alert alert-info" role="alert">
 
@@ -73,17 +74,12 @@ At the end of this notebook you will know:
 We begin by importing the packages used in this notebook.
 
 ```{code-cell} ipython3
-import cartopy.crs as ccrs
 import earthaccess
+import xarray as xr
 import matplotlib.pyplot as plt
 import numpy as np
-import xarray as xr
+import cartopy.crs as ccrs
 ```
-
-The last import provides a preview of the `DataTree` object. Once it is fully integrated into XArray,
-the additional import won't be needed, as the function will be available as `xr.open_datree`.
-
-+++
 
 [back to top](#Contents)
 
@@ -142,7 +138,7 @@ The short name can also be found on <a href="https://search.earthdata.nasa.gov/s
 </div>
 
 Next, we use the `search_data` function to find granules within a
-collection. Let's use the `short_name` for the PACE/OCI Level-2 near real time (NRT), product for biogeochemical properties (although you can
+collection. Let's use the `short_name` for the PACE/OCI Level-2 product for biogeochemical properties (although you can
 search for granules across collections too).
 
 
@@ -215,12 +211,21 @@ The `paths` list contains references to files on a remote filesystem. The ob-cum
 paths
 ```
 
-Notice that this `xarray.Dataset` has nothing but "Attributes". The NetCDF data model includes multi-group hierarchies within a single file, where each group maps to an `xarray.Dataset`. The whole file maps to a `DataTree`, which we will only use lightly because the implementation in XArray remains under development.
+Let's open up the first file using XArray.
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(paths[0])
+dat = xr.open_dataset(paths[0])
+dat
+```
+
+Notice that this `xarray.Dataset` has nothing but "Attributes". The NetCDF data model includes multi-group hierarchies within a single file, where each group maps to an `xarray.Dataset`. The whole file maps to a `xarray.Datatree`, which we can open using:
+
+```{code-cell} ipython3
+datatree = xr.open_datatree(paths[0], decode_timedelta=False)
 datatree
 ```
+
+Let's convert the `xarray.Datatree` into a `xarray.Dataset` by merging all the nested dictionary values:
 
 ```{code-cell} ipython3
 dataset = xr.merge(datatree.to_dict().values())
@@ -296,11 +301,8 @@ A common reason to generate a single dataset from multiple, daily images is to c
 
 ```{code-cell} ipython3
 chla = np.log10(dataset["chlor_a"])
-chla.attrs.update(
-    {
-        "units": f'log({dataset["chlor_a"].attrs["units"]})',
-    }
-)
+chla.attrs.update({"units": f'log({dataset["chlor_a"].attrs["units"]})'})
+
 plot = chla.sel({"date": 0}).plot(aspect=2, size=4, cmap="GnBu_r")
 ```
 
@@ -347,7 +349,7 @@ paths
 We can open up that locally saved file using `xarray` as well.
 
 ```{code-cell} ipython3
-xr.open_datatree(paths[0])
+xr.open_datatree(paths[0], decode_timedelta=False)
 ```
 
 [back to top](#Contents)
