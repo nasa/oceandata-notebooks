@@ -32,7 +32,7 @@ jobs:
       - name: build with repo2docker
         uses: jupyterhub/repo2docker-action@master
         with:
-          DOCKER_USERNAME: ${{ github.actor }}
+          DOCKER_USERNAME: ${{ github.repository_owner }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_REGISTRY: ghcr.io
           LATEST_TAG_OFF: true
