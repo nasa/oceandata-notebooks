@@ -49,11 +49,12 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 
 ```{code-cell} ipython3
 from pathlib import Path
-import requests
-import earthaccess
+
 import cartopy.crs as ccrs
+import earthaccess
 import matplotlib.pyplot as plt
 import numpy as np
+import requests
 import xarray as xr
 ```
 
@@ -134,7 +135,7 @@ The remote sensing reflectance characterizes ocean-leaving reflectance. It is de
 There are two versions of remote sensing reflectance: Rrs1 (before BRDF correction) and Rrs2 (after BRDF correction). Due to the large size of Rrs1 and Rrs2, they are optional outputs in the standard L2 file. Instead, their angular means and standard deviations are typically included as Rrs1_mean/std and Rrs2_mean/std.
 
 ```{code-cell} ipython3
-datatree['geophysical_data']
+datatree["geophysical_data"]
 ```
 
 [back to top](#Contents)
@@ -146,19 +147,19 @@ datatree['geophysical_data']
 In this example, we visualize the aerosol properties for a scene during LA wild fire with both smoke and dust events. We read the total aerosol optical depth, single scattering albedo, and fine mode volume fraction as below:
 
 ```{code-cell} ipython3
-aot = dataset['aot'].values
-ssa = dataset['ssa'].values
-fvf = dataset['fvf'].values
+aot = dataset["aot"].values
+ssa = dataset["ssa"].values
+fvf = dataset["fvf"].values
 aot.shape, ssa.shape, fvf.shape
 ```
 
 We also need the spatial and angle dimensions as below:
 
 ```{code-cell} ipython3
-lat = dataset['latitude'].values
-lon = dataset['longitude'].values
+lat = dataset["latitude"].values
+lon = dataset["longitude"].values
 plot_range = [lon.min(), lon.max(), lat.min(), lat.max()]
-wavelength = dataset['wavelength_3d'].values
+wavelength = dataset["wavelength_3d"].values
 print(wavelength)
 ```
 
@@ -169,60 +170,71 @@ For future L2 product, the wavelength variable will be called simple `wavelength
 </div>
 
 ```{code-cell} ipython3
-def plot_l2_product(data, plot_range, label, title, vmin, vmax, figsize=(12, 4), cmap='viridis'):
+def plot_l2_product(
+    data, plot_range, label, title, vmin, vmax, figsize=(12, 4), cmap="viridis"
+):
     """Make map and histogram (default)."""
-    
+
     # Create a figure with two subplots: 1 for map, 1 for histogram
     fig = plt.figure(figsize=figsize)
-    gs = fig.add_gridspec(1, 2, width_ratios=[3,1], wspace=0.3)
+    gs = fig.add_gridspec(1, 2, width_ratios=[3, 1], wspace=0.3)
 
     # Map subplot
     ax_map = fig.add_subplot(gs[0], projection=ccrs.PlateCarree())
     ax_map.set_extent(plot_range, crs=ccrs.PlateCarree())
-    ax_map.coastlines(resolution="110m", color='black', linewidth=0.8)
+    ax_map.coastlines(resolution="110m", color="black", linewidth=0.8)
     ax_map.gridlines(draw_labels=True)
 
     # Assume lon and lat are defined globally or passed in
-    pm = ax_map.pcolormesh(lon, lat, data, vmin=vmin, vmax=vmax,
-                           transform=ccrs.PlateCarree(), cmap=cmap)
-    plt.colorbar(pm, ax=ax_map, orientation='vertical', pad=0.1,label=label)
+    pm = ax_map.pcolormesh(
+        lon, lat, data, vmin=vmin, vmax=vmax, transform=ccrs.PlateCarree(), cmap=cmap
+    )
+    plt.colorbar(pm, ax=ax_map, orientation="vertical", pad=0.1, label=label)
     ax_map.set_title(title, fontsize=12)
 
     # Histogram subplot
     ax_hist = fig.add_subplot(gs[1])
     flattened_data = data[~np.isnan(data)]  # Remove NaNs for histogram
     valid_count = np.sum(~np.isnan(flattened_data))
-    ax_hist.hist(flattened_data, bins=40, color='gray', range=[vmin, vmax], edgecolor='black')
+    ax_hist.hist(
+        flattened_data, bins=40, color="gray", range=[vmin, vmax], edgecolor="black"
+    )
     ax_hist.set_xlabel(label)
     ax_hist.set_ylabel("Count")
-    ax_hist.set_title("Histogram: N="+str(valid_count))
+    ax_hist.set_title("Histogram: N=" + str(valid_count))
 
-    #plt.tight_layout()
+    # plt.tight_layout()
     plt.show()
 ```
 
 ```{code-cell} ipython3
 wavelength_index = 1
-title = 'Aerosol Optical Depth (AOD): ' + str(wavelength[wavelength_index]) +' nm'
-label = 'AOD'
-data = aot[:,:,wavelength_index]
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax = 0.5, cmap='jet')
+title = "Aerosol Optical Depth (AOD): " + str(wavelength[wavelength_index]) + " nm"
+label = "AOD"
+data = aot[:, :, wavelength_index]
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.5, cmap="jet"
+)
 ```
 
 ```{code-cell} ipython3
 wavelength_index = 1
-title = 'Single scattering albedo (SSA): ' + str(wavelength[wavelength_index]) +' nm'
-label = 'SSA'
+title = "Single scattering albedo (SSA): " + str(wavelength[wavelength_index]) + " nm"
+label = "SSA"
 data = ssa[:, :, wavelength_index]
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap='jet')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
+)
 ```
 
 ```{code-cell} ipython3
 wavelength_index = 1
-title = 'Fine mode fraction'
-label = 'FVF'
+title = "Fine mode fraction"
+label = "FVF"
 data = fvf
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='jet')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
+)
 ```
 
 [back to top](#Contents)
@@ -237,22 +249,34 @@ Aerosol absorption and microphysics have larger uncertainties when aerosol loadi
 
 ```{code-cell} ipython3
 wavelength_index = 1
-aot_min  = 0.15
-title = 'Filtered single scattering albedo (SSA): ' + str(wavelength[wavelength_index]) +' nm (AOD 550>'+str(aot_min)+')'
-label = 'SSA'
-data = filtered_ssa = np.where(aot[:, :, wavelength_index] >= aot_min, ssa[:, :, wavelength_index], np.nan)
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap='jet')
+aot_min = 0.15
+title = (
+    "Filtered single scattering albedo (SSA): "
+    + str(wavelength[wavelength_index])
+    + " nm (AOD 550>"
+    + str(aot_min)
+    + ")"
+)
+label = "SSA"
+data = filtered_ssa = np.where(
+    aot[:, :, wavelength_index] >= aot_min, ssa[:, :, wavelength_index], np.nan
+)
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
+)
 ```
 
 The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
 
 ```{code-cell} ipython3
 wavelength_index = 1
-aot_min  = 0.15
-title = 'Fine mode fraction (AOD 550>'+str(aot_min)+')'
-label = 'FVF'
+aot_min = 0.15
+title = "Fine mode fraction (AOD 550>" + str(aot_min) + ")"
+label = "FVF"
 data = filtered_ssa = np.where(aot[:, :, wavelength_index] >= aot_min, fvf, np.nan)
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='jet')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
+)
 ```
 
 [back to top](#Contents)
@@ -274,31 +298,37 @@ To support L3 data processing, a quality flag is also defined, which is usually 
 Quality flag will be updated with future L1 data calibration improvement.
 
 ```{code-cell} ipython3
-chi2 = dataset['chi2'].values
-nv_ref = dataset['nv_ref'].values
-nv_dolp = dataset['nv_dolp'].values
-quality_flag = dataset['quality_flag'].values
+chi2 = dataset["chi2"].values
+nv_ref = dataset["nv_ref"].values
+nv_dolp = dataset["nv_dolp"].values
+quality_flag = dataset["quality_flag"].values
 ```
 
 ```{code-cell} ipython3
-title = r'Retrieval cost function: $\chi^2$'
-label = r'$\chi^2$'
+title = r"Retrieval cost function: $\chi^2$"
+label = r"$\chi^2$"
 data = chi2
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap='jet')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap="jet"
+)
 ```
 
 ```{code-cell} ipython3
-title = r'Total number of reflectance measurements'
-label = r'$N_{ref}$'
+title = r"Total number of reflectance measurements"
+label = r"$N_{ref}$"
 data = nv_ref
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=90, cmap='jet')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=90, cmap="jet"
+)
 ```
 
 ```{code-cell} ipython3
-title = r'Total number of reflectance measurements'
-label = r'$N_{dolp}$'
+title = r"Total number of reflectance measurements"
+label = r"$N_{dolp}$"
 data = nv_dolp
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=90, cmap='jet')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=90, cmap="jet"
+)
 ```
 
 ```{code-cell} ipython3
@@ -308,10 +338,12 @@ np.nanmean(chi2), np.nanmean(nv_ref), np.nanmean(nv_dolp)
 Note that $\chi^2$ converges reasonably well with slight under fitting (averaged around 1.6, peaked around 1.3). Since HARP2 measures 90 angles across 4 bands, the average number of measurement satisfied good fitting are only 52 for reflectance and 42 for polarization, which indicate   potential discrepany between forward model and measurements, due to forward model assumptions or likely measurement calibrations.
 
 ```{code-cell} ipython3
-title = 'Retrieval quality flag'
-label = 'quality_flag'
+title = "Retrieval quality flag"
+label = "quality_flag"
 data = quality_flag
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=4, cmap='cool')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=4, cmap="cool"
+)
 ```
 
 We can evaluate quality flag based on the $\chi^2$ and $N$, and only a small portion of data near center of swath reach best quality as we defined as quality_flag=0. With the future improvement of data calibration, more data with better quality will be vailable.
@@ -329,25 +361,29 @@ We can evaluate quality flag based on the $\chi^2$ and $N$, and only a small por
 As mentioned previously, FastMAPOL algorithm conducted internal adaptive data screening on each HARP2 angle, the data mask are provided for both reflectance and DoLP. value 0 means the measurements are used in the retrievals, value 1 or NAN means the measurements are removed from retrieval. Therefore, the adaptive data mask can be also used to evaluate fitting quality and measurement quality at each angle. In the example below, please note the difference pattern for reflectance and polarization, which may indicates different calibration perforance.
 
 ```{code-cell} ipython3
-mask_ref = dataset['mask_ref'].values
-mask_dolp = dataset['mask_dolp'].values
+mask_ref = dataset["mask_ref"].values
+mask_dolp = dataset["mask_dolp"].values
 mask_ref.shape, mask_dolp.shape
 ```
 
 ```{code-cell} ipython3
 angle_index = 5
-title = 'Adaptive data mask on reflectance: angle index ' + str(angle_index)
-label = 'mask_ref'
-data = mask_ref[:, :,angle_index,0]
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='cool')
+title = "Adaptive data mask on reflectance: angle index " + str(angle_index)
+label = "mask_ref"
+data = mask_ref[:, :, angle_index, 0]
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="cool"
+)
 ```
 
 ```{code-cell} ipython3
 angle_index = 5
-title = 'Adaptive data mask on DoLP: angle index' + str(angle_index)
-label = 'mask_DOLP'
-data = mask_dolp[:, :,angle_index,0]
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='cool')
+title = "Adaptive data mask on DoLP: angle index" + str(angle_index)
+label = "mask_DOLP"
+data = mask_dolp[:, :, angle_index, 0]
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="cool"
+)
 ```
 
 [back to top](#Contents)
