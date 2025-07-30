@@ -1,8 +1,8 @@
 ---
 kernelspec:
-  name: python3
   display_name: Python 3 (ipykernel)
   language: python
+  name: python3
 ---
 
 # Applying Gaussian Pigment (GPig) Phytoplankton Community Composition Algorithm to OCI data
@@ -44,8 +44,8 @@ At the end of this notebook you will know:
 ## Contents
 
 1. [Setup](#1.-Setup)
-2. [Run GPig on Level-2 (L2) data](#2.-Run-GPig-on-Level-2-(L2)-data)
-3. [Run GPig on L3 mapped (L3M) data](#3.-Run-GPig-on-L3-mapped-(L3M)-data)
+2. [Run GPig on L2 data](#2.-Run-GPig-on-Level-2-(L2)-data)
+3. [Run GPig on L3M data](#3.-Run-GPig-on-L3-mapped-(L3M)-data)
 
 +++
 
@@ -67,15 +67,13 @@ Next, we'll import all of the packages used in this notebook.
 **TODO: Figure out how to use `from gpig import *`, I think this requires editing the `__init__.py`?**
 
 ```{code-cell} ipython3
-import earthaccess
-import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import earthaccess
 import matplotlib.pyplot as plt
 import numpy as np
-
-from gpig import L2_utils
-from gpig import L3_utils
+import xarray as xr
+from gpig import L2_utils, L3_utils
 ```
 
 Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
@@ -88,7 +86,7 @@ auth = earthaccess.login(persist=True)
 
 +++
 
-# 2. Run GPig on Level-2 (L2) data
+# 2. Run GPig on L2 data
 
 +++
 
@@ -107,29 +105,35 @@ Running `L2_utils.load_data()` downloads several data files from NASA EarthData:
 Let's run `L2_utils.load_data()` to download data collected on May 5, 2025 corresponding to a bounding box off the coast of Washington, U.S.
 
 ```{code-cell} ipython3
-rrs, sss, sst = L2_utils.load_data(('2025-05-01','2025-05-01'), (-127,40,-126,41))
+rrs, sss, sst = L2_utils.load_data(("2025-05-01", "2025-05-01"), (-127, 40, -126, 41))
 ```
 
 You should see 3 new folders in your working directory called 'L2_data', 'sal_data', and 'temp_data', with one data file downloaded in each. Let's take a quick look at Rrs at 500 nm:
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(rrs, decode_timedelta=False)
+datatree = xr.open_datatree(rrs)
 dataset = xr.merge(datatree.to_dict().values())
 dataset = dataset.set_coords(("longitude", "latitude"))
 
 data = dataset["Rrs"].sel({"wavelength_3d": 500})
 
-fig, ax = plt.subplots(figsize=(8,6), subplot_kw={'projection': ccrs.PlateCarree()})
+fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
 
 im = data.plot(
-    x="longitude", y="latitude", vmin=0, vmax=0.008,
-    ax=ax, transform=ccrs.PlateCarree(),  
-    cbar_kwargs={'label': 'Rrs (sr⁻¹)'}
+    x="longitude",
+    y="latitude",
+    vmin=0,
+    vmax=0.008,
+    ax=ax,
+    transform=ccrs.PlateCarree(),
+    cbar_kwargs={"label": "Rrs (sr⁻¹)"},
 )
 ax.set_extent([-135, -115, 35, 55], crs=ccrs.PlateCarree())
-ax.coastlines(resolution='10m') 
+ax.coastlines(resolution="10m")
 
-gl = ax.gridlines(draw_labels=True, linewidth=0.5, color='gray', alpha=0.5, linestyle='--')
+gl = ax.gridlines(
+    draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+)
 gl.top_labels = False
 gl.right_labels = False
 
@@ -143,11 +147,9 @@ Now, we can use `L2_utils.estimate_inv_pigments` to calculate phytoplankton pigm
 ```
 
 You can see that this function requires user input to create a boundary box for processing. We will select the bounding box between these coordinates:
-50 N, 36 S, -122.5 E, -132.5 W. This can take awhile depending on size of bounding box.
+45 N, 44 S, -125 E, -126 W. This can take awhile depending on size of bounding box.
 
 ```{code-cell} ipython3
-%%timeit -n 1 -r 1
-
 l2_pigments = L2_utils.estimate_inv_pigments(rrs, sss, sst)
 l2_pigments
 ```
@@ -155,44 +157,45 @@ l2_pigments
 Let's plot the phytoplankton pigment concentrations:
 
 ```{code-cell} ipython3
-variables = ['chla', 'chlb', 'chlc', 'ppc']
-titles = ['Chlorophyll-a', 'Chlorophyll-b', 'Chlorophyll-c', 'PPC']
+variables = ["chla", "chlb", "chlc", "ppc"]
+titles = ["Chlorophyll-a", "Chlorophyll-b", "Chlorophyll-c", "PPC"]
 
-fig, axs = plt.subplots(2, 2, figsize=(8, 8),
-                        subplot_kw={'projection': ccrs.PlateCarree()},
-                        gridspec_kw={'wspace': 0.02, 'hspace': 0.05},
-                        constrained_layout=True)
+fig, axs = plt.subplots(2,2, figsize=(8, 8),
+    subplot_kw={"projection": ccrs.PlateCarree()},
+    gridspec_kw={"wspace": 0.02, "hspace": 0.05},
+    constrained_layout=True,
+)
 
 for ax, var, title in zip(axs.flat, variables, titles):
     data = l2_pigments[var].values
-    lon = l2_pigments['longitude'].values
-    lat = l2_pigments['latitude'].values
+    lon = l2_pigments["longitude"].values
+    lat = l2_pigments["latitude"].values
 
     data = np.where(data > 0, np.log10(data), np.nan)
 
-    im = ax.pcolormesh(lon, lat, data,
-                       transform=ccrs.PlateCarree(),
-                       cmap='viridis',
-                       shading='auto')
+    im = ax.pcolormesh(
+        lon, lat, data, transform=ccrs.PlateCarree(), cmap="viridis", shading="auto"
+    )
 
     ax.set_title(title)
-    ax.coastlines(resolution='10m')
-    ax.add_feature(cfeature.BORDERS, linestyle=':')
+    ax.coastlines(resolution="10m")
+    ax.add_feature(cfeature.BORDERS, linestyle=":")
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
 
-    gl = ax.gridlines(draw_labels=True, linewidth=0.5,
-                      color='gray', alpha=0.5, linestyle='--')
+    gl = ax.gridlines(
+        draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+    )
     gl.top_labels = False
     gl.right_labels = False
 
-    cbar = fig.colorbar(im, ax=ax, orientation='vertical', shrink=0.8)
+    cbar = fig.colorbar(im, ax=ax, orientation="vertical", shrink=0.8)
     cbar.set_label(f"log₁₀({var})")
 
 plt.show()
 ```
 
-# 3. Run GPig on L3 mapped (L3M) data
+# 3. Run GPig on L3M data
 
 +++
 
@@ -205,7 +208,36 @@ We can also run GPig on L3M data. Let's look at the `L3_utils.load_data()` docst
 We'll use this to download 4km L3M Rrs data, global SSS, and global SST data for June 12, 2024:
 
 ```{code-cell} ipython3
-rrs, sss, sst = L3_utils.load_data(('2024-06-12','2024-06-12'), '4km')
+rrs, sss, sst = L3_utils.load_data(("2024-06-12", "2024-06-12"), "4km")
+```
+
+Let's quickly look at L3M Rrs at 500 nm:
+
+```{code-cell} ipython3
+dataset = xr.open_dataset('rrs_data/PACE_OCI.20240612.L3m.DAY.RRS.V3_0.Rrs.4km.nc')
+data = dataset["Rrs"].sel({"wavelength": 500})
+
+fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
+
+im = data.plot(
+    x="lon",
+    y="lat",
+    vmin=0,
+    vmax=0.008,
+    ax=ax,
+    transform=ccrs.PlateCarree(),
+    cbar_kwargs={"label": "Rrs (sr⁻¹)"},
+)
+#ax.set_extent([-135, -115, 35, 55], crs=ccrs.PlateCarree())
+ax.coastlines(resolution="10m")
+
+gl = ax.gridlines(
+    draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+)
+gl.top_labels = False
+gl.right_labels = False
+
+plt.show()
 ```
 
 Let's look at what `L3_utils.estimate_inv_pigments` requires as input:
@@ -217,7 +249,7 @@ Let's look at what `L3_utils.estimate_inv_pigments` requires as input:
 We'll provide the Rrs, SSS, and SST file and input a bounding box corresponding to the coast of Washington, U.S.
 
 ```{code-cell} ipython3
-bbox = (-127.5, 45, -125, 50)
+bbox = (-127, 40, -126, 41)
 l3_pigments = L3_utils.estimate_inv_pigments(rrs, sss, sst, bbox)
 l3_pigments
 ```
@@ -226,42 +258,39 @@ Let's plot all phytoplankton pigment concentrations:
 
 ```{code-cell} ipython3
 fig, axs = plt.subplots(2, 2, figsize=(8, 8),
-                        subplot_kw={'projection': ccrs.PlateCarree()},
-                        constrained_layout=True)
+    subplot_kw={"projection": ccrs.PlateCarree()},
+    constrained_layout=True,
+)
 
-variables = ['chla', 'chlb', 'chlc', 'ppc']
-titles = ['Chlorophyll-a', 'Chlorophyll-b', 'Chlorophyll-c', 'PPC']
+variables = ["chla", "chlb", "chlc", "ppc"]
+titles = ["Chlorophyll-a", "Chlorophyll-b", "Chlorophyll-c", "PPC"]
 
 for ax, var, title in zip(axs.flat, variables, titles):
 
     data = l3_pigments[var]
-    data_log = np.log10(data.where(data > 0))  # Avoid log(0) or log of negative
+    data_log = np.log10(data.where(data > 0))  
 
     im = data_log.plot(
         ax=ax,
-        transform=ccrs.PlateCarree(),  # Needed to correctly place the data
-        cmap='viridis',
-        add_colorbar=False
+        transform=ccrs.PlateCarree(), 
+        cmap="viridis",
+        add_colorbar=False,
     )
-    ax.coastlines(resolution='10m')
-    ax.add_feature(cfeature.BORDERS, linestyle=':')
+    ax.coastlines(resolution="10m")
+    ax.add_feature(cfeature.BORDERS, linestyle=":")
     ax.set_title(title)
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
 
-    gl = ax.gridlines(draw_labels=True, linewidth=0.5, color='gray', alpha=0.5, linestyle='--')
+    gl = ax.gridlines(
+        draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+    )
     gl.top_labels = False
     gl.right_labels = False
 
-    fig.colorbar(im, ax=ax, orientation='vertical', shrink=0.7, label=f"log₁₀({var})")
+    fig.colorbar(im, ax=ax, orientation="vertical", shrink=0.7, label=f"log₁₀({var})")
 
 plt.show()
 ```
 
 [back to top](#Contents)
-
-<div class="alert alert-info" role="alert">
-
-You have completed the notebook on ... suggest what's next. And don't add an emptyr cell after this one.
-
-</div>
