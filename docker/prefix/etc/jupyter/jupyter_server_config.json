@@ -1,8 +1,5 @@
 {
     "ContentsManager": {
         "allow_hidden": true
-    },
-    "JupyterLabGit": {
-        "credential_helper": "cache --timeout=36000 --socket=/tmp/git-credential-cache/socket"
     }
 }

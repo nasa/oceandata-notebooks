@@ -4,7 +4,8 @@ LABEL org.opencontainers.image.source="https://github.com/nasa/oceandata-noteboo
 USER root
 
 # system configuration
-RUN sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
+RUN git config --system credential.helper 'cache --timeout 86400 --socket /tmp/git-credential-cache/socket' \
+ && sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
 
 # install OCSSW core files (i.e. no $OCSSWROOT/share or $OCSSWROOT/var)
 ARG OCSSWTAG=V2025.2
