@@ -3,8 +3,7 @@ LABEL org.opencontainers.image.source="https://github.com/nasa/oceandata-noteboo
 # helpful system configurations
 # TODO: https://github.com/jupyterlab/jupyterlab-git/issues/1369
 USER root
-RUN git config --system credential.helper 'cache --timeout=36000 --socket /tmp/.git-credential-cache/socket' \
- && sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
+RUN sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
 COPY src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # install OCSSW core files (i.e. no $OCSSWROOT/share or $OCSSWROOT/var)
