@@ -58,7 +58,7 @@ mpl.rcParams["scatter.marker"] = "."
 ## 2. Validation Data
 
 NASA Ocean Color Validation Data can be extracted from https://seabass.gsfc.nasa.gov/search#val.
-This example uses Moby validation data called "ModisA_Moby.csv" saved within the "shared-public" directory.
+This example uses MOBY validation data paired with MODIS-Aqua measurements called "ModisA_Moby.csv" and saved within the "shared-public" directory.
 To begin, we load the validation data as pandas dataframe and set the index to `datetime`.
 
 ```{code-cell} ipython3
@@ -99,7 +99,7 @@ ax.set_title("Solar Zenith Angle")
 plt.show()
 ```
 
-A regular annual variation clearly exists - as we'd expect given that Earth's position along its orbit combined with its tilt along it's own axis. But what about time series of a variable when there's no prior knowledge of a regular temporal dependence or when noise may obscure the periodicity? 
+A regular annual variation clearly exists - as we'd expect given that Earth's position along its orbit combined with its tilt along it's own axis. But what about time series of a variable when there's no prior knowledge of a regular temporal dependence or when noise may obscure the periodicity?
 
 +++
 
@@ -173,7 +173,7 @@ ax.set_ylabel("Power")
 fig.show()
 ```
 
-The estimated power in the L-S periodogram is dimensionless and ranges from 0 to 1. A peak's height indicates that frequency of oscillation may exist in the signal, with increased likelihood with increased height. Here, we see a strong peak at a period of 1 year. 
+The estimated power in the L-S periodogram is dimensionless and ranges from 0 to 1. A peak's height indicates that frequency of oscillation may exist in the signal, with increased likelihood with increased height. Here, we see a strong peak at a period of 1 year.
 
 +++
 
@@ -223,7 +223,7 @@ axs[2].set_title(r"MODIS-Aqua $R_{rs}(412\ \mathrm{nm})$")
 fig.show()
 ```
 
-Find the "best" periodicity based on the maximum power. 
+Find the "best" periodicity based on the maximum power.
 
 ```{code-cell} ipython3
 period = period.round(3)
