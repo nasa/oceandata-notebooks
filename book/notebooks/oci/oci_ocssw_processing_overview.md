@@ -66,7 +66,6 @@ import os
 import cartopy.crs as ccrs
 import earthaccess
 import matplotlib.pyplot as plt
-from pathlib import Path
 import xarray as xr
 ```
 
@@ -162,7 +161,7 @@ wavelength.
 ```{code-cell} ipython3
 f = earthaccess.open([ifile],provider='OB_CLOUD')
 dataset = xr.open_dataset(f[0], group="observation_data")
-plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
+plot = dataset["rhot_red"][dict(red_bands=100)].plot()
 ```
 
 [back to top](#Contents)
@@ -211,24 +210,26 @@ Using this pattern, run the `l2gen` command with the single argument `help` to v
 
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
-source "aws.sh"
+
 l2gen help
 ```
 
-To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the biogeochemical (BGC) suite that includes chlorophyll *a* estimates.
+To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can also indicate a data suite or L2 products; in this example, we will proceed with chlorophyll *a* estimates.
 
 Parameters can be passed to OCSSW programs through a text file. They can also be passed as arguments, but writing to a text file leaves a clear processing record. Define the parameters in a dictionary, then send it to the `write_par` function
-defined in the [Setup](#1.-Setup) section. NOTE TO CARINA: I've CHANGED PAR FILE
+defined in the [Setup](#1.-Setup) section.
+
+We can limit the geographical boundaries of the processing. Here we use the `location` variable to set Northwestern and Southeastern boundaries.
 
 ```{code-cell} ipython3
-location = [(-56.5, 49.8), (-53.3, 48.4)]
+location = [(-62, 49), (-60, 47)]
 ```
 
 ```{code-cell} ipython3
 par = {
     "ifile": ifile,
     "ofile": os.path.basename(ifile).replace("L1B", "L2"),
-    "l2prod": "Rrs,chlor_a,rhos",
+    "l2prod": "chlor_a",
     "proc_uncertainty": 0,
     "north": location[0][1],
     "south": location[1][1],
@@ -239,16 +240,6 @@ write_par("l2gen.par", par)
 ```
 
 With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell.
-
-```{raw-cell}
-:scrolled: true
-
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-source "aws.sh"
-
-l2gen par=l2gen.par
-```
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -266,10 +257,8 @@ Once this process is done, you are ready to visualize your "custom" L2 data.
 Use the `robust=True` option to ignore outlier values.
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(par["ofile"])
-rhos = datatree["geophysical_data"]["rhos"]
-rhos["wavelength_3d"] = datatree["sensor_band_parameters"]["wavelength_3d"]
-plot = rhos.sel({"wavelength_3d": 470}).plot(cmap="viridis", robust=True)
+dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
+plot = dataset["chlor_a"].plot(cmap="viridis", robust=True)
 ```
 
 Feel free to explore `l2gen` options to produce the L2 dataset you need! The documentation
@@ -294,16 +283,6 @@ It can be useful to merge adjacent scenes to create a single, larger image. The 
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
-l2bin help
-```
-
-```{raw-cell}
-:scrolled: true
-:tags: [scroll-output]
-
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-source "aws.sh"
 l2bin help
 ```
 
@@ -370,16 +349,6 @@ source $OCSSWROOT/OCSSW_bash.env
 l2bin par=l2bin.par
 ```
 
-```{raw-cell}
-:scrolled: true
-:tags: [scroll-output]
-
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-source "aws.sh"
-l2bin par=l2bin.par
-```
-
 [back to top](#Contents)
 
 +++
@@ -398,16 +367,6 @@ source $OCSSWROOT/OCSSW_bash.env
 l3mapgen help
 ```
 
-```{raw-cell}
-:scrolled: true
-:tags: [scroll-output]
-
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-source "aws.sh"
-l3mapgen help
-```
-
 Run `l3mapgen` to make a 9km map with a Plate Carree projection.
 
 ```{code-cell} ipython3
@@ -423,16 +382,6 @@ par = {
     "apply_pal": 0,
 }
 write_par("l3mapgen.par", par)
-```
-
-```{raw-cell}
-:scrolled: true
-:tags: [scroll-output]
-
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-source "aws.sh"
-l3mapgen par=l3mapgen.par
 ```
 
 ```{code-cell} ipython3
@@ -469,7 +418,3 @@ plt.show()
 You have completed the notebook on using OCCSW to process PACE data! You can now explore more notebooks to learn more about OCSSW usage. 
 
 </div>
-
-```{code-cell} ipython3
-
-```
