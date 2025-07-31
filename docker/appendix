@@ -1,7 +1,8 @@
-USER root
+LABEL org.opencontainers.image.source="https://github.com/nasa/oceandata-notebooks"
 
 # helpful system configurations
 # TODO: https://github.com/jupyterlab/jupyterlab-git/issues/1369
+USER root
 RUN git config --system credential.helper 'cache --timeout=36000 --socket /tmp/.git-credential-cache/socket' \
  && sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
 COPY src/prefix/ ${NB_PYTHON_PREFIX}/
@@ -20,9 +21,8 @@ RUN chmod +x install_ocssw \
  && ln -s ${OCSSWROOT_PUBLIC}/share ${OCSSWROOT} \
  && chown ${NB_USER}:${NB_USER} ${OCSSWROOT}/*.json ${OCSSWROOT}/python/*.json
 
+# install (locked) dependencies for oceandata-notebooks with the "docker" group
 USER ${NB_USER}
-
-# install (locked) dependencies for oceandata-notebooks[docker]
 RUN pip install --no-cache-dir --no-deps \
       --extra-index-url "https://download.pytorch.org/whl/cpu" \
       --no-binary netcdf4 \
@@ -40,7 +40,6 @@ ENV GH_SCOPED_CREDS_APP_URL="https://github.com/apps/cryocloud-github-access"
 ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
 
 # configure uv tool
-ENV UV_NO_CACHE=1 UV_NO_SYNC=1 UV_CONSTRAINT=/srv/docker/requirements.txt
-
-# connect to repository
-LABEL org.opencontainers.image.source="https://github.com/nasa/oceandata-notebooks"
+ENV UV_CONSTRAINT=/srv/docker/requirements.txt
+ENV UV_CACHE_DIR=/tmp/uv/cache
+ENV UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
