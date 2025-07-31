@@ -1,10 +1,10 @@
 LABEL org.opencontainers.image.source="https://github.com/nasa/oceandata-notebooks"
 
-# helpful system configurations
-# TODO: https://github.com/jupyterlab/jupyterlab-git/issues/1369
+# change USER
 USER root
+
+# system configuration
 RUN sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
-COPY src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # install OCSSW core files (i.e. no $OCSSWROOT/share or $OCSSWROOT/var)
 ARG OCSSWTAG=V2025.2
@@ -20,8 +20,13 @@ RUN chmod +x install_ocssw \
  && ln -s ${OCSSWROOT_PUBLIC}/share ${OCSSWROOT} \
  && chown ${NB_USER}:${NB_USER} ${OCSSWROOT}/*.json ${OCSSWROOT}/python/*.json
 
-# install (locked) dependencies for oceandata-notebooks with the "docker" group
+# revert USER
 USER ${NB_USER}
+
+# jupyter configuration
+COPY src/prefix/ ${NB_PYTHON_PREFIX}/
+
+# install (locked) dependencies for oceandata-notebooks with the "docker" group
 RUN pip install --no-cache-dir --no-deps \
       --extra-index-url "https://download.pytorch.org/whl/cpu" \
       --no-binary netcdf4 \
@@ -36,9 +41,10 @@ ENV GH_SCOPED_CREDS_CLIENT_ID="Iv1.bd27058fd393e285"
 ENV GH_SCOPED_CREDS_APP_URL="https://github.com/apps/cryocloud-github-access"
 
 # ignore select Python warnings
+# TODO: specifically cartopy.io.DownloadWarning
 ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
 
 # configure uv tool
-ENV UV_CONSTRAINT=/srv/docker/requirements.txt
 ENV UV_CACHE_DIR=/tmp/uv/cache
 ENV UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
+ENV UV_CONSTRAINT=/srv/docker/requirements.txt
