@@ -31,9 +31,17 @@ At the end of this notebook you will know how to:
 - Generate a Lomb-Scargle periodogram for ocean color data time series 
 - Calculate the False-Alarm-Probability to estimate the significance of a peak in the periodogram
 
+## Contents
+
+1. [Setup](#1.-Setup)
+2. [Validation Data](#2.-Validation-Data)
+3. [Lomb-Scargle Periodogram](#3.-Lomb-Scargle-Periodogram)
+4. [False Alarm Probability](#4.-False-Alarm-Probability)
+5. [Folding the Time Series](#5.-Folding-the-Time-Series)
+
 +++
 
-## Setup
+## 1. Setup
 
 ```{code-cell} ipython3
 import matplotlib as mpl
@@ -47,10 +55,10 @@ mpl.rcParams["lines.markersize"] = 5
 mpl.rcParams["scatter.marker"] = "."
 ```
 
-## Validation Data
+## 2. Validation Data
 
 NASA Ocean Color Validation Data can be extracted from https://seabass.gsfc.nasa.gov/search#val.
-This example uses Moby validation data called "ModisA_Moby.csv".
+This example uses Moby validation data called "ModisA_Moby.csv" saved within the "shared-public" directory.
 To begin, we load the validation data as pandas dataframe and set the index to `datetime`.
 
 ```{code-cell} ipython3
@@ -66,7 +74,7 @@ df["date_time"] = pd.to_datetime(
 df = df.set_index("date_time")
 ```
 
-Add a $\Delta R_{rs}(\lambda)$ column for the difference between the remote-sensing and in-situ observations.
+We're intersted in a metric evaluating the satellite-to-in situ matchup performance, so we add a $\Delta R_{rs}(\lambda)$ column for the difference between the satellite and in situ observations.
 
 ```{code-cell} ipython3
 df["Delta_rrs412"] = df["aqua_rrs412"] - df["insitu_rrs412"]
@@ -91,7 +99,7 @@ ax.set_title("Solar Zenith Angle")
 plt.show()
 ```
 
-Periodicity clearly exists.
+A regular annual variation clearly exists - as we'd expect given that Earth's position along its orbit combined with its tilt along it's own axis. But what about time series of a variable when there's no prior knowledge of a regular temporal dependence or when noise may obscure the periodicity? 
 
 +++
 
@@ -116,11 +124,17 @@ fig.tight_layout()
 fig.show()
 ```
 
-Unlike SZA versus time (and to a lesser extent the $R_{rs}(\lambda)$ time series), the periodicity the $\Delta R_{rs}(\lambda)$ time series is hader to determine from the scatter plots
+Unlike the solar zenith angle versus time (and to a lesser extent the $R_{rs}(\lambda)$ time series), a periodicity in the $\Delta R_{rs}(\lambda)$ time series is difficult to determine from the scatter plot.
 
 +++
 
-## Lomb-Scargle Periodogram
+## 3. Lomb-Scargle Periodogram
+
++++
+
+A useful tool for detecting a periodicity in a discretely sampled signal is the periodogram. However, direct application of Fourier analysis techniques to generate a periodogram requires regular sampling, which is not always attainable in oceanographic data collection due to data gaps due to quality screening or instrument failures. Alternatively, a modified version of the periodogram - the Lomb-Scargle periodgram (or L-S periodgram) - can be achieved in connection to a least-squares analysis [(VanderPlas, 2018)] . 
+
+[(VanderPlas, 2018)]: https://dx.doi.org/10.3847/1538-4365/aab766
 
 +++
 
@@ -140,7 +154,7 @@ power_kwargs = {
 }
 ```
 
-Generate L-S periodogram.
+Generate and then plot the L-S periodogram.
 
 ```{code-cell} ipython3
 ls = LombScargle.from_timeseries(ts, "aqua_solz", **ls_kwargs)
@@ -158,6 +172,10 @@ ax.set_ylabel("Power")
 
 fig.show()
 ```
+
+The estimated power in the L-S periodogram is dimensionless and ranges from 0 to 1. A peak's height indicates that frequency of oscillation may exist in the signal, with increased likelihood with increased height. Here, we see a strong peak at a period of 1 year. 
+
++++
 
 Generate Perdiograms for $R_{rs}(\lambda)$
 
@@ -205,7 +223,7 @@ axs[2].set_title(r"MODIS-Aqua $R_{rs}(412\ \mathrm{nm})$")
 fig.show()
 ```
 
-Find "best" periodicity.
+Find the "best" periodicity based on the maximum power. 
 
 ```{code-cell} ipython3
 period = period.round(3)
@@ -236,13 +254,13 @@ The "best" periods are all close to the annual period, which is within the preci
 
 +++
 
-## False Alarm Probability
+## 4. False Alarm Probability
 
 +++
 
-A more useful metric for computing the uncertainty associated with the peak is the false alarm probablity (FAP)
+A more useful metric for computing the uncertainty associated with the peak is the false alarm probablity (FAP) - a metric of how likely a peak's height is due to coincidental alignment from noise instead of a true periodicity in the signal.
 
-Get the position of the period closest to the annual period.
+To find the FAP for the annual period, we get the position of the period closest to the annual period.
 
 ```{code-cell} ipython3
 i = np.argmin(np.abs(period - 1 * u.year))
@@ -278,18 +296,18 @@ The FAPs at the annual period for for all the time series are zero, strongly ind
 
 +++
 
-## Folding Time Series
+## 5. Folding the Time Series
 
 +++
 
-Folding time series to the annual peridocity. A day in the middle of the year is chosen so that the x-axis begins with Jan 1st (-182.56 days) and ends with Dec 31st (182.5).
+Now that we know with confidence that the annual peridicity is contained in the time series, we fold the temporal range to the annual peridocity. A day in the middle of the year is chosen so that the x-axis begins with Jan 1st (-182.56 days) and ends with Dec 31st (182.5).
 
 ```{code-cell} ipython3
 folded_ts = ts.fold(period=1 * u.year, epoch_time="2000-07-02")
 ```
 
 ```{code-cell} ipython3
-fig, axs = plt.subplots(1, 3, figsize=(10, 3), sharex=True, sharey=True)
+fig, axs = plt.subplots(1, 3, figsize=(10, 6), sharex=True, sharey=True)
 
 x = folded_ts.time.jd
 y = folded_ts["Delta_rrs412"]
@@ -315,4 +333,4 @@ fig.tight_layout()
 fig.show()
 ```
 
-When folded, the annual perodicity is clearly contained in the time series.
+When folded, the annual perodicity is clearly contained in the time series (higher in the summer and lower in the winter).
