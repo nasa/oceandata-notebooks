@@ -55,7 +55,7 @@ To begin, we load the validation data as pandas dataframe and set the index to `
 
 ```{code-cell} ipython3
 df = pd.read_csv(
-    "ModisA_Moby.csv",
+    "~/shared-public/pace-hackweek/modis_lombscargle_periodogram/ModisA_Moby.csv",
     header=33,
     skiprows=(35, 34),
 )
