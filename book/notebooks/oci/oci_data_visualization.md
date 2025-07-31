@@ -30,7 +30,7 @@ At the end of this notebook you will know:
 
 - How to create a quick global map from OCI data
 - How to clean up your OCI dataset for visualizing
-- How to create a quick plot for a transect
+- How to create a quick plot for a "transect"
 - How to interpolate the data
 - How to create an multi-variable RGB map with two datasets
 - Plot a timeline of the plankton types for a region of interest
@@ -114,7 +114,7 @@ results_land = earthaccess.search_data(
 )
 ```
 
-Here we will download the data. If you have access to a AWS cloud instance, you could use `earthaccess.open` instead of `earthacces.download` at this step, to process in the cloud.
+Here we will open the datasets.
 
 ```{code-cell} ipython3
 path_moana = earthaccess.open(results_moana)
@@ -148,19 +148,19 @@ dataset_land
 Lets make a very quick map using `xr.plot`. All we need is to indicate the variable we want to plot and because our dataset contains multiple date, we indicate the index of one date in brackets with `[0]`.
 
 ```{code-cell} ipython3
-dataset_moana.prococcus_moana[0].plot()
+dataset_moana["prococcus_moana"][0].plot()
 ```
 
 Notice that we do not see much. In this case, the dataset contains outliers. If we just want to make a quick plot, we can remove outliers with `robust=true`.
 
 ```{code-cell} ipython3
-dataset_moana.prococcus_moana[0].plot(robust="true")
+dataset_moana["prococcus_moana"][0].plot(robust="true")
 ```
 
 We can do another quick plot for the land vegetation indices dataset. Notice the map is much more complete, which is expected in monthly compared to daily products.
 
 ```{code-cell} ipython3
-dataset_land.cire[0].plot()
+dataset_land["cire"][0].plot()
 ```
 
 [back to top](#Contents)
@@ -174,21 +174,7 @@ dataset_land.cire[0].plot()
 Because we want to do statistics on the data and not only draw a quick plot, we are going to clean up the dataset. Thankfully, the dataset comes with atttributes that indicate `valid_max` and `valid_min` values to guide us.
 
 ```{code-cell} ipython3
-dataset_land["cire"] = np.clip(
-    dataset_land["cire"],
-    a_min=dataset_land["cire"].attrs["valid_min"],
-    a_max=dataset_land["cire"].attrs["valid_max"],
-)
-dataset_land["car"] = np.clip(
-    dataset_land["car"],
-    a_min=dataset_land["car"].attrs["valid_min"],
-    a_max=dataset_land["car"].attrs["valid_max"],
-)
-dataset_land["mari"] = np.clip(
-    dataset_land["mari"],
-    a_min=dataset_land["mari"].attrs["valid_min"],
-    a_max=dataset_land["mari"].attrs["valid_max"],
-)
+dataset_moana
 ```
 
 ```{code-cell} ipython3
@@ -209,13 +195,29 @@ dataset_moana["picoeuk_moana"] = np.clip(
 )
 ```
 
+```{code-cell} ipython3
+dataset_land["cire"] = np.clip(
+    dataset_land["cire"],
+    a_min=dataset_land["cire"].attrs["valid_min"],
+    a_max=dataset_land["cire"].attrs["valid_max"],
+)
+dataset_land["car"] = np.clip(
+    dataset_land["car"],
+    a_min=dataset_land["car"].attrs["valid_min"],
+    a_max=dataset_land["car"].attrs["valid_max"],
+)
+dataset_land["mari"] = np.clip(
+    dataset_land["mari"],
+    a_min=dataset_land["mari"].attrs["valid_min"],
+    a_max=dataset_land["mari"].attrs["valid_max"],
+)
+```
+
 We will also remove the variables we will not be using for this example with `drop_vars`.
 
 ```{code-cell} ipython3
-dataset_veg = dataset_land.drop_vars(
-    ["palette", "ndvi", "evi", "ndwi", "ndii", "cci", "ndsi", "pri"]
-)
 dataset_phy = dataset_moana.drop_vars(["palette"])
+dataset_veg = dataset_land.drop_vars(["palette", "ndvi", "evi", "ndwi", "ndii", "cci", "ndsi", "pri"])
 ```
 
 #### Average
@@ -264,6 +266,10 @@ We can see there are some values missing, we can interpolate the data if we want
 
 Here we offer the option of interpolating the data. This can be useful for filling gaps in the dataset, which can make visualizations smoother. Consider how it affects your statistics before using. 
 
+```{code-cell} ipython3
+dataset_phy["syncoccus_moana"].plot(robust="true")
+```
+
 The `margin` parameter is the number of pixels on the X and Y axes to be considered in the calculation.
 
 ```{code-cell} ipython3
@@ -293,9 +299,7 @@ dataset_phy["picoeuk_moana"][...] = pic.transpose()
 If we have a look at the transect again, we can see that some of the values have been filled in by the interpolation.
 
 ```{code-cell} ipython3
-lon_val = -30
-transect = dataset_phy.sel(lon=lon_val, method="nearest")
-transect.syncoccus_moana.plot(y="lat")
+dataset_phy["syncoccus_moana"].plot(robust="true")
 ```
 
 ### Interpolation Land (Optional)
@@ -309,17 +313,17 @@ margin_v = 1
 ```
 
 ```{code-cell} ipython3
-grid_cire = pyinterp.backends.xarray.Grid2D(dataset_veg.cire)
-grid_car = pyinterp.backends.xarray.Grid2D(dataset_veg.car)
-grid_mari = pyinterp.backends.xarray.Grid2D(dataset_veg.mari)
+grid_cire = pyinterp.backends.xarray.Grid2D(dataset_veg["cire"])
+grid_car = pyinterp.backends.xarray.Grid2D(dataset_veg["car"])
+grid_mari = pyinterp.backends.xarray.Grid2D(dataset_veg["mari"])
 
 cir = pyinterp.fill.loess(grid_cire, nx=margin_v, ny=margin_v)
 car = pyinterp.fill.loess(grid_car, nx=margin_v, ny=margin_v)
 mar = pyinterp.fill.loess(grid_mari, nx=margin_v, ny=margin_v)
 
-dataset_veg.cire[...] = cir.transpose()
-dataset_veg.car[...] = car.transpose()
-dataset_veg.mari[...] = mar.transpose()
+dataset_veg["cire"][...] = cir.transpose()
+dataset_veg["car"][...] = car.transpose()
+dataset_veg["mari"][...] = mar.transpose()
 ```
 
 ### Normalize data
@@ -329,17 +333,15 @@ dataset_veg.mari[...] = mar.transpose()
 We normalize in order to visualize and compare multiple variables together.
 
 ```{code-cell} ipython3
-dataset_norm = (
-    dataset_phy.astype(np.float64) - dataset_phy.astype(np.float64).min()
-) / (dataset_phy.astype(np.float64).max() - dataset_phy.astype(np.float64).min())
+dataset_norm = dataset_phy.astype(np.float64)
+dataset_norm = (dataset_phy - dataset_phy.min()) / (dataset_phy.max() - dataset_phy.min())
 ```
 
 ```{code-cell} ipython3
 :scrolled: true
 
-dataset_v_norm = (
-    dataset_veg.astype(np.float64) - dataset_veg.astype(np.float64).min()
-) / (dataset_veg.astype(np.float64).max() - dataset_veg.astype(np.float64).min())
+dataset_v_norm = dataset_veg.astype(np.float64)
+dataset_v_norm = (dataset_veg - dataset_veg.min()) / (dataset_veg.max() - dataset_veg.min())
 ```
 
 ```{code-cell} ipython3
@@ -358,9 +360,7 @@ data_norm_v = dataset_v_norm.to_dataarray()
 We will use the `plot.imshow` function to represent our variables by intensities of Red, Green, and Blue. We can use `sel` to reorder the dataset because the visualization will go in the order of Red, Green, and Blue.
 
 ```{code-cell} ipython3
-data_norm = data_norm.sel(
-    variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"]
-)
+data_norm = data_norm.sel(variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"])
 data_norm_v = data_norm_v.sel(variable=["car", "cire", "mari"])
 ```
 
@@ -387,11 +387,13 @@ plt.show()
 
 We export the figure of a chosen name, format and resolution (dpi). `str(tspan)` adds the date range to the name, you can use other variables in strings in the same way.
 
-```{code-cell} ipython3
+```{raw-cell}
 fig.savefig("moana_and_land_vi" + str(tspan) + ".png", format="png", dpi=70)
 ```
 
-We can create a RGB ternary legend for our map.
+We can create a RGB ternary legend for our map. This was shamelessly inspired by the [EDMW EarthData Workshop 2025] , check their githut repo for even more inspiration for PACE visualizations!
+
+[EDMW EarthData Workshop 2025]: https://github.com/nmfs-opensci/EDMW-EarthData-Workshop-2025/blob/main/tutorials/Tutorial_3_moana-erddap.ipynb
 
 ```{code-cell} ipython3
 size = 200
@@ -471,7 +473,7 @@ plt.show()
 
 +++
 
-We are going to use what we just learned to create a timeline for a chosen area. First, we will get data for a year.
+We are going to use what we just learned to create a timeline for a chosen area. First, we will get data for a whole year.
 
 +++
 
@@ -556,20 +558,6 @@ data_norm = dataset_norm.to_dataarray()
 data_norm = data_norm.sel(variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"])
 ```
 
-```{raw-cell}
-dataset_phy_mean = dataset_phy.mean("date")
-dataset_norm = (
-    dataset_phy_mean.astype(np.float64) - dataset_phy_mean.astype(np.float64).min()
-) / (
-    dataset_phy_mean.astype(np.float64).max()
-    - dataset_phy_mean.astype(np.float64).min()
-)
-data_norm = dataset_norm.to_dataarray()
-data_norm = data_norm.sel(
-    variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"]
-)
-```
-
 ### Select and visualize our region of interest
 
 +++
@@ -602,7 +590,7 @@ if west_lon > east_lon:
         west_lon, east_lon = east_lon, west_lon
         print("Warning: West longitude was east of east longitude. Values swapped.")
 
-lat_ascending = dataset_phy.lat[1] > dataset_phy.lat[0]
+lat_ascending = dataset_phy["lat"][1] > dataset_phy["lat"][0]
 lon_ascending = dataset_phy.lon[1] > dataset_phy.lon[0]
 
 if lat_ascending:
