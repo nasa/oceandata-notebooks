@@ -16,10 +16,12 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 <div class="alert alert-warning" role="alert">
 
-You need at least 14GB of memory to run this notebook
+You need up to 4GB of memory to run this notebook
+
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
+
 ## Summary
 
 This is an introduction to the visualization possibilities arising from PACE data, meant to give you ideas and tools to develop your own scientific data visualizations.
