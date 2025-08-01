@@ -117,10 +117,10 @@ help(write_par)
 Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
 
 ```{code-cell} ipython3
-earthaccess.login(persist=True)
+auth = earthaccess.login(persist=True)
 ```
 
-To use OCSSW cloud processing, we also need to set our s3 credentials.
+To use OCSSW cloud processing, we also need to set our temporary S3 credentials.
 
 ```{code-cell} ipython3
 credentials = earthaccess.get_s3_credentials(provider="OB_CLOUD")
@@ -146,7 +146,7 @@ results = earthaccess.search_data(
 results[0]
 ```
 
-Store the link to the data in a variable for future use. 
+Store the link to the data in a variable for future use.
 
 ```{code-cell} ipython3
 ifile = results[0].data_links(access="direct")[0]
@@ -159,7 +159,7 @@ the dataset's "observation_data" group in the netCDF file using `xarray` to plot
 wavelength.
 
 ```{code-cell} ipython3
-f = earthaccess.open([ifile],provider='OB_CLOUD')
+f = earthaccess.open([ifile], provider="OB_CLOUD")
 dataset = xr.open_dataset(f[0], group="observation_data")
 plot = dataset["rhot_red"][dict(red_bands=100)].plot()
 ```
@@ -170,7 +170,7 @@ plot = dataset["rhot_red"][dict(red_bands=100)].plot()
 
 ## 3. Process L1B Data with `l2gen`
 
-At L1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to L2 and then to Level-3-Mapped (L3M) to get both of those. Note that L2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the L3M data distributed by the OB.DAAC are global composites, which may cover more L2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters.
+At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to L2 and then to Level-3-Mapped (L3M) to get both of those. Note that L2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the L3M data distributed by the OB.DAAC are global composites, which may cover more L2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters.
 
 <div class="alert alert-warning">
 
@@ -263,8 +263,8 @@ plot = dataset["chlor_a"].plot(cmap="viridis", robust=True)
 
 Feel free to explore `l2gen` options to produce the L2 dataset you need! The documentation
 for `l2gen` is kind of interactive, because so much depends on the data product being processed.
-For example, try `l2gen ifile=granules/PACE_OCI.20240427T161654.L1B.nc dump_options=true` to get
-a lot of information about the specifics of what the `l2gen` program generates.
+For example, try `l2gen dump_options=true` with an `ifile` argument to get
+a lot of information about the specifics of what the `l2gen` program generates for that `ifile`.
 
 The next step for this tutorial is to merge multiple L2 granules together.
 
@@ -308,9 +308,7 @@ for item in results:
 Get the S3 links for the files.
 
 ```{code-cell} ipython3
-paths = []
-for res in results:
-    paths.append(res.data_links(access="direct")[0])
+paths = [i.data_links(access="direct")[0] for i in results]
 paths
 ```
 
@@ -322,7 +320,7 @@ with open("l2bin_ifile.txt", "w") as file:
     file.write("\n".join(paths))
 ```
 
-Then we use that text file as an `ifile` parameter in the `l2bin` par file. 
+Then we use that text file as an `ifile` parameter in the `l2bin` par file.
 
 ```{code-cell} ipython3
 ofile = "granules/PACE_OCI.L3B.nc"
