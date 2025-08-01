@@ -8,7 +8,7 @@ kernelspec:
 # Run Level-2 Generator (l2gen) OCSSW program on OCI data
 
 **Authors:** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA) <br>
-Last updated: July 30, 2025
+Last updated: July 31, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -157,10 +157,7 @@ Within the OCSSW directory, there are sub-directories that contain files that co
 ```{code-cell} ipython3
 :scrolled: true
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-ls $OCSSWROOT/share/common
+!ls $OCSSWROOT/share/common
 ```
 
 <div class="alert alert-info">
@@ -182,10 +179,7 @@ Now, let's look at the PACE OCI-specific files within the `share/oci` directory:
 ```{code-cell} ipython3
 :scrolled: true
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-ls $OCSSWROOT/share/oci
+!ls $OCSSWROOT/share/oci
 ```
 
 Let's print "msl12_defaults.par", where the `l2gen` default parameters for OCI are defined:
@@ -193,9 +187,7 @@ Let's print "msl12_defaults.par", where the `l2gen` default parameters for OCI a
 ```{code-cell} ipython3
 :scrolled: true
 
-%%bash
-
-cat $OCSSWROOT/share/oci/msl12_defaults.par
+!cat $OCSSWROOT/share/oci/msl12_defaults.par
 ```
 
 This par file lists the default configuration for standard `l2gen` processing. If nothing is modified from this par file, `l2gen` will process a L1B file to L2 containing the OC suite of data products, and it will be *exactly* the same as the L2 data file that OBPG processes and ingests into NASA Earthdata.
@@ -343,12 +335,8 @@ Before we do this, however, there is one additional step required to <i>exactly<
 We can run `getanc -h` to see options for the program:
 
 ```{code-cell} ipython3
----
-scrolled: true
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
+:scrolled: true
+
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
@@ -373,9 +361,7 @@ getanc --use_filename $1 --ofile l2gen.anc
 You'll notice that a file named "l1b.anc" now appears in your working directory. Reading this file, you can see that ancillary files are saved in the `var/anc/` directory.  Note that this file also provides text in the correct format for use in a par file.
 
 ```{code-cell} ipython3
-%%bash
-
-cat l2gen.anc
+!cat l2gen.anc
 ```
 
 Now, we'll make a par file that has an ifile, ofile, corresponding ancillary data, and latitude and longitude boundaries. Trust us ... subsetting the L1B file to a smaller region makes processing time faster for this demo! <br>
