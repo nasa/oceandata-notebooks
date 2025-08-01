@@ -119,7 +119,7 @@ The SPEXone RemoTAP L2 product suite includes a long list of aerosol optical pro
 - Ångström coefficient (angstrom_440_870 and angstrom_440_670)
 - Aerosol fine mode optical depth fraction (fmf)
 - etc
-  
+
 As well as aerosol microphysical properties:
 - Aerosol effective radius (reff_fine/coarse) and variance (veff_fine/coarse)
 - Aerosol refractive index: real part (mr and mr_fine/coarse), imaginary part (mi and mi_fine/coarse)
@@ -291,13 +291,13 @@ plot_l2_product(
 
 ## 6. Advanced quality assessment
 
-Since the retrieval algorithm is based on optimal estimation by minimizing a $\chi^2$ cost function defined as the difference between measurement (m) and forward model fitting (f), normalized by total uncertainties ($\sigma$). 
+Since the retrieval algorithm is based on optimal estimation by minimizing a $\chi^2$ cost function defined as the difference between measurement (m) and forward model fitting (f), normalized by total uncertainties ($\sigma$).
 
 $\chi^2 = \frac{1}{N} \sum (f - m)^2/\sigma^2$
 
 Here N is the total number of measureents used in retreival. The $\chi^2$ and $N$ can be used to evaluate retrieval performance, the pixels with small $\chi^2$ (good fitting) and large $N$ (more pixels can be fitted) will better quality. A more quantitatively approach based on error propogation are used to compute retrieval uncertainty, which are also included for many of the data product. Note that RemoTAP algorithm do not adaptively remove measurements during retrieval, but instead all the measureemts as defined in the input file are used.
 
-To support L3 data processing, a quality flag is also defined, which is usually based on $\chi^2$ for SPEXone data. Other flags based on land-water adjacent, cloud ajacent are also included.  
+To support L3 data processing, a quality flag is also defined, which is usually based on $\chi^2$ for SPEXone data. Other flags based on land-water adjacent, cloud ajacent are also included.
 - flag_0 : good.
 - flag_1 : large chi2.
 - flag_2 : land-water adjacent.

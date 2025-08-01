@@ -204,9 +204,9 @@ $$
   NDVI = \frac{\rho_{NIR} - \rho_{red}}{\rho_{NIR} + \rho_{red}}
 $$
 
-You'll notice that the equation does not mention specific wavelengths, but rather just requires a "red" measurement and a "NIR" measurement. PACE provides many reflectance measurements throughout the red and NIR regions of the spectrum, as we can see in the plots below. 
+You'll notice that the equation does not mention specific wavelengths, but rather just requires a "red" measurement and a "NIR" measurement. PACE provides many reflectance measurements throughout the red and NIR regions of the spectrum, as we can see in the plots below.
 
-To visualize the spectra, we want to plot across the wavelength dimension of individual pixels, so we'll take just a small sample from the dataset. We also like to separate the hyperspectral (ultraviolet to NIR wavelengths) and multispectral (NIR to SWIR wavelengths) regions when plotting spectra to better understand the spectral shapes. 
+To visualize the spectra, we want to plot across the wavelength dimension of individual pixels, so we'll take just a small sample from the dataset. We also like to separate the hyperspectral (ultraviolet to NIR wavelengths) and multispectral (NIR to SWIR wavelengths) regions when plotting spectra to better understand the spectral shapes.
 
 ```{code-cell} ipython3
 sample_rhos = rhos.sel(

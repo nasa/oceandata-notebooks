@@ -116,7 +116,7 @@ obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 
 ## 3. Understanding Multi-Angle Data
 
-SPEXone is a hyper-spectral sensor with 400 intensity bands (380-779nm) and 50 polarization bands (within 385-770nm).  SPEXone is also multi-angle measures five view angles for all its spectral bands. Therefore, there is no need to combine the spectral bands and angles together into one axis as what HARP2 data is organized. 
+SPEXone is a hyper-spectral sensor with 400 intensity bands (380-779nm) and 50 polarization bands (within 385-770nm).  SPEXone is also multi-angle measures five view angles for all its spectral bands. Therefore, there is no need to combine the spectral bands and angles together into one axis as what HARP2 data is organized.
 
 Pull out the view angles and wavelengths.
 
@@ -135,7 +135,7 @@ ax[0].set_xlabel("Index")
 ax[1].set_ylabel("Wavelength (nm)")
 ax[1].set_xlabel("Index")
 
-angle_index = 0 
+angle_index = 0
 color, marker = 'blue', 'o'
 ax[0].plot(
     #np.arange(start_idx, end_idx),
@@ -174,7 +174,7 @@ Both HARP2 and SPEXone conduct polarized measurements. Polarization describes th
 
 Polarimetric data is typically represented using [Stokes vectors](https://en.wikipedia.org/wiki/Stokes_parameters). These have four components: I, Q, U, and V. Both HARP2 and SPEXone are only sensitive to linear polarization, and does not detect circular polarization. Since the V component corresponds to circular polarization, the data only includes the I, Q, and U elements of the Stokes vector.
 
-Let's make a plot of the I, Q, and U components of our Stokes vector, using the RGB channels, which will help our eyes make sense of the data. We'll use the view that is closest to pointing straight down, which is called the "nadir" view in the code.  Since SPEXone swath is relatively narrow (100km), the sensor zenith angle at the edges of the swath will be slightly higher. It's only a true nadir view close to the center of the swath. 
+Let's make a plot of the I, Q, and U components of our Stokes vector, using the RGB channels, which will help our eyes make sense of the data. We'll use the view that is closest to pointing straight down, which is called the "nadir" view in the code.  Since SPEXone swath is relatively narrow (100km), the sensor zenith angle at the edges of the swath will be slightly higher. It's only a true nadir view close to the center of the swath.
 
 The I, Q, and U components of the Stokes vector are separate variables in the `obs` dataset.
 

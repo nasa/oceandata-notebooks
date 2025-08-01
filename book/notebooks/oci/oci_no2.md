@@ -5,7 +5,7 @@ kernelspec:
   language: python
 ---
 
-# Exploring nitrogen dioxide (NO<sub>2</sub>) data from OCI 
+# Exploring nitrogen dioxide (NO<sub>2</sub>) data from OCI
 
 **Authors:** Anna Windle (NASA, SSAI), Zachary Fasnacht (NASA, SSAI) <br>
 Last updated: July 28, 2025
@@ -20,7 +20,7 @@ The following notebooks are **prerequisites** for this tutorial.
 
 ## Summary
 
-This tutorial describes how to access and download nitrogen dioxide (NO<sub>2</sub>) data products developed from PACE OCI data. More information on how these products were created can be found in [Fasnacht et al. (2025)][paper]. This notebook will also include examples on how to plot NO<sub>2</sub> data as a static and interactive map, as well as how to plot an interactive time series plot. 
+This tutorial describes how to access and download nitrogen dioxide (NO<sub>2</sub>) data products developed from PACE OCI data. More information on how these products were created can be found in [Fasnacht et al. (2025)][paper]. This notebook will also include examples on how to plot NO<sub>2</sub> data as a static and interactive map, as well as how to plot an interactive time series plot.
 
 [paper]: http://doi.org/10.1088/1748-9326/addfef
 
@@ -62,7 +62,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
 import holoviews
-holoviews.config.image_rtol = 1e-2 
+holoviews.config.image_rtol = 1e-2
 
 swap_dims = {"nlon": "longitude", "nlat": "latitude"}
 ```
@@ -100,7 +100,7 @@ dataset = xr.merge(datatree.to_dict().values()).swap_dims(swap_dims)
 dataset
 ```
 
-If you expand the `nitrogen_dioxide_total_vertical_column` variable, you'll see that it is a 2D variable consisting of total vertical column NO<sub>2</sub> measurements with units of molecules cm<sup>-2</sup>. 
+If you expand the `nitrogen_dioxide_total_vertical_column` variable, you'll see that it is a 2D variable consisting of total vertical column NO<sub>2</sub> measurements with units of molecules cm<sup>-2</sup>.
 Let's plot it!
 
 ```{code-cell} ipython3
@@ -174,7 +174,7 @@ results = fs.glob(pattern)
 paths = [fs.open(i, cache_type="blockcache") for i in results]
 ```
 
-Now we will combine the files into one `xarray` dataset, for which we have to access one group at a time within the hierarchichal datasets. This can take several minutes. 
+Now we will combine the files into one `xarray` dataset, for which we have to access one group at a time within the hierarchichal datasets. This can take several minutes.
 
 ```{code-cell} ipython3
 dataset = xr.open_mfdataset(
@@ -231,7 +231,7 @@ We've created two plots, and now we combine them, add styling, and display.
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook introducing NO<sub>2</sub> data products from OCI. We suggest looking at the notebook on [Orientation to PACE/OCI Terrestrial Products][terrestrial] tutorial to learn more about the terrestrial data products that can be derived from PACE OCI data. 
+You have completed the notebook introducing NO<sub>2</sub> data products from OCI. We suggest looking at the notebook on [Orientation to PACE/OCI Terrestrial Products][terrestrial] tutorial to learn more about the terrestrial data products that can be derived from PACE OCI data.
 
 [terrestrial]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-terrestrial-data/)
 

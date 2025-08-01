@@ -26,7 +26,7 @@ By the end of this notebook, you will understand:
 - What aerosol products are available
 - How to visualize basic aerosol properties
 - How to evaluate data quality
-  
+
 ## Contents
 
 1. [Setup](#1.-Setup)
@@ -115,7 +115,7 @@ The HARP2 FastMAPOL L2 product suite includes a long list of aerosol optical pro
 - Ångström coefficient (angstrom_440_870 and angstrom_440_670)
 - Aerosol fine mode optical depth fraction (fmf)
 - etc
-  
+
 As well as aerosol microphysical properties:
 - Aerosol effective radius (reff_fine/coarse) and variance (veff_fine/coarse)
 - Aerosol refractive index: real part (mr and mr_fine/coarse), imaginary part (mi and mi_fine/coarse)
@@ -285,13 +285,13 @@ plot_l2_product(
 
 ## 6. Advanced quality assessment
 
-Since the retrieval algorithm is based on optimal estimation by minimizing a $\chi^2$ cost function defined as the difference between measurement (m) and forward model fitting (f), normalized by total uncertainties ($\sigma$). 
+Since the retrieval algorithm is based on optimal estimation by minimizing a $\chi^2$ cost function defined as the difference between measurement (m) and forward model fitting (f), normalized by total uncertainties ($\sigma$).
 
 $\chi^2 = \frac{1}{N} \sum (f - m)^2/\sigma^2$
 
 Here N is the total number of measureents used in retreival. The algorithm also adaptively evalue fitting performance, if the fitting perform poor, it will be removed from the retreival process. Therefore, the $\chi^2$ and $N$ can be used to evaluate retrieval performance, the pixels with small $\chi^2$ (good fitting) and large $N$ (more pixels can be fitted) will better quality. A more quantitatively approach based on error propogation can be also used to compute retrieval uncertainty, which will be include in future product.
 
-To support L3 data processing, a quality flag is also defined, which is usually based on $\chi^2$ and $N$. For the HARP2 test data, we choose 
+To support L3 data processing, a quality flag is also defined, which is usually based on $\chi^2$ and $N$. For the HARP2 test data, we choose
 - quality_flag = 0: when $\chi^2<1.5$ and $N_{ref}>60$ and $N_{DoLP}>60$
 - quality_flag = 1: when $\chi^2<1.5$ and $N_{ref}>40$ and $N_{DoLP}>40$
 - quality_flag > 1: for higher value $\chi^2$ and lower values of $N_{ref}$ and $N_{DoLP}$

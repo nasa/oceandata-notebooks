@@ -92,7 +92,7 @@ paths = earthaccess.download(results, local_path="data")
 
 ### 2.1. 2D Variables - Vegetation Indices
 
-All of PACE OCI's L2 data are still in the instrument swath - in other words, they are not projected to any sort of regular grid, which makes comparing between satellites, or even between two PACE OCI granules in the same location, difficult. However, each pixel is geolocated (i.e., has an associated latitude and longitude), meaning we can reproject our data onto a grid to make working with it more intuitive. 
+All of PACE OCI's L2 data are still in the instrument swath - in other words, they are not projected to any sort of regular grid, which makes comparing between satellites, or even between two PACE OCI granules in the same location, difficult. However, each pixel is geolocated (i.e., has an associated latitude and longitude), meaning we can reproject our data onto a grid to make working with it more intuitive.
 
 As mentioned above, we're working with two data products in this tutorial. We'll open both as `xarray` datatrees and display their different dimensional architecture:
 
@@ -106,7 +106,7 @@ print("Surface reflectance dimensions: ", sr_dt["geophysical_data"]["rhos"].dims
 print("Vegetation index dimensions: ", vi_dt["geophysical_data"]["cire"].dims)
 ```
 
-As we can see, the dimensions between the variables in both datasets differ. The surface reflectance contained in the `rhos` variable have 3 dimensions corresponding to (rows, columns, wavelength), while each VI variable (e.g., `ndvi` or `cire`) is a 2D variable with (row, column) dimensions. 
+As we can see, the dimensions between the variables in both datasets differ. The surface reflectance contained in the `rhos` variable have 3 dimensions corresponding to (rows, columns, wavelength), while each VI variable (e.g., `ndvi` or `cire`) is a 2D variable with (row, column) dimensions.
 
 If we plot one of these variables, we'll see that they aren't on any sort of regular spatial grid, and will instead be plotted by their row (`number_of_lines`) and column (`pixels_per_line`) indices as any non-geospatial array would be.
 
@@ -131,7 +131,7 @@ vi_src = vi_dt["geophysical_data"].to_dataset()
 vi_src
 ```
 
-The `cf_xarray` package allows us to interpret [CF-compliant](http://cfconventions.org/) attributes with xarray - for our dataset, this means we can use the data in `l2_flags` to mask for certain quality issues. [See their documentation](https://cf-xarray.readthedocs.io/en/latest/) for more information. 
+The `cf_xarray` package allows us to interpret [CF-compliant](http://cfconventions.org/) attributes with xarray - for our dataset, this means we can use the data in `l2_flags` to mask for certain quality issues. [See their documentation](https://cf-xarray.readthedocs.io/en/latest/) for more information.
 
 L2 PACE OCI data has multiple quality flags we could apply, but here we will only mask for `CLDICE`, the flag for pixels contaminated with clouds and/or ice. The names of each available flag and what they mean can be found at [this link](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/).
 
@@ -159,11 +159,11 @@ vi_src
 
 If we compare `vi_src` before and after these steps, it looks like nothing much has changed. However, you can see that under `Coordinates` we now have `longitude` and `latitude`, as well as the `spatial_ref` variable, which contains the spatial reference information necessary to reproject the data.
 
-In the next cell, we create a destination dataset, `vi_dst`, the projected version of the source dataset. The key parameter in this step is the `src_geoloc_array`, which is how we're able to feed the function our coordinate arrays and get out a projected dataset. 
+In the next cell, we create a destination dataset, `vi_dst`, the projected version of the source dataset. The key parameter in this step is the `src_geoloc_array`, which is how we're able to feed the function our coordinate arrays and get out a projected dataset.
 
 <div class="alert alert-info" role="alert">
 
-In this example, we project into EPSG 4326, which might not be best for your project. An easy way to input your preferred CRS is rasterio's CRS module. For example, if you knew the specific EPSG code you wanted to use (e.g., 32617), you would replace `vi_src.rio.crs` with `rasterio.crs.CRS.from_epsg(32617)`. There are several other options to define your CRS as well - see [here](https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html) for more details. 
+In this example, we project into EPSG 4326, which might not be best for your project. An easy way to input your preferred CRS is rasterio's CRS module. For example, if you knew the specific EPSG code you wanted to use (e.g., 32617), you would replace `vi_src.rio.crs` with `rasterio.crs.CRS.from_epsg(32617)`. There are several other options to define your CRS as well - see [here](https://rasterio.readthedocs.io/en/stable/api/rasterio.crs.html) for more details.
 
 </div>
 
@@ -197,13 +197,13 @@ plt.show()
 
 The VI data is now masked and reprojected! Now let's start with our 3D surface reflectances.
 
-### 2.2. 3D Variables - Surface Reflectance 
+### 2.2. 3D Variables - Surface Reflectance
 
-Typically, you'd be able to repeat the process we completed for the VIs above for most 3D data, and if you tried it with PACE OCI surface reflectances, it would work. However, in addition to reprojecting PACE OCI data, another goal of this tutorial is to export the data into GeoTIFF format for use in a GIS software. Many of these programs, and specifically the popular [QGIS](https://qgis.org/) software, require that data dimensions are ordered (Z, Y, X), where Y and X are positional coordinates like latitude and longitude and Z is a third dimension, like wavelength. 
+Typically, you'd be able to repeat the process we completed for the VIs above for most 3D data, and if you tried it with PACE OCI surface reflectances, it would work. However, in addition to reprojecting PACE OCI data, another goal of this tutorial is to export the data into GeoTIFF format for use in a GIS software. Many of these programs, and specifically the popular [QGIS](https://qgis.org/) software, require that data dimensions are ordered (Z, Y, X), where Y and X are positional coordinates like latitude and longitude and Z is a third dimension, like wavelength.
 
 Recalling from above, the surface reflectance variable `rhos` has 3 dimensions (rows, columns, wavelengths) - in other words, (Y, X, Z). Without resolving this issue, trying to load PACE OCI surface reflectance data in QGIS will result in what looks like nonsensical lines and squares instead of a rich reflectance data cube.
 
-To put PACE OCI reflectances in the correct dimensional order, all we have to do is transpose the data so that the wavelength dimension, `wavelength_3d`, is first. 
+To put PACE OCI reflectances in the correct dimensional order, all we have to do is transpose the data so that the wavelength dimension, `wavelength_3d`, is first.
 
 Before this, we include code that assigns the wavelength_3d variable as a coordinate, so that each band can be selected by its center wavelength rather than its 0-121 numerical index ordering.
 
@@ -222,7 +222,7 @@ sr_src = sr_src.transpose("wavelength_3d", ...)
 sr_src
 ```
 
-The `rhos` variable is now in dimension order (Z, Y, X), which will allow QGIS and other software with the same requirement to properly handle the surface reflectance data. Note that we are setting `sr_src` to include only `rhos` and not `l2_flags`. We separate these variables to allow for exporting in Section 3, as the `rio.to_raster` method cannot handle two dataarrays with different dimensions (i.e., 3D for `rhos` and 2D for `l2_flags`). That means if you want your surface reflectance data masked with any of the flags we explained above, you'll have to do it before the step above. 
+The `rhos` variable is now in dimension order (Z, Y, X), which will allow QGIS and other software with the same requirement to properly handle the surface reflectance data. Note that we are setting `sr_src` to include only `rhos` and not `l2_flags`. We separate these variables to allow for exporting in Section 3, as the `rio.to_raster` method cannot handle two dataarrays with different dimensions (i.e., 3D for `rhos` and 2D for `l2_flags`). That means if you want your surface reflectance data masked with any of the flags we explained above, you'll have to do it before the step above.
 
 We can now complete the rest of the steps above to reproject the data.
 
@@ -258,7 +258,7 @@ plt.show()
 
 ## 3. Exporting to GeoTIFF
 
-Now that we have two georeferenced, projected datasets of surface reflectances and VIs, you can export them to your preferred format. Here, we export to a Cloud Optimized Geotiff, or COG, using the "COG" driver with applicable profile options. 
+Now that we have two georeferenced, projected datasets of surface reflectances and VIs, you can export them to your preferred format. Here, we export to a Cloud Optimized Geotiff, or COG, using the "COG" driver with applicable profile options.
 
 COGs are a subset of Geotiffs which have been optimized to work in cloud environments. If you are not working in the cloud, you don't have to worry, as COGs are backwards compatible with Geotiffs. That is, any software that can be used to analyze a Geotiff can also be used with COGs. For more information on the COG format, please see the [cogeo website](https://cogeo.org/). There is also a very useful plug in for rasterio called `rio-cogeo` for creating/validating COGs, documentation for which can be found [here](https://cogeotiff.github.io/rio-cogeo/).
 
@@ -300,7 +300,7 @@ profile = {
 vi_dst.rio.to_raster(vi_dst_name, **profile)
 ```
 
-The files should be successfully converted, and able to be analyzed properly in QGIS and other software! To make a nice quick true colour image in your program of choice, you can set R = 655 nm (band 60), G = 555 nm (band 42), and B = 470 nm (band 25). 
+The files should be successfully converted, and able to be analyzed properly in QGIS and other software! To make a nice quick true colour image in your program of choice, you can set R = 655 nm (band 60), G = 555 nm (band 42), and B = 470 nm (band 25).
 
 To do the format conversion and reprojection in one step, please see the function below:
 

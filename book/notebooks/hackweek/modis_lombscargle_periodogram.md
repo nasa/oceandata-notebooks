@@ -28,7 +28,7 @@ This notebook follows the astropy documentation for [timeseries analysis] to gen
 
 At the end of this notebook you will know how to:
 
-- Generate a Lomb-Scargle periodogram for ocean color data time series 
+- Generate a Lomb-Scargle periodogram for ocean color data time series
 - Calculate the False-Alarm-Probability to estimate the significance of a peak in the periodogram
 
 ## Contents
@@ -132,7 +132,7 @@ Unlike the solar zenith angle versus time (and to a lesser extent the $R_{rs}(\l
 
 +++
 
-A useful tool for detecting a periodicity in a discretely sampled signal is the periodogram. However, direct application of Fourier analysis techniques to generate a periodogram requires regular sampling, which is not always attainable in oceanographic data collection due to data gaps due to quality screening or instrument failures. Alternatively, a modified version of the periodogram - the Lomb-Scargle periodgram (or L-S periodgram) - can be achieved in connection to a least-squares analysis [(VanderPlas, 2018)] . 
+A useful tool for detecting a periodicity in a discretely sampled signal is the periodogram. However, direct application of Fourier analysis techniques to generate a periodogram requires regular sampling, which is not always attainable in oceanographic data collection due to data gaps due to quality screening or instrument failures. Alternatively, a modified version of the periodogram - the Lomb-Scargle periodgram (or L-S periodgram) - can be achieved in connection to a least-squares analysis [(VanderPlas, 2018)] .
 
 [(VanderPlas, 2018)]: https://dx.doi.org/10.3847/1538-4365/aab766
 

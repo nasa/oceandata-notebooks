@@ -232,6 +232,11 @@
 #     "virtualenv==20.31.2",
 #     "wheel==0.45.1",
 #     "torch==2.7.1+cpu ; sys_platform != 'darwin'",
+#     "astropy==7.1.0",
+#     "astropy-iers-data==0.2025.7.28.0.41.50",
+#     "pyerfa==2.0.1.5",
+#     "torch==2.7.1 ; (python_full_version >= '3.14' and platform_machine == 'AMD64' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'WIN32' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'aarch64' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'amd64' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'ppc64le' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'win32' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'x86_64' and sys_platform == 'darwin') or (platform_machine != 'AMD64' and platform_machine != 'WIN32' and platform_machine != 'aarch64' and platform_machine != 'amd64' and platform_machine != 'ppc64le' and platform_machine != 'win32' and platform_machine != 'x86_64' and sys_platform == 'darwin')",
+#     "torch==2.7.1+cpu ; (python_full_version < '3.14' and platform_machine == 'AMD64') or (python_full_version < '3.14' and platform_machine == 'WIN32') or (python_full_version < '3.14' and platform_machine == 'aarch64') or (python_full_version < '3.14' and platform_machine == 'amd64') or (python_full_version < '3.14' and platform_machine == 'ppc64le') or (python_full_version < '3.14' and platform_machine == 'win32') or (python_full_version < '3.14' and platform_machine == 'x86_64') or sys_platform != 'darwin'",
 # ]
 # ///
 """Install kernels for Jupyter.
