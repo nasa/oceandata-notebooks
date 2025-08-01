@@ -106,8 +106,6 @@ os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
 In every cell where we wish to call an OCSSW command, several lines of code need to appear first to establish the required environment. These are shown below, followed by a call to the OCSSW program `install_ocssw` to see which version (tag) of OCSSW is installed.
 
 ```{code-cell} ipython3
-:scrolled: true
-
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
@@ -211,12 +209,8 @@ You can also see OCSSW parameter options by running 'l2gen --help'.
 </div>
 
 ```{code-cell} ipython3
----
-scrolled: true
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
+:scrolled: true
+
 %%bash
 source $OCSSWROOT/OCSSW_bash.env
 
@@ -289,8 +283,6 @@ results[0]
 ```
 
 ```{code-cell} ipython3
-:scrolled: true
-
 l1b_paths = earthaccess.open(results)
 ```
 
@@ -476,8 +468,6 @@ This should have created a new file including "L2_sub" in the data subdirectory.
 Let's open it and see how it compares with the L2 file we generated.
 
 ```{code-cell} ipython3
-:scrolled: true
-
 dat_sub = xr.open_datatree(par["ofile"])
 dat_sub = xr.merge(dat_sub.to_dict().values())
 dat_sub = dat_sub.set_coords(("longitude", "latitude"))
