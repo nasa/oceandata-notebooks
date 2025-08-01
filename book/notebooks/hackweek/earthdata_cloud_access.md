@@ -8,7 +8,7 @@ kernelspec:
 # Orientation to Earthdata Cloud Access
 
 **Tutorial Lead:** Anna Windle (NASA, SSAI) <br>
-Last updated: July 21, 2025
+Last updated: August 1, 2025
 
 <div class="alert alert-info" role="alert">
 
@@ -21,7 +21,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 ## Summary
 
 In this example we will use the `earthaccess` package to search for
-OCI products on NASA Earthdata. The `earthaccess` package, published
+PACE OCI products on NASA Earthdata. The `earthaccess` package, published
 on the [Python Package Index][pypi] and [conda-forge][conda],
 facilitates discovery and use of all NASA Earth Science data
 products by providing an abstraction layer for NASA’s [Common
@@ -41,15 +41,15 @@ we need to clearly understand **where our notebook is
 running**. There are three cases to distinguish:
 
 1. The notebook is running on the local host. For instance, you started a Jupyter server on your laptop.
-1. The notebook is running on a remote host, but it does not have direct access to the AWS us-west-2 region. For instance, you are running in [GitHub Codespaces][codespaces], which is run on Microsoft Azure.
-1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud (AWS us-west-2 region). This is the case for the PACE Hackweek.
+1. The notebook is running on a remote host, but it does not have direct access to the AWS us-west-2 region. For instance, you are running in [Google Colab][colab], which is run on the Google cloud.
+1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud (AWS us-west-2 region). This is the case for the PACE Hackweek with CryoCloud.
 
 [pypi]: https://pypi.org/
 [conda]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-data-access/
 [cmr]: https://www.earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/cmr
 [edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
 [earthaccess-docs]: https://earthaccess.readthedocs.io/en/latest/
-[codespaces]: https://github.com/features/codespaces
+[colab]: https://colab.research.google.com/
 
 ## Learning Objectives
 
@@ -74,11 +74,11 @@ At the end of this notebook you will know:
 We begin by importing the packages used in this notebook.
 
 ```{code-cell} ipython3
+import cartopy.crs as ccrs
 import earthaccess
-import xarray as xr
 import matplotlib.pyplot as plt
 import numpy as np
-import cartopy.crs as ccrs
+import xarray as xr
 ```
 
 [back to top](#Contents)
@@ -138,7 +138,7 @@ The short name can also be found on <a href="https://search.earthdata.nasa.gov/s
 </div>
 
 Next, we use the `search_data` function to find granules within a
-collection. Let's use the `short_name` for the PACE/OCI Level-2 product for biogeochemical properties (although you can
+collection. Let's use the `short_name` for the PACE/OCI Level-2 near real time (NRT) product for biogeochemical properties (although you can
 search for granules across collections too).
 
 
@@ -198,7 +198,7 @@ results[0]
 
 Let's go ahead and open a couple granules using `xarray`. The `earthaccess.open` function is used when you want to directly read bytes from a remote filesystem, but not download a whole file. When
 running code on a host with direct access to the NASA Earthdata
-Cloud, you don't need to download the data and `earthaccess.open`
+Cloud (like CryoCloud), you don't need to download the data and `earthaccess.open`
 is the way to go.
 
 ```{code-cell} ipython3
@@ -211,28 +211,28 @@ The `paths` list contains references to files on a remote filesystem. The ob-cum
 paths
 ```
 
-Let's open up the first file using XArray.
+Let's open a file using `xarray.Dataset`:
 
 ```{code-cell} ipython3
-dat = xr.open_dataset(paths[0])
-dat
+dataset = xr.open_dataset(paths[0])
+dataset
 ```
 
-Notice that this `xarray.Dataset` has nothing but "Attributes". The NetCDF data model includes multi-group hierarchies within a single file, where each group maps to an `xarray.Dataset`. The whole file maps to a `xarray.Datatree`, which we can open using:
+Notice that this `xarray.Dataset` has nothing but "Attributes". The NetCDF data model includes multi-group hierarchies within a single file, where each group maps to an `xarray.Dataset`. The whole file maps to a `DataTree`, which we will only use lightly because the implementation in XArray remains under development.
 
 ```{code-cell} ipython3
 datatree = xr.open_datatree(paths[0])
 datatree
 ```
 
-Let's convert the `xarray.Datatree` into a `xarray.Dataset` by merging all the nested dictionary values:
+We merge all the variables from the different groups together using:
 
 ```{code-cell} ipython3
 dataset = xr.merge(datatree.to_dict().values())
 dataset
 ```
 
-Let's do a quick plot of the `chlor_a` variable.
+Now we can see all 31 variables under 'Data variables'. Let's do a quick plot of the `chlor_a` variable.
 
 ```{code-cell} ipython3
 artist = dataset["chlor_a"].plot(vmax=5)
@@ -277,14 +277,14 @@ results = earthaccess.search_data(
 paths = earthaccess.open(results)
 ```
 
-Let's open the first file using `xarray`.
+Since L3M do not have groups, we can open the first file as a `xarray.Dataset`:
 
 ```{code-cell} ipython3
 dataset = xr.open_dataset(paths[0])
 dataset
 ```
 
-Because the L3M variables have lat and lon coordinates, it's possible to stack multiple granules along a new dimension that corresponds to time. Instead of xr.open_dataset, we use xr.open_mfdataset to create a single xarray.Dataset (the "mf" in open_mfdataset stands for multiple files) from an array of paths.
+Because the L3M variables have lat and lon coordinates, it's possible to stack multiple granules along a new dimension that corresponds to time. Instead of `xr.open_dataset`, we can use` xr.open_mfdataset` to create a single `xarray.Dataset` (the "mf" in open_mfdataset stands for multiple files) from an array of paths.
 
 The paths list is sorted temporally by default, which means the shape of the paths array specifies the way we need to tile the files together into larger arrays. We specify combine="nested" to combine the files according to the shape of the array of files (or file-like objects), even though paths is not a "nested" list in this case. The concat_dim="date" argument generates a new dimension in the combined dataset, because "date" is not an existing dimension in the individual files.
 
@@ -301,8 +301,11 @@ A common reason to generate a single dataset from multiple, daily images is to c
 
 ```{code-cell} ipython3
 chla = np.log10(dataset["chlor_a"])
-chla.attrs.update({"units": f'log({dataset["chlor_a"].attrs["units"]})'})
-
+chla.attrs.update(
+    {
+        "units": f'log({dataset["chlor_a"].attrs["units"]})',
+    }
+)
 plot = chla.sel({"date": 0}).plot(aspect=2, size=4, cmap="GnBu_r")
 ```
 
