@@ -68,6 +68,7 @@ import pyinterp.backends.xarray  # Module that handles the filling of undefined 
 import pyinterp.fill
 import seaborn as sns
 import xarray as xr
+from matplotlib.patches import Rectangle
 ```
 
 Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
@@ -129,6 +130,9 @@ dataset_moana
 
 ```{code-cell} ipython3
 path_land = earthaccess.open(results_land)
+```
+
+```{code-cell} ipython3
 dataset_land = xr.open_mfdataset(
     path_land,
     combine="nested",
@@ -148,19 +152,19 @@ dataset_land
 Lets make a very quick map using `xr.plot`. All we need is to indicate the variable we want to plot and because our dataset contains multiple date, we indicate the index of one date in brackets with `[0]`.
 
 ```{code-cell} ipython3
-dataset_moana["prococcus_moana"][0].plot()
+plot = dataset_moana["prococcus_moana"][0].plot.imshow()
 ```
 
 Notice that we do not see much. In this case, the dataset contains outliers. If we just want to make a quick plot, we can remove outliers with `robust=true`.
 
 ```{code-cell} ipython3
-dataset_moana["prococcus_moana"][0].plot(robust="true")
+plot = dataset_moana["prococcus_moana"][0].plot.imshow(robust="true")
 ```
 
 We can do another quick plot for the land vegetation indices dataset. Notice the map is much more complete, which is expected in monthly compared to daily products.
 
 ```{code-cell} ipython3
-dataset_land["cire"][0].plot()
+plot = dataset_land["cire"][0].plot.imshow()
 ```
 
 [back to top](#Contents)
@@ -178,38 +182,32 @@ dataset_moana
 ```
 
 ```{code-cell} ipython3
-dataset_moana["prococcus_moana"] = np.clip(
-    dataset_moana["prococcus_moana"],
-    a_min=dataset_moana["prococcus_moana"].attrs["valid_min"],
-    a_max=dataset_moana["prococcus_moana"].attrs["valid_max"],
+dataset_moana["prococcus_moana"] = dataset_moana["prococcus_moana"].clip(
+    min=dataset_moana["prococcus_moana"].attrs["valid_min"],
+    max=dataset_moana["prococcus_moana"].attrs["valid_max"],
 )
-dataset_moana["syncoccus_moana"] = np.clip(
-    dataset_moana["syncoccus_moana"],
-    a_min=dataset_moana["syncoccus_moana"].attrs["valid_min"],
-    a_max=dataset_moana["syncoccus_moana"].attrs["valid_max"],
+dataset_moana["syncoccus_moana"] = dataset_moana["syncoccus_moana"].clip(
+    min=dataset_moana["syncoccus_moana"].attrs["valid_min"],
+    max=dataset_moana["syncoccus_moana"].attrs["valid_max"],
 )
-dataset_moana["picoeuk_moana"] = np.clip(
-    dataset_moana["picoeuk_moana"],
-    a_min=dataset_moana["picoeuk_moana"].attrs["valid_min"],
-    a_max=dataset_moana["picoeuk_moana"].attrs["valid_max"],
+dataset_moana["picoeuk_moana"] = dataset_moana["picoeuk_moana"].clip(
+    min=dataset_moana["picoeuk_moana"].attrs["valid_min"],
+    max=dataset_moana["picoeuk_moana"].attrs["valid_max"],
 )
 ```
 
 ```{code-cell} ipython3
-dataset_land["cire"] = np.clip(
-    dataset_land["cire"],
-    a_min=dataset_land["cire"].attrs["valid_min"],
-    a_max=dataset_land["cire"].attrs["valid_max"],
+dataset_land["cire"] = dataset_land["cire"].clip(
+    min=dataset_land["cire"].attrs["valid_min"],
+    max=dataset_land["cire"].attrs["valid_max"],
 )
-dataset_land["car"] = np.clip(
-    dataset_land["car"],
-    a_min=dataset_land["car"].attrs["valid_min"],
-    a_max=dataset_land["car"].attrs["valid_max"],
+dataset_land["car"] = dataset_land["car"].clip(
+    min=dataset_land["car"].attrs["valid_min"],
+    max=dataset_land["car"].attrs["valid_max"],
 )
-dataset_land["mari"] = np.clip(
-    dataset_land["mari"],
-    a_min=dataset_land["mari"].attrs["valid_min"],
-    a_max=dataset_land["mari"].attrs["valid_max"],
+dataset_land["mari"] = dataset_land["mari"].clip(
+    min=dataset_land["mari"].attrs["valid_min"],
+    max=dataset_land["mari"].attrs["valid_max"],
 )
 ```
 
@@ -249,7 +247,7 @@ transect = dataset_phy.sel(lon=lon_val, method="nearest")
 Making a quick plot with latitudes on the y axis.
 
 ```{code-cell} ipython3
-transect["syncoccus_moana"].plot(y="lat")
+plot = transect["syncoccus_moana"].plot(y="lat")
 ```
 
 We can see there are some values missing, we can interpolate the data if we want to, but it is entirely optional.
@@ -264,10 +262,10 @@ We can see there are some values missing, we can interpolate the data if we want
 ### (Optional)
 #### MOANA (Optional)
 
-Here we offer the option of interpolating the data. This can be useful for filling gaps in the dataset, which can make visualizations smoother. Consider how it affects your statistics before using. 
+Here we offer the option of interpolating the data. This can be useful for filling gaps in the dataset, which can make visualizations smoother. Consider how it affects your statistics before using.
 
 ```{code-cell} ipython3
-dataset_phy["syncoccus_moana"].plot(robust="true")
+plot = dataset_phy["syncoccus_moana"].plot.imshow(robust="true")
 ```
 
 The `margin` parameter is the number of pixels on the X and Y axes to be considered in the calculation.
@@ -299,7 +297,7 @@ dataset_phy["picoeuk_moana"][...] = pic.transpose()
 If we have a look at the transect again, we can see that some of the values have been filled in by the interpolation.
 
 ```{code-cell} ipython3
-dataset_phy["syncoccus_moana"].plot(robust="true")
+plot = dataset_phy["syncoccus_moana"].plot.imshow(robust="true")
 ```
 
 ### Interpolation Land (Optional)
@@ -391,7 +389,7 @@ We export the figure of a chosen name, format and resolution (dpi). `str(tspan)`
 fig.savefig("moana_and_land_vi" + str(tspan) + ".png", format="png", dpi=70)
 ```
 
-We can create a RGB ternary legend for our map. This was shamelessly inspired by the [EDMW EarthData Workshop 2025] , check their githut repo for even more inspiration for PACE visualizations!
+We can create a RGB ternary legend for our map. This was shamelessly inspired by the [EDMW EarthData Workshop 2025] , check their GitHub repo for even more inspiration for PACE visualizations!
 
 [EDMW EarthData Workshop 2025]: https://github.com/nmfs-opensci/EDMW-EarthData-Workshop-2025/blob/main/tutorials/Tutorial_3_moana-erddap.ipynb
 
@@ -527,20 +525,17 @@ dataset_moana
 We then clean up our dataset using the built-in `valid_min` and `valid_max` values and remove the palette variable that we will not be using.
 
 ```{code-cell} ipython3
-dataset_moana["prococcus_moana"] = np.clip(
-    dataset_moana["prococcus_moana"],
-    a_min=dataset_moana["prococcus_moana"].attrs["valid_min"],
-    a_max=dataset_moana["prococcus_moana"].attrs["valid_max"],
+dataset_moana["prococcus_moana"] = dataset_moana["prococcus_moana"].clip(
+    min=dataset_moana["prococcus_moana"].attrs["valid_min"],
+    max=dataset_moana["prococcus_moana"].attrs["valid_max"],
 )
-dataset_moana["syncoccus_moana"] = np.clip(
-    dataset_moana["syncoccus_moana"],
-    a_min=dataset_moana["syncoccus_moana"].attrs["valid_min"],
-    a_max=dataset_moana["syncoccus_moana"].attrs["valid_max"],
+dataset_moana["syncoccus_moana"] = dataset_moana["syncoccus_moana"].clip(
+    min=dataset_moana["syncoccus_moana"].attrs["valid_min"],
+    max=dataset_moana["syncoccus_moana"].attrs["valid_max"],
 )
-dataset_moana["picoeuk_moana"] = np.clip(
-    dataset_moana["picoeuk_moana"],
-    a_min=dataset_moana["picoeuk_moana"].attrs["valid_min"],
-    a_max=dataset_moana["picoeuk_moana"].attrs["valid_max"],
+dataset_moana["picoeuk_moana"] = dataset_moana["picoeuk_moana"].clip(
+    min=dataset_moana["picoeuk_moana"].attrs["valid_min"],
+    max=dataset_moana["picoeuk_moana"].attrs["valid_max"],
 )
 ```
 
@@ -611,8 +606,6 @@ else:
 Then we plot a rectangle around our area of interest on our RGB map. We can try to choose an area that is at the edge of a population to see the changes in time.
 
 ```{code-cell} ipython3
-from matplotlib.patches import Rectangle
-
 fig = plt.figure(figsize=(7, 7))
 ax1 = fig.add_subplot(projection=ccrs.PlateCarree(), facecolor="#080c17")
 ax2 = data_norm.plot.imshow(
@@ -632,6 +625,7 @@ ax1.add_patch(
         zorder=4,
     )
 )
+plt.show()
 ```
 
 We then select the data within our area of interest.
@@ -650,6 +644,11 @@ We want to run some statistics within our area. Here we are looking at the avera
 ```{code-cell} ipython3
 region_mean = tl.mean(dim=["lat", "lon"])
 region_std = tl.std(dim=["lat", "lon"])
+```
+
+```{code-cell} ipython3
+region_mean.load()
+region_std.load()
 ```
 
 We can now plot our timeline. We are going to plot the standard deviations as a shaded area around our mean with `fill_between`. We are using `seaborn` as `sns` to get their built-in plot styling options. It can be good to define some style elements, like `markersize`, ahead to avoid repeating them, but they can be changed for any individual dataset if needed. 
@@ -721,7 +720,6 @@ ax2.fill_between(
     alpha=0.2,
 )
 
-
 ax1.legend(loc="upper left")
 ax2.legend(loc="upper right")
 
@@ -747,6 +745,11 @@ monthly_stds = region_std.groupby("date.month").mean()
 
 ```{code-cell} ipython3
 monthly_means
+```
+
+```{code-cell} ipython3
+monthly_stds.load()
+monthly_means.load()
 ```
 
 We can now plot our monthly averages. Note that we will manually indicate the month names here.
