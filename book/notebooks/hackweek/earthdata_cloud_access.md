@@ -221,7 +221,7 @@ dat
 Notice that this `xarray.Dataset` has nothing but "Attributes". The NetCDF data model includes multi-group hierarchies within a single file, where each group maps to an `xarray.Dataset`. The whole file maps to a `xarray.Datatree`, which we can open using:
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(paths[0], decode_timedelta=False)
+datatree = xr.open_datatree(paths[0])
 datatree
 ```
 
@@ -349,7 +349,7 @@ paths
 We can open up that locally saved file using `xarray` as well.
 
 ```{code-cell} ipython3
-xr.open_datatree(paths[0], decode_timedelta=False)
+xr.open_datatree(paths[0])
 ```
 
 [back to top](#Contents)
