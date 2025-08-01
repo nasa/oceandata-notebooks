@@ -1,8 +1,8 @@
 ---
 kernelspec:
-  name: python3
   display_name: Python 3 (ipykernel)
   language: python
+  name: python3
 ---
 
 # Processing with OCSSW Command Line Interface (CLI)
@@ -120,6 +120,12 @@ Set (and persist to your user profile on the host, if needed) your Earthdata Log
 auth = earthaccess.login(persist=True)
 ```
 
+To use OCSSW cloud processing, we also need to set our temporary S3 credentials.
+
+```{code-cell} ipython3
+credentials = earthaccess.get_s3_credentials(provider="OB_CLOUD")
+```
+
 We will use the `earthaccess` search method used in the OCI Data Access notebook. Note that Level-1B (L1B) files
 do not include cloud coverage metadata, so we cannot use that filter. In this search, the spatial filter is
 performed on a location given as a point represented by a tuple of latitude and longitude in decimal degrees.
@@ -140,58 +146,22 @@ results = earthaccess.search_data(
 results[0]
 ```
 
-Download the granules found in the search.
+Store the link to the data in a variable for future use.
 
 ```{code-cell} ipython3
-paths = earthaccess.download(results, local_path="granules")
-```
-
-While we have the downloaded location stored in the list `paths`, store one in a variable we won't overwrite for future use.
-
-```{code-cell} ipython3
-ifile = paths[0]
+ifile = results[0].data_links(access="direct")[0]
+ifile
 ```
 
 The L1B files contain top-of-atmosphere reflectances, typically denoted as $\rho_t$.
 On OCI, the reflectances are grouped into blue, red, and short-wave infrared (SWIR) wavelengths. Open
-the dataset's "observatin_data" group in the netCDF file using `xarray` to plot a "rhot_red"
+the dataset's "observation_data" group in the netCDF file using `xarray` to plot a "rhot_red"
 wavelength.
 
 ```{code-cell} ipython3
-dataset = xr.open_dataset(ifile, group="observation_data")
-plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
-```
-
-This tutorial will demonstrate processing this L1B granule into a Level-2 (L2) granule. Because that can
-take several minutes, we'll also download a couple of L2 granules to save time for the next step of compositing multiple L2 granules into a single granule.
-
-```{code-cell} ipython3
-location = [(-56.5, 49.8), (-53.3, 48.4)]
-```
-
-Searching on a location defined as a line, rather than a point, is a good way to get granules that are
-adjacent to eachother. Pass a list of latitude and longitude tuples to the `line` argument of `search_data`.
-
-```{code-cell} ipython3
-results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_BGC",
-    temporal=tspan,
-    line=location,
-)
-for item in results:
-    display(item)
-```
-
-```{code-cell} ipython3
-paths = earthaccess.download(results, "granules")
-```
-
-While we have the downloaded location stored in the list `paths`, write the list to a text file for future use.
-
-```{code-cell} ipython3
-paths = [str(i) for i in paths]
-with open("l2bin_ifile.txt", "w") as file:
-    file.write("\n".join(paths))
+f = earthaccess.open([ifile], provider="OB_CLOUD")
+dataset = xr.open_dataset(f[0], group="observation_data")
+plot = dataset["rhot_red"][dict(red_bands=100)].plot()
 ```
 
 [back to top](#Contents)
@@ -200,7 +170,7 @@ with open("l2bin_ifile.txt", "w") as file:
 
 ## 3. Process L1B Data with `l2gen`
 
-At L1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to L2 and then to Level-3-Mapped (L3M) to get both of those. Note that L2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the L3M data distributed by the OB.DAAC are global composites, which may cover more L2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters.
+At Level-1, we neither have geophysical variables nor are the data projected for easy map making. We will need to process the L1B file to L2 and then to Level-3-Mapped (L3M) to get both of those. Note that L2 data for many geophysical variables are available for download from the OB.DAAC, so you often don't need the first step. However, the L3M data distributed by the OB.DAAC are global composites, which may cover more L2 scenes than you want. You'll learn more about compositing below. This section shows how to use `l2gen` for processing the L1B data to L2 using customizable parameters.
 
 <div class="alert alert-warning">
 
@@ -215,8 +185,19 @@ We can, however, define the `OCSSWROOT` environment variable in a way that effec
 [magic]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands
 
 ```{code-cell} ipython3
-ocsswroot = os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
-assert os.path.isdir(ocsswroot)
+os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
+```
+
+We then neet to set up the AWS cloud processing credentials in our environment.
+
+```{code-cell} ipython3
+os.environ.update(
+    {
+        "AWS_ACCESS_KEY_ID": credentials["accessKeyId"],
+        "AWS_SECRET_ACCESS_KEY": credentials["secretAccessKey"],
+        "AWS_SESSION_TOKEN": credentials["sessionToken"],
+    }
+)
 ```
 
 Then we need a couple lines, which will appear in multiple cells below, to begin a Bash cell initiated with the `OCSSW_bash.env` file.
@@ -233,17 +214,23 @@ source $OCSSWROOT/OCSSW_bash.env
 l2gen help
 ```
 
-To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can also indicate a data suite; in this example, we will proceed with the biogeochemical (BGC) suite that includes chlorophyll *a* estimates.
+To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can also indicate a data suite or L2 products; in this example, we will proceed with chlorophyll *a* estimates.
 
 Parameters can be passed to OCSSW programs through a text file. They can also be passed as arguments, but writing to a text file leaves a clear processing record. Define the parameters in a dictionary, then send it to the `write_par` function
 defined in the [Setup](#1.-Setup) section.
 
+We can limit the geographical boundaries of the processing. Here we use the `location` variable to set Northwestern and Southeastern boundaries.
+
+```{code-cell} ipython3
+location = [(-62, 49), (-60, 47)]
+```
+
 ```{code-cell} ipython3
 par = {
     "ifile": ifile,
-    "ofile": str(ifile).replace("L1B", "L2_SFREFL"),
-    "suite": "SFREFL",
-    "atmocor": 0,
+    "ofile": os.path.basename(ifile).replace("L1B", "L2"),
+    "l2prod": "chlor_a",
+    "proc_uncertainty": 0,
     "north": location[0][1],
     "south": location[1][1],
     "east": location[1][0],
@@ -270,16 +257,14 @@ Once this process is done, you are ready to visualize your "custom" L2 data.
 Use the `robust=True` option to ignore outlier values.
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(par["ofile"])
-rhos = datatree["geophysical_data"]["rhos"]
-rhos["wavelength_3d"] = datatree["sensor_band_parameters"]["wavelength_3d"]
-plot = rhos.sel({"wavelength_3d": 470}).plot(cmap="viridis", robust=True)
+dataset = xr.open_dataset(par["ofile"], group="geophysical_data")
+plot = dataset["chlor_a"].plot(cmap="viridis", robust=True)
 ```
 
 Feel free to explore `l2gen` options to produce the L2 dataset you need! The documentation
 for `l2gen` is kind of interactive, because so much depends on the data product being processed.
-For example, try `l2gen ifile=granules/PACE_OCI.20240427T161654.L1B.nc dump_options=true` to get
-a lot of information about the specifics of what the `l2gen` program generates.
+For example, try `l2gen dump_options=true` with an `ifile` argument to get
+a lot of information about the specifics of what the `l2gen` program generates for that `ifile`.
 
 The next step for this tutorial is to merge multiple L2 granules together.
 
@@ -301,18 +286,50 @@ source $OCSSWROOT/OCSSW_bash.env
 l2bin help
 ```
 
-Write a parameter file with the previously saved list of L2 files standing in
-for the usual "ifile" value. We can leave the datetime out of the "ofile" name rather than extracing a
-time period from the granules chosen for binning.
+Let's search for granules to bin.
+
+```{code-cell} ipython3
+location = [(-56.5, 49.8), (-53.3, 48.4)]
+```
+
+Searching on a location defined as a line, rather than a point, is a good way to get granules that are
+adjacent to eachother. Pass a list of latitude and longitude tuples to the `line` argument of `search_data`.
+
+```{code-cell} ipython3
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L2_BGC",
+    temporal=tspan,
+    line=location,
+)
+for item in results:
+    display(item)
+```
+
+Get the S3 links for the files.
+
+```{code-cell} ipython3
+paths = [i.data_links(access="direct")[0] for i in results]
+paths
+```
+
+While we have the downloaded location stored in the list `paths`, write the list to a text file for future use.
+
+```{code-cell} ipython3
+paths = [str(i) for i in paths]
+with open("l2bin_ifile.txt", "w") as file:
+    file.write("\n".join(paths))
+```
+
+Then we use that text file as an `ifile` parameter in the `l2bin` par file.
 
 ```{code-cell} ipython3
 ofile = "granules/PACE_OCI.L3B.nc"
+os.makedirs("granules",exist_ok=True)
 par = {
     "ifile": "l2bin_ifile.txt",
     "ofile": ofile,
     "prodtype": "regional",
     "resolution": 9,
-    "flaguse": "NONE",
     "rowgroup": 2000,
 }
 write_par("l2bin.par", par)
@@ -396,6 +413,6 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on using OCCSW to process PACE data. More notebooks are comming soon!
+You have completed the notebook on using OCCSW to process PACE data! You can now explore more notebooks to learn more about OCSSW usage. 
 
 </div>
