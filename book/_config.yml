@@ -2,7 +2,7 @@ only_build_toc_files: true
 exclude_patterns: [notebooks/**/*.md]
 execute:
   timeout: -1  # no cell timeout
-  # run_in_temp: true  # no reuse of downloads, etc.
+  run_in_temp: true  # no reuse of downloads, etc.
   execute_notebooks: cache  # re-use outputs (when none of the code cells change)
 sphinx:
   config:
