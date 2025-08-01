@@ -215,7 +215,9 @@ We will also remove the variables we will not be using for this example with `dr
 
 ```{code-cell} ipython3
 dataset_phy = dataset_moana.drop_vars(["palette"])
-dataset_veg = dataset_land.drop_vars(["palette", "ndvi", "evi", "ndwi", "ndii", "cci", "ndsi", "pri"])
+dataset_veg = dataset_land.drop_vars(
+    ["palette", "ndvi", "evi", "ndwi", "ndii", "cci", "ndsi", "pri"]
+)
 ```
 
 #### Average
@@ -332,14 +334,20 @@ We normalize in order to visualize and compare multiple variables together.
 
 ```{code-cell} ipython3
 dataset_norm = dataset_phy.astype(np.float64)
-dataset_norm = (dataset_phy - dataset_phy.min()) / (dataset_phy.max() - dataset_phy.min())
+dataset_norm = (
+    (dataset_phy - dataset_phy.min())
+    / (dataset_phy.max() - dataset_phy.min())
+)
 ```
 
 ```{code-cell} ipython3
 :scrolled: true
 
 dataset_v_norm = dataset_veg.astype(np.float64)
-dataset_v_norm = (dataset_veg - dataset_veg.min()) / (dataset_veg.max() - dataset_veg.min())
+dataset_v_norm = (
+    (dataset_veg - dataset_veg.min())
+    / (dataset_veg.max() - dataset_veg.min())
+)
 ```
 
 ```{code-cell} ipython3
@@ -358,7 +366,9 @@ data_norm_v = dataset_v_norm.to_dataarray()
 We will use the `plot.imshow` function to represent our variables by intensities of Red, Green, and Blue. We can use `sel` to reorder the dataset because the visualization will go in the order of Red, Green, and Blue.
 
 ```{code-cell} ipython3
-data_norm = data_norm.sel(variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"])
+data_norm = data_norm.sel(
+    variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"]
+)
 data_norm_v = data_norm_v.sel(variable=["car", "cire", "mari"])
 ```
 
@@ -369,15 +379,33 @@ fig = plt.figure(figsize=(6, 6))
 ax1 = fig.add_subplot(projection=ccrs.Orthographic(-30, 0), facecolor="#080c17")
 ax1.add_feature(
     cfeature.NaturalEarthFeature(
-        "physical", "ocean", "110m", edgecolor="face", facecolor="#131c36"), alpha=1, zorder=1)
+        "physical",
+        "ocean",
+        "110m",
+        edgecolor="face",
+        facecolor="#131c36",
+    ),
+    alpha=1,
+    zorder=1,
+)
 ax1.add_feature(
     cfeature.NaturalEarthFeature(
-        "physical", "land", "110m", edgecolor="face", facecolor="#131c36"), alpha=0.85, zorder=2)
+        "physical",
+        "land",
+        "110m",
+        edgecolor="face",
+        facecolor="#131c36",
+    ),
+    alpha=0.85,
+    zorder=2,
+)
 
 ax2 = data_norm.plot.imshow(
-    transform=ccrs.PlateCarree(), interpolation="none", zorder=3)
+    transform=ccrs.PlateCarree(), interpolation="none", zorder=3
+)
 ax3 = data_norm_v.plot.imshow(
-    transform=ccrs.PlateCarree(), interpolation="none", zorder=4)
+    transform=ccrs.PlateCarree(), interpolation="none", zorder=4
+)
 
 fig.patch.set_alpha(0.0)
 plt.show()
@@ -445,7 +473,11 @@ ax1.coastlines(linewidth=0.4, color="black", zorder=3)
 
 ax1.add_feature(
     cfeature.NaturalEarthFeature(
-        "physical", "ocean", "110m", edgecolor="face", facecolor="black"
+        "physical",
+        "ocean",
+        "110m",
+        edgecolor="face",
+        facecolor="black",
     ),
     alpha=1,
     zorder=0,
@@ -547,10 +579,15 @@ Let's average, normalize and reorder our dataset as seen in the previous example
 
 ```{code-cell} ipython3
 dataset_phy_mean = dataset_phy.mean("date")
-dataset_phy_mean= dataset_phy_mean.astype(np.float64)
-dataset_norm = (dataset_phy_mean - dataset_phy_mean.min()) / (dataset_phy_mean.max() - dataset_phy_mean.min())
+dataset_phy_mean = dataset_phy_mean.astype(np.float64)
+dataset_norm = (
+    (dataset_phy_mean - dataset_phy_mean.min())
+    / (dataset_phy_mean.max() - dataset_phy_mean.min())
+)
 data_norm = dataset_norm.to_dataarray()
-data_norm = data_norm.sel(variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"])
+data_norm = data_norm.sel(
+    variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"]
+)
 ```
 
 ### Select and visualize our region of interest
@@ -744,10 +781,6 @@ monthly_stds = region_std.groupby("date.month").mean()
 ```
 
 ```{code-cell} ipython3
-monthly_means
-```
-
-```{code-cell} ipython3
 monthly_stds.load()
 monthly_means.load()
 ```
@@ -764,7 +797,20 @@ sns.set_style("white")
 palette = sns.color_palette("husl", 3)
 
 months = monthly_means["month"].values
-month_names = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"]  # Manually change if different range
+month_names = [
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+]  # Manually change if different range
 
 # Left axis
 ax1.plot(
@@ -778,7 +824,8 @@ ax1.plot(
 )
 ax1.fill_between(
     months,
-    monthly_means["syncoccus_moana"] - monthly_stds["syncoccus_moana"], monthly_means["syncoccus_moana"] + monthly_stds["syncoccus_moana"],
+    monthly_means["syncoccus_moana"] - monthly_stds["syncoccus_moana"],
+    monthly_means["syncoccus_moana"] + monthly_stds["syncoccus_moana"],
     color=palette[0],
     alpha=0.2,
 )
@@ -794,7 +841,8 @@ ax1.plot(
 )
 ax1.fill_between(
     months,
-    monthly_means["picoeuk_moana"] - monthly_stds["picoeuk_moana"], monthly_means["picoeuk_moana"] + monthly_stds["picoeuk_moana"],
+    monthly_means["picoeuk_moana"] - monthly_stds["picoeuk_moana"],
+    monthly_means["picoeuk_moana"] + monthly_stds["picoeuk_moana"],
     color=palette[1],
     alpha=0.2,
 )
@@ -812,7 +860,8 @@ ax2.plot(
 )
 ax2.fill_between(
     months,
-    monthly_means["prococcus_moana"] - monthly_stds["prococcus_moana"], monthly_means["prococcus_moana"] + monthly_stds["prococcus_moana"],
+    monthly_means["prococcus_moana"] - monthly_stds["prococcus_moana"],
+    monthly_means["prococcus_moana"] + monthly_stds["prococcus_moana"],
     color=palette[2],
     alpha=0.2,
 )
@@ -821,10 +870,7 @@ ax2.fill_between(
 ax1.set_xlabel("Month", fontsize=12)
 ax1.set_ylabel("Synechococcus and Picoeucaryotes (cells/ml)", fontsize=12)
 ax2.set_ylabel("Prochlorococcus (cells/ml)", fontsize=12)
-
-ax1.set_xticks(
-    range(1, 13)
-)  # first to last month on x axis, manually change if different months
+ax1.set_xticks(range(1, 13))  # manually change if different months on x axis
 ax1.set_xticklabels(month_names)
 
 ax1.legend(loc="upper left", frameon=True, framealpha=0.6)
