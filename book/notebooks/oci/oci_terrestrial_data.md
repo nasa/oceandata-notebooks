@@ -73,7 +73,8 @@ We will use `earthaccess` to open a Level-2 surface reflectance granule that cov
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    concept_id="G3406522735-OB_CLOUD",
+    short_name="PACE_OCI_L2_SFREFL",
+    granule_name="*.20240701T175112.*",
 )
 for item in results:
     display(item)
@@ -303,7 +304,15 @@ Comparing these two plots, we can see some similarities and differences. General
 If calculating these indices manually felt a little tedious, not to worry! PACE/OCI provides 10 VIs in its LANDVI products available in Level-2 (`short_name="PACE_OCI_L2_LANDVI"`) and Level-3 (`short_name="PACE_OCI_L3M_LANDVI"`). The suite includes 6 heritage indices and 4 narrowband pigment indices including CIRE. Read more about it in the [LANDVI ATBD](https://www.earthdata.nasa.gov/apt/documents/landvi/v1.0).
 
 ```{code-cell} ipython3
-results = earthaccess.search_data(concept_id="G3407628214-OB_CLOUD")
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_LANDVI",
+    granule_name="*.20240701_20240731.*.0p1deg.*",
+)
+for item in results:
+    display(item)
+```
+
+```{code-cell} ipython3
 paths = earthaccess.open(results)
 ```
 
