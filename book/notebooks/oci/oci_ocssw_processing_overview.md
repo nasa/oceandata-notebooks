@@ -178,15 +178,13 @@ At Level-1, we neither have geophysical variables nor are the data projected for
 
 <div class="alert alert-warning">
 
-OCSSW programs are run from the command line in Bash, but we can have a Bash terminal-in-a-cell using the [IPython magic][magic] command `%%bash`. In the specific case of OCSSW programs, the Bash environment created for that cell must be set up by loading `$OCSSWROOT/OCSSW_bash.env`.
+OCSSW programs are system commands, typically called in a Bash shell. We will employ [system shell access][ipython] available in the IPython kernel to launch system commands as a subprocess using the `!` prefix. In the specific case of OCSSW programs, a suite of required environment variables must be set by first executing `source $OCSSWROOT/OCSSW_bash.env` in the same subprocess.
 
 </div>
 
-Every `%%bash` cell that calls an OCSSW program needs to `source` the environment
-definition file shipped with OCSSW, because its effects are not retained from one cell to the next.
-We can, however, define the `OCSSWROOT` environment variable in a way that effects every `%%bash` cell.
+Every time we use `!` to invoke an OCSSW program, we must also evaluate the `OCSSW_bash.env` environment file shipped with OCSSW. Each `!` initiated subprocess is distinct, and the environment configuration is discarded after the command is finished. Let's get prepared by reading the path to the OCSSW installation from the `OCSSWROOT` environment variable (assuming it's `/tmp/ocssw` as a fallback).
 
-[magic]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands
+[ipython]: https://ipython.readthedocs.io/en/stable/interactive/reference.html#system-shell-access
 
 ```{code-cell} ipython3
 ocsswroot = os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
