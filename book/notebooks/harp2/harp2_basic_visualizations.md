@@ -357,8 +357,8 @@ ax[0].set_title("Radiance")
 ax[1].imshow(refl.sel({"number_of_views": red_nadir_idx}), cmap="gray")
 ax[1].set_title("Reflectance")
 plt.show()
-print(f"Mean radiance: {dataset["i"].mean():.3f}")
-print(f"Mean reflectance: {refl
+print(f"Mean radiance:    {dataset["i"].mean():.1f}")
+print(f"Mean reflectance: {refl.mean():.3f}")
 ```
 
 Create a line plot of the mean reflectance for each view angle and spectral channel. The flatness of this plot serves as a sanity check that nothing has gone horribly wrong with our data processing.
