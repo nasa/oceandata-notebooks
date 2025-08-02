@@ -48,8 +48,6 @@ At the end of this notebook you will know:
 7. [Make a multi-variable RBG map with two datasets](#7.-Make-a-multi-variable-RBG-map-with-two-datasets)
 8. [Plot a timeline of the plankton types for a region of interest](#8.-Plot-a-timeline-of-the-plankton-types-for-a-region-of-interest)
 
-[edl]: https://urs.earthdata.nasa.gov/
-
 +++
 
 ## 1. Setup
@@ -222,7 +220,7 @@ dataset_veg = dataset_land.drop_vars(
 )
 ```
 
-#### Average
+### Average
 
 +++
 
@@ -263,8 +261,8 @@ We can see there are some values missing, we can interpolate the data if we want
 +++
 
 ## 6. Interpolate the data
-### (Optional)
-#### MOANA (Optional)
+
+### MOANA (Optional)
 
 Here we offer the option of interpolating the data. This can be useful for filling gaps in the dataset, which can make visualizations smoother. Consider how it affects your statistics before using.
 
