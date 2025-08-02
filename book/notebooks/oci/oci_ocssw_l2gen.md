@@ -91,28 +91,27 @@ Next, we'll set up the OCSSW programs.
 
 <div class="alert alert-warning">
 
-OCSSW programs are typically run using the Bash shell. Here, we employ a Bash shell-in-a-cell using the [IPython magic][magic] command `%%bash` to launch an independent subprocess. In the specific case of OCSSW programs, a suite of required environment variables must be set by executing `source $OCSSWROOT/OCSSW_bash.env`.
+OCSSW programs are system commands, typically called in a Bash shell. We will employ [system shell access][ipython] available in the IPython kernel to launch system commands as a subprocess using the `!` prefix. In the specific case of OCSSW programs, a suite of required environment variables must be set by first executing `source $OCSSWROOT/OCSSW_bash.env` in the same subprocess.
 
 </div>
 
-Every `%%bash` cell that calls an OCSSW program needs to `source` this environment definition file shipped with OCSSW, as the environment variables it establishes are not retained from one cell to the next. We do, however, define the `OCSSWROOT` environmental variable in a way that effects every `%%bash` cell. This `OCSSWROOT` variable is just the path to where OCSSW is installed on your system.
+Every time we use `!` to invoke an OCSSW program, we must also evaluate the `OCSSW_bash.env` environment file shipped with OCSSW. Each `!` initiated subprocess is distinct, and the environment configuration is discarded after the command is finished. Let's get prepared by reading the path to the OCSSW installation from the `OCSSWROOT` environment variable (assuming it's `/tmp/ocssw` as a fallback).
 
-[magic]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands
-
-```{code-cell} ipython3
-os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
-```
-
-In every cell where we wish to call an OCSSW command, several lines of code need to appear first to establish the required environment. These are shown below, followed by a call to the OCSSW program `install_ocssw` to see which version (tag) of OCSSW is installed.
+[ipython]: https://ipython.readthedocs.io/en/stable/interactive/reference.html#system-shell-access
 
 ```{code-cell} ipython3
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-install_ocssw --installed_tag
+ocsswroot = os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
+env = Path(ocsswroot, "OCSSW_bash.env")
+env.exists()
 ```
 
-Tags beginning with "V" are operational tags, while "T" tags are equivalent to a "beta" release for testing by advanced users. This notebook uses OCSSW's new S3 authentication feature, which is still in testing.
+Our first OCSSW program is `install_ocssw`, which we use to print which version (tag) of OCSSW is installed. As just explained, we have to evaluate (or `source`) the environment configuration file first. To pass its location, we use `{}` variable expansion that is available with the `!` prefix.
+
+```{code-cell} ipython3
+!source {env}; install_ocssw --installed_tag
+```
+
+The `installedTag` is our OCSSW version. Tags beginning with "V" are operational tags, while "T" tags are equivalent to a "beta" release and meant for testing by advanced users.
 
 +++
 
@@ -211,10 +210,7 @@ You can also see OCSSW parameter options by running 'l2gen --help'.
 ```{code-cell} ipython3
 :scrolled: true
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l2gen --help
+!source {env}; l2gen --help
 ```
 
 ## Writing OCSSW parameter files
@@ -303,7 +299,7 @@ Next, let's define variables with the path of the input file to process using `l
 l2_paths = earthaccess.open(results)
 ```
 
-And let's do a quick plot of a `rhot_red` wavelength to see what the data looks like:
+And let's plot a `rhot_red` wavelength to see what the data looks like:
 
 ```{code-cell} ipython3
 dataset = xr.open_datatree(l1b_paths[0])
@@ -329,25 +325,20 @@ We can run `getanc -h` to see options for the program:
 ```{code-cell} ipython3
 :scrolled: true
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-getanc -h
+!source {env}; getanc -h
 ```
 
 Let's run it on our L1B file, using the `--use_filename` parameter to parse only the filename for datetime information.
-The filename from `l1b_paths` can be passed to the `%%bash` magic via the `-s` argument, but first must be assigned to a `str` variable.
+We can parse the filename from `l1b_paths` to use with `{}` variable expansion after the `!` prefix like have done with `{env}` above.
 
 ```{code-cell} ipython3
 l1b_path = l1b_paths[0].full_name
 l1b_name = Path(l1b_path).name
+l1b_name
 ```
 
 ```{code-cell} ipython3
-%%bash -s $l1b_name
-source $OCSSWROOT/OCSSW_bash.env
-
-getanc --use_filename $1 --ofile l2gen.anc
+!source {env}; getanc --use_filename {l1b_name} --ofile l2gen.anc --noprint
 ```
 
 You'll notice that a file named "l1b.anc" now appears in your working directory. Reading this file, you can see that ancillary files are saved in the `var/anc/` directory.  Note that this file also provides text in the correct format for use in a par file.
@@ -356,9 +347,9 @@ You'll notice that a file named "l1b.anc" now appears in your working directory.
 !cat l2gen.anc
 ```
 
-Now, we'll make a par file that has an ifile, ofile, corresponding ancillary data, and latitude and longitude boundaries. Trust us ... subsetting the L1B file to a smaller region makes processing time faster for this demo! <br>
+Now, we'll make a par file that has an ifile, ofile, and latitude and longitude boundaries. Trust us ... subsetting the L1B file to a smaller region makes processing time faster for this demo!
 
-We will output the Rrs variable by listing l2prod to "Rrs". And we wil also set proc_uncertainity to 0, which means we are not calculating uncertainites for Rrs. This makes `l2gen` process faster. 
+We will output the Rrs variable by listing l2prod to "Rrs". And we wil also set proc_uncertainity to 0, which means we are not calculating uncertainites for Rrs. This makes `l2gen` process faster.
 
 Let's first make a folder called 'data' to store the outputs:
 
@@ -383,15 +374,12 @@ par = {
 write_par("l2gen.par", par)
 ```
 
-Now, let's run l2gen using this new par file AND the ancillary information in the par file generated by `getanc`. This can take several minutes.
+Now, let's run l2gen using this new par file AND the ancillary information in the second par file generated by `getanc`. This can take several minutes.
 
 ```{code-cell} ipython3
 :scrolled: true
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l2gen par=l2gen.par par=l2gen.anc
+!source {env}; l2gen par=l2gen.par par=l2gen.anc
 ```
 
 You'll know `l2gen` processing is finished successfully when you see "Processing Completed" at the end of the cell output. 
@@ -429,38 +417,32 @@ We need the full path to the input file (this will become the `$1` argument).
 
 ```{code-cell} ipython3
 l2_path = l2_paths[0].full_name
+l2_name = Path(l2_path).name
+l2_sub_path = data / l2_name.replace("L2", "L2_sub")
+l2_sub_path
 ```
 
 And we need to specify the bounding box in the standard order: west, south, east, north
 
 ```{code-cell} ipython3
-%%bash -s $l2_path
-source $OCSSWROOT/OCSSW_bash.env
+pixline = !source {env}; lonlat2pixline {l2_path} -76.0 35.0 -74.5 39.0
+pixline
+```
 
-lonlat2pixline $1 -76.0 35.0 -74.5 39.0
+```{code-cell} ipython3
+_, spix, epix, sline, eline = pixline[0].split()
 ```
 
 This output gets fed into `l2extract` to create a new, smaller file that only includes our defined geographic boundaries. The arguments are input file, start pixel, end pixel, start line, end line, sampling substep for pixels and lines (where 1 = every pixel), and output file.
 
 ```{code-cell} ipython3
-par = {
-    "ifile": l2_path,
-    "ofile": data / l1b_name.replace("L1B", "L2_sub"),
-    "spix": 175,
-    "epix": 310,
-    "sline": 1270,
-    "eline": 1651,
-    # "pix_sub": 1, #TODO these are not documented, are they needed?
-    # "sc_sub": 1,
-}
-write_par("l2extract.par", par)
+:scrolled: true
+
+!source {env}; l2extract
 ```
 
 ```{code-cell} ipython3
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l2extract par=l2extract.par
+!source {env}; l2extract {l2_path} {spix} {epix} {sline} {eline} 1 1 {l2_sub_path}
 ```
 
 This should have created a new file including "L2_sub" in the data subdirectory.
@@ -468,7 +450,7 @@ This should have created a new file including "L2_sub" in the data subdirectory.
 Let's open it and see how it compares with the L2 file we generated.
 
 ```{code-cell} ipython3
-dat_sub = xr.open_datatree(par["ofile"])
+dat_sub = xr.open_datatree(l2_sub_path)
 dat_sub = xr.merge(dat_sub.to_dict().values())
 dat_sub = dat_sub.set_coords(("longitude", "latitude"))
 dat_sub
@@ -541,10 +523,7 @@ write_par("l2gen_mod.par", par)
 ```{code-cell} ipython3
 :scrolled: true
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l2gen par=l2gen_mod.par par=l2gen.anc
+!source {env}; l2gen par=l2gen_mod.par par=l2gen.anc
 ```
 
 A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot the chlorophyll-a product:
@@ -603,10 +582,7 @@ write_par("l2gen_brdf.par", par)
 ```{code-cell} ipython3
 :scrolled: true
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l2gen par=l2gen_brdf.par par=l2gen.anc
+!source {env}; l2gen par=l2gen_brdf.par par=l2gen.anc
 ```
 
 A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot the chlorophyll-a product:
