@@ -84,7 +84,8 @@ Note that access might take a while, depending on the speed of your internet con
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_HARP2_L1C_SCI",
-    temporal=("2025-07-20", "2025-07-20"),
+    # temporal=("2025-07-20", "2025-07-20"),
+    temporal=("2025-01-09T20:00:20", "2025-01-09T20:00:21"),
     count=1
 )
 paths = earthaccess.open(results)
@@ -250,7 +251,7 @@ for i, (key, value) in enumerate(crop_rgb_stokes.items()):
     ax[i].set_title(key.upper())
 ```
 
-It's pretty plain to see that the I plot makes sense to the eye: we can see clouds over the Pacific Ocean (this scene is south of the Cook Islands and east of Australia). This is because the I component of the Stokes vector corresponds to the total intensity. In other words, this is roughly what your eyes would see. However, the Q and U plots don't quite make as much sense to the eye. We can see that there is some sort of transition in the middle, which is the satellite track. This transition occurs in both plots, but is stronger in Q. This gives us a hint: the type of linear polarization we see in the scene depends on the angle with which we view the scene.
+It's pretty plain to see that the I plot makes sense to the eye: we can see clouds over Mexico and the Southwestern United States, with Baja California mostly cloud-free. The I component of the Stokes vector corresponds to the total intensity. In other words, this is roughly what your eyes would see. However, the Q and U plots don't quite make as much sense to the eye. We can see that there is some sort of transition in the middle, which is the satellite track. This transition occurs in both plots, but the differences give us a hint: the type of linear polarization we see in the scene depends on the angle with which we view the scene.
 
 [This Wikipedia plot](https://upload.wikimedia.org/wikipedia/commons/3/31/StokesParameters.png) is very helpful for understanding what exactly the Q and U components of the Stokes vector mean. Q describes how much the light is oriented in -90°/90° vs. 0°/180°, while U describes how much light is oriented in -135°/45°; vs. -45°/135°.
 
@@ -283,7 +284,7 @@ for i, (key, value) in enumerate(crop_rgb[["i", "dolp"]].items()):
     ax[i].set_title(key.upper())
 ```
 
-For a different perspective on DoLP, line plots of the channels averaged over the two spatial dimensions show the clear minimum associated with the nadir view angle.
+For a different perspective on DoLP, line plots of the channels averaged over the two spatial dimensions show the clear trend associated with view angle. In this scene we see high DoLP in the ocean, which is entirely located in the western half of this granule. Since view angle is strongly correlated with the likelihood that a pixel in this scene is over the ocean, we see a strong relationship between view angle and DoLP in the data.
 
 ```{code-cell} ipython3
 dolp_mean = dataset["dolp"].mean(["bins_along_track", "bins_across_track"])
@@ -352,16 +353,16 @@ refl = rad_to_refl(
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 2, figsize=(16, 8))
-ax[0].imshow(dataset["i"].sel({"number_of_views": red_nadir_idx}), cmap="gray")
+ax[0].imshow(dataset["i"].sel({"number_of_views": red_nadir_idx})[::-1], cmap="gray")
 ax[0].set_title("Radiance")
-ax[1].imshow(refl.sel({"number_of_views": red_nadir_idx}), cmap="gray")
+ax[1].imshow(refl.sel({"number_of_views": red_nadir_idx})[::-1], cmap="gray")
 ax[1].set_title("Reflectance")
 plt.show()
 print(f"Mean radiance:    {dataset["i"].mean():.1f}")
 print(f"Mean reflectance: {refl.mean():.3f}")
 ```
 
-Create a line plot of the mean reflectance for each view angle and spectral channel. The flatness of this plot serves as a sanity check that nothing has gone horribly wrong with our data processing.
+Create a line plot of the mean reflectance for each view angle and spectral channel:
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(16, 6))
@@ -388,6 +389,38 @@ ax.set_title("Mean Reflectance by View Angle")
 plt.show()
 ```
 
+We can also plot the reflectance by solar zenith angle:
+
+```{code-cell} ipython3
+sza_idx = (dataset["solar_zenith_angle"] // 1).to_numpy()
+sza_uq = np.unique(sza_idx[~np.isnan(sza_idx)]).astype(int)
+sza_masks = sza_idx[None] == sza_uq[:, None, None, None]
+refl_np = refl.to_numpy()[None]
+refl_mean_by_sza = np.nansum(refl_np * sza_masks, axis=(1,2,3)) / sza_masks.sum(axis=(1,2,3))
+
+fig, ax = plt.subplots(figsize=(16, 6))
+plot_data = [("b", "o"), ("g", "^"), ("r", "*"), ("black", "s")]
+for wv_idx in range(4):
+    wv = wv_uq[wv_idx]
+    wv_mask = wavelengths.values == wv
+    sza_masks_wv = sza_masks[..., wv_mask]
+    refl_mean_by_sza = np.nansum(refl_np[..., wv_mask] * sza_masks_wv, axis=(1,2,3)) / np.clip(sza_masks_wv.sum(axis=(1,2,3)), min=1)
+    c, m = plot_data[wv_idx]
+    ax.plot(
+        sza_uq,
+        refl_mean_by_sza,
+        color=c,
+        marker=m,
+        markersize=7,
+        label=str(wv),
+    )
+ax.legend()
+ax.set_xlabel("Solar Zenith Angle (°)")
+ax.set_ylabel("Reflectance")
+ax.set_title("Mean Reflectance by Solar Zenith Angle")
+plt.show()
+```
+
 [back to top](#Contents)
 
 +++
@@ -409,7 +442,7 @@ We will generate this animation without using the latitude and longitude coordin
 Get the reflectances of just the red channel, and normalize the reflectance to lie between 0 and 1.
 
 ```{code-cell} ipython3
-refl_red = refl[..., 10:70]
+refl_red = refl[::-1, :, 10:70]
 refl_pretty = (refl_red - refl_red.min()) / (refl_red.max() - refl_red.min())
 ```
 
@@ -443,11 +476,9 @@ Now we can use `matplotlib.animation` to create an initial plot, define a functi
 fig, ax = plt.subplots()
 im = ax.imshow(refl_pretty[{"number_of_views": 0}], cmap="gray")
 
-
 def update(i):
     im.set_data(refl_pretty[{"number_of_views": i}])
     return im
-
 
 an = animation.FuncAnimation(fig=fig, func=update, frames=frames, interval=30)
 filename = f'harp2_red_anim_{dataset.attrs["product_name"].split(".")[1]}.gif'
@@ -455,11 +486,11 @@ an.save(filename, writer="pillow")
 plt.close()
 ```
 
-This scene is a great example of multi-layer clouds. You can use the parallax effect to distinguish between these layers.
+You can see some multi-layer clouds in the southwest corner of the granule: notice the parallax effect between these layers.
 
 The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
 
-![A multi-angle HARP2 animation](harp2_red_anim_20250719T235621.gif)
+![A multi-angle HARP2 animation](harp2_red_anim_20250109T200019.gif)
 
 Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By default, `matplotlib` will not display an animation. To view the animation, we saved it as a file and displayed the result in the next cell. Alternatively, you could change the default by executing `%matplotlib widget`. The `widget` setting, which works in Jupyter Lab but not on a static website, you can use `plt.show()` as well as `an.pause()` and `an.resume()`.
 
