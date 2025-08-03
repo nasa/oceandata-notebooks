@@ -8,7 +8,7 @@ kernelspec:
 # Run Level-2 Generator (l2gen) OCSSW program on OCI data
 
 **Authors:** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA) <br>
-Last updated: July 31, 2025
+Last updated: August 1, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -279,6 +279,8 @@ results[0]
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+
 l1b_paths = earthaccess.open(results)
 ```
 
