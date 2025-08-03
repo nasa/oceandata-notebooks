@@ -5,6 +5,8 @@ kernelspec:
   name: python3
 ---
 
++++ {"jp-MarkdownHeadingCollapsed": true}
+
 # Run Level-2 Generator (l2gen) OCSSW program on OCI data
 
 **Authors:** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA) <br>
@@ -279,8 +281,6 @@ results[0]
 ```
 
 ```{code-cell} ipython3
-:scrolled: true
-
 l1b_paths = earthaccess.open(results)
 ```
 
@@ -452,6 +452,8 @@ This should have created a new file including "L2_sub" in the data subdirectory.
 Let's open it and see how it compares with the L2 file we generated.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 dat_sub = xr.open_datatree(l2_sub_path)
 dat_sub = xr.merge(dat_sub.to_dict().values())
 dat_sub = dat_sub.set_coords(("longitude", "latitude"))
