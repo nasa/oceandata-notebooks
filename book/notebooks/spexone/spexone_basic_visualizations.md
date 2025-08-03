@@ -79,7 +79,8 @@ auth = earthaccess.login(persist=True)
 
 results = earthaccess.search_data(
     short_name="PACE_SPEXONE_L1C_SCI",
-    temporal=("2024-05-20", "2024-05-20"),
+    # temporal=("2024-05-20", "2024-05-20"),
+    temporal=("2025-01-09T20:00:20", "2025-01-09T20:00:21"),
     count=1,
 )
 
@@ -368,7 +369,7 @@ fig, ax = plt.subplots(1,1, figsize=(16, 6))
 plot_data = [("b", "o"), ("g", "^"), ("r", "*")]
 refl_pixel= refl[350,12] #select an arbitrary pixel
 for wv_idx in range(3):
-    wv = wavelengths_p[0, wavelengths_p_index[wv_idx]].values
+    wv = wavelengths_i[0, wavelengths_i_index[wv_idx]].values
     c, m = plot_data[wv_idx]
     ax.plot(
         angles.values,
@@ -382,6 +383,35 @@ ax.legend()
 ax.set_xlabel("Nominal View Angle (°)")
 ax.set_ylabel("Reflectance")
 ax.set_title("Reflectance by View Angle")
+plt.show()
+```
+
+Create a plot of reflectance across the whole granule by solar zenith angle:
+
+```{code-cell} ipython3
+sza_idx = (geo["solar_zenith_angle"] // 1).to_numpy()
+sza_uq = np.unique(sza_idx[~np.isnan(sza_idx)]).astype(int)
+sza_masks = sza_idx[None, ...] == sza_uq[:, None, None, None]
+refl_np = refl.to_numpy()[None]
+
+fig, ax = plt.subplots(figsize=(16, 6))
+plot_data = [("b", "o"), ("g", "^"), ("r", "*"), ("black", "s")]
+
+for idx, wv_idx in enumerate(wavelengths_i_index):
+    refl_mean_by_sza = np.nansum(refl_np[..., wv_idx] * sza_masks, axis=(1,2,3)) / np.clip(sza_masks.sum(axis=(1,2,3)), min=1)
+    c, m = plot_data[idx]
+    ax.plot(
+        sza_uq,
+        refl_mean_by_sza,
+        color=c,
+        marker=m,
+        markersize=7,
+        label=str(wv),
+    )
+ax.legend()
+ax.set_xlabel("Solar Zenith Angle (°)")
+ax.set_ylabel("Reflectance")
+ax.set_title("Mean Reflectance by Solar Zenith Angle")
 plt.show()
 ```
 
