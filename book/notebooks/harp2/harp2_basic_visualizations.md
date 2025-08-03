@@ -358,7 +358,7 @@ ax[0].set_title("Radiance")
 ax[1].imshow(refl.sel({"number_of_views": red_nadir_idx})[::-1], cmap="gray")
 ax[1].set_title("Reflectance")
 plt.show()
-print(f"Mean radiance:    {dataset["i"].mean():.1f}")
+print(f"Mean radiance:    {dataset['i'].mean():.1f}")
 print(f"Mean reflectance: {refl.mean():.3f}")
 ```
 
