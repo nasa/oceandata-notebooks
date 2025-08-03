@@ -343,7 +343,7 @@ l1b_name
 !source {env}; getanc --use_filename {l1b_name} --ofile l2gen.anc --noprint
 ```
 
-You'll notice that a file named "l1b.anc" now appears in your working directory. Reading this file, you can see that ancillary files are saved in the `var/anc/` directory.  Note that this file also provides text in the correct format for use in a par file.
+You'll notice that a file named "l2gen.anc" now appears in your working directory. Reading this file, you can see that ancillary files are saved in the `var/anc/` directory.  Note that this file also provides text in the correct format for use in a par file.
 
 ```{code-cell} ipython3
 !cat l2gen.anc
@@ -565,7 +565,7 @@ plt.show()
 
 +++
 
-As a final example of the far-reaching utility that `l2gen` provides an end user, let's exercise one more example where we disable the standard bidirectional reflectance distribution function (BRDF) correction and see how it changes the retrieved chlor_a values. The default BRDF is 'brdf_opt=7', which is Morel f/Q + Fresnel solar + Fresnel sensor.
+As a final example of the far-reaching utility that `l2gen` provides an end user, let's exercise one more example where we disable the standard bidirectional reflectance distribution function (BRDF) correction and see how it changes the retrieved Rrs values. The default BRDF is 'brdf_opt=7', which is Morel f/Q + Fresnel solar + Fresnel sensor.
 
 While a rather simple case-study, we hope it will introduce the practioner to an improved understanding of `l2gen` and the sensitivity of derived reflectances (and, therefore, biogeochemical variables) to choices made within the standard processing scheme.
 
@@ -589,7 +589,7 @@ write_par("l2gen_brdf.par", par)
 !source {env}; l2gen par=l2gen_brdf.par par=l2gen.anc
 ```
 
-A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot the chlorophyll-a product:
+A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot Rrs(550):
 
 ```{code-cell} ipython3
 dat_brdf = xr.open_datatree(par["ofile"])
@@ -599,7 +599,7 @@ dat_brdf
 ```
 
 ```{code-cell} ipython3
-dat_brdf["chlor_a"].plot(norm=LogNorm(vmin=0.01, vmax=2))
+dat_brdf["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
 ```
 
 This figure looks similar to what we produced in Section 3, but let's make a scatter plot to be sure ...
@@ -607,21 +607,20 @@ This figure looks similar to what we produced in Section 3, but let's make a sca
 ```{code-cell} ipython3
 fig, ax = plt.subplots()
 
-x = dat_mod["chlor_a"]
-y = dat_brdf["chlor_a"]
+x = dat_mod["Rrs"].sel({"wavelength_3d": 550})
+y = dat_brdf["Rrs"].sel({"wavelength_3d": 550})
+
 
 ax.scatter(x, y, s=20)
-ax.set_xlabel("default Chl a")
-ax.set_ylabel("disabled BRDF Chl a")
+ax.set_xlabel("default Rrs(550)")
+ax.set_ylabel("disabled BRDF Rrs(550)")
 ax.plot([0, 1], [0, 1], transform=ax.transAxes, color="black")
-ax.set_xscale("log")
-ax.set_yscale("log")
 
 plt.tight_layout()
 plt.show()
 ```
 
-<b> TODO: Figure out why points aren't different? I think they should be different...
+You can see that disabling the BRDF does in fact change Rrs values. 
 
 +++
 
