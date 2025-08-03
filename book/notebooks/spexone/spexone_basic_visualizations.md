@@ -230,14 +230,14 @@ rgb_i = rgb_i.assign_coords(
 )
 ```
 
-The granule crosses the 180 degree longitude, so we set up the figure and subplots to use a Plate Carree projection shifted to center on a -170 longitude. The data has coordinates from the default (i.e. centered at 0 longitude) Plate Carree projection, so we give that CRS as a `transform`.
+The granule might cross the 180 degree longitude, so we set up the figure and subplots to use a Plate Carree projection shifted to center on a -170 longitude. The data has coordinates from the default (i.e. centered at 0 longitude) Plate Carree projection, so we give that CRS as a `transform`.
 
 ```{code-cell} ipython3
 crs_proj = ccrs.PlateCarree(-170)
 crs_data = ccrs.PlateCarree()
 ```
 
-The figure will hav 1 row and 3 columns, for each of the I, Q, and U arrays, spanning a width suitable for many screens.
+The figure will have 1 row and 3 columns, for each of the I, Q, and U arrays, spanning a width suitable for many screens.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1, figsize=(16, 5), subplot_kw={"projection": crs_proj})
