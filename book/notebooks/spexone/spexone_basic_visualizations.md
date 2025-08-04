@@ -230,13 +230,19 @@ rgb_i = rgb_i.assign_coords(
 )
 ```
 
+Set up the figure and subplots to use a Plate Carree projection.
+
+```{code-cell} ipython3
+crs_proj = ccrs.PlateCarree()
+```
+
 The figure will have 1 row and 3 columns, for each of the I, Q, and U arrays, spanning a width suitable for many screens.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1, figsize=(16, 5), subplot_kw={"projection": crs_proj})
 fig.suptitle(f'{prod.attrs["product_name"]} RGB')
 
-ax.pcolormesh(rgb_i["i"]["lon"], rgb_i["i"]["lat"], rgb_i["i"], transform=crs_data)
+ax.pcolormesh(rgb_i["i"]["lon"], rgb_i["i"]["lat"], rgb_i["i"], transform=crs_proj)
 ax.gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
 ax.coastlines(color="grey")
 ax.set_title("I");
@@ -337,8 +343,8 @@ The difference in appearance (after matplotlib automatically normalizes the data
 ```{code-cell} ipython3
 refl = rad_to_refl(
     rad=obs["i"],
-    f0=view["intensity_f0"],
-    sza=geo["solar_zenith_angle"],
+    f0=view["intensity_f0"].to_numpy()[None, None],
+    sza=geo["solar_zenith_angle"].to_numpy()[..., None],
     r=float(prod.attrs["sun_earth_distance"]),
 )
 ```
@@ -399,7 +405,7 @@ for idx, wv_idx in enumerate(wavelengths_i_index):
         color=c,
         marker=m,
         markersize=7,
-        label=str(wv),
+        label=str(wavelengths_i[0, wv_idx].item()),
     )
 ax.legend()
 ax.set_xlabel("Solar Zenith Angle (°)")
