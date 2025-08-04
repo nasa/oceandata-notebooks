@@ -231,11 +231,10 @@ crop_rgb_stokes = rgb_stokes.where(
 )
 ```
 
-The granule crosses the 180 degree longitude, so we set up the figure and subplots to use a Plate Carree projection shifted to center on a -170 longitude. The data has coordinates from the default (i.e. centered at 0 longitude) Plate Carree projection, so we give that CRS as a `transform`.
+Set up the figure and subplots to use a Plate Carree projection.
 
 ```{code-cell} ipython3
-crs_proj = ccrs.PlateCarree(-170)
-crs_data = ccrs.PlateCarree()
+crs_proj = ccrs.PlateCarree()
 ```
 
 The figure will hav 1 row and 3 columns, for each of the I, Q, and U arrays, spanning a width suitable for many screens.
@@ -245,7 +244,7 @@ fig, ax = plt.subplots(1, 3, figsize=(16, 5), subplot_kw={"projection": crs_proj
 fig.suptitle(f'{prod.attrs["product_name"]} RGB')
 
 for i, (key, value) in enumerate(crop_rgb_stokes.items()):
-    ax[i].pcolormesh(value["longitude"], value["latitude"], value, transform=crs_data)
+    ax[i].pcolormesh(value["longitude"], value["latitude"], value, transform=crs_proj)
     ax[i].gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
     ax[i].coastlines(color="grey")
     ax[i].set_title(key.upper())
@@ -278,7 +277,7 @@ fig, ax = plt.subplots(1, 2, figsize=(16, 8), subplot_kw={"projection": crs_proj
 fig.suptitle(f'{prod.attrs["product_name"]} RGB')
 
 for i, (key, value) in enumerate(crop_rgb[["i", "dolp"]].items()):
-    ax[i].pcolormesh(value["longitude"], value["latitude"], value, transform=crs_data)
+    ax[i].pcolormesh(value["longitude"], value["latitude"], value, transform=crs_proj)
     ax[i].gridlines(draw_labels={"bottom": "x", "left": "y"}, linestyle="--")
     ax[i].coastlines(color="grey")
     ax[i].set_title(key.upper())
