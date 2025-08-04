@@ -38,14 +38,14 @@ By the end of this notebook you will be familiar about:
 +++
 
 ## 1. Setup
-Import all of the packages used in this notebook. 
+Import all of the packages used in this notebook.
 
 ```{code-cell} ipython3
 import sys
 import torch
 import earthaccess
 
-sharedpath='./'
+sharedpath='/home/jovyan/shared-public/pace-hackweek/rayleigh-correction/'
 if torch.cuda.is_available():
     device = torch.device("cuda:0") 
     print("Running on the GPU")
@@ -178,7 +178,6 @@ sys.modules['fastmapol.tool'].inv_normalize = inv_normalize
 - The viewing geometry are changed according to convention used in NN training.
 
 ```{code-cell} ipython3
-
 def anc_data_reader(file):
     ds1 = xr.open_dataset(file)
     lat = ds1['latitude'].values
@@ -328,7 +327,7 @@ def load_nn(device,modelpath):
 ### 4. Understanding the trained model
 
 ```{code-cell} ipython3
-nn=load_nn(device,modelpath)
+nn=load_nn(device,sharedpath)
 
 print(nn.activation)
 print(nn.name)
@@ -493,7 +492,7 @@ plt.legend()
 +++
 
 - SPEXone has multiangle measurements.
-- If OCI view has clouds, other angle from spexone can be cloud free supplement information.  
+- If OCI view has clouds, other angle from spexone can be cloud free supplement information.
 
 ```{code-cell} ipython3
 #For SPEXonne
@@ -513,7 +512,6 @@ for i in range(5):
     ax[i].plot(wl_sp1,corr_refs[300,16,:],c='g', label='Rayleigh corrected TOA reflectance')
     ax[i].set_title('iang='+str(i),fontsize=14)
     ax[0].legend(fontsize=11)
-
 ```
 
 ### Lets look at RGB plot and Rayleigh corrected RGB plot
