@@ -19,7 +19,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 
 ## Summary
-This notebook explores the SPEXone Level 2 (L2) aerosol product derived from the joint aerosol and surface retrieval algorithm: RemoTAP. For more detailed information about the algorithm, please refer to the relevant documentation.
+This notebook explores the SPEXone Level 2 (L2) aerosol product derived from the joint aerosol and surface retrieval algorithm: RemoTAP (Remote Sensing of Trace Gases and Aerosol Products algorithm). For more detailed information about the algorithm, please refer to the relevant documentation.
 
 Similar to the HARP2 notebook, we analyze a scene from the Los Angeles wildfire, which includes both smoke and dust events (as observed by OCI and HARP2). However, due to the narrow swath of SPEXone data, the dust event will be the main focus of this tutorial. We will evaluate aerosol optical depth, aerosol absorption, and particle size information.
 
@@ -57,7 +57,6 @@ import earthaccess
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-from xarray.backends.api import open_datatree
 ```
 
 ```{code-cell} ipython3
@@ -76,7 +75,7 @@ SPEXone L2 data is available on both OB.DAAC and earth data cloud. Please refer 
 results = earthaccess.search_data(
     short_name="PACE_SPEXONE_L2_AER_RTAPOCEAN",
     temporal=("2025-01-09T20:00:20", "2025-01-09T20:00:21"),
-    count=1
+    count=1,
 )
 paths = earthaccess.open(results)
 ```
@@ -97,7 +96,7 @@ PACE polarimeter L2 products for both HARP2 and SPEXone include four data groups
 - sensor_band_parameters
 
 ```{code-cell} ipython3
-datatree = open_datatree(paths[0], decode_timedelta=True)
+datatree = xr.open_datatree(paths[0])
 datatree
 ```
 
@@ -120,7 +119,7 @@ The SPEXone RemoTAP L2 product suite includes a long list of aerosol optical pro
 - Ångström coefficient (angstrom_440_870 and angstrom_440_670)
 - Aerosol fine mode optical depth fraction (fmf)
 - etc
-  
+
 As well as aerosol microphysical properties:
 - Aerosol effective radius (reff_fine/coarse) and variance (veff_fine/coarse)
 - Aerosol refractive index: real part (mr and mr_fine/coarse), imaginary part (mi and mi_fine/coarse)
@@ -135,7 +134,7 @@ And a set of other products:
 - Chlorophyll-a (chla)
 
 ```{code-cell} ipython3
-datatree['geophysical_data']
+datatree["geophysical_data"]
 ```
 
 [back to top](#Contents)
@@ -147,19 +146,19 @@ datatree['geophysical_data']
 In this example, we visualize the aerosol properties for a scene during LA wild fire with both smoke and dust events. We read the total aerosol optical depth, single scattering albedo, and fine mode volume fraction as below:
 
 ```{code-cell} ipython3
-aot = dataset['aot'].values
-ssa = dataset['ssa'].values
-fvf = dataset['fvf'].values
+aot = dataset["aot"].values
+ssa = dataset["ssa"].values
+fvf = dataset["fvf"].values
 aot.shape, ssa.shape, fvf.shape
 ```
 
 We also need the spatial and angle dimensions as below:
 
 ```{code-cell} ipython3
-lat = dataset['latitude'].values
-lon = dataset['longitude'].values
+lat = dataset["latitude"].values
+lon = dataset["longitude"].values
 plot_range = [lon.min(), lon.max(), lat.min(), lat.max()]
-wavelength = dataset['wavelength3d'].values
+wavelength = dataset["wavelength3d"].values
 print(wavelength)
 ```
 
@@ -170,68 +169,81 @@ For future L2 product, the wavelength variable will be called simple `wavelength
 </div>
 
 ```{code-cell} ipython3
-# function to make map and histogram (default)
-def plot_l2_product(data, plot_range, label, title, vmin, vmax, figsize=(12, 4), cmap='viridis'):
+def plot_l2_product(
+    data, plot_range, label, title, vmin, vmax, figsize=(12, 4), cmap="viridis"
+):
+    """Make map and histogram (default)"""
+
     # Create a figure with two subplots: 1 for map, 1 for histogram
     fig = plt.figure(figsize=figsize)
-    gs = fig.add_gridspec(1, 2, width_ratios=[3,1], wspace=0.3)
+    gs = fig.add_gridspec(1, 2, width_ratios=[3, 1], wspace=0.3)
 
     # Map subplot
     ax_map = fig.add_subplot(gs[0], projection=ccrs.PlateCarree())
     ax_map.set_extent(plot_range, crs=ccrs.PlateCarree())
-    ax_map.coastlines(resolution="110m", color='black', linewidth=0.8)
+    ax_map.coastlines(resolution="110m", color="black", linewidth=0.8)
     ax_map.gridlines(draw_labels=True)
 
     # Assume lon and lat are defined globally or passed in
-    pm = ax_map.pcolormesh(lon, lat, data, vmin=vmin, vmax=vmax,
-                           transform=ccrs.PlateCarree(), cmap=cmap)
-    plt.colorbar(pm, ax=ax_map, orientation='vertical', pad=0.1,label=label)
+    pm = ax_map.pcolormesh(
+        lon, lat, data, vmin=vmin, vmax=vmax, transform=ccrs.PlateCarree(), cmap=cmap
+    )
+    plt.colorbar(pm, ax=ax_map, orientation="vertical", pad=0.1, label=label)
     ax_map.set_title(title, fontsize=12)
 
     # Histogram subplot
     ax_hist = fig.add_subplot(gs[1])
     flattened_data = data[~np.isnan(data)]  # Remove NaNs for histogram
     valid_count = np.sum(~np.isnan(flattened_data))
-    ax_hist.hist(flattened_data, bins=40, color='gray', range=[vmin, vmax], edgecolor='black')
+    ax_hist.hist(
+        flattened_data, bins=40, color="gray", range=[vmin, vmax], edgecolor="black"
+    )
     ax_hist.set_xlabel(label)
     ax_hist.set_ylabel("Count")
-    ax_hist.set_title("Histogram: N="+str(valid_count))
+    ax_hist.set_title("Histogram: N=" + str(valid_count))
 
-    #plt.tight_layout()
+    # plt.tight_layout()
     plt.show()
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
-title = 'Aerosol Optical Depth (AOD): ' + str(wavelength[wavelength_index]) +' nm'
-label = 'AOD'
-data = aot[:,:,wavelength_index]
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax = 0.3, cmap='jet')
+title = "Aerosol Optical Depth (AOD): " + str(wavelength[wavelength_index]) + " nm"
+label = "AOD"
+data = aot[:, :, wavelength_index]
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.3, cmap="jet"
+)
 ```
 
-[back to top](#Contents)
-
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
-title = 'Single scattering albedo (SSA): ' + str(wavelength[wavelength_index]) +' nm'
-label = 'SSA'
-data = filtered_ssa = np.where(aot[:, :, wavelength_index] > 0.1, ssa[:, :, wavelength_index], np.nan)
+title = "Single scattering albedo (SSA): " + str(wavelength[wavelength_index]) + " nm"
+label = "SSA"
+data = filtered_ssa = np.where(
+    aot[:, :, wavelength_index] > 0.1, ssa[:, :, wavelength_index], np.nan
+)
 data = ssa[:, :, wavelength_index]
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap='jet')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
+)
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
-title = 'Fine mode fraction'
-label = 'FVF'
+title = "Fine mode fraction"
+label = "FVF"
 data = fvf
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='jet')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
+)
 ```
 
 We can clearly see the aerosol event with less absorption (high SSA) and large size (low FVF), probably dust.
+
++++
+
+[back to top](#Contents)
 
 +++
 
@@ -242,25 +254,35 @@ We can clearly see the aerosol event with less absorption (high SSA) and large s
 Aerosol absorption and microphysics have larger uncertainties when aerosol loading is low. User can further remove low AOD cases when necessary.
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
-aot_min  = 0.05
-title = 'Filtered single scattering albedo (SSA): ' + str(wavelength[wavelength_index]) +' nm (AOD 550>'+str(aot_min)+')'
-label = 'SSA'
-data = filtered_ssa = np.where(aot[:, :, wavelength_index] >= aot_min, ssa[:, :, wavelength_index], np.nan)
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap='jet')
+aot_min = 0.05
+title = (
+    "Filtered single scattering albedo (SSA): "
+    + str(wavelength[wavelength_index])
+    + " nm (AOD 550>"
+    + str(aot_min)
+    + ")"
+)
+label = "SSA"
+data = filtered_ssa = np.where(
+    aot[:, :, wavelength_index] >= aot_min, ssa[:, :, wavelength_index], np.nan
+)
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
+)
 ```
 
 The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
-aot_min  = 0.05
-title = 'Fine mode fraction (AOD 550>'+str(aot_min)+')'
-label = 'FVF'
+aot_min = 0.05
+title = "Fine mode fraction (AOD 550>" + str(aot_min) + ")"
+label = "FVF"
 data = filtered_ssa = np.where(aot[:, :, wavelength_index] >= aot_min, fvf, np.nan)
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='jet')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
+)
 ```
 
 [back to top](#Contents)
@@ -269,13 +291,13 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 
 ## 6. Advanced quality assessment
 
-Since the retrieval algorithm is based on optimal estimation by minimizing a $\chi^2$ cost function defined as the difference between measurement (m) and forward model fitting (f), normalized by total uncertainties ($\sigma$). 
+Since the retrieval algorithm is based on optimal estimation by minimizing a $\chi^2$ cost function defined as the difference between measurement (m) and forward model fitting (f), normalized by total uncertainties ($\sigma$).
 
 $\chi^2 = \frac{1}{N} \sum (f - m)^2/\sigma^2$
 
 Here N is the total number of measureents used in retreival. The $\chi^2$ and $N$ can be used to evaluate retrieval performance, the pixels with small $\chi^2$ (good fitting) and large $N$ (more pixels can be fitted) will better quality. A more quantitatively approach based on error propogation are used to compute retrieval uncertainty, which are also included for many of the data product. Note that RemoTAP algorithm do not adaptively remove measurements during retrieval, but instead all the measureemts as defined in the input file are used.
 
-To support L3 data processing, a quality flag is also defined, which is usually based on $\chi^2$ for SPEXone data. Other flags based on land-water adjacent, cloud ajacent are also included.  
+To support L3 data processing, a quality flag is also defined, which is usually based on $\chi^2$ for SPEXone data. Other flags based on land-water adjacent, cloud ajacent are also included.
 - flag_0 : good.
 - flag_1 : large chi2.
 - flag_2 : land-water adjacent.
@@ -290,16 +312,17 @@ Specifically for quality flag 0 and 1:
 - quality_flag = 1: when $\chi^2 \ge 5$ over land and $\chi^2 \ge 10$ over ocean
 
 ```{code-cell} ipython3
-chi2 = dataset['chi2'].values
-quality_flag = dataset['quality_flag'].values
+chi2 = dataset["chi2"].values
+quality_flag = dataset["quality_flag"].values
 ```
 
 ```{code-cell} ipython3
-# Create the plot
-title = r'Retrieval cost function: $\chi^2$'
-label = r'$\chi^2$'
+title = r"Retrieval cost function: $\chi^2$"
+label = r"$\chi^2$"
 data = chi2
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap='jet')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap="jet"
+)
 ```
 
 ```{code-cell} ipython3
@@ -309,14 +332,15 @@ np.nanmean(chi2)
 Note that $\chi^2$ converges reasonably well with peak at 1. There are also pixels which do not converge well with relatively high cost function. These pixels need to be removed for more detailed analysis.
 
 ```{code-cell} ipython3
-# Create the plot
-title = 'Retrieval quality flag'
-label = 'quality_flag'
+title = "Retrieval quality flag"
+label = "quality_flag"
 data = quality_flag
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=2, cmap='cool')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap="cool"
+)
 ```
 
-We can evaluate quality flag based on the $\chi^2$ and $N$, and most pixels have reach to the best quality with quality_flag=0. 
+We can evaluate quality flag based on the $\chi^2$ and $N$, and most pixels have reach to the best quality with quality_flag=0.
 
 +++
 
@@ -331,16 +355,17 @@ We can evaluate quality flag based on the $\chi^2$ and $N$, and most pixels have
 RemoTAP conducted cloud masking based on an internal neural network model. The cloud fraction (CF) can be evaluated as follows: CF<0.05 is considered as clear sky, the others are as cloudy.
 
 ```{code-cell} ipython3
-cloud_fraction = dataset['cloud_fraction'].values
+cloud_fraction = dataset["cloud_fraction"].values
 cloud_fraction.shape
 ```
 
 ```{code-cell} ipython3
-# Create the plot
-title = 'Cloud fraction'
-label = 'cloud_fraction'
+title = "Cloud fraction"
+label = "cloud_fraction"
 data = cloud_fraction
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap='cool')
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="cool"
+)
 ```
 
 [back to top](#Contents)
@@ -351,31 +376,37 @@ plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, v
 
 +++
 
-As mentioned previously, pixel level uncertainty can be evalated through error propagation, which propgation measurement uncertainty through Jacobian of the forward model. The estimated uncertainties are availalbe in the SPEXone RemmoTAP product. Here we look at the uncertainties of AOD. 
+As mentioned previously, pixel level uncertainty can be evalated through error propagation, which propgation measurement uncertainty through Jacobian of the forward model. The estimated uncertainties are availalbe in the SPEXone RemmoTAP product. Here we look at the uncertainties of AOD.
 
 ```{code-cell} ipython3
-aot_unc = dataset['aot_uncertainty'].values
+aot_unc = dataset["aot_uncertainty"].values
 aot_unc.shape
 ```
 
 ```{code-cell} ipython3
-# Create the plot
 wavelength_index = 7
-title = 'Aerosol Optical Depth (AOD) Uncertainty: ' + str(wavelength[wavelength_index]) +' nm'
-label = 'AOD'
-data = aot_unc[:,:,wavelength_index]
-plot_l2_product(data, plot_range=plot_range, label=label, title=title, vmin=0, vmax = 0.02, cmap='jet')
+title = (
+    "Aerosol Optical Depth (AOD) Uncertainty: "
+    + str(wavelength[wavelength_index])
+    + " nm"
+)
+label = "AOD"
+data = aot_unc[:, :, wavelength_index]
+plot_l2_product(
+    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.02, cmap="jet"
+)
 ```
 
 ```{code-cell} ipython3
-plt.plot(aot[:,:,wavelength_index], aot_unc[:,:,wavelength_index], 'b.', alpha=0.3)
-plt.ylim(0,0.02)
-plt.xlim(0,0.3)
+plt.figure(figsize=(8, 4))
+plt.plot(aot[:, :, wavelength_index], aot_unc[:, :, wavelength_index], "b.", alpha=0.3)
+plt.ylim(0, 0.02)
+plt.xlim(0, 0.3)
 plt.xlabel("AOD")
 plt.ylabel("AOD Uncertainty")
 ```
 
-As shown above, the AOD uncertainties increase with the AOD value. You can play with other retrieval uncertainties and evaluate how they vary with AOD. 
+As shown above, the AOD uncertainties increase with the AOD value. You can play with other retrieval uncertainties and evaluate how they vary with AOD.
 
 +++
 
@@ -390,7 +421,3 @@ Guangliang Fu,  Jeroen Rietjens,  Raul Laasner,  Laura van der Schaaf,  Richard 
 +++
 
 [back to top](#Contents)
-
-```{code-cell} ipython3
-
-```

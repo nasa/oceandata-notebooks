@@ -85,6 +85,33 @@ appnope==0.1.4 ; sys_platform == 'darwin' \
     --hash=sha256:1de3860566df9caf38f01f86f65e0e13e379af54f9e4bee1e66b48f2efffd1ee \
     --hash=sha256:502575ee11cd7a28c0205f379b525beefebab9d161b7c964670864014ed7213c
     # via ipykernel
+astropy==7.1.0 \
+    --hash=sha256:06ba650db237557912fdd7bb8ffdd87838e23e58b0fa0001b4d43c2bb5a79412 \
+    --hash=sha256:116149abdebafab193f7ca16427bd6bb4afc111677c78c32f48cffbc0ecb6a18 \
+    --hash=sha256:1fd94f755f2e9104c5caf0afe69175d2620708828233d387c1dad0044e79f543 \
+    --hash=sha256:3b66b8dbb678fca9a811f24227a953a3c2f7b02c951c5b2dee3ab6853ac6e1b0 \
+    --hash=sha256:49effea6de855dcdba09a211d51ca279766c66284c8db3d911b4523bbd96eae9 \
+    --hash=sha256:52709e6bbe65c6d6c2a342506ad8c2801ff2aed80cc0a5d7817387122e0ac616 \
+    --hash=sha256:654261df547c150e5b6a022f3785f47a2e547e0cc1c06fbcf6293b5f4e85722a \
+    --hash=sha256:6bd25761ba1385bb99a189401fbc486e0884d97129e271b655b6efa956a12a77 \
+    --hash=sha256:734d5e93e76d2e2175f991b17ca130463f2edb56c107fbc07c6532ca461a6ea7 \
+    --hash=sha256:7694e0b2ffc5fa60c47a55667bdfda98cbae8df736f60cc57afbe38bc5c98b41 \
+    --hash=sha256:83fe4c581bbdf1cbaeab1efc58891e4433d729412847f4d0788c870fee709432 \
+    --hash=sha256:8e2bc5cb91dc319bcf65ee08c68abea617c52b5d042d245542a4853b07269233 \
+    --hash=sha256:8e317f34e33a8f5517bc9fc6fbc005f42730d3be7d2820ef41e0468bcb796843 \
+    --hash=sha256:a2d277cf0d34748bfc23bb6b4d1974f058c8541ec92113cb00db06eebe5a2862 \
+    --hash=sha256:a58498f9549a0e94a1f2cd48ddb96c0bed7b0375a6362ee4025f19d6bd114f9a \
+    --hash=sha256:a77d07a104ec24ed7f8a45de3935f46071551aa2eb6d6b62efebdc888f65b6d6 \
+    --hash=sha256:c811a4aedd8fbf6d7611d64d40af1f0c1c1e6621e5992e7e1a7b5fec47dc1fa1 \
+    --hash=sha256:c8f254322295b1b8cf24303d6f155bf7efdb6c1282882b966ce3040eff8c53c5 \
+    --hash=sha256:e0fec2f4b5265caab68020eaa320704e7ce9433ae8dbea75c300468fed695437 \
+    --hash=sha256:e4bb022f863cf13eefeb406692f58824c0d9bdb1aa36ae786e87c096d8ebdd07 \
+    --hash=sha256:f637e39622b23750a12b19ab4642f2e3970f6cb84f2228587725f15bf1d80d03 \
+    --hash=sha256:fba97e3d99ad48540b6eb7c6f7849e57dd6aaf9d9d48707b227bf39ac77c6368
+astropy-iers-data==0.2025.7.28.0.41.50 \
+    --hash=sha256:615b23572553ab2156131ccc6577be2f7528d79326bcde17ab788374aca085b2 \
+    --hash=sha256:ed2ee1139f7838ce1e46cdc0024a7c169235f765a3e73b36d45ab6412cbbbb98
+    # via astropy
 asttokens==3.0.0 \
     --hash=sha256:0dcd8baa8d62b0c1d118b399b2ddba3c4aff271d0d7a9e0d4c1681c79035bbc7 \
     --hash=sha256:e3078351a059199dd5138cb1c706e6430c05eff2ff136af5eb4790f9d28932e2
@@ -1139,6 +1166,7 @@ numpy==2.2.6 \
     --hash=sha256:fe27749d33bb772c80dcd84ae7e8df2adc920ae8297400dabec45f0dedb3f6de \
     --hash=sha256:fee4236c876c4e8369388054d02d0e9bb84821feb1a64dd59e137e6511a551f8
     # via
+    #   astropy
     #   bokeh
     #   cartopy
     #   cftime
@@ -1153,6 +1181,7 @@ numpy==2.2.6 \
     #   numba
     #   pandas
     #   pvlib
+    #   pyerfa
     #   rasterio
     #   rioxarray
     #   scipy
@@ -1163,6 +1192,7 @@ packaging==24.2 \
     --hash=sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759 \
     --hash=sha256:c228a6dc5e932d346bc5739379109d49e8853dd8223571c7c5b55260edc0b97f
     # via
+    #   astropy
     #   bokeh
     #   cartopy
     #   cmocean
@@ -1461,6 +1491,16 @@ pydata-sphinx-theme==0.15.4 \
     --hash=sha256:2136ad0e9500d0949f96167e63f3e298620040aea8f9c74621959eda5d4cf8e6 \
     --hash=sha256:7762ec0ac59df3acecf49fd2f889e1b4565dbce8b88b2e29ee06fdd90645a06d
     # via sphinx-book-theme
+pyerfa==2.0.1.5 \
+    --hash=sha256:07b80cd70701f5d066b1ac8cce406682cfcd667a1186ec7d7ade597239a6021d \
+    --hash=sha256:0e43c7194e3242083f2350b46c09fd4bf8ba1bcc0ebd1460b98fc47fe2389906 \
+    --hash=sha256:17d6b24fe4846c65d5e7d8c362dcb08199dc63b30a236aedd73875cc83e1f6c0 \
+    --hash=sha256:66292d437dcf75925b694977aa06eb697126e7b86553e620371ed3e48b5e0ad0 \
+    --hash=sha256:b0603e8e1b839327d586c8a627cdc634b795e18b007d84f0cda5500a0908254e \
+    --hash=sha256:b282d7c60c4c47cf629c484c17ac504fcb04abd7b3f4dfcf53ee042afc3a5944 \
+    --hash=sha256:be1aeb70390dd03a34faf96749d5cabc58437410b4aab7213c512323932427df \
+    --hash=sha256:d30b9b0df588ed5467e529d851ea324a67239096dd44703125072fd11b351ea2
+    # via astropy
 pygments==2.19.1 \
     --hash=sha256:61c16d2a8576dc0649d9f39e089b5f02bcd27fba10d8fb4dcc28173f7a45151f \
     --hash=sha256:9ea1544ad55cecf4b8242fab6dd35a93bbce657034b0611ee383099054ab6d8c
@@ -1575,6 +1615,7 @@ pyyaml==6.0.2 \
     --hash=sha256:efdca5630322a10774e8e98e1af481aad470dd62c3170801852d752aa7a783ba \
     --hash=sha256:ff3824dc5261f50c9b0dfb3be22b4567a6f938ccce4587b38952d85fd9e9afe4
     # via
+    #   astropy
     #   bokeh
     #   dask
     #   distributed
@@ -1992,12 +2033,12 @@ toolz==1.0.0 \
     #   datashader
     #   distributed
     #   partd
-torch==2.7.1 ; sys_platform == 'darwin' \
+torch==2.7.1 ; (python_full_version >= '3.14' and platform_machine == 'AMD64' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'WIN32' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'aarch64' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'amd64' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'ppc64le' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'win32' and sys_platform == 'darwin') or (python_full_version >= '3.14' and platform_machine == 'x86_64' and sys_platform == 'darwin') or (platform_machine != 'AMD64' and platform_machine != 'WIN32' and platform_machine != 'aarch64' and platform_machine != 'amd64' and platform_machine != 'ppc64le' and platform_machine != 'win32' and platform_machine != 'x86_64' and sys_platform == 'darwin') \
     --hash=sha256:68a352c7f435abb5cb47e2c032dcd1012772ae2bacb6fc8b83b0c1b11874ab3a \
     --hash=sha256:7b4f8b2b83bd08f7d399025a9a7b323bdbb53d20566f1e0d584689bb92d82f9a \
     --hash=sha256:7ecd868a086468e1bcf74b91db425c1c2951a9cfcd0592c4c73377b7e42485ae \
     --hash=sha256:95af97e7b2cecdc89edc0558962a51921bf9c61538597dbec6b7cc48d31e2e13
-torch==2.7.1+cpu ; sys_platform != 'darwin' \
+torch==2.7.1+cpu ; (python_full_version < '3.14' and platform_machine == 'AMD64') or (python_full_version < '3.14' and platform_machine == 'WIN32') or (python_full_version < '3.14' and platform_machine == 'aarch64') or (python_full_version < '3.14' and platform_machine == 'amd64') or (python_full_version < '3.14' and platform_machine == 'ppc64le') or (python_full_version < '3.14' and platform_machine == 'win32') or (python_full_version < '3.14' and platform_machine == 'x86_64') or sys_platform != 'darwin' \
     --hash=sha256:0bc887068772233f532b51a3e8c8cfc682ae62bef74bf4e0c53526c8b9e4138f \
     --hash=sha256:355614185a2aea7155f9c88a20bfd49de5f3063866f3cf9b2f21b6e9e59e31e0 \
     --hash=sha256:3bf2db5adf77b433844f080887ade049c4705ddf9fe1a32023ff84ff735aa5ad \

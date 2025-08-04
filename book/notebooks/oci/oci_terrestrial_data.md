@@ -1,8 +1,8 @@
 ---
 kernelspec:
-  name: python3
   display_name: Python 3 (ipykernel)
   language: python
+  name: python3
 ---
 
 # Orientation to PACE/OCI Terrestrial Products
@@ -73,7 +73,8 @@ We will use `earthaccess` to open a Level-2 surface reflectance granule that cov
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    concept_id="G3406522735-OB_CLOUD",
+    short_name="PACE_OCI_L2_SFREFL",
+    granule_name="*.20240701T175112.*",
 )
 for item in results:
     display(item)
@@ -149,15 +150,15 @@ Level-2 files usually include information on the quality of each pixel in the sc
 dataset["l2_flags"]
 ```
 
-At first glance, we can see that `l2_flags` is in the same shape as the surface reflectance we plotted above. The attributes look sorta meaningful, but also sorta like random numbers and abbreviations. If we were to plot `l2_flags`, the result wouldn't look like anything useful at all. This is because the values in `l2_flags` include many quality flags compactly encoded in the binary representation of an integer. In order to use the flags applied to each pixel, we need a decoded representation. Since all OB.DAAC data follows the [CF Metadata Conventions](http://cfconventions.org/), we only need to import the `cf_xarray` package to access the decoded flags.
+At first glance, we can see that `l2_flags` is in the same shape as the surface reflectance we plotted above. The attributes look sort of meaningful, but also sort of like random numbers and abbreviations. If we were to plot `l2_flags`, the result wouldn't look like anything useful at all. This is because the values in `l2_flags` include many quality flags compactly encoded in the binary representation of an integer. In order to use the flags applied to each pixel, we need a decoded representation. Since all OB.DAAC data follows the [CF Metadata Conventions](http://cfconventions.org/), we only need to import the `cf_xarray` package to access the decoded flags.
 
-For example, say we want to mask any pixels flagged as clouds and or water in our data. First, we have to make sure that the `l2_flags` variable is readable by `cf_xarray` so that we can eventually apply them to the data. We can check this using the built in `is_flag_variable` property.
+For example, say we want to mask any pixels flagged as clouds and/or water in our data. First, we have to make sure that the `l2_flags` variable is readable by `cf_xarray` so that we can eventually apply them to the data. We can check this using the built in `is_flag_variable` property.
 
 ```{code-cell} ipython3
 dataset["l2_flags"].cf.is_flag_variable
 ```
 
-The statement returned `True`, which means `l2_flags` is recognized as a flag variable. By referencing the OBPG [ocean color flags documentation](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/), we find the name of the flags we want to mask out. In this case, "CLDICE" is the cloud flag, and while there is no specific water mask (this is an ocean mission, after all) there is a "LAND" flag we can invert to mask out water. The expressions in the cell below will retain any pixel identified as land which is also not a cloud (thanks to the `~`).
+The statement returned `True`, which means `l2_flags` is recognized as a flag variable. By referencing the OBPG [ocean color flags documentation](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/), we find the names of the flags we want to mask out. In this case, "CLDICE" is the cloud flag, and while there is no specific water mask (this is an ocean mission, after all) there is a "LAND" flag we can invert to mask out water. The expressions in the cell below will retain any pixel identified as land which is also not a cloud (thanks to the `~`).
 
 [ocean color flags documentation]: https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/
 
@@ -194,7 +195,7 @@ plt.show()
 
 ## 4. Working with PACE Terrestrial Data
 
-Now that we have our surface reflectance data masked, we can start doing some analysis. A relatively simple but informative use of surface reflectance data is the calculation of vegetation indices (VIs). VIs use the well-known, idealized spectral shape of leaves and other materials to determine surface features contributing to a pixel. Vegetation health, relative water content, or even the presence of snow can be measured using VIs. They've been used in terrestrial remote sensing for decades, and are particularly valuable when considering the limited number of bands in previous multispectral sensors. They can, of course, also be calculated with hyperspectral sensors like PACE.
+Now that we have our surface reflectance data masked, we can start doing some analysis. A relatively simple but informative use of surface reflectance data is the calculation of vegetation indices (VIs). VIs use the well-known, idealized spectral shape of leaves and other materials to determine surface features contributing to a pixel. Vegetation health, relative water content, or even the presence of snow can be measured using VIs. These indices are particularly valuable when considering the limited number of bands in previous multispectral sensors, but they can of course be calculated with hyperspectral sensors like PACE.
 
 ### Multispectral Vegetation Indices
 
@@ -204,7 +205,9 @@ $$
   NDVI = \frac{\rho_{NIR} - \rho_{red}}{\rho_{NIR} + \rho_{red}}
 $$
 
-You'll notice that the equation does not mention specific wavelengths, but rather just requires a "red" measurement and a "NIR" measurement. With PACE, we have a lot of measurements throughout the red and NIR regions of the spectrum. To visualize the spectra, we want to plot across the wavelength dimension of individual pixels, so we'll take just a small sample from the dataset. We also like to separate the hyperspectral (ultraviolet to NIR wavelengths) and multispectral (NIR to SWIR wavelengths) regions when plotting spectra.
+You'll notice that the equation does not mention specific wavelengths, but rather just requires a "red" measurement and a "NIR" measurement. PACE provides many reflectance measurements throughout the red and NIR regions of the spectrum, as we can see in the plots below.
+
+To visualize the spectra, we want to plot across the wavelength dimension of individual pixels, so we'll take just a small sample from the dataset. We also like to separate the hyperspectral (ultraviolet to NIR wavelengths) and multispectral (NIR to SWIR wavelengths) regions when plotting spectra to better understand the spectral shapes.
 
 ```{code-cell} ipython3
 sample_rhos = rhos.sel(
@@ -222,7 +225,7 @@ b.set_ylabel("")
 plt.show()
 ```
 
-To calculate NDVI and other heritage multispectral indices with PACE, you could choose a single band from each region. However, doing so would mean capturing only the information from one of OCI's narrow 5 nm bands. In other words, we would miss out on information from surrounding wavelengths that improve these calculations and would have otherwise been included from other sensors. To preserve continuity with those sensors and calculate a more comparable NDVI, we can take an average of several OCI bands to simulate a multispectral measurement, incorporating as much relevant information into the calculation as possible.
+To calculate NDVI and other heritage multispectral indices with PACE, you could choose a single band from each region. However, doing so would mean capturing only the information from one of OCI's narrow 5 nm bands. In other words, we would miss out on information from surrounding wavelengths that improve these calculations and would have otherwise been included from other sensors with broader bandwidths. To preserve continuity with those sensors and calculate a more comparable NDVI, we can take an average of several OCI bands to simulate a multispectral measurement, incorporating as much relevant information into the calculation as possible.
 
 We'll take MODIS's red and NIR bandwidths and average the PACE measurements together.
 
@@ -254,7 +257,7 @@ Making these heritage calculations are important for many reasons, not least of 
 
 ### Hyperspectral-enabled Vegetation Indices
 
-Hyperspectral-enabled VIs are still band ratios, but rather than using wide bands to capture the general aspects of a spectrum, they target minute fluctuations in surface reflectances to describe detailed features of a pixel, such as relative pigment concentration in plants. This means that, unlike multispectral VIs, these indices require the narrow bandwidths inherent to OCI data. In other words, we don't want to do any band averaging as we did above, because we'd likely dilute the very signal we want to pull out. The calculations for this type of VI are actually much simpler!
+Hyperspectral-enabled VIs are still band ratios, but rather than using wide bands to capture the general aspects of a spectrum, they target minute fluctuations in surface reflectances to describe detailed features of a pixel, such as relative pigment concentration in plants. This means that, unlike multispectral VIs, these indices require the narrow bandwidths inherent to OCI data. In other words, we don't want to do any band averaging as we did above, because we'd likely dilute the very signal we want to pull out. The calculations for this type of VI are therefore even simpler.
 
 We'll take the Chlorophyll Index Red Edge (CIRE) as an example of a hyperspectral-enabled VI. CIRE uses bands from the red edge and the NIR to get at relative canopy chlorophyll content:
 
@@ -298,10 +301,18 @@ plt.show()
 
 Comparing these two plots, we can see some similarities and differences. Generally, the patterns of high and low values fall in the same places - this is because NDVI is essentially measuring the amount of green vegetation, and CIRE is measuring the amount of green pigment in plants. However, CIRE also has a higher dynamic range than NDVI does. For one, NDVI saturates as vegetation density increases, so a wide range of ecosystems with varying amounts of green vegetation may have very similar NDVI values. On the other hand, CIRE is not as affected by the leaf area, and can instead hone in on the relative amount of chlorophyll pigment in a pixel rather than the amount of leaves. This is a major advantage of CIRE and other hyperspectral-enabled VIs like the Carotenoid Content Index (Car), enabling us to track specific biochemical shifts in plants that correspond to states of photosynthetic or photoprotective ability, and thus provide insight on plant physiological condition.
 
-If calculating these indices manually felt a little tedious, not to worry! PACE/OCI provides 10 VIs in its LANDVI products available in Level-2 (`short_name="PACE_OCI_L2_LANDVI"`) and Level-3 (`short_name="PACE_OCI_L3M_LANDVI"`). The suite includes 6 heritage indices and 4 narrowband pigment indices including CIRE. Read more about it in the ATBD (in review).
+If calculating these indices manually felt a little tedious, not to worry! PACE/OCI provides 10 VIs in its LANDVI products available in Level-2 (`short_name="PACE_OCI_L2_LANDVI"`) and Level-3 (`short_name="PACE_OCI_L3M_LANDVI"`). The suite includes 6 heritage indices and 4 narrowband pigment indices including CIRE. Read more about it in the [LANDVI ATBD](https://www.earthdata.nasa.gov/apt/documents/landvi/v1.0).
 
 ```{code-cell} ipython3
-results = earthaccess.search_data(concept_id="G3407628214-OB_CLOUD")
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_LANDVI",
+    granule_name="*.20240701_20240731.*.0p1deg.*",
+)
+for item in results:
+    display(item)
+```
+
+```{code-cell} ipython3
 paths = earthaccess.open(results)
 ```
 
