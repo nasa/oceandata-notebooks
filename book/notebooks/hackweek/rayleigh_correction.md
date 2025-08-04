@@ -317,7 +317,7 @@ def rgb_image(ax,ref,wavelengths):
 ## 3. Function to load NN model
 
 ```{code-cell} ipython3
-def load_nn(device,modelpath):
+def load_nn(device,sharedpath):
     nn_path=sharedpath+'RayleighNN_FastMAPOL_component.pk'
     nn=pickle.load(open(nn_path,'rb'))
     nn.nn.to(device)    
@@ -458,9 +458,9 @@ o3,ps=anc_data_reader(fileanc)
 ### Get reflectances (total, rayleigh and rayleigh corrected)
 
 ```{code-cell} ipython3
-def get_ref(device,modelpath,toa_ref,wavelengths,inda):
+def get_ref(device,sharedpath,toa_ref,wavelengths,inda):
     inputp=nn_input_vector(zen[:,:,inda],az[:,:,inda],solzen[:,:,inda],o3,ps)
-    nn = load_nn(device,modelpath)
+    nn = load_nn(device,sharedpath)
     ref_nn=refl_nn(device,inputp,nn)
     ray_ref=rayleigh_ref_interp(ref_nn, wavelengths)
 #    total_ref=toa_ref[:,:,inda,:]
@@ -471,7 +471,7 @@ def get_ref(device,modelpath,toa_ref,wavelengths,inda):
 ##  Rayleigh correction for arbitrary pixel from OCI
 
 ```{code-cell} ipython3
-total_ref, ray_refoci, corr_ref, ref_nn=get_ref(device,modelpath,ref_oci,wl_oci,inda=1)
+total_ref, ray_refoci, corr_ref, ref_nn=get_ref(device,sharedpath,ref_oci,wl_oci,inda=1)
 
 plt.plot(wl_oci,total_ref[300,260,:],c='b', label='Total TOA reflectance')
 plt.plot(wl_nn, ref_nn[300,260,:],linestyle='none', marker='x',color='b',label='NN reflectances')
@@ -496,8 +496,8 @@ plt.legend()
 
 ```{code-cell} ipython3
 #For SPEXonne
-anc_sp1='PACE.20240720T140430.L1C.ANC.5km.spex_width.nc'
-spexfile='PACE_SPEXONE.20240720T140430.L1C.V2.5km.nc'
+anc_sp1=sharedpath+'PACE.20240720T140430.L1C.ANC.5km.spex_width.nc'
+spexfile=sharedpath+'PACE_SPEXONE.20240720T140430.L1C.V2.5km.nc'
 
 lat,lon,solzen,ref_sp1,wl_sp1,zen,az=l1c_data_reader1(spexfile)
 o3,ps=anc_data_reader(anc_sp1)
@@ -506,7 +506,7 @@ o3,ps=anc_data_reader(anc_sp1)
 ```{code-cell} ipython3
 fig,ax=plt.subplots(1,5,figsize=[30,6])
 for i in range(5):
-    total_refs, ray_refs, corr_refs, ref_nn=get_ref(device,modelpath,ref_sp1,wl_sp1,i)
+    total_refs, ray_refs, corr_refs, ref_nn=get_ref(device,sharedpath,ref_sp1,wl_sp1,i)
     ax[i].plot(wl_sp1,total_refs[300,16,:],c='b', label='Total TOA reflectance')
     ax[i].plot(wl_sp1,ray_refs[300,16,:],c='gray',label='Rayleigh reflectance')
     ax[i].plot(wl_sp1,corr_refs[300,16,:],c='g', label='Rayleigh corrected TOA reflectance')
@@ -520,7 +520,7 @@ for i in range(5):
 lat,lon,solzen,ref_oci,wl_oci,zen,az=l1c_data_reader(ocifile)
 o3,ps=anc_data_reader(fileanc)
 
-total_ref, ray_ref, corr_ref, ref_nn=get_ref(device,modelpath,ref_oci,wl_oci,inda=1)
+total_ref, ray_ref, corr_ref, ref_nn=get_ref(device,sharedpath,ref_oci,wl_oci,inda=1)
 
 fig,ax=plt.subplots(1,2,figsize=[30,9],subplot_kw={'projection': ccrs.PlateCarree()})
 rgb_image(ax[0],total_ref,wl_oci)
