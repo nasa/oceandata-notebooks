@@ -452,8 +452,6 @@ This should have created a new file including "L2_sub" in the data subdirectory.
 Let's open it and see how it compares with the L2 file we generated.
 
 ```{code-cell} ipython3
-:scrolled: true
-
 dat_sub = xr.open_datatree(l2_sub_path)
 dat_sub = xr.merge(dat_sub.to_dict().values())
 dat_sub = dat_sub.set_coords(("longitude", "latitude"))
@@ -620,7 +618,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-You can see that disabling the BRDF does in fact change Rrs values. 
+You can see that disabling the BRDF does in fact change Rrs values.
 
 +++
 
