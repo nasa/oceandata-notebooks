@@ -8,7 +8,7 @@ jupyter:
 
 # Visualize HARP2 CLOUD GPC Product
 
-**Authors:** Chamara (NASA, SSAI), Andy (NASA, UMBC), Meng (NASA, SSAI), Sean (NASA, MSU)
+**Authors:** Chamara (NASA, SSAI), Kirk (NASA), Andy (NASA, UMBC), Meng (NASA, SSAI), Sean (NASA, MSU)
 
 [edl]: https://urs.earthdata.nasa.gov/
 [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
