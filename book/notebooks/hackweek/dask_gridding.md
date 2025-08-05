@@ -462,7 +462,7 @@ client.close()
 
 +++
 
-## Scaling Out
+## 5. Scaling Out
 
 +++
 
@@ -472,31 +472,39 @@ Again, `dask` and the CryoCloud come to our aid in the form of a pre-configured 
 The `gateway` object created below works with the CryoCloud to launch additional servers,
 and now those servers are enlisted in your `cluster`.
 
-```{raw-cell}
+```{code-cell} ipython3
 from dask_gateway import Gateway
 ```
 
-```{raw-cell}
+```{code-cell} ipython3
 gateway = Gateway()
 options = gateway.cluster_options()
 options
 ```
 
-```{raw-cell}
+```{code-cell} ipython3
 cluster = gateway.new_cluster(options)
 cluster
 ```
 
-```{raw-cell}
-cluster
-```
+The cluster starts with no workers, and you must set manual or adaptive scaling in order to get any workers.
 
-```{raw-cell}
+<div class="alert alert-warning" role="alert">
+
+The cluster can take several minutes to spin up. Monitor the dashboard to ensure you have workers.
+
+</div>
+
+```{code-cell} ipython3
 client = cluster.get_client()
 client
 ```
 
-```{raw-cell}
+Use this client exactly as above:
+
++++
+
+```
 futures = client.map(
     grid_match,
     paths,
@@ -506,13 +514,15 @@ futures = client.map(
 )
 ```
 
-```{raw-cell}
++++
+
+```
 chla = xr.combine_nested(client.gather(futures), concat_dim="time")
 chla["time"] = attrs["time"]
 chla
 ```
 
-```{raw-cell}
+```{code-cell} ipython3
 cluster.close()
 ```
 
