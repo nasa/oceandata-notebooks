@@ -62,6 +62,7 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 ```{code-cell} ipython3
 import csv
 import os
+from pathlib import Path
 
 import cartopy.crs as ccrs
 import earthaccess
@@ -160,6 +161,9 @@ wavelength.
 
 ```{code-cell} ipython3
 f = earthaccess.open([ifile], provider="OB_CLOUD")
+```
+
+```{code-cell} ipython3
 dataset = xr.open_dataset(f[0], group="observation_data")
 plot = dataset["rhot_red"][dict(red_bands=100)].plot()
 ```
@@ -174,18 +178,18 @@ At Level-1, we neither have geophysical variables nor are the data projected for
 
 <div class="alert alert-warning">
 
-OCSSW programs are run from the command line in Bash, but we can have a Bash terminal-in-a-cell using the [IPython magic][magic] command `%%bash`. In the specific case of OCSSW programs, the Bash environment created for that cell must be set up by loading `$OCSSWROOT/OCSSW_bash.env`.
+OCSSW programs are system commands, typically called in a Bash shell. We will employ [system shell access][ipython] available in the IPython kernel to launch system commands as a subprocess using the `!` prefix. In the specific case of OCSSW programs, a suite of required environment variables must be set by first executing `source $OCSSWROOT/OCSSW_bash.env` in the same subprocess.
 
 </div>
 
-Every `%%bash` cell that calls an OCSSW program needs to `source` the environment
-definition file shipped with OCSSW, because its effects are not retained from one cell to the next.
-We can, however, define the `OCSSWROOT` environment variable in a way that effects every `%%bash` cell.
+Every time we use `!` to invoke an OCSSW program, we must also evaluate the `OCSSW_bash.env` environment file shipped with OCSSW. Each `!` initiated subprocess is distinct, and the environment configuration is discarded after the command is finished. Let's get prepared by reading the path to the OCSSW installation from the `OCSSWROOT` environment variable (assuming it's `/tmp/ocssw` as a fallback).
 
-[magic]: https://ipython.readthedocs.io/en/stable/interactive/magics.html#built-in-magic-commands
+[ipython]: https://ipython.readthedocs.io/en/stable/interactive/reference.html#system-shell-access
 
 ```{code-cell} ipython3
-os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
+ocsswroot = os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
+env = Path(ocsswroot, "OCSSW_bash.env")
+env.exists()
 ```
 
 We then neet to set up the AWS cloud processing credentials in our environment.
@@ -208,10 +212,7 @@ Using this pattern, run the `l2gen` command with the single argument `help` to v
 :scrolled: true
 :tags: [scroll-output]
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l2gen help
+!source {env}; l2gen help
 ```
 
 To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can also indicate a data suite or L2 products; in this example, we will proceed with chlorophyll *a* estimates.
@@ -223,9 +224,6 @@ We can limit the geographical boundaries of the processing. Here we use the `loc
 
 ```{code-cell} ipython3
 location = [(-62, 49), (-60, 47)]
-```
-
-```{code-cell} ipython3
 par = {
     "ifile": ifile,
     "ofile": os.path.basename(ifile).replace("L1B", "L2"),
@@ -245,10 +243,7 @@ With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell.
 :scrolled: true
 :tags: [scroll-output]
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l2gen par=l2gen.par
+!source {env}; l2gen par=l2gen.par
 ```
 
 If successful, the `l2gen` program created a netCDF file at the `ofile` path.
@@ -280,10 +275,7 @@ It can be useful to merge adjacent scenes to create a single, larger image. The 
 :scrolled: true
 :tags: [scroll-output]
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l2bin help
+!source {env}; l2bin help
 ```
 
 Let's search for granules to bin.
@@ -315,16 +307,16 @@ paths
 While we have the downloaded location stored in the list `paths`, write the list to a text file for future use.
 
 ```{code-cell} ipython3
-paths = [str(i) for i in paths]
+paths = [f"{i}\n" for i in paths]
 with open("l2bin_ifile.txt", "w") as file:
-    file.write("\n".join(paths))
+    file.writelines(paths)
 ```
 
 Then we use that text file as an `ifile` parameter in the `l2bin` par file.
 
 ```{code-cell} ipython3
 ofile = "granules/PACE_OCI.L3B.nc"
-os.makedirs("granules",exist_ok=True)
+os.makedirs("granules", exist_ok=True)
 par = {
     "ifile": "l2bin_ifile.txt",
     "ofile": ofile,
@@ -341,10 +333,7 @@ Now run `l2bin` using your chosen parameters:
 :scrolled: true
 :tags: [scroll-output]
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l2bin par=l2bin.par
+!source {env}; l2bin par=l2bin.par
 ```
 
 [back to top](#Contents)
@@ -359,10 +348,7 @@ The `l3mapgen` function of OCSSW allows you to create maps with a wide array of 
 :scrolled: true
 :tags: [scroll-output]
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l3mapgen help
+!source {env}; l3mapgen help
 ```
 
 Run `l3mapgen` to make a 9km map with a Plate Carree projection.
@@ -386,10 +372,7 @@ write_par("l3mapgen.par", par)
 :scrolled: true
 :tags: [scroll-output]
 
-%%bash
-source $OCSSWROOT/OCSSW_bash.env
-
-l3mapgen par=l3mapgen.par
+!source {env}; l3mapgen par=l3mapgen.par
 ```
 
 Open the output with XArray, note that there is no group anymore.
