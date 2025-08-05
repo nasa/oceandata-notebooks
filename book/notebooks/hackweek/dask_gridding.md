@@ -45,6 +45,7 @@ At the end of this notebook you will know:
 1. [Chunk-Apply-Combine](#2.-Chunk-Apply-Combine)
 1. [Dask Workers](#3.-Dask-Workers)
 1. [Level-2 Averaging](#4.-Level-2-Averaging)
+1. [Scaling Out](#5.-Scaling-Out)
 
 [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access
 [oci-ocssw-processing]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-ocssw-processing
