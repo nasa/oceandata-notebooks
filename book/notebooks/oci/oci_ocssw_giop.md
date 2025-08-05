@@ -159,6 +159,8 @@ In the 'Run Level-2 Generator (l2gen) OCSSW program on OCI data' tutorial, we le
 Let's take a look at the msl12_defaults_IOP.par file, which is the "parameter" file that defines the default IOP suite for OCI:
 
 ```{code-cell} ipython3
+:scrolled: true
+
 !cat $OCSSWROOT/share/oci/msl12_defaults_IOP.par
 ```
 
@@ -270,19 +272,17 @@ Let's use the earthaccess Python package to access a L1B file.
 
 ```{code-cell} ipython3
 tspan = ("2025-05-07", "2025-05-07")
-bbox = (-76.75, 36.97, -74.74, 39.01)
+bbox = {"west": -76, "south": 35, "east": -74.5, "north": 39}
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L1B_SCI",
     temporal=tspan,
-    bounding_box=bbox,
+    bounding_box=tuple(bbox.values()),
 )
 results[0]
 ```
 
 ```{code-cell} ipython3
-:scrolled: true
-
 l1b_paths = earthaccess.open(results)
 l1b_paths
 ```
@@ -325,12 +325,24 @@ par = {
     "ifile": l1b_path,
     "ofile": data / l1b_name.replace("L1B", "L2_IOP"),
     "suite": "IOP",
-    "north": 39,
-    "south": 35,
-    "west": -76,
-    "east": -74.5,
-    "l2prod": "fit_par_1_giop fit_par_2_giop fit_par_3_giop a bb aph Kd adg_442 adg_s bbp_442 bbp_s rrsdiff aph_unc_442 adg_unc_442 bbp_unc_442 ",
-
+    **bbox,
+    "l2prod": " ".join([
+        "fit_par_1_giop",
+        "fit_par_2_giop",
+        "fit_par_3_giop",
+        "a",
+        "bb",
+        "aph",
+        "Kd",
+        "adg_442",
+        "adg_s",
+        "bbp_442",
+        "bbp_s",
+        "rrsdiff",
+        "aph_unc_442",
+        "adg_unc_442",
+        "bbp_unc_442",
+    ]),
 }
 write_par("l2gen_iop.par", par)
 ```
@@ -340,11 +352,8 @@ A file named "l2gen_iop.par" should now appear in your working directory.
 Now, let's run `l2gen` using this new .par file. This can take several minutes.
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
+:scrolled: true
+
 !source {env}; l2gen par=l2gen_iop.par
 ```
 
@@ -367,15 +376,15 @@ Let's plot each of the IOP variables:
 
 ```{code-cell} ipython3
 target_wavelength = 443
-wl_idx = dat.wavelength_3d.sel(wavelength_3d=target_wavelength, method="nearest")
+wl_idx = dat["wavelength_3d"].sel({"wavelength_3d": target_wavelength}, method="nearest").item()
 
 vars_to_plot = {
     "fit_par_1_giop": "M_aph",
     "fit_par_2_giop": "M_adg",
     "fit_par_3_giop": "M_bbp",
-    "a": f"a [{wl_idx.values:.1f} nm]",
-    "bb": f"bb [{wl_idx.values:.1f} nm]",
-    "aph": f"aph [{wl_idx.values:.1f} nm]",
+    "a": f"a [{wl_idx:.1f} nm]",
+    "bb": f"bb [{wl_idx:.1f} nm]",
+    "aph": f"aph [{wl_idx:.1f} nm]",
     "adg_442": "adg at 442 nm",
     "adg_s": "adg slope",
     "bbp_s": "bbp slope",
@@ -401,7 +410,7 @@ axes = axes.flatten()
 
 for i, (var, title) in enumerate(vars_to_plot.items()):
     ax = axes[i]
-    da = dat[var].sel(wavelength_3d=wl_idx) if var in ["a", "bb", "aph"] else dat[var]
+    da = dat[var].sel({"wavelength_3d": wl_idx}) if var in ["a", "bb", "aph"] else dat[var]
 
     vmin, vmax = limits.get(var, (None, None))
 
@@ -430,47 +439,39 @@ We can also plot the shapes of absorption (a), backscattering (bb), and aph (phy
 ```{code-cell} ipython3
 :lines_to_next_cell: 2
 
-plot = dat.aph.sel({"wavelength_3d": 510}).plot(
-    x="longitude", y="latitude", vmin=0, vmax=0.025
+lat1, lon1 = 38, -74.5
+lat2, lon2 = 35.5, -74
+plot = (
+    dat["aph"]
+    .sel({"wavelength_3d": 510})
+    .plot(x="longitude", y="latitude", vmin=0, vmax=0.025)
 )
-plt.plot(-74.5, 38, marker="o", color="red", markersize=8)
-plt.plot(-74, 35.5, marker="o", color="magenta", markersize=8)
+plt.plot(lon1, lat1, marker="o", color="red", markersize=8)
+plt.plot(lon2, lat2, marker="o", color="magenta", markersize=8)
+plt.show()
 ```
 
+Use `argmin` to find the index in the `number_of_lines` and `pixels_per_line` dimension of the nearest pixel center to each station, and concatentate the result into a dataset with a `station` dimension.
+
 ```{code-cell} ipython3
-lat1, lon1 = 38, -74.5
 distance1 = np.sqrt((dat.latitude - lat1) ** 2 + (dat.longitude - lon1) ** 2)
-line_idx1, pixel_idx1 = np.unravel_index(distance1.argmin().values, distance1.shape)
+index1 = distance1.argmin(...)
 
-lat2, lon2 = 35.5, -74
 distance2 = np.sqrt((dat.latitude - lat2) ** 2 + (dat.longitude - lon2) ** 2)
-line_idx2, pixel_idx2 = np.unravel_index(distance2.argmin().values, distance2.shape)
+index2 = distance2.argmin(...)
 
-wavelengths = dat["wavelength_3d"].values
+station_dat = xr.concat((dat[index1], dat[index2]), "station")
+station_dat
+```
 
-a1 = dat["a"][line_idx1, pixel_idx1, :].values
-bb1 = dat["bb"][line_idx1, pixel_idx1, :].values
-aph1 = dat["aph"][line_idx1, pixel_idx1, :].values
+The spectral plots for the two stations.
 
-a2 = dat["a"][line_idx2, pixel_idx2, :].values
-bb2 = dat["bb"][line_idx2, pixel_idx2, :].values
-aph2 = dat["aph"][line_idx2, pixel_idx2, :].values
-
-# Calculate min/max for each variable across both pixels
-a_min = min(a1.min(), a2.min())
-a_max = max(a1.max(), a2.max())
-
-bb_min = min(bb1.min(), bb2.min())
-bb_max = max(bb1.max(), bb2.max())
-
-aph_min = min(aph1.min(), aph2.min())
-aph_max = max(aph1.max(), aph2.max())
-
-fig, axs = plt.subplots(2, 3, figsize=(8, 6))
+```{code-cell} ipython3
+fig, axs = plt.subplots(2, 3, figsize=(10, 6), sharex=True, sharey="col")
 fig.text(
     0.5,
     0.95,
-    "Location 1: lat=38, lon=-74.5",
+    f"Location 1: lat={lat1}, lon={lon1}",
     ha="center",
     fontsize=14,
     weight="bold",
@@ -478,45 +479,26 @@ fig.text(
 )
 fig.text(
     0.5,
-    0.48,
-    "Location 2: lat=35.5, lon=-74",
+    0.5,
+    f"Location 2: lat={lat2}, lon={lon2}",
     ha="center",
     fontsize=14,
     weight="bold",
     color="magenta",
 )
 
-axs[0, 0].plot(wavelengths, a1, color="blue")
-axs[0, 0].set_title("a (absorption)")
-axs[0, 0].set_ylim(a_min, a_max)
-axs[0, 0].set_ylabel("m-1")
-
-axs[0, 1].plot(wavelengths, bb1, color="orange")
-axs[0, 1].set_title("bb (backscatter)")
-axs[0, 1].set_ylim(bb_min, bb_max)
-
-axs[0, 2].plot(wavelengths, aph1, color="green")
-axs[0, 2].set_title("aph (phytoplankton)")
-axs[0, 2].set_ylim(aph_min, aph_max)
-
-axs[1, 0].plot(wavelengths, a2, color="blue")
-axs[1, 0].set_ylabel("m-1")
-axs[1, 0].set_ylim(a_min, a_max)
-axs[1, 0].set_xlabel("Wavelength (nm)")
-
-axs[1, 1].plot(wavelengths, bb2, color="orange")
-axs[1, 1].set_ylim(bb_min, bb_max)
-axs[1, 1].set_xlabel("Wavelength (nm)")
-
-axs[1, 2].plot(wavelengths, aph2, color="green")
-axs[1, 2].set_ylim(aph_min, aph_max)
-axs[1, 2].set_xlabel("Wavelength (nm)")
+station_dat["a"][0].plot(ax=axs[0, 0], color="blue")
+station_dat["a"][1].plot(ax=axs[1, 0], color="blue")
+station_dat["bb"][0].plot(ax=axs[0, 1], color="orange")
+station_dat["bb"][1].plot(ax=axs[1, 1], color="orange")
+station_dat["aph"][0].plot(ax=axs[0, 2], color="green")
+station_dat["aph"][1].plot(ax=axs[1, 2], color="green")
 
 for ax in axs.flat:
+    ax.set_title(None)
     ax.grid(True)
 
 fig.tight_layout(pad=4.0)
-
 plt.show()
 ```
 
@@ -533,22 +515,31 @@ par = {
     "ifile": l1b_path,
     "ofile": data / l1b_name.replace("L1B", "L2_IOP_mod"), 
     "suite": "IOP",
-    "north": 39,
-    "south": 35,
-    "west": -76,
-    "east": -74.5,
+    **bbox,
     "giop_adg_opt": 2,
-    "l2prod": "fit_par_1_giop fit_par_2_giop fit_par_3_giop a bb aph Kd adg_442 bbp_442 bbp_s rrsdiff aph_unc_442 adg_unc_442 bbp_unc_442 ",
+    "l2prod": " ".join([
+        "fit_par_1_giop",
+        "fit_par_2_giop",
+        "fit_par_3_giop",
+        "a",
+        "bb",
+        "aph",
+        "Kd",
+        "adg_442",
+        "bbp_442",
+        "bbp_s",
+        "rrsdiff",
+        "aph_unc_442",
+        "adg_unc_442",
+        "bbp_unc_442",
+    ]),
 }
 write_par("l2gen_iop_mod.par", par)
 ```
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
+:scrolled: true
+
 !source {env}; l2gen par=l2gen_iop_mod.par 
 ```
 
