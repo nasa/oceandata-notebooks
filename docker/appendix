@@ -10,7 +10,7 @@ RUN git config --system credential.helper 'cache --timeout 86400 --socket /tmp/g
  && sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
 
 # install OCSSW core files (i.e. no $OCSSWROOT/share or $OCSSWROOT/var)
-ARG OCSSWTAG=V2025.2
+ARG OCSSWTAG=V2025.3
 ARG OCSSWROOT=/opt/ocssw
 ARG OCSSWROOT_PUBLIC=/home/${NB_USER}/shared-public/pace-hackweek/ocssw
 ENV OCSSWROOT=${OCSSWROOT}
