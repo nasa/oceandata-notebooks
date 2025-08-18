@@ -8,7 +8,7 @@ kernelspec:
 # Applying Gaussian Pigment (GPig) Phytoplankton Community Composition Algorithm to OCI data
 
 **Authors:** Anna Windle (NASA, SSAI), Max Danenhower (Bowdoin College), Ali Chase (University of Washington) <br>
-Last updated: July 28, 2025
+Last updated: August 18, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -30,7 +30,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 ## Summary
 
 This notebook applies the inversion algorithm described in [Chase et al., 2017][Chase-et-al] to estimate phytoplankton pigment concentrations from PACE OCI Rrs data. This algorithm, called Gaussian Pigment (GPig), is currently being implemented into OBPG's OCSSW software. This work was originally developed in MatLab by Ali Chase and can be found here: https://github.com/alisonpchase/Rrs_inversion_pigments. <br>
-It was translated to Python by Max Danenhower, Charles Stern, and Ali Chase, and can be found here: https://github.com/max-danenhower/pace-rrs-inversions-pigments/tree/main. This tutorial demonstrates how to apply the Python GPig algortithm to Level-2 (L2) and Level-3 Mapped (L3M) PACE OCI data. <br>
+It was translated to Python by Max Danenhower, Charles Stern, and Ali Chase, and can be found here: https://github.com/max-danenhower/pace-rrs-inversions-pigments/tree/main. This tutorial demonstrates how to apply the Python GPig algorithm to Level-2 (L2) and Level-3 Mapped (L3M) PACE OCI data. <br>
 
 [Chase-et-al]: https://doi.org/10.1002/2017JC012859
 
@@ -54,17 +54,12 @@ At the end of this notebook you will know:
 The GPig Python code has been packaged to allow it to be easily installed, imported, and reused. We will use pip install to get the current packaged code from Github. You will need to restart the kernel after running this to use udpated packages.
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
+:scrolled: true
+
 %pip install git+https://github.com/max-danenhower/pace-rrs-inversions-pigments.git
 ```
 
-Next, we'll import all of the packages used in this notebook. 
-
-**TODO: Figure out how to use `from gpig import *`, I think this requires editing the `__init__.py`?**
+Next, we'll import all of the packages used in this notebook.
 
 ```{code-cell} ipython3
 import cartopy.crs as ccrs
@@ -108,18 +103,18 @@ Let's run `L2_utils.load_data()` to download data collected on May 5, 2025 corre
 rrs, sss, sst = L2_utils.load_data(("2025-05-01", "2025-05-01"), (-127, 40, -126, 41))
 ```
 
-You should see 3 new folders in your working directory called 'L2_data', 'sal_data', and 'temp_data', with one data file downloaded in each. Let's take a quick look at Rrs at 500 nm:
+You should see 3 new folders in your working directory called 'L2_rrs_data', 'sal_data', and 'temp_data'. Let's take a quick look at Rrs at 500 nm:
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(rrs)
-dataset = xr.merge(datatree.to_dict().values())
-dataset = dataset.set_coords(("longitude", "latitude"))
+l2_datatree = xr.open_datatree(rrs[0])
+l2_dataset = xr.merge(l2_datatree.to_dict().values())
+l2_dataset = l2_dataset.set_coords(("longitude", "latitude"))
 
-data = dataset["Rrs"].sel({"wavelength_3d": 500})
+l2_data = l2_dataset["Rrs"].sel({"wavelength_3d": 500})
 
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
 
-im = data.plot(
+im = l2_data.plot(
     x="longitude",
     y="latitude",
     vmin=0,
@@ -146,11 +141,50 @@ Now, we can use `L2_utils.estimate_inv_pigments` to calculate phytoplankton pigm
 ?L2_utils.estimate_inv_pigments
 ```
 
-You can see that this function requires user input to create a boundary box for processing. We will select the bounding box between these coordinates:
-45 N, 44 S, -125 E, -126 W. This can take awhile depending on size of bounding box.
+You can see that this function requires a bounding box (bbox) as a parameter. The default is `None` which means it will run the algorithm on every single pixel in the L2 file, which can take a long time. We will supply the `bbox` parameter with the following coordinates:
+45 N, 44 S, -125 E, -126 W. 
+
+Let's first see what this bounding box covers:
 
 ```{code-cell} ipython3
-l2_pigments = L2_utils.estimate_inv_pigments(rrs, sss, sst)
+bbox = (-126, 47, -125, 48)
+lon_min, lat_min, lon_max, lat_max = bbox
+
+l2_data = l2_dataset["Rrs"].sel({"wavelength_3d": 500})
+
+fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
+
+im = l2_data.plot(
+    x="longitude",
+    y="latitude",
+    vmin=0,
+    vmax=0.008,
+    ax=ax,
+    transform=ccrs.PlateCarree(),
+    cbar_kwargs={"label": "Rrs (sr⁻¹)"},
+)
+
+# Add bounding box rectangle
+rect_lon = [lon_min, lon_max, lon_max, lon_min, lon_min]
+rect_lat = [lat_min, lat_min, lat_max, lat_max, lat_min]
+ax.plot(rect_lon, rect_lat, color="red", linewidth=2, transform=ccrs.PlateCarree())
+
+ax.set_extent([-135, -115, 35, 55], crs=ccrs.PlateCarree())
+ax.coastlines(resolution="10m")
+
+gl = ax.gridlines(
+    draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+)
+gl.top_labels = False
+gl.right_labels = False
+
+plt.show()
+```
+
+Let's run it. This can take some time depending on bounding box size.
+
+```{code-cell} ipython3
+l2_pigments = L2_utils.estimate_inv_pigments(rrs[0], sss, sst, bbox)
 l2_pigments
 ```
 
@@ -214,21 +248,21 @@ rrs, sss, sst = L3_utils.load_data(("2024-06-12", "2024-06-12"), "4km")
 Let's quickly look at L3M Rrs at 500 nm:
 
 ```{code-cell} ipython3
-dataset = xr.open_dataset('rrs_data/PACE_OCI.20240612.L3m.DAY.RRS.V3_0.Rrs.4km.nc')
-data = dataset["Rrs"].sel({"wavelength": 500})
+l3_dataset = xr.open_dataset(rrs[0])
+l3_data = l3_dataset["Rrs"].sel({"wavelength": 500})
 
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
 
-im = data.plot(
+im = l3_data.plot(
     x="lon",
     y="lat",
     vmin=0,
     vmax=0.008,
     ax=ax,
     transform=ccrs.PlateCarree(),
-    cbar_kwargs={"label": "Rrs (sr⁻¹)"},
+    cbar_kwargs={"label": "Rrs (sr⁻¹)", "fraction": 0.046},
 )
-#ax.set_extent([-135, -115, 35, 55], crs=ccrs.PlateCarree())
+
 ax.coastlines(resolution="10m")
 
 gl = ax.gridlines(
@@ -248,8 +282,42 @@ Let's look at what `L3_utils.estimate_inv_pigments` requires as input:
 
 We'll provide the Rrs, SSS, and SST file and input a bounding box corresponding to the coast of Washington, U.S.
 
+Let's take a look at what data this bounding box covers:
+
 ```{code-cell} ipython3
 bbox = (-127, 40, -126, 41)
+lon_min, lat_min, lon_max, lat_max = bbox
+
+fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
+
+im = l3_data.plot(
+    x="lon",
+    y="lat",
+    vmin=0,
+    vmax=0.008,
+    ax=ax,
+    transform=ccrs.PlateCarree(),
+    cbar_kwargs={"label": "Rrs (sr⁻¹)"},
+)
+
+# Add bounding box rectangle
+rect_lon = [lon_min, lon_max, lon_max, lon_min, lon_min]
+rect_lat = [lat_min, lat_min, lat_max, lat_max, lat_min]
+ax.plot(rect_lon, rect_lat, color="red", linewidth=2, transform=ccrs.PlateCarree())
+
+ax.set_extent([-130, -115, 32, 50], crs=ccrs.PlateCarree())
+
+ax.coastlines(resolution="10m")
+gl = ax.gridlines(
+    draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+)
+gl.top_labels = False
+gl.right_labels = False
+
+plt.show()
+```
+
+```{code-cell} ipython3
 l3_pigments = L3_utils.estimate_inv_pigments(rrs, sss, sst, bbox)
 l3_pigments
 ```
