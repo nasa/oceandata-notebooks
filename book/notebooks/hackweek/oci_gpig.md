@@ -7,8 +7,9 @@ kernelspec:
 
 # Applying Gaussian Pigment (GPig) Phytoplankton Community Composition Algorithm to OCI data
 
-**Authors:** Anna Windle (NASA, SSAI), Max Danenhower (Bowdoin College), Ali Chase (University of Washington) <br>
-Last updated: August 18, 2025
+**Authors:** Anna Windle (NASA, SSAI), Max Danenhower (Bowdoin College), Ali Chase (University of Washington)
+
+Last updated: August 20, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -29,8 +30,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-This notebook applies the inversion algorithm described in [Chase et al., 2017][Chase-et-al] to estimate phytoplankton pigment concentrations from PACE OCI Rrs data. This algorithm, called Gaussian Pigment (GPig), is currently being implemented into OBPG's OCSSW software. This work was originally developed in MatLab by Ali Chase and can be found here: https://github.com/alisonpchase/Rrs_inversion_pigments. <br>
-It was translated to Python by Max Danenhower, Charles Stern, and Ali Chase, and can be found here: https://github.com/max-danenhower/pace-rrs-inversions-pigments/tree/main. This tutorial demonstrates how to apply the Python GPig algorithm to Level-2 (L2) and Level-3 Mapped (L3M) PACE OCI data. <br>
+This notebook applies the inversion algorithm described in [Chase et al., 2017][Chase-et-al] to estimate phytoplankton pigment concentrations from PACE OCI Rrs data. This algorithm, called Gaussian Pigment (GPig), is currently being implemented in OBPG's OCSSW software. This work was originally [developed in MatLab](https://github.com/alisonpchase/Rrs_inversion_pigments) by Ali Chase and subsequently [translated to Python](https://github.com/max-danenhower/pace-rrs-inversions-pigments) by Max Danenhower, Charles Stern, and Ali Chase. This tutorial demonstrates how to apply the Python GPig algorithm to Level-2 (L2) and Level-3 Mapped (L3M) PACE OCI data.
 
 [Chase-et-al]: https://doi.org/10.1002/2017JC012859
 
@@ -44,19 +44,19 @@ At the end of this notebook you will know:
 ## Contents
 
 1. [Setup](#1.-Setup)
-2. [Run GPig on L2 data](#2.-Run-GPig-on-Level-2-(L2)-data)
-3. [Run GPig on L3M data](#3.-Run-GPig-on-L3-mapped-(L3M)-data)
+2. [Run GPig on L2 Data](#2.-Run-GPig-on-L2-Data)
+3. [Run GPig on L3M Data](#3.-Run-GPig-on-L3M-Data)
 
 +++
 
 ## 1. Setup
 
-The GPig Python code has been packaged to allow it to be easily installed, imported, and reused. We will use pip install to get the current packaged code from Github. You will need to restart the kernel after running this to use udpated packages.
+The GPig Python code has been packaged to allow it to be easily installed, imported, and reused. We will use pip install to get the current packaged code from Github. You may need to restart the kernel after the installation before continuing.
 
-```{code-cell} ipython3
+```{raw-cell}
 :scrolled: true
 
-%pip install git+https://github.com/max-danenhower/pace-rrs-inversions-pigments.git
+%pip install git+https://github.com/max-danenhower/pace-rrs-inversions-pigments
 ```
 
 Next, we'll import all of the packages used in this notebook.
@@ -81,7 +81,7 @@ auth = earthaccess.login(persist=True)
 
 +++
 
-# 2. Run GPig on L2 data
+## 2. Run GPig on L2 Data
 
 +++
 
@@ -91,7 +91,7 @@ Let's first download the data using the `L2_utils.load()` function. Let's take a
 ?L2_utils.load_data
 ```
 
-Running `L2_utils.load_data()` downloads several data files from NASA EarthData: <br>
+Running `L2_utils.load_data()` downloads several data files from NASA EarthData:
 
 * Rrs: PACE OCI Level-2 AOP data products 
 * Sea surface salinity: JPL SMAP-SSS V5.0 CAP, 8-day running mean, level 3 mapped, sea surface salinity (SSS) product from the NASA Soil Moisture Active Passive (SMAP) observatory 
@@ -103,7 +103,7 @@ Let's run `L2_utils.load_data()` to download data collected on May 5, 2025 corre
 rrs, sss, sst = L2_utils.load_data(("2025-05-01", "2025-05-01"), (-127, 40, -126, 41))
 ```
 
-You should see 3 new folders in your working directory called 'L2_rrs_data', 'sal_data', and 'temp_data'. Let's take a quick look at Rrs at 500 nm:
+You should see 3 new folders in your working directory called `L2_rrs_data`, `sal_data`, and `temp_data`. Let's take a quick look at Rrs at 500 nm:
 
 ```{code-cell} ipython3
 l2_datatree = xr.open_datatree(rrs[0])
@@ -114,7 +114,7 @@ l2_data = l2_dataset["Rrs"].sel({"wavelength_3d": 500})
 
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
 
-im = l2_data.plot(
+l2_data.plot(
     x="longitude",
     y="latitude",
     vmin=0,
@@ -125,14 +125,13 @@ im = l2_data.plot(
 )
 ax.set_extent([-135, -115, 35, 55], crs=ccrs.PlateCarree())
 ax.coastlines(resolution="10m")
+ax.add_feature(cfeature.BORDERS, linestyle=":")
 
 gl = ax.gridlines(
     draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
 )
 gl.top_labels = False
 gl.right_labels = False
-
-plt.show()
 ```
 
 Now, we can use `L2_utils.estimate_inv_pigments` to calculate phytoplankton pigment concentrations for this data. Let's take a look at the docstring for this function:
@@ -141,7 +140,7 @@ Now, we can use `L2_utils.estimate_inv_pigments` to calculate phytoplankton pigm
 ?L2_utils.estimate_inv_pigments
 ```
 
-You can see that this function requires a bounding box (bbox) as a parameter. The default is `None` which means it will run the algorithm on every single pixel in the L2 file, which can take a long time. We will supply the `bbox` parameter with the following coordinates:
+You can see that this function accepts a bounding box (bbox) as a parameter. The default is `None` which means it will run the algorithm on every single pixel in the L2 file, which can take a long time. We will supply the `bbox` parameter with the following coordinates:
 45 N, 44 S, -125 E, -126 W. 
 
 Let's first see what this bounding box covers:
@@ -150,41 +149,22 @@ Let's first see what this bounding box covers:
 bbox = (-126, 47, -125, 48)
 lon_min, lat_min, lon_max, lat_max = bbox
 
-l2_data = l2_dataset["Rrs"].sel({"wavelength_3d": 500})
-
-fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
-
-im = l2_data.plot(
-    x="longitude",
-    y="latitude",
-    vmin=0,
-    vmax=0.008,
-    ax=ax,
-    transform=ccrs.PlateCarree(),
-    cbar_kwargs={"label": "Rrs (sr⁻¹)"},
-)
-
-# Add bounding box rectangle
 rect_lon = [lon_min, lon_max, lon_max, lon_min, lon_min]
 rect_lat = [lat_min, lat_min, lat_max, lat_max, lat_min]
 ax.plot(rect_lon, rect_lat, color="red", linewidth=2, transform=ccrs.PlateCarree())
 
-ax.set_extent([-135, -115, 35, 55], crs=ccrs.PlateCarree())
-ax.coastlines(resolution="10m")
-
-gl = ax.gridlines(
-    draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
-)
-gl.top_labels = False
-gl.right_labels = False
-
-plt.show()
+fig
 ```
 
 Let's run it. This can take some time depending on bounding box size.
 
 ```{code-cell} ipython3
 l2_pigments = L2_utils.estimate_inv_pigments(rrs[0], sss, sst, bbox)
+```
+
+The inversion provides four pigment variables.
+
+```{code-cell} ipython3
 l2_pigments
 ```
 
@@ -194,28 +174,18 @@ Let's plot the phytoplankton pigment concentrations:
 variables = ["chla", "chlb", "chlc", "ppc"]
 titles = ["Chlorophyll-a", "Chlorophyll-b", "Chlorophyll-c", "PPC"]
 
-fig, axs = plt.subplots(2,2, figsize=(8, 8),
-    subplot_kw={"projection": ccrs.PlateCarree()},
-    gridspec_kw={"wspace": 0.02, "hspace": 0.05},
-    constrained_layout=True,
-)
+fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": ccrs.PlateCarree()})
 
 for ax, var, title in zip(axs.flat, variables, titles):
-    data = l2_pigments[var].values
-    lon = l2_pigments["longitude"].values
-    lat = l2_pigments["latitude"].values
+    data = l2_pigments[var]
+    lon = l2_pigments["longitude"]
+    lat = l2_pigments["latitude"]
 
-    data = np.where(data > 0, np.log10(data), np.nan)
+    data_log = np.log10(data.where(data > 0))
 
     im = ax.pcolormesh(
-        lon, lat, data, transform=ccrs.PlateCarree(), cmap="viridis", shading="auto"
+        lon, lat, data_log, transform=ccrs.PlateCarree(), cmap="viridis", shading="auto"
     )
-
-    ax.set_title(title)
-    ax.coastlines(resolution="10m")
-    ax.add_feature(cfeature.BORDERS, linestyle=":")
-    ax.set_xlabel("Longitude")
-    ax.set_ylabel("Latitude")
 
     gl = ax.gridlines(
         draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
@@ -223,13 +193,18 @@ for ax, var, title in zip(axs.flat, variables, titles):
     gl.top_labels = False
     gl.right_labels = False
 
-    cbar = fig.colorbar(im, ax=ax, orientation="vertical", shrink=0.8)
-    cbar.set_label(f"log₁₀({var})")
+    ax.set_title(title)
+    ax.set_xlim(bbox[0], bbox[2])
+    ax.set_ylim(bbox[1], bbox[3])
 
+    cbar = fig.colorbar(im, ax=ax, orientation="vertical")
+    cbar.set_label(f"$log_{{10}}({var})$")
+
+plt.tight_layout()
 plt.show()
 ```
 
-# 3. Run GPig on L3M data
+## 3. Run GPig on L3M Data
 
 +++
 
@@ -251,16 +226,15 @@ Let's quickly look at L3M Rrs at 500 nm:
 l3_dataset = xr.open_dataset(rrs[0])
 l3_data = l3_dataset["Rrs"].sel({"wavelength": 500})
 
-fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
+fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": ccrs.PlateCarree()})
 
-im = l3_data.plot(
+l3_data.plot.imshow(
     x="lon",
     y="lat",
     vmin=0,
     vmax=0.008,
     ax=ax,
-    transform=ccrs.PlateCarree(),
-    cbar_kwargs={"label": "Rrs (sr⁻¹)", "fraction": 0.046},
+    cbar_kwargs={"label": r"Rrs ($sr^{-1}$)", "fraction": 0.046},
 )
 
 ax.coastlines(resolution="10m")
@@ -270,8 +244,6 @@ gl = ax.gridlines(
 )
 gl.top_labels = False
 gl.right_labels = False
-
-plt.show()
 ```
 
 Let's look at what `L3_utils.estimate_inv_pigments` requires as input:
@@ -288,67 +260,45 @@ Let's take a look at what data this bounding box covers:
 bbox = (-127, 40, -126, 41)
 lon_min, lat_min, lon_max, lat_max = bbox
 
-fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
-
-im = l3_data.plot(
-    x="lon",
-    y="lat",
-    vmin=0,
-    vmax=0.008,
-    ax=ax,
-    transform=ccrs.PlateCarree(),
-    cbar_kwargs={"label": "Rrs (sr⁻¹)"},
-)
-
-# Add bounding box rectangle
 rect_lon = [lon_min, lon_max, lon_max, lon_min, lon_min]
 rect_lat = [lat_min, lat_min, lat_max, lat_max, lat_min]
 ax.plot(rect_lon, rect_lat, color="red", linewidth=2, transform=ccrs.PlateCarree())
 
 ax.set_extent([-130, -115, 32, 50], crs=ccrs.PlateCarree())
 
-ax.coastlines(resolution="10m")
-gl = ax.gridlines(
-    draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
-)
-gl.top_labels = False
-gl.right_labels = False
-
-plt.show()
+fig
 ```
 
 ```{code-cell} ipython3
 l3_pigments = L3_utils.estimate_inv_pigments(rrs, sss, sst, bbox)
+```
+
+The inversion provides four pigment variables.
+
+```{code-cell} ipython3
 l3_pigments
 ```
 
 Let's plot all phytoplankton pigment concentrations:
 
 ```{code-cell} ipython3
-fig, axs = plt.subplots(2, 2, figsize=(8, 8),
-    subplot_kw={"projection": ccrs.PlateCarree()},
-    constrained_layout=True,
-)
-
 variables = ["chla", "chlb", "chlc", "ppc"]
 titles = ["Chlorophyll-a", "Chlorophyll-b", "Chlorophyll-c", "PPC"]
+
+fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": ccrs.PlateCarree()})
 
 for ax, var, title in zip(axs.flat, variables, titles):
 
     data = l3_pigments[var]
     data_log = np.log10(data.where(data > 0))  
 
-    im = data_log.plot(
+    im = data_log.plot.imshow(
         ax=ax,
-        transform=ccrs.PlateCarree(), 
         cmap="viridis",
         add_colorbar=False,
     )
     ax.coastlines(resolution="10m")
-    ax.add_feature(cfeature.BORDERS, linestyle=":")
     ax.set_title(title)
-    ax.set_xlabel("Longitude")
-    ax.set_ylabel("Latitude")
 
     gl = ax.gridlines(
         draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
@@ -356,8 +306,9 @@ for ax, var, title in zip(axs.flat, variables, titles):
     gl.top_labels = False
     gl.right_labels = False
 
-    fig.colorbar(im, ax=ax, orientation="vertical", shrink=0.7, label=f"log₁₀({var})")
+    fig.colorbar(im, ax=ax, orientation="vertical", label=f"$log_{{10}}({var})$")
 
+plt.tight_layout()
 plt.show()
 ```
 
