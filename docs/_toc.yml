@@ -1,0 +1,41 @@
+format: jb-book
+root: index
+parts:
+  - chapters:
+      - file: setup
+  - caption: Help Hub Core
+    chapters:
+      - file: notebooks/oci/oci_data_access
+        title: Access Data Products
+      - file: notebooks/modis/modis_explore_l2
+        title: Orientation to Level-2
+              # WARNING: skipping unknown output mime type: application/json [mystnb.unknown_mime_type]
+      - file: notebooks/modis/modis_explore_l3
+        title: Orientation to Level-3
+      - file: notebooks/oci/oci_data_visualization
+        title: Data Product Visualization
+      - file: notebooks/oci/oci_project_and_format
+        title: Export for GIS
+  - caption: Ocean
+    chapters:
+      - file: notebooks/oci/oci_file_structure
+  - caption: Cloud & Atmosphere
+    chapters:
+      - file: notebooks/harp2/harp2_l2_aerosol_product
+              # WARNING: Notebook exception traceback saved in: _build/html/reports/notebooks/harp2/harp2_l2_aerosol_product.err.log
+      - file: notebooks/spexone/spexone_l2_aerosol_product
+      - file: notebooks/oci/oci_no2
+      - file: notebooks/oci/ml_cloud_mask
+  - caption: Land
+    chapters:
+      - file: notebooks/oci/oci_terrestrial_data
+              # WARNING: skipping unknown output mime type: application/vnd.holoviews_load.v0+json [mystnb.unknown_mime_type]
+  - caption: SeaDAS
+    chapters:
+      - file: notebooks/oci/oci_ocssw_install
+             # WARNING: Notebook exception traceback saved in: _build/html/reports/notebooks/oci/oci_ocssw_install.err.log [mystnb.exec]
+      - file: notebooks/oci/oci_ocssw_processing_overview
+  - caption: Instruments
+    chapters:
+      - file: notebooks/harp2/harp2_basic_visualizations
+      - file: notebooks/spexone/spexone_basic_visualizations

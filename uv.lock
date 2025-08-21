@@ -1474,6 +1474,22 @@ wheels = [
 ]
 
 [[package]]
+name = "gpig"
+version = "0.1.dev79+g8eee944c6"
+source = { git = "https://github.com/max-danenhower/pace-rrs-inversions-pigments.git#8eee944c6996558c0c316c0d41099998cfced8ab" }
+dependencies = [
+    { name = "cartopy" },
+    { name = "earthaccess" },
+    { name = "h5netcdf" },
+    { name = "matplotlib" },
+    { name = "numba" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "scipy" },
+    { name = "xarray" },
+]
+
+[[package]]
 name = "greenlet"
 version = "3.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3086,6 +3102,9 @@ wheels = [
 name = "oceandata-notebooks"
 version = "0.2.0"
 source = { virtual = "." }
+dependencies = [
+    { name = "gpig" },
+]
 
 [package.dev-dependencies]
 constraints = [
@@ -3306,6 +3325,7 @@ tools = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "gpig", git = "https://github.com/max-danenhower/pace-rrs-inversions-pigments.git" }]
 
 [package.metadata.requires-dev]
 constraints = [

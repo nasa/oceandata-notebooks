@@ -1,4 +1,10 @@
 ---
+jupytext:
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.17.2
 kernelspec:
   name: bash
   language: bash
@@ -7,36 +13,106 @@ kernelspec:
 
 # Maintainer's Guide
 
-We are glad to have your help maintaining tutorials for the [Help Hub] at the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
+We are glad to have your help maintaining the [Help Hub] for the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
+You should already be familiar with the [README](README.md).
+This guide provides additional information on the structure of this repository and maintenaner tasks.
+Maintainers are responsible for:
+1. ensuring the reproducible environment specifications are correct, and
+2. publishing its content on the [Help Hub].
 
-The following subsections provide additional information on the structure of this repo and maintenaner tasks.
-Maintainers are responsible for building HTML files for publishing the content on the [Help Hub], which also tests that the notebooks run successfully in an isolated Python environment.
-Here is how some of the contents of this repo map to the subsections below:
+The following sections map to the contents of the repository as follows:
 
 ```shell
 .
 ├── CONTRIBUTING.md          # (this document)
+├── docs                     # -> GitHub Pages Website
 ├── uv.lock                  # -> Isolated Environment
-├── book                     # -> Rendering to HTML
 ├── pyproject.toml           # -> Dependencies
-├── .pre-commit-config.yaml  # -> Automation and Checks
-└── docker                   # -> Container Image for a JupyterHub
+├── container                # -> Container Image for JupyterHub
+└── .pre-commit-config.yaml  # -> Automation and Checks
 ```
 
-[OB]: https://www.earthdata.nasa.gov/centers/ob-daac
-[Help Hub]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
-
-Use the `uv` command line tool to create a Python environment for maintainer actions.
-Install `uv` as shown next or by one of [many other installation methods][uv].
-
-[uv]: https://docs.astral.sh/uv/getting-started/installation
+Use the `uv` command line tool to create isolated Python environments for maintainer actions.
+If `uv` is not already installed, install it by exectuing the cell below or some other documented [installation method][uv].
 
 > [!Important]
-> This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells.
+> This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells on JupyterLab.
+
+[OB]: https://www.earthdata.nasa.gov/centers/ob-daac/
+[Help Hub]: https://nasa.github.io/oceandata-notebooks/
+[uv]: https://docs.astral.sh/uv/getting-started/installation
 
 ```{code-cell}
-curl -LsSf https://astral.sh/uv/install.sh | sh
+if ! command -v uv; then
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
 ```
+
+## GitHub Pages Website
+
+The `docs` folder contains configuration and content for the [Jupyter Book] we host on [GitHub Pages].
+For all tutorials, the content is formatted as executable MyST Markdown notebooks, and building the notebooks requires executing any tutorials that are not found in the cache.
+We use [DVC] to share that cache among maintainers as well as to the deployment infrastructure on GitHub.
+
+> [!Important]
+> Only notebooks listed in `docs/_toc.yml` are built, so adding a new notebook requires updating `docs/_toc.yml`.
+
+The next cell builds a static website in `docs/_build/html` using `jupyter-book<2`.
+
+[Jupyter Book]: https://jupyterbook.org/
+[DVC]: https://dvc.org/
+
+```{code-cell}
+uvx dvc pull
+```
+
+```{code-cell}
+
+```
+
+```{code-cell}
+:scrolled: true
+
+uv run jupytext --update --to ipynb $(git ls-files book/notebooks)
+```
+
+Now use `jupyter-book` to generate or update the `book/_build` folder.
+This folder is ignored by git, but its contents are provided to the website team.
+
+```{code-cell}
+:scrolled: true
+
+conda run --live-stream -n notebook jupyter-book build --all book
+```
+
+```{code-cell}
+# uv run jcache notebook -p book/_build/.jupyter_cache invalidate
+```
+
+```{code-cell}
+uv run jcache notebook -p book/_build/.jupyter_cache list
+```
+
+Run the next cell to preview the website.
+Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
+
+```{code-cell}
+
+```
+
+```{code-cell}
+:scrolled: true
+
+python -m http.server -d book/_build/html
+```
+
+> [!Note]
+> On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
+
+The `_templates` make the website very plain, on purpose, for the benefit of the website.
+For a navigable website with the same content, comment out the `templates_path` part of `book/_config.yml` and rebuild the website.
+
++++
 
 ## Isolated Environment
 
@@ -52,56 +128,43 @@ On a laptop or on-prem server, there are good reasons to not set these variables
 ```{code-cell}
 :scrolled: true
 
-if [ $(whoami) = "jovyan" ]; then
-  export UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
-  export UV_CACHE_DIR=/tmp/uv/cache
-fi
 uv sync
+```
+
+```{code-cell}
+:scrolled: true
+
 uv run python -m bash_kernel.install --sys-prefix
 ```
 
-## Rendering to HTML
+## Jupyter-Cache
 
-The `book` folder contains configuration for a [Jupyter Book], along with its content (the tutorials as MyST Markdown).
-Rendering the tutorials to HTML with Jupyter Book results in smaller files for tutorial content, a single source of JavaScript and CSS, the ability to cache unchanged tutorials, and some confirmation that all notebooks run without errors.
++++
 
-> [!Important]
-> Only notebooks listed in `book/_toc.yml` are built, so adding a new notebook requires updating `book/_toc.yml`.
+Late effort method for use on cryo cloud ...
 
-The next cell builds the HTML in `book/_build/html`.
-Presently (for `jupyter-book<2`), it's best to build from .ipynb rather than .md, so we generate clean notebooks and exclude (see `book/_config.yml`) the markdown files.
++++
 
-[Jupyter Book]: https://jupyterbook.org/
+First
+```
+jcache cache list
+```
+Followed by "y" in Terminal.
+
+```{code-cell}
+#jcache notebook add --reader jupytext book/notebooks/**/*.md
+uv run jcache notebook add --reader jupytext book/notebooks/hackweek/oci_gpig.md
+```
+
+```{code-cell}
+uv run jcache notebook list
+```
 
 ```{code-cell}
 :scrolled: true
 
-uv run jupytext --quiet --to ipynb $(git ls-files book/notebooks)
+uv run jcache project execute --executor temp-parallel --timeout -1
 ```
-
-Now use `jupyter-book` to generate or update the `book/_build` folder.
-This folder is ignored by git, but its contents are provided to the website team.
-
-```{code-cell}
-:scrolled: true
-
-uv run jupyter-book build book
-```
-
-Run the next cell to preview the website.
-Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
-
-```{code-cell}
-:scrolled: true
-
-python -m http.server -d book/_build/html
-```
-
-> [!Note]
-> On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
-
-The `_templates` make the website very plain, on purpose, for the benefit of the website.
-For a navigable website with the same content, comment out the `templates_path` part of `book/_config.yml` and rebuild the website.
 
 ## Dependencies
 

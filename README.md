@@ -8,7 +8,7 @@ Welcome to the repository of tutorials for users of the [Ocean Biology Distribut
 
 Head over to our [Help Hub] to access the published tutorials.
 
-[Help Hub]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
+[Help Hub]: https://nasa.github.io/oceandata-notebooks/
 
 ## For Notebook Authors and Reviewers
 
@@ -26,9 +26,9 @@ Going one step further, Jupytext can pair an actual Jupyter Notebook file with a
 That lets us enjoy the benefits of Jupyter Notebooks (e.g. saved outputs and metadata) while only storing MyST Markdown in the repository.
 
 What does this mean for authors and reviewers?
-You can use the Jupyter Notebooks in the `notebooks` folder normally, but you must commit the synchronous changes to the paired MyST Markdown files within the `book/notebooks` folder.
-To create the `notebooks` folder after cloning the repository, or when a new MyST Markdown file is pulled, run the following Terminal command.
-The Terminal command will synchronize, creating if necessary, the paired Jupyter Notebook files with all MyST Markdown files tracked by git.
+You can use the Jupyter Notebooks in the `notebooks` folder normally, but you must commit the synchronous changes to the paired MyST Markdown files within the `docs/notebooks` folder.
+To create the `notebooks` folder after cloning the repository, or to create a new Jupyter Notebook when a new MyST Markdown file is pulled, run the following Terminal command.
+This Terminal command will synchronize, creating if necessary, the paired Jupyter Notebook files with all MyST Markdown files tracked by git.
 
 ```shell
 jupytext --sync $(git ls-files book/notebooks)
@@ -41,7 +41,7 @@ jupytext --sync $(git ls-files book/notebooks)
 > [!Note]
 > Create new notebooks by copying `COPYME.ipynb` into a suitable location within the `notebooks` folder.
 
-When you save your new notebook, watch for a new markdown file to appear in the `book/notebooks` folder and add that file to a commit.
+When you save your new notebook, watch for a new markdown file to appear in the `docs/notebooks` folder and add that file to a commit.
 
 ## Acknowledgements
 
