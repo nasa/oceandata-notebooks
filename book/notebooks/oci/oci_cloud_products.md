@@ -7,22 +7,28 @@ kernelspec:
 
 # OCI CLOUD Products
 
-**Authors:** Chamara (NASA, SSAI), Andy (NASA, UMBC), Kirk (NASA), Meng (NASA, SSAI), Sean (NASA, MSU)
+**Authors:** Chamara Rajapakshe (NASA, SSAI), Andy Sayer (NASA, UMBC), Kirk Knobelspiesse (NASA), Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU)
+
+<div class="alert alert-info" role="alert">
+
+An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+
+</div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 
 ## Summary
 
-This notebook summarizes how to access OCI cloud products (CLDMASK and CLOUD) and visualize the variables they contain.
+This notebook summarizes how to access OCI cloud products (CLDMASK and CLOUD) in Level-2 (L2) granules and visualize the variables they contain.
 Note that this notebook is based on an early, preliminary version of the product and is therefore subject to future optimizations and changes.
 
 ## Learning Objectives
+
 By the end of this notebook, you will understand:
 
 - How to acquire OCI CLDMASK and CLOUD L2 data
-- Available variables in the products
-- How to visualize variables
+- Key variables in these products
+- How to visualize those variables
 
 ## Contents
 
@@ -40,23 +46,41 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 ```{code-cell} ipython3
-from pathlib import Path
-from textwrap import wrap
+import re
 
 import cartopy.crs as ccrs
 import earthaccess
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
-import requests
 import xarray as xr
-
-plt.style.use("seaborn-v0_8-notebook")
 ```
+
+Configure matplotlib for all plots below.
+
+```{code-cell} ipython3
+plt.rcParams.update({
+    "xtick.labelsize": 12,
+    "ytick.labelsize": 12,
+})
+plt.style.use("seaborn-v0_8-notebook")
+projection = ccrs.PlateCarree()
+transform = ccrs.PlateCarree(central_longitude=0) # why have a transform?
+```
+
+Define our area and time of interest.
+Note that the bounding box is supplied as latitudes or longitudes in the order west, south, east, then north.
+Also note that the timespan is rounded down for the start and rounded up for the end.
+
+```{code-cell} ipython3
+bbox = (-90, -13, -89, -12)
+tspan = ("2025-07-02", "2025-07-02")
+```
+
+Set (and persist to your home directory as a "netrc" file) or check your Earthdata Login credentials.
 
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
-fs = earthaccess.get_fsspec_https_session()
 ```
 
 [back to top](#Contents)
@@ -66,63 +90,75 @@ fs = earthaccess.get_fsspec_https_session()
 ## 2. Get Level-2 Data
 
 You can find the appropriate product "short name" for CLOUD_MASK and CLOUD products as follows.
+Note that you don't need to do this search if you already know the `short_name` you are interested in.
 
 ```{code-cell} ipython3
-results = earthaccess.search_datasets(instrument="oci")
+:scrolled: true
+
+results = earthaccess.search_datasets(
+    keyword="clouds", instrument="oci", processing_level_id="2",
+)
+```
+
+The keyword "clouds" is easy to guess, but you can always print the full title, as below, even when you don't use a keyword.
+
+```{code-cell} ipython3
 for item in results:
     summary = item.summary()
-    print(summary["short-name"])
+    title = item["umm"]["EntryTitle"][26:]
+    print(f'{summary["short-name"]}: {title}')
 ```
+
+Your may want to look for data in both the refined and near real-time (NRT) collections.
+If your temporal constraint is very recent, the refined product may not be available,
+so your search will fall back on the NRT product.
+The `sort_key` can help when multiple versions are available; the `-revision_date` key
+will show the most recent versions first.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_CLOUD_MASK_NRT",
-    temporal=("2025-07-02", "2025-07-02"),
-    bounding_box=(-90, -15, -89, -14),  # (west, south, east, north) if desired
-    count=1,
+    short_name=["PACE_OCI_L2_CLOUD_MASK", "PACE_OCI_L2_CLOUD_MASK_NRT"],
+    temporal=tspan,
+    bounding_box=bbox,
+    sort_key="-revision_date",
 )
-paths_cldmask = earthaccess.open(results)
+for item in results:
+    display(item)
 ```
 
 ```{code-cell} ipython3
-paths_cldmask
-```
-
-```{code-cell} ipython3
-datatree_cldmask = xr.open_datatree(paths_cldmask[0])
-# datatree
+paths = earthaccess.open(results[:1])
 ```
 
 Here we merge all the data group together for convenience in data manipulations.
 
 ```{code-cell} ipython3
-dataset_cldmask = xr.merge(datatree_cldmask.to_dict().values())
-# dataset
+datatree = xr.open_datatree(paths[0])
+cldmask = xr.merge(datatree.to_dict().values())
+cldmask = cldmask.set_coords(("latitude", "longitude"))
+cldmask
 ```
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_CLOUD_NRT",
-    temporal=("2025-07-02", "2025-07-02"),
-    bounding_box=(-90, -15, -89, -14),  # (west, south, east, north) if desired
-    count=1,
+    short_name=["PACE_OCI_L2_CLOUD", "PACE_OCI_L2_CLOUD_NRT"],
+    temporal=tspan,
+    bounding_box=bbox,
+    sort_key="-revision_date",
 )
-paths_cloud = earthaccess.open(results)
+for item in results:
+    display(item)
 ```
 
 ```{code-cell} ipython3
-paths_cloud
+paths = earthaccess.open(results[:1])
 ```
 
 ```{code-cell} ipython3
-datatree_cloud = xr.open_datatree(paths_cloud[0])
-# datatree
-```
-
-```{code-cell} ipython3
-
-dataset_cloud = xr.merge(datatree_cloud.to_dict().values())
-# dataset
+datatree = xr.open_datatree(paths[0])
+cloud = xr.merge(datatree.to_dict().values())
+cloud = cloud.set_coords(("latitude", "longitude"))
+cloud
 ```
 
 [back to top](#Contents)
@@ -134,55 +170,47 @@ dataset_cloud = xr.merge(datatree_cloud.to_dict().values())
 The product includes two cloud flags. The first, cloud_flag, classifies each pixel as either cloudy or clear. The second, cloud_flag_dilated, provides a more conservative classification: it labels pixels as either cloud-free and not adjacent to cloudy pixels, or as cloudy or adjacent to cloudy pixels.
 
 ```{code-cell} ipython3
-transform = ccrs.PlateCarree(central_longitude=0)
-projection = ccrs.PlateCarree()
-
-def geo_axis_tags(ax, crs=ccrs.PlateCarree(central_longitude=0)):
-    gl = ax.gridlines(crs=crs, draw_labels=True)
-    ax.coastlines()
-    # gl = ax.gridlines(draw_labels=True,linestyle='--',\
-    #     xlocs=mticker.FixedLocator(np.arange(-180,180.1,10)),ylocs=mticker.FixedLocator(np.arange(-90,90.1,10)))
-    gl.top_labels = False
-    gl.right_labels = False
-    gl.xlabel_style = {"size": 12, "color": "k"}
-    gl.ylabel_style = {"size": 12, "color": "k"}
-
-    ax.coastlines()
-    return gl
-def plot_cloud_flag(dataset,cloud_flag_option,fig,ax,transform):
-    '''
+def plot_cloud_flag(dataset, name, fig, ax, transform):
+    """
     To plot projected maps of cloud_flag
     parameters:
         dataset: xarray.core.dataset.Dataset
         cloud_flag_option: 'cloud_flag' or 'cloud_flag_dilated'
         fig,ax : fig,ax = plt.subplots(figsize=(8,6), subplot_kw={'projection':projection=ccrs.PlateCarree(central_longitude=0)})
         transform : ccrs.PlateCarree(central_longitude=0)
-    '''
-    values = [0,1,2]
-    cloud_flag = dataset[cloud_flag_option].values.copy()
-    cloud_flag[np.isnan(cloud_flag)] = 2
-    tab10_colors = plt.get_cmap("tab20",3).colors # First 3 colors
-    colors = list(tab10_colors) + [tab10_colors[-1]]
-    cmap = mcolors.ListedColormap(colors)
-    norm = mcolors.BoundaryNorm(values + [max(values) + 1], cmap.N)
-
-    ctf = ax.pcolormesh(dataset.longitude,dataset.latitude,cloud_flag,cmap=cmap,norm=norm,transform=transform)
+    """
+    array = dataset[name]
+    flag_values = array.attrs["flag_values"]
+    flag_meanings = array.attrs["flag_meanings"].split(", ")
+    cmap = plt.get_cmap("tab20", flag_values.size)
+    cmap.set_bad("grey")
+    ctf = array.plot.pcolormesh(
+        x="longitude",
+        y="latitude",
+        cmap=cmap,
+        vmin=flag_values.min() - 0.5,
+        vmax=flag_values.max() + 0.5,
+        add_colorbar=False,
+        transform=transform,
+    )
     cbar = fig.colorbar(ctf, ax=ax, orientation="vertical")
-    cbar.set_ticks(np.array(values)+0.5)
-    cbar.set_ticklabels(['clear','cloud','invalid'])
-    geo_axis_tags(ax)
+    cbar.set_ticks(flag_values)
+    cbar.set_ticklabels(flag_meanings)
+    ax.gridlines(crs=transform, draw_labels=["left", "bottom"])
+    ax.coastlines()
+    ax.set_title(name)
 ```
 
 ```{code-cell} ipython3
-fig1, ax1 = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
-plot_cloud_flag(dataset_cldmask,'cloud_flag',fig1,ax1,transform)
-ax1.set_title('cloud_flag')
+fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
+plot_cloud_flag(cldmask, "cloud_flag", fig, ax, transform)
+plt.show()
 ```
 
 ```{code-cell} ipython3
-fig1, ax1 = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
-plot_cloud_flag(dataset_cldmask,'cloud_flag_dilated',fig1,ax1,transform)
-ax1.set_title('cloud_flag_dilated')
+fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
+plot_cloud_flag(cldmask, "cloud_flag_dilated", fig, ax, transform)
+plt.show()
 ```
 
 [back to top](#Contents)
@@ -192,119 +220,64 @@ ax1.set_title('cloud_flag_dilated')
 ## 4. Visualizing L2 CLOUD Variables
 
 ```{code-cell} ipython3
-transform = ccrs.PlateCarree(central_longitude=0)
-projection = ccrs.PlateCarree()
-def extremes_removed_ids(x):
+def vlims(array):
     """
-    Returns indices of array x after removing the extreme values
     """
-    q3 = np.percentile(x, 75)
-    q1 = np.percentile(x, 25)
-    xmin = q1 - 1.5 * (q3 - q1)
-    xmax = q3 + 1.5 * (q3 - q1)
-    return (xmin <= x) * (x < xmax)
+    q0, q1, q3, q4 = array.quantile([0, 0.25, 0.75, 1])
+    vmin = q1 - 1.5 * (q3 - q1)
+    vmax = q3 + 1.5 * (q3 - q1)
+    return max(q0, vmin), min(q4, vmax)
 
-
-def geo_axis_tags(ax, crs=ccrs.PlateCarree(central_longitude=0)):
-    gl = ax.gridlines(crs=crs, draw_labels=True)
+def plot_cloud(dataset, name, fig, ax, transform):
+    array = dataset[name]
+    vmin, vmax = vlims(array)
+    array.plot.pcolormesh(
+        x="longitude",
+        y="latitude",
+        ax=ax,
+        cmap="viridis",
+        vmin=vmin,
+        vmax=vmax,
+        transform=transform,
+    )
+    ax.gridlines(crs=transform, draw_labels=["left", "bottom"])
     ax.coastlines()
-    # gl = ax.gridlines(draw_labels=True,linestyle='--',\
-    #     xlocs=mticker.FixedLocator(np.arange(-180,180.1,10)),ylocs=mticker.FixedLocator(np.arange(-90,90.1,10)))
-    gl.top_labels = False
-    gl.right_labels = False
-    gl.xlabel_style = {"size": 12, "color": "k"}
-    gl.ylabel_style = {"size": 12, "color": "k"}
-
-    ax.coastlines()
-    return gl
-def plot_cld_phase_21(dataset,fig,ax,transform):
-    '''
-    Plot cloud phase 2.1 um projected map
-    ----------------------
-    parameters:
-        dataset: xarray.core.dataset.Dataset 
-        fig,ax : fig,ax = plt.subplots(figsize=(8,6), subplot_kw={'projection':projection=ccrs.PlateCarree(central_longitude=0)})
-        transform : ccrs.PlateCarree(central_longitude=0)
-    '''
-    colors = ['red', 'blue', 'green', 'yellow', 'purple']
-    values = [0, 1, 2, 3, 4]
-    cmap = mcolors.ListedColormap(colors)
-    # Define the boundaries and create a BoundaryNorm
-    boundaries = [i - 0.5 for i in range(len(values) + 1)]
-    norm = mcolors.BoundaryNorm(boundaries, cmap.N, clip=True)
-    ph21 = dataset.cld_phase_21.copy()
-    ctf  = ax.pcolormesh(dataset.longitude,dataset.latitude,ph21,cmap=cmap,norm=norm,transform=transform)
-    geo_axis_tags(ax)
-    cbar = fig.colorbar(ctf, ax=ax, orientation="vertical",label="\n".join(wrap('(1: Clear, 2: Water, 3: Ice, 4: Undetermined)',45)))
-    #cbar = add_cb(fig,ctf,ax,orientation='vertical',label="\n".join(wrap('(1: Clear, 2: Water, 3: Ice, 4: Undetermined)',45)))
-    cbar.set_ticks([i for i in range(len(values))])
-    cbar.set_ticklabels(values)
+    ax.set_title(name)
 ```
 
 ```{code-cell} ipython3
-var = "cer_21"
-fig1, ax1 = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
-cmap = plt.get_cmap("viridis", 20)
-_arr = dataset_cloud[var].values
-arr_tes = np.ma.masked_array(_arr, mask=np.isnan(_arr))
-# vmin, vmax = har_l2_tes.read_from_file('retrievals/%s'%variable_list[i],attrs_local='valid_min'), har_l2_tes.read_from_file('retrievals/%s'%variable_list[i],attrs_local='valid_max')
-vmin, vmax = (
-    arr_tes.compressed()[extremes_removed_ids(arr_tes.compressed())].min(),
-    arr_tes.compressed()[extremes_removed_ids(arr_tes.compressed())].max(),
-)
-ctf = ax1.pcolormesh(
-    dataset_cloud.longitude,
-    dataset_cloud.latitude,
-    arr_tes,
-    transform=transform,
-    cmap=cmap,
-    vmin=vmin,
-    vmax=vmax,
-)
-ax1.set_title(var, size=12)
-gl = geo_axis_tags(ax1, crs=transform)
-# plt.colorbar(pm, ax=ax_map, orientation="vertical", pad=0.1, label=label)
-fig1.colorbar(
-    ctf, ax=ax1, orientation="vertical", label="%s [%s]" % (var, dataset_cloud[var].units)
-)
+fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
+plot_cloud(cloud, "cer_21", fig, ax, transform)
+plt.show()
 ```
 
 ```{code-cell} ipython3
-var = "cot_22"
-fig1, ax1 = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
-cmap = plt.get_cmap("viridis", 20)
-_arr = dataset_cloud[var].values
-arr_tes = np.ma.masked_array(_arr, mask=np.isnan(_arr))
-# vmin, vmax = har_l2_tes.read_from_file('retrievals/%s'%variable_list[i],attrs_local='valid_min'), har_l2_tes.read_from_file('retrievals/%s'%variable_list[i],attrs_local='valid_max')
-vmin, vmax = (
-    arr_tes.compressed()[extremes_removed_ids(arr_tes.compressed())].min(),
-    arr_tes.compressed()[extremes_removed_ids(arr_tes.compressed())].max(),
-)
-ctf = ax1.pcolormesh(
-    dataset_cloud.longitude,
-    dataset_cloud.latitude,
-    arr_tes,
-    transform=transform,
-    cmap=cmap,
-    vmin=vmin,
-    vmax=vmax,
-)
-ax1.set_title(var, size=12)
-gl = geo_axis_tags(ax1, crs=transform)
-# plt.colorbar(pm, ax=ax_map, orientation="vertical", pad=0.1, label=label)
-fig1.colorbar(
-    ctf, ax=ax1, orientation="vertical", label="%s [%s]" % (var, dataset_cloud[var].units)
-)
+fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
+plot_cloud(cloud, "cot_22", fig, ax, transform)
+plt.show()
 ```
 
+The "cld_phase_21" variable is currently (as of version 3.1) missing the conventional attributes for enum type variables.
+The following cell, which extracts that missing attribute information from the `long_name` attribute, wouldn't typically be needed!
+
 ```{code-cell} ipython3
-fig1, ax1 = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
-plot_cld_phase_21(dataset_cloud,fig1,ax1,transform)
-ax1.set_title('cld_phase_21')
+array = cloud["cld_phase_21"]
+description = array.attrs["long_name"]
+long_name, flags = description.split(": ")
+flag_pairs = re.findall(r"([0-9]) - ([^,]+)", flags)
+flag_values = np.array([int(a) for a, b in flag_pairs], dtype=array.encoding["dtype"])
+flag_meanings = ", ".join((b.replace(" ", "_") for a, b in flag_pairs))
+array.attrs["long_name"] = long_name
+array.attrs["flag_values"] = flag_values
+array.attrs["flag_meanings"] = flag_meanings
+```
+
+With that patched up, we can visualize the cloud phase using the previously defined function.
+
+```{code-cell} ipython3
+fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
+plot_cloud_flag(cloud, "cld_phase_21", fig, ax, transform)
+plt.show()
 ```
 
 [back to top](#Contents)
-
-```{code-cell} ipython3
-
-```
