@@ -52,12 +52,42 @@ On a laptop or on-prem server, there are good reasons to not set these variables
 ```{code-cell}
 :scrolled: true
 
-if [ $(whoami) = "jovyan" ]; then
-  export UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
-  export UV_CACHE_DIR=/tmp/uv/cache
-fi
 uv sync
+```
+
+```{code-cell}
+:scrolled: true
+
 uv run python -m bash_kernel.install --sys-prefix
+```
+
+## Jupyter-Cache
+
++++
+
+Late effort method for use on cryo cloud ...
+
++++
+
+First
+```
+jcache cache list
+```
+Followed by "y" in Terminal.
+
+```{code-cell}
+#jcache notebook add --reader jupytext book/notebooks/**/*.md
+uv run jcache notebook add --reader jupytext book/notebooks/hackweek/oci_gpig.md
+```
+
+```{code-cell}
+uv run jcache notebook list
+```
+
+```{code-cell}
+:scrolled: true
+
+uv run jcache project execute --executor temp-parallel --timeout -1
 ```
 
 ## Rendering to HTML
@@ -76,7 +106,7 @@ Presently (for `jupyter-book<2`), it's best to build from .ipynb rather than .md
 ```{code-cell}
 :scrolled: true
 
-uv run jupytext --quiet --to ipynb $(git ls-files book/notebooks)
+uv run jupytext --update --to ipynb $(git ls-files book/notebooks)
 ```
 
 Now use `jupyter-book` to generate or update the `book/_build` folder.
@@ -85,7 +115,15 @@ This folder is ignored by git, but its contents are provided to the website team
 ```{code-cell}
 :scrolled: true
 
-uv run jupyter-book build book
+conda run --live-stream -n notebook jupyter-book build --all book
+```
+
+```{code-cell}
+# uv run jcache notebook -p book/_build/.jupyter_cache invalidate
+```
+
+```{code-cell}
+uv run jcache notebook -p book/_build/.jupyter_cache list
 ```
 
 Run the next cell to preview the website.
