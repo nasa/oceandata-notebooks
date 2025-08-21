@@ -53,7 +53,7 @@ At the end of this notebook you will know:
 
 The GPig Python code has been packaged to allow it to be easily installed, imported, and reused. We will use pip install to get the current packaged code from Github. You may need to restart the kernel after the installation before continuing.
 
-```{raw-cell}
+```{code-cell} ipython3
 :scrolled: true
 
 %pip install git+https://github.com/max-danenhower/pace-rrs-inversions-pigments
@@ -69,9 +69,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 from gpig import L2_utils, L3_utils
+
+crs = ccrs.PlateCarree()
 ```
 
-Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
+Set (and persist to your home directory on the host, if needed) your Earthdata Login credentials.
 
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
@@ -101,37 +103,37 @@ Let's run `L2_utils.load_data()` to download data collected on May 5, 2025 corre
 
 ```{code-cell} ipython3
 rrs, sss, sst = L2_utils.load_data(("2025-05-01", "2025-05-01"), (-127, 40, -126, 41))
+datatree = xr.open_datatree(rrs[0])
+dataset = xr.merge(datatree.to_dict().values())
+l2_dataset = dataset.set_coords(("longitude", "latitude"))
 ```
 
 You should see 3 new folders in your working directory called `L2_rrs_data`, `sal_data`, and `temp_data`. Let's take a quick look at Rrs at 500 nm:
 
 ```{code-cell} ipython3
-l2_datatree = xr.open_datatree(rrs[0])
-l2_dataset = xr.merge(l2_datatree.to_dict().values())
-l2_dataset = l2_dataset.set_coords(("longitude", "latitude"))
+fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": crs})
 
-l2_data = l2_dataset["Rrs"].sel({"wavelength_3d": 500})
-
-fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
-
-l2_data.plot(
+data = l2_dataset["Rrs"].sel({"wavelength_3d": 500})
+data.plot(
     x="longitude",
     y="latitude",
     vmin=0,
     vmax=0.008,
     ax=ax,
-    transform=ccrs.PlateCarree(),
-    cbar_kwargs={"label": "Rrs (sr⁻¹)"},
+    cbar_kwargs={"label": "Rrs ($sr^{-1}$)"},
 )
-ax.set_extent([-135, -115, 35, 55], crs=ccrs.PlateCarree())
+
+ax.set_extent([-135, -115, 35, 55], crs=crs)
 ax.coastlines(resolution="10m")
 ax.add_feature(cfeature.BORDERS, linestyle=":")
-
-gl = ax.gridlines(
-    draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+ax.gridlines(
+    draw_labels=["left", "bottom"],
+    linewidth=0.5,
+    color="gray",
+    alpha=0.5,
+    linestyle="--",
 )
-gl.top_labels = False
-gl.right_labels = False
+plt.show()
 ```
 
 Now, we can use `L2_utils.estimate_inv_pigments` to calculate phytoplankton pigment concentrations for this data. Let's take a look at the docstring for this function:
@@ -147,11 +149,11 @@ Let's first see what this bounding box covers:
 
 ```{code-cell} ipython3
 bbox = (-126, 47, -125, 48)
-lon_min, lat_min, lon_max, lat_max = bbox
 
+lon_min, lat_min, lon_max, lat_max = bbox
 rect_lon = [lon_min, lon_max, lon_max, lon_min, lon_min]
 rect_lat = [lat_min, lat_min, lat_max, lat_max, lat_min]
-ax.plot(rect_lon, rect_lat, color="red", linewidth=2, transform=ccrs.PlateCarree())
+ax.plot(rect_lon, rect_lat, color="red", linewidth=2)
 
 fig
 ```
@@ -171,11 +173,10 @@ l2_pigments
 Let's plot the phytoplankton pigment concentrations:
 
 ```{code-cell} ipython3
+fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": crs})
+
 variables = ["chla", "chlb", "chlc", "ppc"]
 titles = ["Chlorophyll-a", "Chlorophyll-b", "Chlorophyll-c", "PPC"]
-
-fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": ccrs.PlateCarree()})
-
 for ax, var, title in zip(axs.flat, variables, titles):
     data = l2_pigments[var]
     lon = l2_pigments["longitude"]
@@ -183,16 +184,15 @@ for ax, var, title in zip(axs.flat, variables, titles):
 
     data_log = np.log10(data.where(data > 0))
 
-    im = ax.pcolormesh(
-        lon, lat, data_log, transform=ccrs.PlateCarree(), cmap="viridis", shading="auto"
-    )
+    im = ax.pcolormesh(lon, lat, data_log, cmap="viridis", shading="auto")
 
-    gl = ax.gridlines(
-        draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+    ax.gridlines(
+        draw_labels=["left", "bottom"],
+        linewidth=0.5,
+        color="gray",
+        alpha=0.5,
+        linestyle="--",
     )
-    gl.top_labels = False
-    gl.right_labels = False
-
     ax.set_title(title)
     ax.set_xlim(bbox[0], bbox[2])
     ax.set_ylim(bbox[1], bbox[3])
@@ -218,17 +218,16 @@ We'll use this to download 4km L3M Rrs data, global SSS, and global SST data for
 
 ```{code-cell} ipython3
 rrs, sss, sst = L3_utils.load_data(("2024-06-12", "2024-06-12"), "4km")
+l3_dataset = xr.open_dataset(rrs[0])
 ```
 
 Let's quickly look at L3M Rrs at 500 nm:
 
 ```{code-cell} ipython3
-l3_dataset = xr.open_dataset(rrs[0])
-l3_data = l3_dataset["Rrs"].sel({"wavelength": 500})
+fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": crs})
 
-fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": ccrs.PlateCarree()})
-
-l3_data.plot.imshow(
+data = l3_dataset["Rrs"].sel({"wavelength": 500})
+data.plot.imshow(
     x="lon",
     y="lat",
     vmin=0,
@@ -238,12 +237,15 @@ l3_data.plot.imshow(
 )
 
 ax.coastlines(resolution="10m")
-
-gl = ax.gridlines(
-    draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+ax.gridlines(
+    draw_labels=["left", "bottom"],
+    linewidth=0.5,
+    color="gray",
+    alpha=0.5,
+    linestyle="--",
 )
-gl.top_labels = False
-gl.right_labels = False
+
+plt.show()
 ```
 
 Let's look at what `L3_utils.estimate_inv_pigments` requires as input:
@@ -258,13 +260,13 @@ Let's take a look at what data this bounding box covers:
 
 ```{code-cell} ipython3
 bbox = (-127, 40, -126, 41)
-lon_min, lat_min, lon_max, lat_max = bbox
 
+lon_min, lat_min, lon_max, lat_max = bbox
 rect_lon = [lon_min, lon_max, lon_max, lon_min, lon_min]
 rect_lat = [lat_min, lat_min, lat_max, lat_max, lat_min]
-ax.plot(rect_lon, rect_lat, color="red", linewidth=2, transform=ccrs.PlateCarree())
+ax.plot(rect_lon, rect_lat, color="red", linewidth=2)
 
-ax.set_extent([-130, -115, 32, 50], crs=ccrs.PlateCarree())
+ax.set_extent([-130, -115, 32, 50], crs=crs)
 
 fig
 ```
@@ -282,29 +284,30 @@ l3_pigments
 Let's plot all phytoplankton pigment concentrations:
 
 ```{code-cell} ipython3
+fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": crs})
+
 variables = ["chla", "chlb", "chlc", "ppc"]
 titles = ["Chlorophyll-a", "Chlorophyll-b", "Chlorophyll-c", "PPC"]
-
-fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": ccrs.PlateCarree()})
-
 for ax, var, title in zip(axs.flat, variables, titles):
 
     data = l3_pigments[var]
-    data_log = np.log10(data.where(data > 0))  
+    data_log = np.log10(data.where(data > 0))
 
     im = data_log.plot.imshow(
         ax=ax,
         cmap="viridis",
         add_colorbar=False,
     )
+    
     ax.coastlines(resolution="10m")
     ax.set_title(title)
-
-    gl = ax.gridlines(
-        draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+    ax.gridlines(
+        draw_labels=["left", "bottom"],
+        linewidth=0.5,
+        color="gray",
+        alpha=0.5,
+        linestyle="--",
     )
-    gl.top_labels = False
-    gl.right_labels = False
 
     fig.colorbar(im, ax=ax, orientation="vertical", label=f"$log_{{10}}({var})$")
 
