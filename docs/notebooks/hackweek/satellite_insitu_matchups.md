@@ -13,7 +13,7 @@ kernelspec:
 
 # Matchups of in situ data with satellite data
 
-**Demo Leads:** James Allen (NASA, MSU), Anna Windle (NASA, SSAI)
+**Authors:** James Allen (NASA, MSU), Anna Windle (NASA, SSAI)
 
 ## Summary
 
@@ -1460,7 +1460,6 @@ Note: This section will actually take quite a while to pull enough granules for 
 </div>
 
 ```{code-cell} ipython3
-:scrolled: true
 :tags: [scroll-output]
 
 # Pull out coordinates
@@ -1506,7 +1505,6 @@ We will use the function `match_data` to create a matchup dataframe based on sel
 ```
 
 ```{code-cell} ipython3
-:scrolled: true
 :tags: [scroll-output]
 
 matchups = match_data(
@@ -1518,7 +1516,7 @@ matchups = match_data(
     max_time_diff=180,
     std_max=1.5,
 )
-matchups
+matchups.head()
 ```
 
 Pull out wavelengths and Rrs data from matchups
@@ -1578,8 +1576,4 @@ df_stats = pd.DataFrame(stats_list)
 df_stats.set_index("wavelength", inplace=True)
 df_stats = df_stats.fillna(-999)
 df_stats
-```
-
-```{code-cell} ipython3
-
 ```
