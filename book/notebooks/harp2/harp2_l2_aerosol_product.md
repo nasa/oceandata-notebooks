@@ -159,7 +159,7 @@ We also need the spatial and angle dimensions as below:
 lat = dataset["latitude"].values
 lon = dataset["longitude"].values
 plot_range = [lon.min(), lon.max(), lat.min(), lat.max()]
-wavelength = dataset["wavelength_3d"].values
+wavelength = dataset["wavelength"].values
 print(wavelength)
 ```
 
