@@ -13,7 +13,9 @@ kernelspec:
 
 # Processing with OCSSW Command Line Interface (CLI)
 
-**Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
+**Author(s):** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -48,14 +50,6 @@ At the end of this notebok you will know:
 * How to process Level-1B (L1B) data to Level-2 (L2) with `l2gen`
 * How to merge two images with `l2bin`
 * How to create a map with `l3mapgen`
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Get L1B Data](#2.-Get-L1B-Data)
-3. [Process L1B Data with `l2gen`](#3.-Process-L1B-Data-with-l2gen)
-4. [Composite L2 Data with `l2bin`](#4.-Composite-L2-Data-with-l2bin)
-5. [Make a Map from Binned Data with `l3mapgen`](#5.-Make-a-Map-from-Binned-Data-with-l3mapgen)
 
 +++
 
@@ -114,8 +108,6 @@ This docstring follows the NumPy [style guide], which is one of a few common con
 help(write_par)
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 2. Get L1B Data
@@ -173,8 +165,6 @@ f = earthaccess.open([ifile], provider="OB_CLOUD")
 dataset = xr.open_dataset(f[0], group="observation_data")
 plot = dataset["rhot_red"][dict(red_bands=100)].plot()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -269,8 +259,6 @@ a lot of information about the specifics of what the `l2gen` program generates f
 
 The next step for this tutorial is to merge multiple L2 granules together.
 
-[back to top](#Contents)
-
 +++
 
 ## 4. Composite L2 Data with `l2bin`
@@ -342,8 +330,6 @@ Now run `l2bin` using your chosen parameters:
 !source {env}; l2bin par=l2bin.par
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 5. Make a Map from Binned Data with `l3mapgen`
@@ -397,8 +383,6 @@ ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.3)
 ax.coastlines(linewidth=0.5)
 plt.show()
 ```
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

@@ -13,7 +13,9 @@ kernelspec:
 
 # Matchups of in situ data with satellite data
 
-**Authors:** James Allen (NASA, MSU), Anna Windle (NASA, SSAI)
+**Author(s):** James Allen (NASA, MSU), Anna Windle (NASA, SSAI)
+
+Last updated: August 3, 2025
 
 ## Summary
 
@@ -35,14 +37,6 @@ At the end of this notebook you will be able to:
 - Visualize matchup performance with statistical plots (Bland-Altman and scatter)
 
 Throughout, you'll gain experience with Python tools including `pandas`, `xarray`, and `matplotlib`, as well as real-world remote sensing workflows.
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Process AERONET-OC data](#2.-Process-AERONET-OC-data)
-3. [Download PACE OCI granules](#3.-Download-PACE-OCI-granules)
-4. [Apply matchup code](#4.-Apply-matchup-code)
-5. [Make plots](#5.-Make-plots)
 
 +++
 
@@ -66,7 +60,7 @@ jupyter:
 ---
 """Helper functions for PACE Hackweek Validation Tutorial.
 
-Authors:
+Author(s):
     James Allen and Anna Windle
 """
 

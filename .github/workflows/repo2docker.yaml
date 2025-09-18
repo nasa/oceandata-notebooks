@@ -1,9 +1,9 @@
-name: build jupyterhub image
+name: build container image
 on:
   push:
     paths:
       - .github/workflows/repo2docker.yaml
-      - docker/**
+      - container/**
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
@@ -22,20 +22,22 @@ jobs:
       - name: checkout files in repo
         uses: actions/checkout@v4
         with:
-          sparse-checkout: docker
+          sparse-checkout: container
           sparse-checkout-cone-mode: false
       - name: move repo2docker files
         run: |
-          mv docker/* .
-          rmdir docker
+          mv container/* .
+          rmdir container
           ls
-      - name: build with repo2docker
-        uses: jupyterhub/repo2docker-action@master
+      - name: repo2docker action
+        uses: jupyterhub/repo2docker-action@0.3
         with:
           DOCKER_USERNAME: ${{ github.repository_owner }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_REGISTRY: ghcr.io
           LATEST_TAG_OFF: true
-          REPO_DIR: /srv/docker
+          REPO_DIR: /srv/container
           APPENDIX_FILE: appendix
-          FORCE_REPO2DOCKER_VERSION: "git+https://github.com/jupyterhub/repo2docker@5d3a946b24608f1856218eb89861d552e9b826af"
+      - name: cleanup
+        run: |
+          find /srv/container -not -name start -delete

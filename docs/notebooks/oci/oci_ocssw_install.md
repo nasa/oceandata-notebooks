@@ -13,7 +13,9 @@ kernelspec:
 
 # Installing and Running OCSSW Command-line Tools
 
-**Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
+**Author(s):** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -45,12 +47,6 @@ At the end of this notebok you will know:
 * How to set up your OCSSW session
 * How to process a L1B file to L2 using l2gen
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Install OCSSW](#2.-Install-OCSSW)
-3. [All-in-One](#3.-All-in-One)
-
 +++
 
 ## 1. Setup
@@ -81,8 +77,6 @@ Convert the following cell from type "Raw" to "Code", using the notebook menu, a
 Follow the prompts from conda to proceed with any installs and updates. If prompted, enter "y" to accept.
 
 Confirm the bash kernel is installed by starting a new Launcher. You should see the bash kernel along with Python and other kernels installed in your JupyterHub. You should now **change the kernel of the notebook** by clicking on the kernel name in the upper-right corner of the window and selecting the Bash kernel before moving on to the rest of the tutorial.
-
-[back to top](#Contents)
 
 +++
 
@@ -139,6 +133,8 @@ Install OCSSW using the `--tag` argument to pick from the list above. Also provi
 *Tip:* The process is not finished as long as the counter to the left of the cell shows `[*]`. It will take some time to install all the tools (7 of 7 installations).
 
 ```{code-cell}
+:tags: [skip-execution]
+
 ./install_ocssw --tag=$TAG --seadas --oci
 ```
 
@@ -159,8 +155,6 @@ l2gen --version
 
 You are now ready to run `l2gen`, the Level-2 processing function for all ocean color instruments under the auspices of the GSFC Ocean Biology Processing Group!
 
-[back to top](#Contents)
-
 +++
 
 ## 3. All-in-One
@@ -171,6 +165,8 @@ to run together.
 If you are starting from scratch ...
 
 ```{code-cell}
+:tags: [skip-execution]
+
 wget -q -nc https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw
 wget -q -nc https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py
 chmod +x install_ocssw
@@ -182,12 +178,12 @@ export TAG="$(./install_ocssw --list_tags | grep '^V' | tail -n 1)"
 If you have already installed OCSSW and want to update ...
 
 ```{code-cell}
+:tags: [skip-execution]
+
 export OCSSWROOT=${OCSSWROOT:-/tmp/ocssw}
 export TAG="$(install_ocssw --list_tags | grep '^V' | tail -n 1)"
 install_ocssw --tag=$TAG --seadas --oci
 ```
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

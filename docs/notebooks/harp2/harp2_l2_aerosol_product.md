@@ -13,10 +13,9 @@ kernelspec:
 
 # Visualize HARP2 L2 aerosol product (FastMAPOL)
 
-**Authors:** Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU), Kamal Aryal (UMBC)
+**Author(s):** Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU), Kamal Aryal (UMBC)
 
-[edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
+Last updated: August 3, 2025
 
 ## Summary
 This notebook explores the HARP2 Level 2 (L2) aerosol product derived from the joint aerosol and surface retrieval algorithm: FastMAPOL (Fast Multi-Angle Polarimetric Ocean and Land algorithm). For more detailed information about the algorithm, please refer to the relevant documentation.
@@ -32,18 +31,6 @@ By the end of this notebook, you will understand:
 - What aerosol products are available
 - How to visualize basic aerosol properties
 - How to evaluate data quality
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Get Level-2 Data](#2.-Get-Level-2-Data)
-3. [Understanding HARP2 L2 product structure](#3.-Understanding-HARP2-L2-product-structure)
-4. [Visulize HARP2 L2 aerosol properties](#4.-Visulize-HARP2-L2-aerosol-properties)
-5. [Improve data quality: filter low AOD pixels](#5.-Improve-data-quality:-filter-low-AOD-pixels)
-6. [Advanced quality assessment](#6.-Advanced-quality-assessment)
-7. [Optional: Multi-angle data mask for cloud and data screening](#7.-Optional:-Multi-angle-data-mask-for-cloud-and-data-screening)
-8. [Optional: pixel level uncertainty estimation](#8.-Optional:-pixel-level-uncertainty-estimation)
-9. [Reference](#9.-Reference)
 
 +++
 
@@ -68,8 +55,6 @@ import xarray as xr
 auth = earthaccess.login(persist=True)
 fs = earthaccess.get_fsspec_https_session()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -109,8 +94,6 @@ dataset = xr.merge(datatree.to_dict().values())
 dataset
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 3. Understanding HARP2 L2 product structure
@@ -143,8 +126,6 @@ There are two versions of remote sensing reflectance: Rrs1 (before BRDF correcti
 ```{code-cell} ipython3
 datatree["geophysical_data"]
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -243,8 +224,6 @@ plot_l2_product(
 )
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 5. Improve data quality: filter low AOD pixels
@@ -284,8 +263,6 @@ plot_l2_product(
     data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
 )
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -356,8 +333,6 @@ We can evaluate quality flag based on the $\chi^2$ and $N$, and only a small por
 
 +++
 
-[back to top](#Contents)
-
 +++
 
 ## 7. Optional: Multi-angle data mask for cloud and data screening
@@ -392,8 +367,6 @@ plot_l2_product(
 )
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 8. Optional: pixel level uncertainty estimation.
@@ -403,8 +376,6 @@ plot_l2_product(
 As mentioned previously, pixel level uncertainty can be evalated through error propagation, which propgation measurement uncertainty through Jacobian of the forward model. The estimated uncertainties are discussed in (Gao et al 2021) for HARP2 and AirHARP, but currently not included in the HARP2 L2 products.
 
 +++
-
-[back to top](#Contents)
 
 +++
 
@@ -418,4 +389,3 @@ As mentioned previously, pixel level uncertainty can be evalated through error p
 
 +++
 
-[back to top](#Contents)

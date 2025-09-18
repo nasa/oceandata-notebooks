@@ -13,7 +13,9 @@ kernelspec:
 
 # Explore Level-2 Ocean Color Data from the Moderate Resolution Imaging Spectroradiometer (MODIS)
 
-**Authors:** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
+**Author(s):** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-info" role="alert">
 
@@ -42,14 +44,6 @@ At the end of this notebok you will know:
 * How to download files using `earthaccess`
 * How to create a plot using `xarray`
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [NASA Earthdata Authentication](#2.-NASA-Earthdata-Authentication)
-3. [Search for Data](#3.-Search-for-Data)
-4. [Download Data](#4.-Download-Data)
-5. [Plot Data](#5.-Plot-Data)
-
 +++
 
 ## 1. Setup
@@ -68,8 +62,6 @@ import numpy as np
 import xarray as xr
 from IPython.display import JSON
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -95,8 +87,6 @@ it's also harmless) for subsequent calls to <code>earthaccess.login</code>.
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -157,8 +147,6 @@ Or we can interactively inspect all the fields underlying all results.
 JSON(results)
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 4. Download Data
@@ -168,8 +156,6 @@ Since the data are not hosted in the Earthdata Cloud (see output from `results[0
 ```{code-cell} ipython3
 paths = earthaccess.download(results, local_path="L2")
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -223,8 +209,6 @@ ax.add_feature(cartopy.feature.STATES, linewidth=0.5)
 ax.set_title(dataset.attrs["product_name"], loc="center")
 plt.show()
 ```
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

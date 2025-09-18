@@ -13,7 +13,8 @@ kernelspec:
 
 # Orientation to Earthdata Cloud Access
 
-**Tutorial Lead:** Anna Windle (NASA, SSAI) <br>
+**Author(s):** Anna Windle (NASA, SSAI)
+
 Last updated: August 1, 2025
 
 <div class="alert alert-info" role="alert">
@@ -50,13 +51,6 @@ running**. There are three cases to distinguish:
 1. The notebook is running on a remote host, but it does not have direct access to the AWS us-west-2 region. For instance, you are running in [Google Colab][colab], which is run on the Google cloud.
 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud (AWS us-west-2 region). This is the case for the PACE Hackweek with CryoCloud.
 
-[pypi]: https://pypi.org/
-[conda]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-data-access/
-[cmr]: https://www.earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/cmr
-[edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
-[earthaccess-docs]: https://earthaccess.readthedocs.io/en/latest/
-[colab]: https://colab.research.google.com/
-
 ## Learning Objectives
 
 At the end of this notebook you will know:
@@ -65,13 +59,12 @@ At the end of this notebook you will know:
 * How to use `earthaccess` to search for OCI data using search filters
 * How to download OCI data, but only when you need to
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [NASA Earthdata Authentication](#2.-NASA-Earthdata-Authentication)
-3. [Search for Data](#3.-Search-for-Data)
-4. [Open Data](#4.-Open-Data)
-5. [Download Data](#5.-Download-Data)
+[pypi]: https://pypi.org/
+[conda]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-data-access/
+[cmr]: https://www.earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/cmr
+[edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
+[earthaccess-docs]: https://earthaccess.readthedocs.io/en/latest/
+[colab]: https://colab.research.google.com/
 
 +++
 
@@ -86,8 +79,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -115,8 +106,6 @@ it's also harmless) for subsequent calls to `earthaccess.login`.
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -196,8 +185,6 @@ command.
 results[0]
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 4. Open L2 Data
@@ -262,8 +249,6 @@ plot = dataset["chlor_a"].plot(
     x="longitude", y="latitude", cmap="viridis", vmax=5, ax=ax
 )
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -361,4 +346,3 @@ We can open up that locally saved file using `xarray` as well.
 xr.open_datatree(paths[0])
 ```
 
-[back to top](#Contents)

@@ -13,7 +13,9 @@ kernelspec:
 
 # Orientation to PACE/OCI Terrestrial Products
 
-**Tutorial Lead:** Skye Caplan (NASA, SSAI)
+**Author(s):** Skye Caplan (NASA, SSAI)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-info" role="alert">
 
@@ -37,13 +39,6 @@ By the end of this tutorial you will be able to:
 - Mask features you can ignore using built-in flags
 - Compare VIs developed using different spectral features
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Search and Open Surface Reflectance Data](#2.-Search-and-Open-Surface-Reflectance-Data)
-3. [Mask Data for Clouds and Water](#3.-Mask-for-Clouds-and-Water)
-4. [Working with PACE Terrestrial Data](#4.-Working-with-PACE-Terrestrial-Data)
-
 +++
 
 ## 1. Setup
@@ -62,8 +57,6 @@ import xarray as xr
 
 crs = cartopy.crs.PlateCarree()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -144,8 +137,6 @@ Great! We've plotted the surface reflectance at a single band for the whole scen
 
 +++
 
-[back to top](#Contents)
-
 +++
 
 ## 3. Mask for Clouds and Water
@@ -194,8 +185,6 @@ ax.add_feature(cartopy.feature.LAKES, edgecolor="k", linewidth=0.1)
 rhos_860.plot(x="longitude", y="latitude", cmap="Greys_r", vmin=0, vmax=1.0)
 plt.show()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -347,8 +336,6 @@ array.hvplot(
     widget_location='top',
 )
 ```
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

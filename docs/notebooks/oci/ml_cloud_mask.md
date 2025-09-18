@@ -13,7 +13,9 @@ kernelspec:
 
 # Machine Learning Tutorial
 
-**Tutorial Lead:** Sean Foley (NASA, MSU)
+**Author(s):** Sean Foley (NASA, MSU)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -40,23 +42,10 @@ At the end of this notebook you will know:
 - How to construct a training loop in Pytorch
 
 Stretch goals:
+
 - How to use a GPU to speed up training
 - How to use a convolutional neural network to process images better and faster
 - How to augment your training data to improve generalization
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Cloud Masking](#2.-Cloud-Masking)
-3. [Training, Validation, and Test Sets](#3.-Training,-Validation,-and-Test-Sets)
-4. [Datasets and DataLoaders](#4.-Datasets-and-DataLoaders)
-5. [A Simple Multi-Layer Perceptron](#5.-A-Simple-Multi-Layer-Perceptron)
-6. [Optimization](#6.-Optimization)
-7. [A Minimal Training Loop](#7.-A-Minimal-Training-Loop)
-8. [Running on GPU/CUDA](#8.-Running-on-GPU-/-CUDA)
-9. [Convolutional Neural Networks](#9.-Convolutional-Neural-Networks)
-10. [Putting It All Together](#10.-Putting-It-All-Together)
-11. [Want More?](#11.-Want-More?)
 
 +++
 
@@ -113,8 +102,6 @@ if not pathlib.Path(CLDMASK_PATH).exists():
     shutil.move("_temp_cldmask_dataset", pathlib.Path(CLDMASK_PATH))
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 2. Cloud Masking
@@ -163,8 +150,6 @@ len(list((CLDMASK_PATH / "output").glob("*.png")))
 ```
 
 Wow! That's a lot. And this represents a small fraction of the available data since PACE has launched. With PACE, we truly are drowning in data. This is why machine learning is such a valuable tool for us. Next, let's talk about how we're going to use that data.
-
-[back to top](#Contents)
 
 +++
 
@@ -219,8 +204,6 @@ def generate_split(name: str, replace: bool = False) -> None:
 
 generate_split("default_split")
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -321,8 +304,6 @@ for inp, validity, labels in train_loader:
 print(inp.shape, validity.shape, labels.shape)
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 5. A Simple Multi-Layer Perceptron
@@ -401,8 +382,6 @@ plt.subplots_adjust(wspace=None, hspace=None)
 plt.show()
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 6. Optimization
@@ -441,8 +420,6 @@ optimizer.zero_grad()  # zero out the optimizer for next time (don't forget to d
 That was so easy! You might be asking, how does `loss.backward()` magically know all of the gradients of all of the functions we called several cells ago? Well, that's because torch has automatic differentiation built in. Torch functions will set up the backward pass as it computes the forward pass. Under the hood, torch will build a computation graph for the operations you use. [More details about autograd here.](https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html) This is also why torch arrays are called "tensors." A tensor is like an array, but its storage can also keep track of its gradient. Torch keeps the gradient computation hidden under the hood, and allows us to operate on tensors in almost exactly the same way as numpy arrays.
 
 In practice, there are much better alternatives to SGD. A great default optimizer which will work fine in 99% of cases is called [Adam](https://pytorch.org/docs/stable/generated/torch.optim.Adam.html) (no, that's not an acronym). For the rest of the tutorial we'll use Adam instead of SGD.
-
-[back to top](#Contents)
 
 +++
 
@@ -572,8 +549,6 @@ If you want to check out more examples, you can rerun the cell to get a new batc
 
 You might notice some problems with our predictions. You might see quite a few examples of the model misclassifying small clouds. Large clouds will dominate the data, and the model can achieve a high accuracy without accurately masking these smaller clouds. You might even see occasional images where the model is totally wrong - predicting all cloud or all no-cloud when the scene is actually partly cloudy. We can do better!
 
-[back to top](#Contents)
-
 +++
 
 ## 8. Running on GPU / CUDA
@@ -608,8 +583,6 @@ print(
     f"Device IDs | rand_cpu: {rand_cpu.device} | rand_gpu1: {rand_gpu1.device} | rand_gpu2: {rand_gpu2.device}"
 )
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -809,8 +782,6 @@ test_output = simple_cnn(test_input)
 print(f"Should be (8, 1, 64, 64): {test_output.shape}")
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 10. Putting It All Together
@@ -910,8 +881,6 @@ plt.xlabel("batch index")
 plt.show()
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 11. Want More?
@@ -926,4 +895,3 @@ This notebook is already massive, although there are many more topics we wish we
 - check out [transformers](https://arxiv.org/abs/1706.03762) and [vision transformers](https://arxiv.org/abs/2010.11929) for a newer, fancier alternative to CNNs
 - play around with [tensorboard](https://pytorch.org/tutorials/recipes/recipes/tensorboard_with_pytorch.html) to track your model's progress in real time
 
-[back to top](#Contents)

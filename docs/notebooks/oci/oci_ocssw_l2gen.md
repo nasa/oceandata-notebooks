@@ -11,11 +11,10 @@ kernelspec:
   name: python3
 ---
 
-+++ {"jp-MarkdownHeadingCollapsed": true}
-
 # Run Level-2 Generator (l2gen) OCSSW program on OCI data
 
-**Authors:** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA) <br>
+**Author(s):** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA)
+
 Last updated: August 1, 2025
 
 <div class="alert alert-success" role="alert">
@@ -63,14 +62,6 @@ At the end of this notebook you will know:
 - How to process L1B data to L2 using `l2gen` with geographical boundaries
 - How to extract geographic regions from a L2 file and create a new file
 - How to make modifications to `l2gen` based on your research needs
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Search and access L1B Data ](#2.-Search-and-access-L1B-data)
-3. [Run l2gen with default configurations](#3.-Run-l2gen-with-default-configurations)
-4. [Compare the newly generated file with a standard OB.DAAC file](#4.-Compare-the-newly-generated-file-with-a-standard-OB.DAAC-file)
-5. [Run l2gen with modifications to configurations](#5.-Run-l2gen-with-modifications-to-configurations)
 
 +++
 
@@ -267,8 +258,6 @@ def write_par(path, par):
         writer.writerows(par.items())
 ```
 
-[back to top](#Contents)
-
 +++
 
 # 2. Search and access L1B data 
@@ -315,8 +304,6 @@ dataset = xr.merge(dataset.to_dict().values())
 dataset = dataset.set_coords(("longitude", "latitude"))
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -407,8 +394,6 @@ Let's do a quick plot of Rrs at 550 nm:
 plot = dat["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
 ```
 
-[back to top](#Contents)
-
 +++
 
 # 4. Compare the newly generated file with a standard OB.DAAC file
@@ -489,8 +474,6 @@ plt.show()
 Other than a negligible number of oddball points, the data are identical. This shows that an end-user can exactly reproduce the data distributed by the OB.DAAC!
 
 +++
-
-[back to top](#Contents)
 
 +++
 
@@ -627,8 +610,6 @@ plt.show()
 You can see that disabling the BRDF does in fact change Rrs values.
 
 +++
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

@@ -13,7 +13,8 @@ kernelspec:
 
 # Exploring nitrogen dioxide (NO<sub>2</sub>) data from OCI
 
-**Authors:** Anna Windle (NASA, SSAI), Zachary Fasnacht (NASA, SSAI) <br>
+**Author(s):** Anna Windle (NASA, SSAI), Zachary Fasnacht (NASA, SSAI)
+
 Last updated: July 28, 2025
 
 <div class="alert alert-success" role="alert">
@@ -38,14 +39,6 @@ At the end of this notebook you will know:
 - What to select from the XArray `DataTree` objects representing hierarchichal datasets
 - Where to find high NO<sub>2</sub> vertical column retrievals (hint: it's a big city)
 - How to create a time series of NO<sub>2</sub> data collected at a single location
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Download NO<sub>2</sub> Data](#2.-Download-NO<sub>2</sub>-Data)
-3. [Read in data using `xarray` and plot](#3.-Read-in-data-using-xarray-and-plot)
-4. [Interactive NO<sub>2</sub> plot](#4.-Interactive-NO<sub>2</sub>-plot)
-5. [Time Series](#5.-Time-Series)
 
 +++
 
@@ -73,8 +66,6 @@ holoviews.config.image_rtol = 1e-2
 swap_dims = {"nlon": "longitude", "nlat": "latitude"}
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 2. Download NO<sub>2</sub> Data
@@ -90,8 +81,6 @@ url = "https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/NO2_L3_Gridded_NAmerica/PACE_
 fs = fsspec.filesystem("https")
 path = fs.open(url, cache_type="blockcache")
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -232,8 +221,6 @@ We've created two plots, and now we combine them, add styling, and display.
     show_grid=True,
 )
 ```
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

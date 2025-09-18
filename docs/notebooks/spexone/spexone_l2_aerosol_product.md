@@ -13,7 +13,9 @@ kernelspec:
 
 # Visualize SPEXone L2 aerosol product (RemoTAP)
 
-**Authors:** Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU), Guangliang Fu (SRON)
+**Author(s):** Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU), Guangliang Fu (SRON)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-info" role="alert">
 
@@ -25,29 +27,19 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 
 ## Summary
+
 This notebook explores the SPEXone Level 2 (L2) aerosol product derived from the joint aerosol and surface retrieval algorithm: RemoTAP (Remote Sensing of Trace Gases and Aerosol Products algorithm). For more detailed information about the algorithm, please refer to the relevant documentation.
 
 Similar to the HARP2 notebook, we analyze a scene from the Los Angeles wildfire, which includes both smoke and dust events (as observed by OCI and HARP2). However, due to the narrow swath of SPEXone data, the dust event will be the main focus of this tutorial. We will evaluate aerosol optical depth, aerosol absorption, and particle size information.
 
 ## Learning Objectives
+
 By the end of this notebook, you will understand:
 
 - How to acquire SPEXone L2 data
 - What aerosol products are available
 - How to visualize basic aerosol properties
 - How to evaluate data quality
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Get Level-2 Data](#2.-Get-Level-2-Data)
-3. [Understanding SPEXone L2 product structure](#3.-Understanding-SPEXone-L2-product-structure)
-4. [Visulize SPEXone L2 aerosol properties](#4.-Visulize-SPEXone-L2-aerosol-properties)
-5. [Improve data quality: filter low AOD pixels](#5.-Improve-data-quality:-filter-low-AOD-pixels)
-6. [Advanced quality assessment](#6.-Advanced-quality-assessment)
-7. [Optional: Multi-angle data mask for cloud and data screening](#7.-Optional:-Multi-angle-data-mask-for-cloud-and-data-screening)
-8. [Optional: pixel level uncertainty estimation](#8.-Optional:-pixel-level-uncertainty-estimation)
-9. [Reference](#9.-Reference)
 
 +++
 
@@ -68,8 +60,6 @@ import xarray as xr
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -113,8 +103,6 @@ dataset = xr.merge(datatree.to_dict().values())
 dataset
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 3. Understanding SPEXone L2 product structure
@@ -142,8 +130,6 @@ And a set of other products:
 ```{code-cell} ipython3
 datatree["geophysical_data"]
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -249,8 +235,6 @@ We can clearly see the aerosol event with less absorption (high SSA) and large s
 
 +++
 
-[back to top](#Contents)
-
 +++
 
 ## 5. Improve data quality: filter low AOD pixels
@@ -290,8 +274,6 @@ plot_l2_product(
     data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
 )
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -350,8 +332,6 @@ We can evaluate quality flag based on the $\chi^2$ and $N$, and most pixels have
 
 +++
 
-[back to top](#Contents)
-
 +++
 
 ## 7 [Optional] Cloud fraction
@@ -373,8 +353,6 @@ plot_l2_product(
     data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="cool"
 )
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -416,8 +394,6 @@ As shown above, the AOD uncertainties increase with the AOD value. You can play 
 
 +++
 
-[back to top](#Contents)
-
 +++
 
 ## 9. Reference
@@ -426,4 +402,3 @@ Guangliang Fu,  Jeroen Rietjens,  Raul Laasner,  Laura van der Schaaf,  Richard 
 
 +++
 
-[back to top](#Contents)

@@ -230,7 +230,7 @@ If you have `docker` available, you can build the image defined in the `docker` 
 
 repo2docker \
     --Repo2Docker.platform=linux/amd64 \
-    --appendix "$(< docker/appendix-cryocloud)" \
+    --appendix "$(< docker/appendix)" \
     --user-id 1000 \
     --user-name jovyan \
     --no-run \

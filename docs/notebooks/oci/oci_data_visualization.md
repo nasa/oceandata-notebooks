@@ -11,8 +11,11 @@ kernelspec:
   name: python3
 ---
 
-# PACE data visualization
-**Author:** Carina Poulin (NASA, SSAI). Prepared for the PACE Hackweek 2025.
+# PACE Data Visualization
+
+**Author(s):** Carina Poulin (NASA, SSAI). Prepared for the PACE Hackweek 2025.
+
+Last updated: August 3, 2025
 
 <div class="alert alert-info" role="alert">
 
@@ -43,17 +46,6 @@ At the end of this notebook you will know:
 - How to create an multi-variable RGB map with two datasets
 - Plot a timeline of the plankton types for a region of interest
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Search for Data](#2.-Search-for-Data)
-3. [Make a quick map with Xarray](#3.-Make-a-quick-map-with-Xarray)
-4. [Clean up the dataset](#4.-Clean-up-the-dataset)
-5. [Plot data from a transect](#5.-Plot-data-from-a-transect)
-6. [Interpolate the data](#6.-Interpolate-the-data)
-7. [Make a multi-variable RBG map with two datasets](#7.-Make-a-multi-variable-RBG-map-with-two-datasets)
-8. [Plot a timeline of the plankton types for a region of interest](#8.-Plot-a-timeline-of-the-plankton-types-for-a-region-of-interest)
-
 +++
 
 ## 1. Setup
@@ -82,8 +74,6 @@ Set (and persist to your user profile on the host, if needed) your Earthdata Log
 ```{code-cell} ipython3
 auth = earthaccess.login()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -147,8 +137,6 @@ dataset_land = xr.open_mfdataset(
 dataset_land
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 3. Make a quick map with Xarray
@@ -172,8 +160,6 @@ We can do another quick plot for the land vegetation indices dataset. Notice the
 ```{code-cell} ipython3
 plot = dataset_land["cire"][0].plot.imshow()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -237,8 +223,6 @@ dataset_phy = dataset_phy.mean("date")
 dataset_veg = dataset_veg.mean("date")
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 5. Plot data from a transect
@@ -261,8 +245,6 @@ plot = transect["syncoccus_moana"].plot(y="lat")
 We can see there are some values missing, we can interpolate the data if we want to, but it is entirely optional.
 
 +++
-
-[back to top](#Contents)
 
 +++
 
@@ -360,8 +342,6 @@ dataset_v_norm = (
 data_norm = dataset_norm.to_dataarray()
 data_norm_v = dataset_v_norm.to_dataarray()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -500,8 +480,6 @@ ax3 = data_norm_v.plot.imshow(
 
 plt.show()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -897,8 +875,6 @@ plt.setp(ax1.get_xticklabels(), rotation=45, ha="right")
 plt.tight_layout(rect=[0, 0.03, 1, 0.97])  # Adjust layout to make room for the note
 plt.show()
 ```
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
     

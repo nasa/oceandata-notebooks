@@ -13,7 +13,9 @@ kernelspec:
 
 # Visualize Data from the Spectro-polarimeter for Planetary Exploration one (SPEXone)
 
-**Authors:** Sean Foley (NASA, MSU), Meng Gao (NASA, SSAI), Ian Carroll (NASA, UMBC)
+**Author(s):** Sean Foley (NASA, MSU), Meng Gao (NASA, SSAI), Ian Carroll (NASA, UMBC)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -45,15 +47,6 @@ At the end of this notebook you will know:
 * Some basic concepts about polarization
 * How to make animations of multi-angle data
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Get Level-1C Data](#2.-Get-Level-1C-Data)
-3. [Understanding Multi-Angle Data](#3.-Understanding-Multi-Angle-Data)
-4. [Understanding Polarimetry](#4.-Understanding-Polarimetry)
-5. [Radiance to Reflectance](#5.-Radiance-to-Reflectance)
-6. [Animating an Overpass](#6.-Animating-an-Overpass)
-
 +++
 
 ## 1. Setup
@@ -73,8 +66,6 @@ import xarray as xr
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-[back to top](#Contents)
 
 ## 2. Get Level-1C Data
 
@@ -116,8 +107,6 @@ view = xr.open_dataset(paths[0], group="sensor_views_bands").squeeze()
 geo = xr.open_dataset(paths[0], group="geolocation_data")
 obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -170,8 +159,6 @@ ax[1].legend()
 ax[2].legend()
 plt.show()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -318,8 +305,6 @@ ax.set_title("Mean DoLP by View Angle")
 plt.show()
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 5. Radiance to Reflectance
@@ -419,8 +404,6 @@ ax.set_ylabel("Reflectance")
 ax.set_title("Mean Reflectance by Solar Zenith Angle")
 plt.show()
 ```
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

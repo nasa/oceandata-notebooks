@@ -13,7 +13,7 @@ kernelspec:
 
 # Applying Gaussian Pigment (GPig) Phytoplankton Community Composition Algorithm to OCI data
 
-**Authors:** Anna Windle (NASA, SSAI), Max Danenhower (Bowdoin College), Ali Chase (University of Washington)
+**Author(s):** Anna Windle (NASA, SSAI), Max Danenhower (Bowdoin College), Ali Chase (University of Washington)
 
 Last updated: August 20, 2025
 
@@ -47,12 +47,6 @@ At the end of this notebook you will know:
 - How to use a packaged Python project 
 - How to run the GPig Algorithm on PACE OCI L2 and L3 data
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Run GPig on L2 Data](#2.-Run-GPig-on-L2-Data)
-3. [Run GPig on L3M Data](#3.-Run-GPig-on-L3M-Data)
-
 +++
 
 ## 1. Setup
@@ -84,8 +78,6 @@ Set (and persist to your home directory on the host, if needed) your Earthdata L
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -321,4 +313,3 @@ plt.tight_layout()
 plt.show()
 ```
 
-[back to top](#Contents)

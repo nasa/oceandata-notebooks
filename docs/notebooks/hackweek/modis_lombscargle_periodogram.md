@@ -13,7 +13,9 @@ kernelspec:
 
 # Applying L-S Periodogram Analysis to Ocean Color Data
 
-**Authors:** Riley Blocker (NASA, SSAI)
+**Author(s):** Riley Blocker (NASA, SSAI)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -36,14 +38,6 @@ At the end of this notebook you will know how to:
 
 - Generate a Lomb-Scargle periodogram for ocean color data time series
 - Calculate the False-Alarm-Probability to estimate the significance of a peak in the periodogram
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Validation Data](#2.-Validation-Data)
-3. [Lomb-Scargle Periodogram](#3.-Lomb-Scargle-Periodogram)
-4. [False Alarm Probability](#4.-False-Alarm-Probability)
-5. [Folding the Time Series](#5.-Folding-the-Time-Series)
 
 +++
 

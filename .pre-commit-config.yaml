@@ -47,9 +47,9 @@ repos:
     hooks:
       - id: update-setup-py
         name: update-setup-py
-        description: Embed the dependencies (with extra "kernel") in the metadata of book/setup.py.
+        description: Embed the dependencies (with extra "kernel") in the metadata of docs/setup.py.
         language: system
-        entry: uv add --script book/setup.py -r
+        entry: uv add --script docs/setup.py -r
         files: ^requirements\.txt$
       - id: repo2docker-requirements
         name: repo2docker-requirements

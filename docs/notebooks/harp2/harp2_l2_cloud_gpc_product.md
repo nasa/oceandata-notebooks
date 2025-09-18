@@ -13,29 +13,22 @@ kernelspec:
 
 # Visualize HARP2 CLOUD GPC Product
 
-**Authors:** Chamara (NASA, SSAI), Kirk (NASA), Andy (NASA, UMBC), Meng (NASA, SSAI), Sean (NASA, MSU)
+**Author(s):** Chamara (NASA, SSAI), Kirk (NASA), Andy (NASA, UMBC), Meng (NASA, SSAI), Sean (NASA, MSU)
 
-[edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
+Last updated: August 3, 2025
 
 ## Summary
+
 This notebook summarizes how to access HARP2 GISS Polarimetric Cloud (GPC) products (CLOUD_GPC.V3_0).
 Note that this notebook is based on an early preliminary version of the product and is therefore subject to future optimizations and changes.
 
 ## Learning Objectives
+
 By the end of this notebook, you will understand:
 
 - How to acquire HARP2 L2 data
 - Available variables in the product
 - How to visualize variables
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Get Level-2 Data](#2.-Get-Level-2-Data)
-3. [Understanding HARP2 L2 product structure](#3.-Understanding-HARP2-L2.CLOUD_GPC-Product-Structure)
-4. [4. Visulizing Variables](#4.-Visulizing-Variables)
-5. [Reference](#5.-Reference)
 
 +++
 
@@ -64,8 +57,6 @@ plt.style.use("seaborn-v0_8-notebook")
 auth = earthaccess.login(persist=True)
 fs = earthaccess.get_fsspec_https_session()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -105,8 +96,6 @@ Here we merge all the data group together for convenience in data manipulations.
 dataset = xr.merge(datatree.to_dict().values())
 # dataset
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -159,8 +148,6 @@ print_variable_description(datatree, ["index"], exclude=False)
 ```{code-cell} ipython3
 print_variable_description(datatree, ["index", "rft", "bow"], exclude=True)
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -276,8 +263,6 @@ fig1.colorbar(
 )
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 5. Reference
@@ -289,4 +274,3 @@ fig1.colorbar(
 
 +++
 
-[back to top](#Contents)

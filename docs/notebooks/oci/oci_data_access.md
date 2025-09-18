@@ -13,7 +13,9 @@ kernelspec:
 
 # Access Data from the Ocean Color Instrument (OCI)
 
-**Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
+**Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-info" role="alert">
 
@@ -64,14 +66,6 @@ At the end of this notebook you will know:
 * How to use `earthaccess` to search for OCI data using search filters
 * How to download OCI data, but only when you need to
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [NASA Earthdata Authentication](#2.-NASA-Earthdata-Authentication)
-3. [Search for Data](#3.-Search-for-Data)
-4. [Open Data](#4.-Open-Data)
-5. [Download Data](#5.-Download-Data)
-
 +++
 
 ## 1. Setup
@@ -82,8 +76,6 @@ We begin by importing the packages used in this notebook.
 import earthaccess
 import xarray as xr
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -111,8 +103,6 @@ it's also harmless) for subsequent calls to `earthaccess.login`.
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -194,8 +184,6 @@ len(results)
 for item in results:
     display(item)
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -294,8 +282,6 @@ Anywhere in any of [these notebooks](https://oceancolor.gsfc.nasa.gov/resources/
 </div>
 
 +++
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

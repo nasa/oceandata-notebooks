@@ -49,5 +49,6 @@ ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
 
 # configure uv tool
 ENV UV_CACHE_DIR=/tmp/uv/cache
+ENV UV_TOOL_DIR=/tmp/uv/cache
 ENV UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
 ENV UV_CONSTRAINT=/srv/docker/requirements.txt

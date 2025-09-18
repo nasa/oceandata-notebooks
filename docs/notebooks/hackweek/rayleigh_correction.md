@@ -11,15 +11,13 @@ kernelspec:
   name: python3
 ---
 
-## Rayleigh correction of the TOA measurements from PACE instruments
+# Rayleigh correction of the TOA measurements from PACE instruments
 
-+++
-
-**Authors:** Kamal Aryal (UMBC), Pengwang Zhai (UMBC)
-
-+++
+**Author(s):** Kamal Aryal (UMBC), Pengwang Zhai (UMBC)
+Last updated: August 3, 2025
 
 ## Summary
+
 This notebook is used to do Rayleigh correction for TOA reflectances obtained from PACE instruments using a nerual network (NN) trained model. 
 - The NN model is adopted from atmospheric correction module of FastMAPOL/component retrieval algorithm (Aryal et al., 2024). The rayleigh signal is obtained by setting input aerosol and surface parameters to a very low number.
 - **Inputs:** Viewing geometry and atmospheric parameters (Surface pressure and Ozone).
@@ -27,13 +25,9 @@ This notebook is used to do Rayleigh correction for TOA reflectances obtained fr
 - **Interpolation:** Rayleigh reflectance is interpolated to a fine wavelength grid using the physical relation R(λ) = c / λ⁴.
 - **Scaling factor \( c \):** Computed by least squares fitting to match the neural network output.
 
-
-
 This notebook highlights the importance of Rayleigh correction in atmospheric and ocean color remote sensing.
 It uses a neural network trained model to predict rayleigh reflectances at 13 discrete wavelengths.
 The NN models is adopted from FastMAPOL/component retrieval algorithm (Aryal et al., 2024). The NN model was originally designed for atmospheric correction of multiangle intensity mesurements.
-
-+++
 
 ## Learning Objectives
 By the end of this notebook you will be familiar about:

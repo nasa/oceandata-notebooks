@@ -13,7 +13,9 @@ kernelspec:
 
 # Visualize Data from the Hyper-Angular Rainbow Polarimeter (HARP2)
 
-**Authors:** Sean Foley (NASA, MSU), Meng Gao (NASA, SSAI), Ian Carroll (NASA, UMBC)
+**Author(s):** Sean Foley (NASA, MSU), Meng Gao (NASA, SSAI), Ian Carroll (NASA, UMBC)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -45,15 +47,6 @@ At the end of this notebook you will know:
 * Some basic concepts about polarization
 * How to make animations of multi-angle data
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Get Level-1C Data](#2.-Get-Level-1C-Data)
-3. [Understanding Multi-Angle Data](#3.-Understanding-Multi-Angle-Data)
-4. [Understanding Polarimetry](#4.-Understanding-Polarimetry)
-5. [Radiance to Reflectance](#5.-Radiance-to-Reflectance)
-6. [Animating an Overpass](#6.-Animating-an-Overpass)
-
 +++
 
 ## 1. Setup
@@ -75,10 +68,6 @@ from scipy.ndimage import gaussian_filter1d
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-[back to top](#Contents)
-
-+++
 
 ## 2. Get Level-1C Data
 
@@ -130,10 +119,6 @@ dataset = xr.merge((prod, obs, geo))
 dataset
 ```
 
-[back to top](#Contents)
-
-+++
-
 ## 3. Understanding Multi-Angle Data
 
 HARP2 is a multi-spectral sensor, like OCI, with 4 spectral bands. These roughly correspond to green, red, near infrared (NIR), and blue (in that order). HARP2 is also multi-angle. These angles are with respect to the satellite track. Essentially, HARP2 is always looking ahead, looking behind, and everywhere in between. The number of angles varies per sensor. The red band has 60 angles, while the green, blue, and NIR bands each have 10.
@@ -180,10 +165,6 @@ ax_angle.legend()
 ax_wavelength.legend()
 plt.show()
 ```
-
-[back to top](#Contents)
-
-+++
 
 ## 4. Understanding Polarimetry
 
@@ -319,10 +300,6 @@ ax.set_title("Mean DoLP by View Angle")
 plt.show()
 ```
 
-[back to top](#Contents)
-
-+++
-
 ## 5. Radiance to Reflectance
 
 We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). This conversion compensates for the differences in appearance due to the viewing angle and sun angle.
@@ -426,10 +403,6 @@ ax.set_title("Mean Reflectance by Solar Zenith Angle")
 plt.show()
 ```
 
-[back to top](#Contents)
-
-+++
-
 ## 6. Animating an Overpass
 
 <div class="alert alert-warning" role="alert">
@@ -471,10 +444,6 @@ frames = np.concatenate((frames, frames[-1::-1]))
 frames
 ```
 
-In order to display an animation in a Jupyter notebook, the "backend" for matplotlib has to be explicitly set to "widget".
-
-+++
-
 Now we can use `matplotlib.animation` to create an initial plot, define a function to update that plot for each new frame, and show the resulting animation. When we create the inital plot, we get back the object called `im` below. This object is an instance of `matplotlib.artist.Artist` and is responsible for rendering data on the axes. Our `update` function uses that artist's `set_data` method to leave everything in the plot the same other than the data used to make the image.
 
 ```{code-cell} ipython3
@@ -495,13 +464,11 @@ You can see some multi-layer clouds in the southwest corner of the granule: noti
 
 The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
 
-![A multi-angle HARP2 animation](./harp2_red_anim_20250109T200019.gif)
+<img alt="multi-angle HARP2 animation" src="./harp2_red_anim_20250109T200019.gif">
 
 Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By default, `matplotlib` will not display an animation. To view the animation, we saved it as a file and displayed the result in the next cell. Alternatively, you could change the default by executing `%matplotlib widget`. The `widget` setting, which works in Jupyter Lab but not on a static website, you can use `plt.show()` as well as `an.pause()` and `an.resume()`.
 
 +++
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

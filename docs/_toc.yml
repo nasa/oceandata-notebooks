@@ -7,6 +7,8 @@ parts:
     chapters:
       - file: notebooks/oci/oci_data_access
         title: Access Data Products
+      - file: notebooks/oci/oci_file_structure
+        title: Introduction to Product Levels
       - file: notebooks/modis/modis_explore_l2
         title: Orientation to Level-2
               # WARNING: skipping unknown output mime type: application/json [mystnb.unknown_mime_type]
@@ -16,16 +18,20 @@ parts:
         title: Data Product Visualization
       - file: notebooks/oci/oci_project_and_format
         title: Export for GIS
-  - caption: Ocean
-    chapters:
-      - file: notebooks/oci/oci_file_structure
+      - file: notebooks/oci/ml_cloud_mask
+        title: Machine Learning Tutorial
+  # - caption: Ocean
+  #   chapters:
+  #     - file:
   - caption: Cloud & Atmosphere
     chapters:
       - file: notebooks/harp2/harp2_l2_aerosol_product
+        title: FastMAPOL Aerosols from PACE/HARP2
               # WARNING: Notebook exception traceback saved in: _build/html/reports/notebooks/harp2/harp2_l2_aerosol_product.err.log
       - file: notebooks/spexone/spexone_l2_aerosol_product
+        title: RemoTAP Aerosols from PACE/SPEXOne
       - file: notebooks/oci/oci_no2
-      - file: notebooks/oci/ml_cloud_mask
+        title: Nitrogen Dioxide (NO<sub>2</sub>) from PACE/OCI
   - caption: Land
     chapters:
       - file: notebooks/oci/oci_terrestrial_data
@@ -33,9 +39,11 @@ parts:
   - caption: SeaDAS
     chapters:
       - file: notebooks/oci/oci_ocssw_install
-             # WARNING: Notebook exception traceback saved in: _build/html/reports/notebooks/oci/oci_ocssw_install.err.log [mystnb.exec]
       - file: notebooks/oci/oci_ocssw_processing_overview
+      - file: notebooks/oci/oci_ocssw_l2gen
+      - file: notebooks/oci/oci_ocssw_giop
   - caption: Instruments
     chapters:
       - file: notebooks/harp2/harp2_basic_visualizations
+              # WARNING: image file not readable: notebooks/harp2/harp2_red_anim_20250109T200019.gif
       - file: notebooks/spexone/spexone_basic_visualizations

@@ -13,7 +13,9 @@ kernelspec:
 
 # Explore Level-3 Ocean Color Data from the Moderate Resolution Imaging Spectroradiometer (MODIS)
 
-**Authors:** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA)
+**Author(s):** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -52,12 +54,6 @@ At the end of this notebok you will know:
 * How to download files using `earthaccess`
 * How to create a plot using `xarray`
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Access Data](#2.-Access-Data)
-3. [Plot Data](#3.-Plot-Data)
-
 +++
 
 ## 1. Setup
@@ -77,8 +73,6 @@ from matplotlib import pyplot as plt
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -153,8 +147,6 @@ dataset = xr.open_dataset(paths[0])
 dataset
 ```
 
-[back to top](#Contents)
-
 +++
 
 ## 3. Plot Data
@@ -215,8 +207,6 @@ ax.coastlines()
 ax.set_title(dataset.attrs["product_name"])
 plt.show()
 ```
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

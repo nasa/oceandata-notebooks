@@ -13,7 +13,9 @@ kernelspec:
 
 # Parallel and Larger-than-Memory Processing
 
-**Authors:** Ian Carroll (NASA, UMBC)
+**Author(s):** Ian Carroll (NASA, UMBC)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -44,14 +46,6 @@ At the end of this notebook you will know:
 - About the framework we're calling "chunk-apply-combine"
 - How to start a `dask` client for parallel and larger-than-memory pipelines
 - One method for averaging Level-2 "swath" data over time
-
-## Contents
-
-1. [Setup](#1.-Setup)
-1. [Chunk-Apply-Combine](#2.-Chunk-Apply-Combine)
-1. [Dask Workers](#3.-Dask-Workers)
-1. [Level-2 Averaging](#4.-Level-2-Averaging)
-1. [Scaling Out](#5.-Scaling-Out)
 
 [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access
 [oci-ocssw-processing]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-ocssw-processing
@@ -205,8 +199,6 @@ Before we get to data, we will play with some random numbers. Whenever you use r
 ```{code-cell} ipython3
 random = np.random.default_rng(seed=5179916885778238210)
 ```
-
-[back to top](#contents) <a name="section-name"></a>
 
 +++
 
@@ -465,8 +457,6 @@ plot = chla.mean("time").plot.imshow(robust=True)
 client.close()
 ```
 
-[back to top](#contents)
-
 +++
 
 ## 5. Scaling Out
@@ -533,4 +523,3 @@ chla
 cluster.close()
 ```
 
-[back to top](#contents)

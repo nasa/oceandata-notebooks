@@ -13,9 +13,9 @@ kernelspec:
 
 # Run the Generalized IOP (GIOP) inversion model in the Level-2 Generator`l2gen` OCSSW program on OCI data
 
-**Authors:** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA) <br>
-Last updated: August 3, 2025
+**Author(s):** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA)
 
+Last updated: August 3, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -63,14 +63,6 @@ At the end of this notebook you will know:
 - How to navigate and open files related to the GIOP within OCSSW directory
 - How to process L1B data to retreive L2 IOPs with `l2gen` 
 - Modifications you can make to `l2gen` to obtain different IOP products
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Search and access L1B Data ](#2.-Search-and-Access-L1B-Data)
-3. [Run `l2gen` with default GIOP configurations](#3.-Run-l2gen-with-default-GIOP-configurations)
-4. [Plot L2 IOP data products](#4.-Plot-L2-IOP-data-products)
-5. [Run GIOP with modifications to the configurations](#5.-Run-GIOP-with-modifications-to-the-configurations)
 
 +++
 
@@ -268,8 +260,6 @@ def write_par(path, par):
         writer.writerows(par.items())
 ```
 
-[back to top](#Contents)
-
 +++
 
 # 2. Search and access L1B data 
@@ -301,8 +291,6 @@ dataset = xr.merge(dataset.to_dict().values())
 dataset = dataset.set_coords(("longitude", "latitude"))
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -574,4 +562,3 @@ ax.set_xlim(left=0)
 plt.show()
 ```
 
-[back to top](#Contents)

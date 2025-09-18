@@ -13,7 +13,8 @@ kernelspec:
 
 # Reprojecting and Formatting PACE OCI Data
 
-**Authors:** Skye Caplan (NASA, SSAI) <br>
+**Author(s):** Skye Caplan (NASA, SSAI)
+
 Last updated: July 28, 2025
 
 <div class="alert alert-info" role="alert">
@@ -42,13 +43,6 @@ At the end of this notebook you will know how to:
 - Open PACE OCI surface reflectance and vegetation index products
 - Reproject those data into defined coordinate reference systems
 - Export those reprojected data as GeoTIFFs
-
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Reprojecting Level-2 PACE Data](#2.-Reprojecting-Level-2-PACE-Data)
-3. [Exporting to GeoTIFF](#3.-Exporting-to-GeoTIFF)
-4. [Converting Level-3 Data to GeoTIFF](#4.-Converting-Level-3-Data-to-GeoTIFF)
 
 +++
 
@@ -89,8 +83,6 @@ for item in results:
 ```{code-cell} ipython3
 paths = earthaccess.download(results, local_path="data")
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -401,8 +393,6 @@ elif "LANDVI" in str(paths[0]):
 ds = ds.rio.write_crs("epsg:4326")
 ds.rio.to_raster(Path(paths[0]).with_suffix(".tif"), driver="COG")
 ```
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 

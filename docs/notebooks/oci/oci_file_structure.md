@@ -13,7 +13,9 @@ kernelspec:
 
 # File Structure at Three Processing Levels for the Ocean Color Instrument (OCI)
 
-**Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
+**Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
+
+Last updated: August 3, 2025
 
 <div class="alert alert-success" role="alert">
 
@@ -51,13 +53,6 @@ At the end of this notebok you will know:
 * How to use `xarray` to open OCI data
 * What key variables are present in the groups within OCI L1B, L2, and L3M files
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Explore L1B File Structure](#2.-Explore-L1B-File-Structure)
-3. [Explore L2 File Structure](#3.-Explore-L2-File-Structure)
-4. [Explore L3M File Structure](#4.-Explore-L3M-File-Structure)
-
 +++
 
 ## 1. Setup
@@ -81,8 +76,6 @@ Set (and persist to your user profile on the host, if needed) your Earthdata Log
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -161,8 +154,6 @@ Let's plot the reflectance at postion 100 in the "blue_bands" dimension.
 ```{code-cell} ipython3
 plot = datatree["observation_data"]["rhot_blue"].sel({"blue_bands": 100}).plot()
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -293,8 +284,6 @@ rrs_stack = rrs_box.stack(
 )
 plot = rrs_stack.plot(hue="pixel", add_legend=False)
 ```
-
-[back to top](#Contents)
 
 +++
 
@@ -448,8 +437,6 @@ We can also create a time series of mean values over the whole region.
 chla_avg = chla.mean(dim=["lon", "lat"], keep_attrs=True)
 im = chla_avg.plot(linestyle="-", marker="o", color="b")
 ```
-
-[back to top](#Contents)
 
 <div class="alert alert-info" role="alert">
 
