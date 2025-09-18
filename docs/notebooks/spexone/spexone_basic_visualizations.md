@@ -45,7 +45,6 @@ At the end of this notebook you will know:
 * How to acquire data from SPEXone
 * How to plot geolocated imagery
 * Some basic concepts about polarization
-* How to make animations of multi-angle data
 
 +++
 
@@ -305,13 +304,9 @@ ax.set_title("Mean DoLP by View Angle")
 plt.show()
 ```
 
-+++
-
 ## 5. Radiance to Reflectance
 
 We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). This conversion compensates for the differences in appearance due to the viewing angle and sun angle.
-
-+++ {"lines_to_next_cell": 2}
 
 The radiances collected by SPEXone often need to be converted, using additional properties, to reflectances. Write the conversion as a function, because you may need to repeat it.
 
