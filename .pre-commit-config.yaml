@@ -26,11 +26,11 @@ repos:
       - id: uv-lock
       - id: uv-export
         name: export-kernel-dependencies
-        args: [ -q, --no-hashes, --group=notebooks, --group=kernel, --output-file=requirements.txt ]
+        args: [ -q, --no-hashes, --no-default-groups, --group=notebooks, --group=kernel, --output-file=requirements.txt ]
         files: ^uv\.lock$
       - id: uv-export
         name: export-container-dependencies
-        args: [ -q, --no-hashes, --group=notebooks, --group=kernel, --group=container, --output-file=container/requirements.txt ]
+        args: [ -q, --no-hashes, --no-default-groups, --group=notebooks, --group=kernel, --group=container, --output-file=container/requirements.txt ]
         files: ^uv\.lock$
   # FIXME format code blocks in md:myst (https://github.com/astral-sh/ruff/issues/3792)
   - repo: local

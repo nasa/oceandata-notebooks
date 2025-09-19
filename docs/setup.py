@@ -305,6 +305,9 @@
 #     "vine==5.1.0",
 #     "voluptuous==0.15.2",
 #     "zc-lockfile==4.0",
+#     "importlib-metadata==8.6.1 ; python_full_version < '3.12'",
+#     "setuptools==75.8.0 ; python_full_version >= '3.12'",
+#     "zipp==3.21.0 ; python_full_version < '3.12'",
 # ]
 #
 # [tool.uv.sources]

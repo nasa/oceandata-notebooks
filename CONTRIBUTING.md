@@ -17,8 +17,8 @@ We are glad to have your help maintaining the [Help Hub] for the [Ocean Biology 
 You should already be familiar with the [README](README.md).
 This guide provides additional information on the structure of this repository and maintenaner tasks.
 Maintainers are responsible for:
-1. ensuring the reproducible environment specifications are correct, and
-2. publishing its content on the [Help Hub].
+1. ensuring the reproducible environment configs are correct, and
+2. publishing the notebooks to [GitHub Pages] as the [Help Hub] (a.k.a releasing!).
 
 The following sections map to the contents of the repository as follows:
 
@@ -32,27 +32,29 @@ The following sections map to the contents of the repository as follows:
 └── .pre-commit-config.yaml  # -> Automation and Checks
 ```
 
-Use the `uv` command line tool to create isolated Python environments for maintainer actions.
+Use the `uv` command line tool to create an isolated Python environment for maintainer actions.
 If `uv` is not already installed, install it by exectuing the cell below or some other documented [installation method][uv].
 
 > [!Important]
 > This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells on JupyterLab.
 
-[OB]: https://www.earthdata.nasa.gov/centers/ob-daac/
-[Help Hub]: https://nasa.github.io/oceandata-notebooks/
+[OB]: https://www.earthdata.nasa.gov/centers/ob-daac
+[Help Hub]: https://nasa.github.io/oceandata-notebooks
 [uv]: https://docs.astral.sh/uv/getting-started/installation
+[GitHub Pages]: https://docs.github.com/en/pages
 
 ```{code-cell}
 if ! command -v uv; then
   curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
+uv sync
 ```
 
 ## GitHub Pages Website
 
-The `docs` folder contains configuration and content for the [Jupyter Book] we host on [GitHub Pages].
-For all tutorials, the content is formatted as executable MyST Markdown notebooks, and building the notebooks requires executing any tutorials that are not found in the cache.
-We use [DVC] to share that cache among maintainers as well as to the deployment infrastructure on GitHub.
+The `docs` folder contains configuration and content for the [Jupyter Book] we host on GitHub Pages.
+The tutorials are written as executable MyST Markdown notebooks, and publishing the website requires executing tutorials ... unless they are in the cache.
+We use [DVC] to share that cache among maintainers as well as to the deployment workflow on GitHub.
 
 > [!Important]
 > Only notebooks listed in `docs/_toc.yml` are built, so adding a new notebook requires updating `docs/_toc.yml`.
@@ -63,7 +65,7 @@ The next cell builds a static website in `docs/_build/html` using `jupyter-book<
 [DVC]: https://dvc.org/
 
 ```{code-cell}
-uvx dvc pull
+uvx dvc pull # doesn't get s3
 ```
 
 ```{code-cell}
