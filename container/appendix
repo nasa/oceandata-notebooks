@@ -38,11 +38,6 @@ RUN pip install --no-cache-dir --no-deps \
 # set up the bash kernel
 RUN python -m bash_kernel.install --sys-prefix
 
-# tell gh-scoped-creds which GitHub app to use for push access
-# see https://github.com/jupyterhub/gh-scoped-creds#github-app-configuration
-ENV GH_SCOPED_CREDS_CLIENT_ID="Iv1.bd27058fd393e285"
-ENV GH_SCOPED_CREDS_APP_URL="https://github.com/apps/cryocloud-github-access"
-
 # ignore select Python warnings
 # TODO: specifically cartopy.io.DownloadWarning
 ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
