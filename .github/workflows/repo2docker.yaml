@@ -30,7 +30,7 @@ jobs:
           rmdir container
           ls
       - name: repo2docker action
-        uses: jupyterhub/repo2docker-action@0.3
+        uses: jupyterhub/repo2docker-action@0.2
         with:
           DOCKER_USERNAME: ${{ github.repository_owner }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}

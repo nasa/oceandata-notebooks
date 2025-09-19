@@ -48,7 +48,7 @@ ENV GH_SCOPED_CREDS_APP_URL="https://github.com/apps/cryocloud-github-access"
 ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
 
 # configure uv tool
-ENV UV_CACHE_DIR=/tmp/uv/cache
-ENV UV_TOOL_DIR=/tmp/uv/cache
-ENV UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+ENV UV_TOOL_DIR=${NB_PYTHON_PREFIX}/bin
+ENV UV_CACHE_DIR=${NB_PYTHON_PREFIX}/cache
 ENV UV_CONSTRAINT=/srv/container/requirements.txt
