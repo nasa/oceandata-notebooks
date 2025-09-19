@@ -66,8 +66,6 @@ holoviews.config.image_rtol = 1e-2
 swap_dims = {"nlon": "longitude", "nlat": "latitude"}
 ```
 
-+++
-
 ## 2. Download NO<sub>2</sub> Data
 
 While under development, the NO<sub>2</sub> product is available at
@@ -81,8 +79,6 @@ url = "https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/NO2_L3_Gridded_NAmerica/PACE_
 fs = fsspec.filesystem("https")
 path = fs.open(url, cache_type="blockcache")
 ```
-
-+++
 
 ## 3. Preview this hierarchical dataset
 

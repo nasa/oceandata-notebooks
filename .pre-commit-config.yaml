@@ -26,39 +26,29 @@ repos:
       - id: uv-lock
       - id: uv-export
         name: export-kernel-dependencies
-        args: [ -q, --group, notebooks, --group, kernel, -o, requirements.txt ]
+        args: [ -q, --group=notebooks, --group=kernel, --output-file=requirements.txt ]
         files: ^uv\.lock$
       - id: uv-export
-        name: export-docker-dependencies
-        args: [ -q, --group, notebooks, --group, docker, -o, docker/requirements.txt ]
+        name: export-container-dependencies
+        args: [ -q, --group=notebooks, --group=kernel, --group=container, --output-file=container/requirements.txt ]
         files: ^uv\.lock$
-  # FIXME don't know how to do this with md:myst
-  # - repo: https://github.com/astral-sh/ruff-pre-commit
-  #   rev: v0.11.10
-  #   hooks:
-  #     - id: ruff
-  #       args: ["--fix", "--exit-non-zero-on-fix"]
-  #       # prefer to lint the ipynbs
-  #       exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
-  #     - id: ruff-format
-  #       # prefer to format the ipynbs
-  #       exclude: ^(book/src/.*\.py|.*/oci_ocssw_install.ipynb)$  # FIXME: the bash one
+  # FIXME format code blocks in md:myst (https://github.com/astral-sh/ruff/issues/3792)
   - repo: local
     hooks:
       - id: update-setup-py
         name: update-setup-py
-        description: Embed the dependencies (with extra "kernel") in the metadata of docs/setup.py.
+        description: Embed the dependencies (with group "kernel") in the metadata of docs/setup.py.
         language: system
         entry: uv add --script docs/setup.py -r
         files: ^requirements\.txt$
       - id: repo2docker-requirements
         name: repo2docker-requirements
-        # FIXME: updates pyproject.toml "constraints" group, rm docker/requirements.in
-        description: Generate docker/requirements.in with prerequisites from repo2docker.
+        # FIXME: updates pyproject.toml "constraints" group, rm container/requirements.in
+        description: Generate container/requirements.in with prerequisites from repo2docker.
         stages: [ manual ]
         language: python
         additional_dependencies:
-          - "jupyter-repo2docker @ git+https://github.com/jupyterhub/repo2docker@5d3a946b24608f1856218eb89861d552e9b826af"
+          - "jupyter-repo2docker==2025.08.0"
         pass_filenames: false
-        entry: repo2docker --Repo2Docker.platform=linux/amd64 --volume docker/requirements.in:./out docker sh -c "pip list --format=freeze > out"
-        files: ^docker/environment\.yml$
+        entry: repo2docker --Repo2Docker.platform=linux/amd64 --volume container/requirements.in:./out container sh -c "pip list --format=freeze > out"
+        files: ^container/environment\.yml$

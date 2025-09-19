@@ -107,8 +107,6 @@ geo = xr.open_dataset(paths[0], group="geolocation_data")
 obs = xr.open_dataset(paths[0], group="observation_data").squeeze()
 ```
 
-+++
-
 ## 3. Understanding Multi-Angle Data
 
 SPEXone is a hyper-spectral sensor with 400 intensity bands (380-779nm) and 50 polarization bands (within 385-770nm).  SPEXone is also multi-angle measures five view angles for all its spectral bands. Therefore, there is no need to combine the spectral bands and angles together into one axis as what HARP2 data is organized.
@@ -158,8 +156,6 @@ ax[1].legend()
 ax[2].legend()
 plt.show()
 ```
-
-+++
 
 ## 4. Understanding Polarimetry
 

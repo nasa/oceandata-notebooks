@@ -200,8 +200,6 @@ Before we get to data, we will play with some random numbers. Whenever you use r
 random = np.random.default_rng(seed=5179916885778238210)
 ```
 
-+++
-
 ## 3. Chunk-Apply-Combine
 
 If you've done big data processing, you've probably come across the "split-apply-combine" or "map-reduce" frameworks.
@@ -457,8 +455,6 @@ plot = chla.mean("time").plot.imshow(robust=True)
 client.close()
 ```
 
-+++
-
 ## 5. Scaling Out
 
 +++
@@ -522,4 +518,3 @@ chla
 ```{code-cell} ipython3
 cluster.close()
 ```
-

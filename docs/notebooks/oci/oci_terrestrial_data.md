@@ -58,8 +58,6 @@ import xarray as xr
 crs = cartopy.crs.PlateCarree()
 ```
 
-+++
-
 ## 2. Search and Open Surface Reflectance Data
 
 Set and persist your Earthdata login credentials.
@@ -137,8 +135,6 @@ Great! We've plotted the surface reflectance at a single band for the whole scen
 
 +++
 
-+++
-
 ## 3. Mask for Clouds and Water
 
 Level-2 files usually include information on the quality of each pixel in the scene, presented in the `l2_flags` variable. Let's look at it a little more closely.
@@ -185,8 +181,6 @@ ax.add_feature(cartopy.feature.LAKES, edgecolor="k", linewidth=0.1)
 rhos_860.plot(x="longitude", y="latitude", cmap="Greys_r", vmin=0, vmax=1.0)
 plt.show()
 ```
-
-+++
 
 ## 4. Working with PACE Terrestrial Data
 

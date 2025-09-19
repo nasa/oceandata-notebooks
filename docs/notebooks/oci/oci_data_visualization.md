@@ -75,8 +75,6 @@ Set (and persist to your user profile on the host, if needed) your Earthdata Log
 auth = earthaccess.login()
 ```
 
-+++
-
 ## 2. Search for Data
 
 +++
@@ -99,7 +97,7 @@ results_moana = earthaccess.search_data(
 )
 ```
 
-The second type of product we look for here is one of the new land products. This one, the OCI vegetation indices, or [LANDVI][landvi_atbd], indicates the presence of different plant pigments. We are interested in monthly data for this example. 
+The second type of product we look for here is one of the new land products. This one, the OCI vegetation indices, or [LANDVI][landvi_atbd], indicates the presence of different plant pigments. We are interested in monthly data for this example.
 
 [landvi_atbd]: https://www.earthdata.nasa.gov/apt/documents/landvi/v1.0
 
@@ -137,8 +135,6 @@ dataset_land = xr.open_mfdataset(
 dataset_land
 ```
 
-+++
-
 ## 3. Make a quick map with Xarray
 
 +++
@@ -160,8 +156,6 @@ We can do another quick plot for the land vegetation indices dataset. Notice the
 ```{code-cell} ipython3
 plot = dataset_land["cire"][0].plot.imshow()
 ```
-
-+++
 
 ## 4. Clean up the dataset
 
@@ -223,8 +217,6 @@ dataset_phy = dataset_phy.mean("date")
 dataset_veg = dataset_veg.mean("date")
 ```
 
-+++
-
 ## 5. Plot data from a transect
 
 +++
@@ -243,8 +235,6 @@ plot = transect["syncoccus_moana"].plot(y="lat")
 ```
 
 We can see there are some values missing, we can interpolate the data if we want to, but it is entirely optional.
-
-+++
 
 +++
 
@@ -342,8 +332,6 @@ dataset_v_norm = (
 data_norm = dataset_norm.to_dataarray()
 data_norm_v = dataset_v_norm.to_dataarray()
 ```
-
-+++
 
 ## 7. Make a multi-variable RBG map with two datasets
 
@@ -481,8 +469,6 @@ ax3 = data_norm_v.plot.imshow(
 plt.show()
 ```
 
-+++
-
 ## 8. Plot a timeline of the plankton types for a region of interest
 
 +++
@@ -578,11 +564,11 @@ data_norm = data_norm.sel(
 
 +++
 
-For this exercise, we want to select an area of interest that we will analyze with our timeline. Note that MOANA only works in the Atlantic Ocean for the moment. 
+For this exercise, we want to select an area of interest that we will analyze with our timeline. Note that MOANA only works in the Atlantic Ocean for the moment.
 
-Use signs appropriately: 
+Use signs appropriately:
 
-North latitude is positive, South latitude is negative. 
+North latitude is positive, South latitude is negative.
 East longitude is positive, West longitude is negative.
 
 ```{code-cell} ipython3
@@ -672,7 +658,7 @@ region_mean.load()
 region_std.load()
 ```
 
-We can now plot our timeline. We are going to plot the standard deviations as a shaded area around our mean with `fill_between`. We are using `seaborn` as `sns` to get their built-in plot styling options. It can be good to define some style elements, like `markersize`, ahead to avoid repeating them, but they can be changed for any individual dataset if needed. 
+We can now plot our timeline. We are going to plot the standard deviations as a shaded area around our mean with `fill_between`. We are using `seaborn` as `sns` to get their built-in plot styling options. It can be good to define some style elements, like `markersize`, ahead to avoid repeating them, but they can be changed for any individual dataset if needed.
 
 In this case, we also are drawing a second y axis with `twinx` for prochlorococcus, which has much higher concentrations than synechococcus and picoeukaryotes.
 
@@ -877,7 +863,7 @@ plt.show()
 ```
 
 <div class="alert alert-info" role="alert">
-    
+
 You have completed the notebook on PACE data visualization!
 
 </div>

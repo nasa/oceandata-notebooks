@@ -63,8 +63,6 @@ import xarray as xr
 from IPython.display import JSON
 ```
 
-+++
-
 ## 2. NASA Earthdata Authentication
 
 Next, we authenticate using our Earthdata Login
@@ -87,8 +85,6 @@ it's also harmless) for subsequent calls to <code>earthaccess.login</code>.
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-+++
 
 ## 3. Search for Data
 
@@ -147,8 +143,6 @@ Or we can interactively inspect all the fields underlying all results.
 JSON(results)
 ```
 
-+++
-
 ## 4. Download Data
 
 Since the data are not hosted in the Earthdata Cloud (see output from `results[0]` above), we need to download files. This will download the data in a folder called "data" in your working directory.
@@ -156,8 +150,6 @@ Since the data are not hosted in the Earthdata Cloud (see output from `results[0
 ```{code-cell} ipython3
 paths = earthaccess.download(results, local_path="L2")
 ```
-
-+++
 
 ## 5. Plot Data
 

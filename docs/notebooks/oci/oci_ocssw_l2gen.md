@@ -48,7 +48,7 @@ The [OceanColor Science SoftWare][ocssw] (OCSSW) repository is the operational d
 
 The Level-2 Generator (`l2gen`) program included in OCSSW is used to generate aquatic Level-2 (L2) data products from calibrated top-of-atmosphere (TOA) radiances. Specifically, `l2gen` atmospherically corrects spectral TOA Level-1B (L1B) radiances to obtain geophysical products, such as spectral remote-sensing reflectances (Rrs) and near-surface concentrations of the photosynthetic pigment chlorophyll-a. More information on `l2gen` methods can be found in the [Rrs Algorithm Theoretrical Basis Document].
 
-This tutorial will demonstrate how to process PACE OCI L1B data through the `l2gen` default settings to retrieve the standard L2 ocean color (OC) data suite. Done right, this data should be *exactly* what you would download from the NASA Earthdata Cloud. This tutorial will also demonstrate how to modify the operation of `l2gen` configurations based on your research needs. 
+This tutorial will demonstrate how to process PACE OCI L1B data through the `l2gen` default settings to retrieve the standard L2 ocean color (OC) data suite. Done right, this data should be *exactly* what you would download from the NASA Earthdata Cloud. This tutorial will also demonstrate how to modify the operation of `l2gen` configurations based on your research needs.
 
 [seadas]: https://seadas.gsfc.nasa.gov/
 [ocssw]: https://oceandata.sci.gsfc.nasa.gov/ocssw
@@ -86,7 +86,7 @@ import xarray as xr
 from matplotlib.colors import LogNorm
 ```
 
-Next, we'll set up the OCSSW programs. 
+Next, we'll set up the OCSSW programs.
 
 <div class="alert alert-warning">
 
@@ -165,7 +165,7 @@ You can click within the area to the left side of an output cell to expand or co
 Clearly, there are an intimidatingly large number of files required to process satellite ocean color data!  The most valuable to the scientific end user are those ending in ".par". These "par files" are plain text files that configure, or parameterize, OCSSW programs. They typically define the inputs, outputs, and the different options one can modify for each program.
 
 <div class="alert alert-warning">
-    
+
 Fun fact: `l2gen` used to be named "Multi Sensor Level 1 to 2", or MSL12. That is why many par files start with 'msl12'. The OB.DAAC renamed most programs with names like 'l2gen', or 'l3mapgen' to more clearly identify their purpose. But, the par files for use with l2gen still have names that begin with 'msl12'. Just remember msl12 = l2gen.
 
 </div>
@@ -189,10 +189,10 @@ Let's print "msl12_defaults.par", where the `l2gen` default parameters for OCI a
 This par file lists the default configuration for standard `l2gen` processing. If nothing is modified from this par file, `l2gen` will process a L1B file to L2 containing the OC suite of data products, and it will be *exactly* the same as the L2 data file that OBPG processes and ingests into NASA Earthdata.
 
 <div class="alert alert-warning">
-    
+
 <b>Here are some examples of other aquatic data suites that may be of interest:
-* AOP: Apparent Optical Properties 
-* BGC: Biogeochemical Propeties 
+* AOP: Apparent Optical Properties
+* BGC: Biogeochemical Propeties
 * IOP: Inherent Optical Properties
 * PAR: Photosynthetic available radiation
 
@@ -216,7 +216,7 @@ You can also see OCSSW parameter options by running 'l2gen --help'.
 
 +++
 
-User-generated parameter files provide a convenient way to control `l2gen` processing. 
+User-generated parameter files provide a convenient way to control `l2gen` processing.
 
 Without a par file, providing `l2gen` the names of the input L1B and output L2 files from the Terminal looks like this:
 
@@ -258,9 +258,7 @@ def write_par(path, par):
         writer.writerows(par.items())
 ```
 
-+++
-
-# 2. Search and access L1B data 
+# 2. Search and access L1B data
 
 Let's use the `earthaccess` Python package to access a L1B and a corresponding L2 file.
 
@@ -305,13 +303,11 @@ dataset = dataset.set_coords(("longitude", "latitude"))
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 ```
 
-+++
-
 # 3. Run `l2gen` with default configurations
 
 +++
 
-Let's now run `l2gen` using its default configuration. 
+Let's now run `l2gen` using its default configuration.
 
 Before we do this, however, there is one additional step required to <i>exactly</i> replicate an L2 file from the OB.DAAC. The algorithms within `l2gen` require ancillary data such as meterological information, ozone concentrations, and sea surface temperatures. To use the corresponding ancillary data for the given date and region, we need to run the `getanc` OCSSW function. If `getanc` is not used, `l2gen` uses climatological data found in `share/common`.
 
@@ -377,7 +373,7 @@ Now, let's run l2gen using this new par file AND the ancillary information in th
 !source {env}; l2gen par=l2gen.par par=l2gen.anc
 ```
 
-You'll know `l2gen` processing is finished successfully when you see "Processing Completed" at the end of the cell output. 
+You'll know `l2gen` processing is finished successfully when you see "Processing Completed" at the end of the cell output.
 
 Let's open up this new L2 data using XArray's open_datatree function:
 
@@ -393,8 +389,6 @@ Let's do a quick plot of Rrs at 550 nm:
 ```{code-cell} ipython3
 plot = dat["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
 ```
-
-+++
 
 # 4. Compare the newly generated file with a standard OB.DAAC file
 
@@ -475,8 +469,6 @@ Other than a negligible number of oddball points, the data are identical. This s
 
 +++
 
-+++
-
 # 5. Run l2gen with modifications to configurations
 
 +++
@@ -489,12 +481,12 @@ Let's say you want to run `l2gen` to retrieve biogeochemical data products, such
 
 <pre>l2prod=Rrs,chlor_a,poc,l2flags</pre>
 
-"Rrs" includes all Rrs wavelengths, "chlor_a" is chlorophyll-a, "poc" is particulate organic carbon, and "[l2flags][l2flags]" is the bitwise operator that identifies processing flags assigned to each pixel (you <b>always</b> want to include [l2flags][l2flags] as an output product!). 
+"Rrs" includes all Rrs wavelengths, "chlor_a" is chlorophyll-a, "poc" is particulate organic carbon, and "[l2flags][l2flags]" is the bitwise operator that identifies processing flags assigned to each pixel (you <b>always</b> want to include [l2flags][l2flags] as an output product!).
 
-Tip: You can run `get_product_info l sensor=oci` to see the many many products l2gen can produce. 
+Tip: You can run `get_product_info l sensor=oci` to see the many many products l2gen can produce.
 
 
-Let's write a new .par file named "l2gen_mod.par" to define the L2 products listed above and rerun `l2gen`. 
+Let's write a new .par file named "l2gen_mod.par" to define the L2 products listed above and rerun `l2gen`.
 
 [l2flags]: https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/
 
@@ -613,6 +605,6 @@ You can see that disabling the BRDF does in fact change Rrs values.
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on "Running the Level-2 Generator (l2gen) OCSSW program on OCI data". We suggest looking at the notebook on "Running l2gen's Generalized Inherent Optical Property (GIOP) model on OCI data" tutorial to learn more about deriving IOP products from PACE OCI data. 
+You have completed the notebook on "Running the Level-2 Generator (l2gen) OCSSW program on OCI data". We suggest looking at the notebook on "Running l2gen's Generalized Inherent Optical Property (GIOP) model on OCI data" tutorial to learn more about deriving IOP products from PACE OCI data.
 
 </div>

@@ -77,8 +77,6 @@ import earthaccess
 import xarray as xr
 ```
 
-+++
-
 ## 2. NASA Earthdata Authentication
 
 Next, we authenticate using our Earthdata Login
@@ -103,8 +101,6 @@ it's also harmless) for subsequent calls to `earthaccess.login`.
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-+++
 
 ## 3. Search for Data
 
@@ -184,8 +180,6 @@ len(results)
 for item in results:
     display(item)
 ```
-
-+++
 
 ## 4. Open Data
 

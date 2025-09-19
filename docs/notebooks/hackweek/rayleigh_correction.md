@@ -18,7 +18,7 @@ Last updated: August 3, 2025
 
 ## Summary
 
-This notebook is used to do Rayleigh correction for TOA reflectances obtained from PACE instruments using a nerual network (NN) trained model. 
+This notebook is used to do Rayleigh correction for TOA reflectances obtained from PACE instruments using a nerual network (NN) trained model.
 - The NN model is adopted from atmospheric correction module of FastMAPOL/component retrieval algorithm (Aryal et al., 2024). The rayleigh signal is obtained by setting input aerosol and surface parameters to a very low number.
 - **Inputs:** Viewing geometry and atmospheric parameters (Surface pressure and Ozone).
 - **Neural Network Output:** Rayleigh reflectance at 13 discrete wavelengths (385–870 nm).
@@ -47,7 +47,7 @@ import earthaccess
 
 sharedpath='/home/jovyan/shared-public/pace-hackweek/rayleigh-correction/'
 if torch.cuda.is_available():
-    device = torch.device("cuda:0") 
+    device = torch.device("cuda:0")
     print("Running on the GPU")
 else:
     device = torch.device("cpu")
@@ -65,15 +65,15 @@ import types
 ```
 
 ## 2. Neural network model class used during training
-- Here, we load all necessary classes and functions used during neural network model training.  
-- To keep the workflow lightweight, only the essential modules required for the model’s forward computation are recreated here.  
+- Here, we load all necessary classes and functions used during neural network model training.
+- To keep the workflow lightweight, only the essential modules required for the model’s forward computation are recreated here.
 - This avoids the need to upload the entire retrieval algorithm which the neural network was part of.
 
 ```{code-cell} ipython3
 class Net3L(torch.nn.Module):
     def __init__(self, n_feature, n_hidden1,n_hidden2, n_hidden3, n_output):
         super(Net3L, self).__init__()
-        self.hidden1 = torch.nn.Linear(n_feature, n_hidden1)  
+        self.hidden1 = torch.nn.Linear(n_feature, n_hidden1)
         self.hidden2 = torch.nn.Linear(n_hidden1, n_hidden2)   # hidden layer
         self.hidden3 = torch.nn.Linear(n_hidden2, n_hidden3)
         self.predict = torch.nn.Linear(n_hidden3, n_output)   # output layer
@@ -90,7 +90,7 @@ def normalize(x,xmin1,xmax1,xmean1, xstd1, option=1):
     if(option==1):
         x=(x-xmin1)/(xmax1-xmin1)
     elif(option==4):
-        x=x       
+        x=x
     return x
 
 def inv_normalize(x, xmin1, xmax1, xmean1, xstd1, option=1):
@@ -109,7 +109,7 @@ class nn_model():
     def __init__(self, info, nv, act,
                  learning_rate, batch_size, epochs,
                  nn_state_dict, train1, test_loss1, test_loss2):
-        
+
         self.info = info
         self.nv = nv
         self.activation = act
@@ -159,7 +159,7 @@ class nn_model():
         return ftool.inv_normalize(output,
                                    self.ymin.values, self.ymax.values,
                                    self.ymean.values, self.ystd.values, self.yv_normalize_option)
-# Recreate modules which were in original FastMAPOL/component algorithm 
+# Recreate modules which were in original FastMAPOL/component algorithm
 sys.modules['fastmapol'] = types.ModuleType('fastmapol')
 sys.modules['fastmapol.train'] = types.ModuleType('train')
 sys.modules['fastmapol.net'] = types.ModuleType('net')
@@ -187,29 +187,29 @@ def anc_data_reader(file):
     ps = ds1['SLP'].values/100
     return fill_nearest(o3), fill_nearest(ps)
 
-def l1c_data_reader(file):    
+def l1c_data_reader(file):
     ds1 = xr.open_dataset(file, group='geolocation_data')
     ds1s = xr.open_dataset(file, group='sensor_views_bands')
     ds1o = xr.open_dataset(file, group='observation_data',mask_and_scale=True)
-    
+
     lat = ds1['latitude'].values
     lon = ds1['longitude'].values
-    
+
     wavelengths = ds1s['intensity_wavelength'].values[0]
     intensity = ds1o['i'].values[:,:,:,:]
     f0 = ds1s['intensity_f0'].values[0]
-    
+
     solzen = ds1['solar_zenith_angle'].values[:,:,:]
     solzen1=np.reshape(solzen,(*solzen.shape,1))* np.ones((1, 1,1, intensity.shape[3]))
     ref=np.pi*intensity/(np.cos(solzen1*np.pi/180.0)*f0)
-    
+
     zen = ds1['sensor_zenith_angle'].values[:,:,:]
     az0 = ds1['sensor_azimuth_angle'].values[:,:,:]
-    solaz = ds1['solar_azimuth_angle'].values [:,:,:]   
-    az=set_az(set_az0(az0, solaz, flag_bin2sun=True)) 
+    solaz = ds1['solar_azimuth_angle'].values [:,:,:]
+    az=set_az(set_az0(az0, solaz, flag_bin2sun=True))
 
     idx_wv1 = np.argmin(np.abs(wavelengths - 360))
-    idx_wv2 = np.argmin(np.abs(wavelengths - 871))   
+    idx_wv2 = np.argmin(np.abs(wavelengths - 871))
     return lat,lon,solzen,ref[:,:,:,idx_wv1:idx_wv2],wavelengths[idx_wv1:idx_wv2],zen,az
 
 def l1c_data_reader1(file):
@@ -218,23 +218,23 @@ def l1c_data_reader1(file):
     ds1 = xr.merge(datatree.to_dict().values())
     lat = ds1['latitude'].values
     lon = ds1['longitude'].values
-    
+
     wavelengths = ds1['intensity_wavelength'].values[0]
     intensity = ds1['i'].values[:,:,:,:]
     f0 = ds1['intensity_f0'].values[0]
-    
+
     solzen = ds1['solar_zenith_angle'].values[:,:,:]
     solzen1=np.reshape(solzen,(*solzen.shape,1))* np.ones((1, 1,1, intensity.shape[3]))
     ref=np.pi*intensity/(np.cos(solzen1*np.pi/180.0)*f0)
-    
+
     zen = ds1['sensor_zenith_angle'].values[:,:,:]
     az0 = ds1['sensor_azimuth_angle'].values[:,:,:]
-    solaz = ds1['solar_azimuth_angle'].values [:,:,:]   
-    az=set_az(set_az0(az0, solaz, flag_bin2sun=True)) 
+    solaz = ds1['solar_azimuth_angle'].values [:,:,:]
+    az=set_az(set_az0(az0, solaz, flag_bin2sun=True))
 
     idx_wv1 = np.argmin(np.abs(wavelengths - 360))
-    idx_wv2 = np.argmin(np.abs(wavelengths - 871)) 
-    
+    idx_wv2 = np.argmin(np.abs(wavelengths - 871))
+
     return lat,lon,solzen,ref[:,:,:,idx_wv1:idx_wv2],wavelengths[idx_wv1:idx_wv2],zen,az
 
 
@@ -242,7 +242,7 @@ def fill_nearest(arr):
     # This function is used to fill the ancilliary data in missing pixels from neighboring pixels.
     nan_mask = np.isnan(arr)
     arr_filled = np.copy(arr)
-    arr_filled[nan_mask] = 0 
+    arr_filled[nan_mask] = 0
 
     # Perform nearest neighbor interpolation to fill NaNs
     nearest_idx = ndimage.distance_transform_edt(nan_mask, return_distances=False, return_indices=True)
@@ -279,32 +279,32 @@ def set_az(az0):
     az[az<0.0] += 360.0
     az[az>180.0] = 360.0 - az[az>180.0]
     return az
-    
+
 
 
 def rgb_image(ax,ref,wavelengths):
     def find_closest(wavelength_array, target_nm):
         return np.argmin(np.abs(wavelength_array - target_nm))
-    
+
     idx_blue = find_closest(wavelengths, 440)
     idx_green = find_closest(wavelengths, 550)
-    idx_red = find_closest(wavelengths, 670)    
+    idx_red = find_closest(wavelengths, 670)
 
     R = ref[:, :,idx_red]
     G = ref[:, :,idx_green]
     B = ref[ :, :,idx_blue]
-            
+
     def color_scaling(R, G, B):
         # Stack
         rgb = np.stack([R, G, B], axis=-1)
         # Normalize
 
-        rgb = np.clip(rgb / 0.4, 0, 1)  
+        rgb = np.clip(rgb / 0.4, 0, 1)
         # Gamma scaling
         rgb = rgb** (1 /2.2)#gamma  scaling
         return rgb
-       
-    rgb = color_scaling(R, G, B) 
+
+    rgb = color_scaling(R, G, B)
 
     ax.set_extent([lon.min(), lon.max(), lat.min(), lat.max()], crs=ccrs.PlateCarree())
     ax.coastlines(resolution='10m', linewidth=0.5)
@@ -320,7 +320,7 @@ def rgb_image(ax,ref,wavelengths):
 def load_nn(device,sharedpath):
     nn_path=sharedpath+'RayleighNN_FastMAPOL_component.pk'
     nn=pickle.load(open(nn_path,'rb'))
-    nn.nn.to(device)    
+    nn.nn.to(device)
     return nn
 ```
 
@@ -350,7 +350,7 @@ def nn_input_vector(zen, az, solzen, o3, ps):
     inputs[..., 12] = o3
     inputs[..., 13] = ps
     return inputs
-def refl_nn(device, inputs, nn):    
+def refl_nn(device, inputs, nn):
     ref=nn.forward(device, inputs)
     return ref
 ```
@@ -390,12 +390,12 @@ def rayleigh_ref_interp(ref_nn, wl_fine):
     rayleigh_fine = 1.0 / (wl_fine ** 4)   # (286,)
 
     # Least-squares fit: c = sum(R_i * (1/λ⁴)) / sum((1/λ⁴)^2)
-    
+
     numerator = np.sum(ref_nn * rayleigh_nn, axis=2)    # (H, W)
     denominator = np.sum(rayleigh_nn ** 2)               # scalar
     c = numerator / denominator                          # (H, W)
 
-    return c[:, :, np.newaxis] * rayleigh_fine           # (H, W, 286)       
+    return c[:, :, np.newaxis] * rayleigh_fine           # (H, W, 286)
 ```
 
 ## 7. Rayleigh correction for OCI/SPEXone/HARP2 measurements
@@ -464,7 +464,7 @@ def get_ref(device,sharedpath,toa_ref,wavelengths,inda):
     ref_nn=refl_nn(device,inputp,nn)
     ray_ref=rayleigh_ref_interp(ref_nn, wavelengths)
 #    total_ref=toa_ref[:,:,inda,:]
-    corr_ref=toa_ref[:,:,inda,:]-ray_ref    
+    corr_ref=toa_ref[:,:,inda,:]-ray_ref
     return toa_ref[:,:,inda,:], ray_ref, corr_ref, ref_nn
 ```
 

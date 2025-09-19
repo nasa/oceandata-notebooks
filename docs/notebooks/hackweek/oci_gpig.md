@@ -27,7 +27,7 @@ The following notebooks are **prerequisites** for this tutorial.
 
 <div class="alert alert-info" role="alert">
 
-An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data. 
+An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
 
 </div>
 
@@ -44,7 +44,7 @@ This notebook applies the inversion algorithm described in [Chase et al., 2017][
 
 At the end of this notebook you will know:
 
-- How to use a packaged Python project 
+- How to use a packaged Python project
 - How to run the GPig Algorithm on PACE OCI L2 and L3 data
 
 +++
@@ -79,8 +79,6 @@ Set (and persist to your home directory on the host, if needed) your Earthdata L
 auth = earthaccess.login(persist=True)
 ```
 
-+++
-
 ## 2. Run GPig on L2 Data
 
 +++
@@ -93,8 +91,8 @@ Let's first download the data using the `L2_utils.load()` function. Let's take a
 
 Running `L2_utils.load_data()` downloads several data files from NASA EarthData:
 
-* Rrs: PACE OCI Level-2 AOP data products 
-* Sea surface salinity: JPL SMAP-SSS V5.0 CAP, 8-day running mean, level 3 mapped, sea surface salinity (SSS) product from the NASA Soil Moisture Active Passive (SMAP) observatory 
+* Rrs: PACE OCI Level-2 AOP data products
+* Sea surface salinity: JPL SMAP-SSS V5.0 CAP, 8-day running mean, level 3 mapped, sea surface salinity (SSS) product from the NASA Soil Moisture Active Passive (SMAP) observatory
 * Sea surface temperature: Group for High Resolution Sea Surface Temperature (GHRSST) Level 4 sea surface temperature
 
 Let's run `L2_utils.load_data()` to download data collected on May 5, 2025 corresponding to a bounding box off the coast of Washington, U.S.
@@ -141,7 +139,7 @@ Now, we can use `L2_utils.estimate_inv_pigments` to calculate phytoplankton pigm
 ```
 
 You can see that this function accepts a bounding box (bbox) as a parameter. The default is `None` which means it will run the algorithm on every single pixel in the L2 file, which can take a long time. We will supply the `bbox` parameter with the following coordinates:
-45 N, 44 S, -125 E, -126 W. 
+45 N, 44 S, -125 E, -126 W.
 
 Let's first see what this bounding box covers:
 
@@ -296,7 +294,7 @@ for ax, var, title in zip(axs.flat, variables, titles):
         cmap="viridis",
         add_colorbar=False,
     )
-    
+
     ax.coastlines(resolution="10m")
     ax.set_title(title)
     ax.gridlines(
@@ -312,4 +310,3 @@ for ax, var, title in zip(axs.flat, variables, titles):
 plt.tight_layout()
 plt.show()
 ```
-

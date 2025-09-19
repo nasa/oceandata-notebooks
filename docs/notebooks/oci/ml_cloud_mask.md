@@ -102,8 +102,6 @@ if not pathlib.Path(CLDMASK_PATH).exists():
     shutil.move("_temp_cldmask_dataset", pathlib.Path(CLDMASK_PATH))
 ```
 
-+++
-
 ## 2. Cloud Masking
 
 Cloud masking refers to the task of assigning a binary value to each pixel in a satellite image, according to whether or not that location is covered by a cloud. It is essential to many other data products. For non-atmospheric scientists, this is usually useful to know what pixels to ignore, or 'mask out', in processing. For atmospheric scientists, it is often the opposite: we may exclusively wish to study the clouds.
@@ -205,8 +203,6 @@ def generate_split(name: str, replace: bool = False) -> None:
 generate_split("default_split")
 ```
 
-+++
-
 ## 4. Datasets and DataLoaders
 
 Next, we need to write a little code to load our data. Torch gives us a nice framework to do this.  A [`torch.utils.Dataset`](https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset) is responsible for getting a single instance of data associated with a specific index. To implement a `Dataset`, we implement `__init__` (as with all classes), `__len__`, and `__getitem__`.
@@ -304,8 +300,6 @@ for inp, validity, labels in train_loader:
 print(inp.shape, validity.shape, labels.shape)
 ```
 
-+++
-
 ## 5. A Simple Multi-Layer Perceptron
 
 Next, let's design a simple multi-layer perceptron (MLP), the simplest form of neural network. MLPs consist of fully-connected layers, also known as [linear layers](https://pytorch.org/docs/stable/generated/torch.nn.Linear.html), separated by activation functions. Fully-connected simply means that, within a layer, every input is connected to every output. Let $M$ be the number of inputs to a linear layer, and let $N$ be the number of outputs. Let $W\in\mathbb{R}^{M\times N}$ be the weight matrix. Let $b\in \mathbb{R}^{N}$ be an optional bias vector. The output $y\in\mathbb{R}^N$ of a linear layer, given input $x\in\mathbb{R}^M$, is defined as $y=xW + b$.
@@ -381,8 +375,6 @@ for i in range(16):
 plt.subplots_adjust(wspace=None, hspace=None)
 plt.show()
 ```
-
-+++
 
 ## 6. Optimization
 
@@ -584,8 +576,6 @@ print(
 )
 ```
 
-+++
-
 ## 9. Convolutional Neural Networks
 
 Our simple MLP has a big problem: it operates independently on every pixel. This means it is incapable of incorporating any _spatial context_ into its understanding of a scene. But we know that adjacent pixels are _not_ independent, and that spatial context is likely to be useful. For example, a pixel is more likely to be cloudy if many of its neighbors are cloudy. On the other hand, if a scene contains reflective surfaces (like snow and ice), then bright values might be less likely to imply that a pixel is cloudy. By allowing our network to operate on an entire image at once, we allow it to model this context.
@@ -782,8 +772,6 @@ test_output = simple_cnn(test_input)
 print(f"Should be (8, 1, 64, 64): {test_output.shape}")
 ```
 
-+++
-
 ## 10. Putting It All Together
 
 Now we can put it all together to train our CNN on the same data! We can crank the batch size way up and see what changes. Feel free to try bigger models. The GPU on this instance can handle much heavier loads than we are currently putting it through. Try playing around with these settings and see what you learn!
@@ -881,8 +869,6 @@ plt.xlabel("batch index")
 plt.show()
 ```
 
-+++
-
 ## 11. Want More?
 
 This notebook is already massive, although there are many more topics we wish we could cover. If you'd like to continue your learning journey, we have some suggestions for you:
@@ -894,4 +880,3 @@ This notebook is already massive, although there are many more topics we wish we
 - see [this post](https://discuss.pytorch.org/t/how-to-prefetch-data-when-processing-with-gpu/548/19) for some common ideas on how to speed up data loading
 - check out [transformers](https://arxiv.org/abs/1706.03762) and [vision transformers](https://arxiv.org/abs/2010.11929) for a newer, fancier alternative to CNNs
 - play around with [tensorboard](https://pytorch.org/tutorials/recipes/recipes/tensorboard_with_pytorch.html) to track your model's progress in real time
-

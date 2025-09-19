@@ -108,8 +108,6 @@ This docstring follows the NumPy [style guide], which is one of a few common con
 help(write_par)
 ```
 
-+++
-
 ## 2. Get L1B Data
 
 
@@ -165,8 +163,6 @@ f = earthaccess.open([ifile], provider="OB_CLOUD")
 dataset = xr.open_dataset(f[0], group="observation_data")
 plot = dataset["rhot_red"][dict(red_bands=100)].plot()
 ```
-
-+++
 
 ## 3. Process L1B Data with `l2gen`
 
@@ -330,8 +326,6 @@ Now run `l2bin` using your chosen parameters:
 !source {env}; l2bin par=l2bin.par
 ```
 
-+++
-
 ## 5. Make a Map from Binned Data with `l3mapgen`
 
 The `l3mapgen` function of OCSSW allows you to create maps with a wide array of options you can see below:
@@ -386,6 +380,6 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on using OCCSW to process PACE data! You can now explore more notebooks to learn more about OCSSW usage. 
+You have completed the notebook on using OCCSW to process PACE data! You can now explore more notebooks to learn more about OCSSW usage.
 
 </div>

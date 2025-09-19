@@ -77,8 +77,6 @@ Set (and persist to your user profile on the host, if needed) your Earthdata Log
 auth = earthaccess.login(persist=True)
 ```
 
-+++
-
 ## 2. Explore L1B File Structure
 
 Let's use `xarray` to open up a OCI L1B NetCDF file using `earthaccess`. We will use the same search method used in <a href="oci_data_access.html">OCI Data Access</a>. Note that L1B files do not include cloud coverage metadata, so we cannot use that filter.
@@ -154,8 +152,6 @@ Let's plot the reflectance at postion 100 in the "blue_bands" dimension.
 ```{code-cell} ipython3
 plot = datatree["observation_data"]["rhot_blue"].sel({"blue_bands": 100}).plot()
 ```
-
-+++
 
 ## 3. Explore L2 File Structure
 
@@ -284,8 +280,6 @@ rrs_stack = rrs_box.stack(
 )
 plot = rrs_stack.plot(hue="pixel", add_legend=False)
 ```
-
-+++
 
 ## 4. Explore L3M File Structure
 

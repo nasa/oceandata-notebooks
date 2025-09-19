@@ -38,6 +38,3 @@ jobs:
           LATEST_TAG_OFF: true
           REPO_DIR: /srv/container
           APPENDIX_FILE: appendix
-      - name: cleanup
-        run: |
-          find /srv/container -not -name start -delete

@@ -80,8 +80,6 @@ import numpy as np
 import xarray as xr
 ```
 
-+++
-
 ## 2. NASA Earthdata Authentication
 
 Next, we authenticate using our Earthdata Login
@@ -106,8 +104,6 @@ it's also harmless) for subsequent calls to `earthaccess.login`.
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-+++
 
 ## 3. Search for Data
 
@@ -185,8 +181,6 @@ command.
 results[0]
 ```
 
-+++
-
 ## 4. Open L2 Data
 
 Let's go ahead and open a couple granules using `xarray`. The `earthaccess.open` function is used when you want to directly read bytes from a remote filesystem, but not download a whole file. When
@@ -249,8 +243,6 @@ plot = dataset["chlor_a"].plot(
     x="longitude", y="latitude", cmap="viridis", vmax=5, ax=ax
 )
 ```
-
-+++
 
 ## 5. Open L3M Data
 
@@ -345,4 +337,3 @@ We can open up that locally saved file using `xarray` as well.
 ```{code-cell} ipython3
 xr.open_datatree(paths[0])
 ```
-

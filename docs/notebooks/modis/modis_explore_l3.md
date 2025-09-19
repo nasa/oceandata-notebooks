@@ -74,8 +74,6 @@ from matplotlib import pyplot as plt
 auth = earthaccess.login(persist=True)
 ```
 
-+++
-
 ## 2. Access Data
 
 In this example, the image to be used is MODIS AQUA L3 8-day averaged 4km chlorophyll image for Sep 13-20, 2016 and the January 2020 monthly average for Rrs_412. First we need to search for that data. These data are hosted by the OB.DAAC. The `earthaccess.search_datasets` function queries the CMR for collections. To do this search we need to know something about the data information, particularly that we are looking for `L3m` or Level-3 mapped collections and MODIS AQUA.
@@ -146,8 +144,6 @@ if not earthaccess.__store__.in_region:
 dataset = xr.open_dataset(paths[0])
 dataset
 ```
-
-+++
 
 ## 3. Plot Data
 

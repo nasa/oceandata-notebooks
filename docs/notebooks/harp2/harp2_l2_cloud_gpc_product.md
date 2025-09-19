@@ -58,8 +58,6 @@ auth = earthaccess.login(persist=True)
 fs = earthaccess.get_fsspec_https_session()
 ```
 
-+++
-
 ## 2. Get Level-2 Data
 
 HARP2 L2.CLOUD_GPC_NRT products are currently available starting from 2025-07-01. You can use the following "short name" to search with earthaccess.search_data:
@@ -96,8 +94,6 @@ Here we merge all the data group together for convenience in data manipulations.
 dataset = xr.merge(datatree.to_dict().values())
 # dataset
 ```
-
-+++
 
 ## 3. Understanding HARP2 L2.CLOUD_GPC Product Structure
 
@@ -148,8 +144,6 @@ print_variable_description(datatree, ["index"], exclude=False)
 ```{code-cell} ipython3
 print_variable_description(datatree, ["index", "rft", "bow"], exclude=True)
 ```
-
-+++
 
 ## 4. Visulizing Variables
 
@@ -263,14 +257,9 @@ fig1.colorbar(
 )
 ```
 
-+++
-
 ## 5. Reference
 
 - Breon, F.-M., & Doutriaux-Boucher, M. (2005). A comparison of cloud droplet radii measured from space. IEEE Transactions on Geoscience and Remote Sensing, 43(8), 1796–1805. https://doi.org/10.1109/TGRS.2005.852838
 - Alexandrov, M. D., Cairns, B., Emde, C., Ackerman, A. S., & Van Diedenhoven, B. (2012). Accuracy assessments of cloud droplet size retrievals from polarized reflectance measurements by the research scanning polarimeter. Remote Sensing of Environment, 125, 92–111. https://doi.org/10.1016/j.rse.2012.07.012
 - Van Diedenhoven, B., Fridlind, A. M., Ackerman, A. S., & Cairns, B. (2012). Evaluation of Hydrometeor Phase and Ice Properties in Cloud-Resolving Model Simulations of Tropical Deep Convection Using Radiance and Polarization Measurements. Journal of the Atmospheric Sciences, 69(11), 3290–3314. https://doi.org/10.1175/JAS-D-11-0314.1
 - Alexandrov, M. D., Cairns, B., & Mishchenko, M. I. (2012). Rainbow Fourier transform. Journal of Quantitative Spectroscopy and Radiative Transfer, 113(18), 2521–2535. https://doi.org/10.1016/j.jqsrt.2012.03.025
-
-+++
-

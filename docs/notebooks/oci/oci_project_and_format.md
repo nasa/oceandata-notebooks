@@ -84,8 +84,6 @@ for item in results:
 paths = earthaccess.download(results, local_path="data")
 ```
 
-+++
-
 ## 2. Reprojecting Level-2 PACE Data
 
 ### 2.1. 2D Variables - Vegetation Indices

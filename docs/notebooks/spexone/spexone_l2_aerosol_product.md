@@ -61,8 +61,6 @@ import xarray as xr
 auth = earthaccess.login(persist=True)
 ```
 
-+++
-
 ## 2. Get Level-2 Data
 
 SPEXone L2 data is available on both OB.DAAC and earth data cloud. Please refer L1C notebook on the access of cloud. The following block retrieves a single SPEXOne granule.
@@ -103,8 +101,6 @@ dataset = xr.merge(datatree.to_dict().values())
 dataset
 ```
 
-+++
-
 ## 3. Understanding SPEXone L2 product structure
 
 The SPEXone RemoTAP L2 product suite includes a long list of aerosol optical properties for both fine and coarse modes (defined in the same format as HARP2 L2 products):
@@ -130,8 +126,6 @@ And a set of other products:
 ```{code-cell} ipython3
 datatree["geophysical_data"]
 ```
-
-+++
 
 ## 4. Visulize SPEXone L2 aerosol properties
 
@@ -235,8 +229,6 @@ We can clearly see the aerosol event with less absorption (high SSA) and large s
 
 +++
 
-+++
-
 ## 5. Improve data quality: filter low AOD pixels
 
 +++ {"lines_to_next_cell": 2}
@@ -274,8 +266,6 @@ plot_l2_product(
     data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
 )
 ```
-
-+++
 
 ## 6. Advanced quality assessment
 
@@ -332,8 +322,6 @@ We can evaluate quality flag based on the $\chi^2$ and $N$, and most pixels have
 
 +++
 
-+++
-
 ## 7 [Optional] Cloud fraction
 
 +++
@@ -353,8 +341,6 @@ plot_l2_product(
     data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="cool"
 )
 ```
-
-+++
 
 ## 8. Optional: pixel level uncertainty estimation
 
@@ -394,11 +380,6 @@ As shown above, the AOD uncertainties increase with the AOD value. You can play 
 
 +++
 
-+++
-
 ## 9. Reference
 
 Guangliang Fu,  Jeroen Rietjens,  Raul Laasner,  Laura van der Schaaf,  Richard van Hees,  Zihao Yuan,  Bastiaan van Diedenhoven,  Neranga Hannadige,  Jochen Landgraf,  Martijn Smit,  Kirk Knobelspiesse,  Brian Cairns,  Meng Gao,  Bryan Franz,  Jeremy Werdell,  Otto Hasekamp (2025). Aerosol retrievals from SPEXone on the NASA PACE mission: First results and validation. Geophysical Research Letters, 52, e2024GL113525. https://doi.org/10.1029/2024GL113525
-
-+++
-

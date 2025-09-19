@@ -19,7 +19,7 @@ Last updated: August 3, 2025
 
 ## Summary
 
-In this example we will conduct matchups of in situ AERONET-OC Rrs data with PACE OCI Rrs data. 
+In this example we will conduct matchups of in situ AERONET-OC Rrs data with PACE OCI Rrs data.
 
 The Aerosol Robotic Network (AERONET) was developed to sustain atmospheric studies at various scales with measurements from worldwide distributed autonomous sun-photometers. This has been extended to support marine applications, called AERONET – Ocean Color [(AERONET-OC)](https://aeronet.gsfc.nasa.gov/new_web/ocean_levels_versions.html), and provides the additional capability of measuring the radiance emerging from the sea (i.e., water-leaving radiance) with modified sun-photometers installed on offshore platforms like lighthouses, oceanographic and oil towers. AERONET-OC is instrumental in satellite ocean color validation activities.
 
@@ -1436,6 +1436,8 @@ We will use the function `process_aeronet` to download and process AERONET-OC da
 There are three "levels" of AERONET-OC data in terms of data quality: 1, 1.5, and 2. If a complete measurement sequence with the instruments is able to be performed, it is collected and stored as Level 1. These data are then passed through an automated quality control system and stored as Level 1.5 if they pass all tests. Finally, Level 2 data are data from Level 1.5 that are subsequently screened by an experienced scientist and validated. We'll be using Level 1.5 data to pull as much good quality data as possible without the time lag for manual validation. More information on AERONET-OC levels can be found in [Zibordi et al., 2009.](https://doi.org/10.1175/2009JTECHO654.1)
 
 ```{code-cell} ipython3
+:scrolled: true
+
 df_aeronet = process_aeronet(
     aeronet_site="AAOT",
     start_date="2024-03-01",
@@ -1500,6 +1502,7 @@ We will use the function `match_data` to create a matchup dataframe based on sel
 
 ```{code-cell} ipython3
 :tags: [scroll-output]
+:scrolled: true
 
 matchups = match_data(
     df_satellite,

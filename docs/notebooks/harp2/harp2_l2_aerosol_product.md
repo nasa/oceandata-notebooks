@@ -56,8 +56,6 @@ auth = earthaccess.login(persist=True)
 fs = earthaccess.get_fsspec_https_session()
 ```
 
-+++
-
 ## 2. Get Level-2 Data
 
 HARP2 L2 data is currently in the test phase with data only available on OB.DAAC, not on earth data cloud yet. We can use the requests library to download data directly from OB.DAAC. The following command line tool downloads one HARP2 FastMAPOL L2 granule at the time stamp 2025/01/09 20:00:19 UTC.
@@ -94,8 +92,6 @@ dataset = xr.merge(datatree.to_dict().values())
 dataset
 ```
 
-+++
-
 ## 3. Understanding HARP2 L2 product structure
 
 The HARP2 FastMAPOL L2 product suite includes a long list of aerosol optical properties for both fine and coarse modes (defined in the same format as SPEXone L2 products):
@@ -126,8 +122,6 @@ There are two versions of remote sensing reflectance: Rrs1 (before BRDF correcti
 ```{code-cell} ipython3
 datatree["geophysical_data"]
 ```
-
-+++
 
 ## 4. Visulize HARP2 L2 aerosol properties
 
@@ -224,8 +218,6 @@ plot_l2_product(
 )
 ```
 
-+++
-
 ## 5. Improve data quality: filter low AOD pixels
 
 +++ {"lines_to_next_cell": 2}
@@ -263,8 +255,6 @@ plot_l2_product(
     data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
 )
 ```
-
-+++
 
 ## 6. Advanced quality assessment
 
@@ -333,8 +323,6 @@ We can evaluate quality flag based on the $\chi^2$ and $N$, and only a small por
 
 +++
 
-+++
-
 ## 7. Optional: Multi-angle data mask for cloud and data screening
 
 +++
@@ -367,15 +355,11 @@ plot_l2_product(
 )
 ```
 
-+++
-
 ## 8. Optional: pixel level uncertainty estimation.
 
 +++
 
 As mentioned previously, pixel level uncertainty can be evalated through error propagation, which propgation measurement uncertainty through Jacobian of the forward model. The estimated uncertainties are discussed in (Gao et al 2021) for HARP2 and AirHARP, but currently not included in the HARP2 L2 products.
-
-+++
 
 +++
 
@@ -386,6 +370,3 @@ As mentioned previously, pixel level uncertainty can be evalated through error p
 - Gao, M., Knobelspiesse, K., Franz, B. A., Zhai, P.-W., Sayer, A. M., Ibrahim, A., Cairns, B., Hasekamp, O., Hu, Y., Martins, V., Werdell, P. J., and Xu, X.: Effective uncertainty quantification for multi-angle polarimetric aerosol remote sensing over ocean, Atmos. Meas. Tech., 15, 4859–4879, https://doi.org/10.5194/amt-15-4859-2022, 2022.
 
 - Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, Atmos. Meas. Tech., 16, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023.
-
-+++
-

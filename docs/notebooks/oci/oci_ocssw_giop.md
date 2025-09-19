@@ -50,7 +50,7 @@ The [OceanColor Science SoftWare][ocssw] (OCSSW) repository is the operational d
 
 In a previous tutorial, we demonstrated how to run the Level-2 Generator (`l2gen`) program to generate aquatic Level-2 (L2) data products from calibrated top-of-atmosphere (TOA) radiances. In practice, `l2gen` not only allows generation of aquatic geophysical products, but also the capability to (re)parameterize the algorithms used to generate them. For example, inherent optical properties (IOPs) are routinely produced and distributed as part of NASA standard L2 and Level-3 (L3) IOP suites, inclusive of spectral absorption and backscattering coefficients and their subcomponents. These standard products are generated using the default configuration of the Generalized IOP (GIOP) framework [(Werdell et al., 2013)][werdell]. Using `l2gen`, you can select options to generate additional IOPs or reconfigure the parameterization of GIOP.
 
-This tutorial will demonstrate how to process PACE OCI L1B data through `l2gen` to retrieve the standard L2 IOP data suite. This tutorial wil also demonstrate how to modify the operation of `l2gen` confifurations based on your research needs. 
+This tutorial will demonstrate how to process PACE OCI L1B data through `l2gen` to retrieve the standard L2 IOP data suite. This tutorial wil also demonstrate how to modify the operation of `l2gen` confifurations based on your research needs.
 
 [seadas]: https://seadas.gsfc.nasa.gov/
 [ocssw]: https://oceandata.sci.gsfc.nasa.gov/ocssw
@@ -61,7 +61,7 @@ This tutorial will demonstrate how to process PACE OCI L1B data through `l2gen` 
 At the end of this notebook you will know:
 
 - How to navigate and open files related to the GIOP within OCSSW directory
-- How to process L1B data to retreive L2 IOPs with `l2gen` 
+- How to process L1B data to retreive L2 IOPs with `l2gen`
 - Modifications you can make to `l2gen` to obtain different IOP products
 
 +++
@@ -84,7 +84,7 @@ import pandas as pd
 import xarray as xr
 ```
 
-Next, we'll set up the OCSSW programs. 
+Next, we'll set up the OCSSW programs.
 
 <div class="alert alert-warning">
 
@@ -162,7 +162,7 @@ Let's take a look at the msl12_defaults_IOP.par file, which is the "parameter" f
 !cat $OCSSWROOT/share/oci/msl12_defaults_IOP.par
 ```
 
-Let's discuss some of these parameters: 
+Let's discuss some of these parameters:
 
 * proc_uncertainty=1 : Rrs uncertainty propagation mode, where 1 = uncertainty propagation generating error variance (and 0 = no uncertainty propagation and 2 = uncertainty propagation generating full covariance matrix)
 <br><br>
@@ -208,7 +208,7 @@ As seen in these two files, the default GIOP parameterization is defined by:
 * raman_opt=2 (Raman scattering Rrs correction options. 2 = Westberry et al. (2013) analytical correction)
 * giop_wave=[413,442,490,510,555,670] (wavelengths used in the L-M optimization)
 
-Running `l2gen` on OCI data to produce the IOP data suite products will include these default options. The user must make modifications to produce different outputs. 
+Running `l2gen` on OCI data to produce the IOP data suite products will include these default options. The user must make modifications to produce different outputs.
 
 *Remember, you can find more information about these parameters, <b>and the other options available for each</b>, using 'l2gen --help'.*
 
@@ -218,7 +218,7 @@ Running `l2gen` on OCI data to produce the IOP data suite products will include 
 
 +++
 
-User-generated parameter files provide a convenient way to control `l2gen` processing. 
+User-generated parameter files provide a convenient way to control `l2gen` processing.
 
 Without a par file, providing `l2gen` the names of the input L1B and output L2 files from the Terminal looks like this:
 
@@ -260,9 +260,7 @@ def write_par(path, par):
         writer.writerows(par.items())
 ```
 
-+++
-
-# 2. Search and access L1B data 
+# 2. Search and access L1B data
 
 Let's use the earthaccess Python package to access a L1B file.
 
@@ -291,8 +289,6 @@ dataset = xr.merge(dataset.to_dict().values())
 dataset = dataset.set_coords(("longitude", "latitude"))
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 ```
-
-+++
 
 # 3. Run `l2gen` with default GIOP configurations
 
@@ -351,7 +347,7 @@ Now, let's run `l2gen` using this new .par file. This can take several minutes.
 !source {env}; l2gen par=l2gen_iop.par
 ```
 
-You'll know `l2gen` processing is finished when you see "Processing Completed" at the end of the cell output. 
+You'll know `l2gen` processing is finished when you see "Processing Completed" at the end of the cell output.
 
 Let's open up this new L2 data using XArray's open_datatree function:
 
@@ -507,7 +503,7 @@ There are many ways you can configure GIOP to run to best suit your research nee
 ```{code-cell} ipython3
 par = {
     "ifile": l1b_path,
-    "ofile": data / l1b_name.replace("L1B", "L2_IOP_mod"), 
+    "ofile": data / l1b_name.replace("L1B", "L2_IOP_mod"),
     "suite": "IOP",
     **bbox,
     "giop_adg_opt": 2,
@@ -534,7 +530,7 @@ write_par("l2gen_iop_mod.par", par)
 ```{code-cell} ipython3
 :scrolled: true
 
-!source {env}; l2gen par=l2gen_iop_mod.par 
+!source {env}; l2gen par=l2gen_iop_mod.par
 ```
 
 ```{code-cell} ipython3
@@ -561,4 +557,3 @@ ax.set_xlim(left=0)
 
 plt.show()
 ```
-
