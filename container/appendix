@@ -27,7 +27,7 @@ RUN chmod +x install_ocssw \
 USER ${NB_USER}
 
 # jupyter configuration
-COPY src/prefix/ ${NB_PYTHON_PREFIX}/
+COPY --chown=${NB_USER}:${NB_USER} src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # install (locked) dependencies for oceandata-notebooks with the "docker" group
 RUN pip install --no-cache-dir --no-deps \
