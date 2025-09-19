@@ -43,7 +43,7 @@ RUN python -m bash_kernel.install --sys-prefix
 ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
 
 # configure uv tool
-ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 ENV UV_TOOL_DIR=${NB_PYTHON_PREFIX}/bin
 ENV UV_CACHE_DIR=${NB_PYTHON_PREFIX}/cache
 ENV UV_CONSTRAINT=/srv/container/requirements.txt
+ENV UV_PROJECT_ENVIRONMENT=${NB_PYTHON_PREFIX}/share/venv
