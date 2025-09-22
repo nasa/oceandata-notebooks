@@ -30,6 +30,7 @@ bleach==6.2.0
     # via panel
 bokeh==3.8.0
     # via
+    #   geoviews
     #   holoviews
     #   hvplot
     #   panel
@@ -38,7 +39,9 @@ botocore==1.37.3
 bounded-pool-executor==0.0.3
     # via pqdm
 cartopy==0.24.1
-    # via gpig
+    # via
+    #   geoviews
+    #   gpig
 certifi==2024.12.14
     # via
     #   netcdf4
@@ -117,6 +120,7 @@ fsspec==2025.9.0
     #   earthaccess
     #   s3fs
     #   torch
+geoviews==1.14.0
 gpig @ git+https://github.com/max-danenhower/pace-rrs-inversions-pigments.git@8eee944c6996558c0c316c0d41099998cfced8ab
 h5netcdf==1.6.1
     # via gpig
@@ -125,7 +129,9 @@ h5py==3.13.0
     #   h5netcdf
     #   pvlib
 holoviews==1.20.2
-    # via hvplot
+    # via
+    #   geoviews
+    #   hvplot
 hvplot==0.11.3
 idna==3.10
     # via
@@ -226,6 +232,7 @@ numpy==2.2.6
     #   cmocean
     #   contourpy
     #   datashader
+    #   geoviews
     #   gpig
     #   h5py
     #   holoviews
@@ -251,6 +258,7 @@ packaging==24.2
     #   dask
     #   datashader
     #   distributed
+    #   geoviews
     #   h5netcdf
     #   holoviews
     #   hvplot
@@ -272,11 +280,13 @@ pandas==2.3.2
     #   xarray
 panel==1.8.1
     # via
+    #   geoviews
     #   holoviews
     #   hvplot
 param==2.2.0
     # via
     #   datashader
+    #   geoviews
     #   holoviews
     #   hvplot
     #   panel
@@ -328,6 +338,7 @@ pyparsing==3.2.3
 pyproj==3.7.1
     # via
     #   cartopy
+    #   geoviews
     #   rioxarray
 pyshp==2.3.1
     # via cartopy
@@ -382,7 +393,9 @@ seaborn==0.13.2
 setuptools==75.8.0 ; python_full_version >= '3.12'
     # via torch
 shapely==2.1.0
-    # via cartopy
+    # via
+    #   cartopy
+    #   geoviews
 six==1.17.0
     # via python-dateutil
 sortedcontainers==2.4.0
@@ -454,7 +467,9 @@ xarray==2025.9.0
     #   gpig
     #   rioxarray
 xyzservices==2025.4.0
-    # via bokeh
+    # via
+    #   bokeh
+    #   geoviews
 yarl==1.20.0
     # via aiohttp
 zict==3.0.0

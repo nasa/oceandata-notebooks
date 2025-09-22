@@ -67,8 +67,6 @@ uv sync
 The `run` subcommand works in the environment, and our first use is installing the bash kernel:
 
 ```{code-cell}
-:scrolled: true
-
 uv run python -m bash_kernel.install --sys-prefix
 ```
 
@@ -83,7 +81,8 @@ We use [DVC] to share that cache among maintainers as well as to the deployment 
 > [!Important]
 > Only notebooks listed in `docs/_toc.yml` are built, so adding a new notebook requires updating `docs/_toc.yml`.
 
-The next cell builds a static website in `docs/_build/html` using `jupyter-book<2`.
+The `dvc pull` command retrieves the cache.
+We execute it via `uv run` only because we've included the DVC tool in the project environment to simplify this workflow.
 
 [Jupyter Book]: https://jupyterbook.org/
 [DVC]: https://dvc.org/
@@ -92,7 +91,8 @@ The next cell builds a static website in `docs/_build/html` using `jupyter-book<
 uv run dvc pull
 ```
 
-Now use Jupyter Book (alias `jb`) to generate or update the `docs/_build` folder.
+The next cell builds a static website in `docs/_build/html` using `jupyter-book<2`.
+We run the Jupyter Book (alias `jb`) build in the isolated virtual environment, to make sure the environment configuration is correct.
 
 ```{code-cell}
 :scrolled: true
@@ -103,27 +103,29 @@ uv run jb build docs
 Run the next cell to preview the website.
 Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 
+> [!Note]
+> On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
+
 ```{code-cell}
 :scrolled: true
 
 python -m http.server -d docs/_build/html
 ```
 
-> [!Note]
-> On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
-
 ### Publish (a.k.a. Release)
 
-If any notebooks have been executed, rather than built using cached outputs, there are three steps for making the new outputs available to the GitHub Action that deploys the website.
+If any notebooks have been executed, rather than relying on cached outputs, follow the next three steps to make the new outputs available to the GitHub Action that deploys the website.
 First, commit the updated cache with `dvc commit`.
 
 ```{code-cell}
-uv run dvc commit
+uv run dvc commit --force
 ```
 
 Second, use `dvc` to push your cache to the remote location accessible to the website build.
 
 ```{code-cell}
+:scrolled: true
+
 uv run dvc push
 ```
 
@@ -134,7 +136,7 @@ Use your preferred method of working with Git to stage the `docs/_cache.dvc` cha
 - generate temp aws credentials
 - todo: aws credentials to github actions
 
-### Jupyter-Cache
+### Jupyter Cache
 
 Alternatively, and with the option for parallel notebook execution, update the cache without building the book.
 

@@ -308,6 +308,7 @@
 #     "importlib-metadata==8.6.1 ; python_full_version < '3.12'",
 #     "setuptools==75.8.0 ; python_full_version >= '3.12'",
 #     "zipp==3.21.0 ; python_full_version < '3.12'",
+#     "geoviews==1.14.0",
 # ]
 #
 # [tool.uv.sources]
