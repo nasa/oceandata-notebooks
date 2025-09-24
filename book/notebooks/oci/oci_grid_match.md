@@ -255,40 +255,11 @@ All of these things will go into building an affine transformation, which is a s
 
 Since we have the masked rasters we're using for this demonstration, we have pretty much all of the information required to create an affine transformation. First, we'll get the bounds of our grid, and we'll set up some of the variables we need.
 
-```{code-cell} ipython3
-# Using EPSG 4326 for destination data, but change it if desired!
-src_crs = CRS.from_epsg(4326)
-dst_crs = CRS.from_epsg(4326)
-
-# Find the min and max lat/lon bounds for these two granules
-min_lon = np.min([sr_masked.longitude.min(), vi_masked.longitude.min()])      # w
-min_lat = np.min([sr_masked.latitude.min(), vi_masked.latitude.min()])        # s
-max_lon = np.max([sr_masked.longitude.max(), vi_masked.longitude.max()])      # e
-max_lat = np.max([sr_masked.latitude.max(), vi_masked.latitude.max()])        # n
-
-# Define desired resolution, in dst CRS units (e.g., degrees for EPSG 4326)
-dst_res = 0.015
-
-# Define the shape of the input granule (both datasets are the same shape)
-src_height, src_width = sr_masked.shape[0], sr_masked.shape[1]
-```
++++
 
 We'll use `rasterio`'s `rasterio.warp.calculate_default_transform` function with those variables defined above to build the affine transform for us. It will also give us the destination granule's width and height.
 
-```{code-cell} ipython3
-transform, dst_width, dst_height = rasterio.warp.calculate_default_transform(
-    src_crs = src_crs,
-    dst_crs = dst_crs, 
-    width = src_width,
-    height = src_height, 
-    left = min_lon,
-    bottom = min_lat,
-    right = max_lon,
-    top = max_lat,
-    resolution = dst_res)
-
-transform
-```
++++
 
 If we look at the printed transform above, we see it is 6 numbers, which represent:
 
@@ -302,12 +273,7 @@ If we look at the printed transform above, we see it is 6 numbers, which represe
 That is as far as we'll go into affine transforms, so please visit the links above if you want a more in depth description of the concept. Now that we have the transform and destination array shape, we proceed with the reprojection:
 
 ```{code-cell} ipython3
-def regrid_data(src, 
-                transform, 
-                width, 
-                height, 
-                src_crs="epsg:4326", 
-                resampling=Resampling.nearest):
+def regrid_data(src, resolution, dst_crs="epsg:4326", resampling=Resampling.nearest):
     """
     Reproject a L2 dataset to match an input grid. Makes sure 3D variables are
         in (Z, Y, X) dimension order, and all variables have spatial dims/crs 
@@ -324,23 +290,54 @@ def regrid_data(src,
     if (len(list(src.dims)) == 3) and (list(src.dims)[0] != "wavelength_3d"):
         src = src.transpose("wavelength_3d", ...)
     src = src.rio.set_spatial_dims("pixels_per_line", "number_of_lines")
-    src = src.rio.write_crs(src_crs)
+    src = src.rio.write_crs("epsg:4326")
+
+    defaults = rasterio.warp.calculate_default_transform(
+        src.rio.crs,
+        dst_crs,
+        src.rio.width,
+        src.rio.height,
+        left=src.attrs["geospatial_lon_min"],
+        bottom=src.attrs["geospatial_lat_min"],
+        right=src.attrs["geospatial_lon_max"],
+        top=src.attrs["geospatial_lat_max"],
+    )
+    transform, width, height = rasterio.warp.aligned_target(*defaults, resolution)
     
     dst = src.rio.reproject(
-        dst_crs=src.rio.crs,
+        dst_crs=dst_crs,
         shape=(height, width),
         transform=transform,
         src_geoloc_array=(
-            src.coords["longitude"],
-            src.coords["latitude"],
+            src["longitude"],
+            src["latitude"],
         ),
         nodata=np.nan,
         resample=resampling,
-    ).rename({"x":"longitude", "y":"latitude"})
-    return dst
+    )
+    dst["x"] = dst["x"].round(9)  # FIXME: i don't like this!
+    dst["y"] = dst["y"].round(9)  #       delicate, and not obvious when it fails
+    
+    return dst.rename({"x":"longitude", "y":"latitude"})
+```
 
-sr_gridded = regrid_data(sr_masked, transform, dst_width, dst_height)
-vi_gridded = regrid_data(vi_masked, transform, dst_width, dst_height)
+Define desired resolution, in target CRS units (e.g., degrees for EPSG 4326).
+
+```{code-cell} ipython3
+sr_masked.attrs.update(sr.attrs)
+vi_masked.attrs.update(vi.attrs)
+resolution = (0.015, 0.015)
+
+sr_gridded = regrid_data(sr_masked, resolution)
+vi_gridded = regrid_data(vi_masked, resolution)
+```
+
+```{code-cell} ipython3
+# FIXME: memory surge if using the whole dataset
+ds = xr.merge(
+    (vi_gridded[["cire"]], sr_gridded.sel({"wavelength_3d": [860]}, method="nearest")),
+)
+ds
 ```
 
 ```{code-cell} ipython3
