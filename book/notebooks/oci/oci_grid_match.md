@@ -8,7 +8,7 @@ kernelspec:
 # Projecting PACE Data onto a Predefined Grid
 
 **Authors:** Skye Caplan (NASA, SSAI) <br>
-Last updated: September 19, 2025
+Last updated: September 26, 2025
 
 <div class="alert alert-info" role="alert">
 
@@ -28,7 +28,7 @@ Executing this notebook requires an instance with up to 8GB of memory.
 ## Summary
 
 
-This notebook will use `rasterio` and to generate a defined Affrine transform with a desired pixel resolution, and `rioxarray` to project PACE OCI data from the instrument swath onto a defined grid. The process for both 2D and 3D variables will be covered. Utilities to export the data in GeoTIFF format are also explained. Several useful functions summarizing these steps are available at the end of the tutorial.
+This notebook will use `rasterio` to generate a defined Affine transform with a desired pixel resolution, and `rioxarray` to project PACE OCI data from the instrument swath onto a defined grid. The process for both 2D and 3D variables will be covered. Utilities to export the data in GeoTIFF format are also explained. Several useful functions summarizing these steps are available at the end of the tutorial.
 
 ## Learning Objectives
 
@@ -95,7 +95,7 @@ results = [sr_result[0], vi_result[0]]
 for item in results:
     display(item)
 
-#paths = earthaccess.download(results, local_path="data")
+paths = earthaccess.download(results, local_path="data")
 
 paths = ['data/PACE_OCI.20240610T184843.L2.SFREFL.V3_0.nc',
          'data/PACE_OCI.20250511T175448.L2.LANDVI.V3_0.NRT.nc']
