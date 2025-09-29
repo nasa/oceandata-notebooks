@@ -15,12 +15,12 @@ kernelspec:
 
 We are glad to have your help maintaining the [Help Hub] for the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
 You should already be familiar with the [README](README.md).
-This guide provides additional information on the structure of this repository and maintenaner tasks.
+This guide provides additional information on the structure of this repository and maintainer tasks.
 Maintainers are responsible for:
 1. ensuring the reproducible environment configuration is correct, and
 2. publishing the notebooks to [GitHub Pages] as the [Help Hub] (a.k.a releasing!).
 
-The following sections map to the contents of the repository as follows:
+The following sections relate to the content of this repository as follows:
 
 ```shell
 .
@@ -38,10 +38,9 @@ The following sections map to the contents of the repository as follows:
 
 ## Isolated Environment
 
-The `pyproject.toml` file lists all packages for an envrionment meant to be sufficient for running all notebooks.
-The `uv.lock` file gives a versioned list of all the packages installed when creating the environment;
-it includes dependencies along with the packages listed in `pyproject.toml`.
-The `uv` tool will install packages in a clean [Python virtual environment][venv], which is used during the website build to ensure completeness.
+The `uv.lock` file gives a versioned list of all packages needed to run the tutorials;
+it includes packages listed in `pyproject.toml` along with all their dependencies.
+The `uv` tool will install thesee packages in an isolated [Python virtual environment][venv], which is used during the website build to ensure completeness.
 If `uv` is not already installed, install it by exectuing the cell below or by some other documented [installation method][uv].
 
 > [!Important]
@@ -114,14 +113,19 @@ python -m http.server -d docs/_build/html
 
 ### Publish (a.k.a. Release)
 
-If any notebooks have been executed, rather than relying on cached outputs, follow the next three steps to make the new outputs available to the GitHub Action that deploys the website.
-First, commit the updated cache with `dvc commit`.
+If any notebooks have been executed, rather than relying on cached outputs, follow the next steps to make the new outputs available to the GitHub Action that deploys the website.
+
+```{code-cell}
+uv run dvc status
+```
+
+If the status is not "Data and pipelines are up to date." then commit the updated cache with `dvc commit`. (The purpose of `--force` is only to skip the confirmation prompt that you can't interact with from within a notebook).
 
 ```{code-cell}
 uv run dvc commit --force
 ```
 
-Second, use `dvc` to push your cache to the remote location accessible to the website build.
+Now use `dvc` to push your cache to the remote location accessible to the website build.
 
 ```{code-cell}
 :scrolled: true
@@ -133,8 +137,28 @@ Third, if there are changes committed by DVC, then there will be changes you nee
 Use your preferred method of working with Git to stage the `docs/_cache.dvc` changes, commit, and push them.
 
 **Fourth** (this won't be necessary with AWS CodeBuilder, and maybe there's some other solution).
-- generate temp aws credentials
-- todo: aws credentials to github actions
+
+```python
+import os
+import boto3
+
+client = boto3.client('sts')
+
+with open(os.environ['AWS_WEB_IDENTITY_TOKEN_FILE']) as f:
+    TOKEN = f.read()
+
+response = client.assume_role_with_web_identity(
+    RoleArn=os.environ['AWS_ROLE_ARN'],
+    RoleSessionName=os.environ['JUPYTERHUB_CLIENT_ID'],
+    WebIdentityToken=TOKEN,
+    DurationSeconds=3600
+)
+secrets = response["Credentials"]
+```
+
+The `secrets` dictionary contains the "AccessKeyId", "SecretAccessKey", and "SessionToken" you need to provide to GitHub as follows.
+
++++
 
 ### Jupyter Cache
 
@@ -152,7 +176,7 @@ For every `import` statement, or if a notebook requires a package to be installe
 make sure the package is listed in the `notebooks` array under the `dependency-groups` table in `pyproject.toml`.
 You can add entries manually or using `uv add`, for example:
 
-```{code-cell}
+```shell
 uv add --group notebooks xarray
 ```
 
