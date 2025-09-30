@@ -20,7 +20,7 @@ jobs:
           path: |
             docs/_build
             docs/_cache
-          key: jupyter-book-cache-${{ hashFiles("docs/_cache.dvc") }}
+          key: jupyter-book-cache-${{ hashFiles('docs/_cache.dvc') }}
       - name: Pull DVC Cache
         if: steps.gha_cache.outputs.cache-hit != "true"
         run:
