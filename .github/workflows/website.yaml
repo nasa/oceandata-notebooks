@@ -1,4 +1,4 @@
-name: Update Website
+name: Update website
 on:
   workflow_dispatch:
   push:
@@ -8,16 +8,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Python
+      - name: Setup python
         uses: actions/setup-python@v6
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
       - run: uv sync --locked --only-group tools
-      - name: Use GitHub Actions Cache
+      - name: Use cache
         id: cache
         uses: actions/cache@v4
         with:
@@ -25,12 +25,12 @@ jobs:
             docs/_build
             docs/_cache
           key: jupyter-book-cache-${{ hashFiles('docs/_cache.dvc') }}
-      - name: Pull DVC Cache
+      - name: DVC pull
         if: steps.cache.outputs.cache-hit != 'true'
-        run: uv run dvc pull
-      - name: Build Jupyter Book
-        run: uv run jb build docs
-      - name: Upload for Deployment
+        run: uv run --no-sync dvc pull
+      - name: Build book
+        run: uv run --no-sync jb build docs
+      - name: Upload html
         id: deployment
         uses: actions/upload-pages-artifact@v4
         with:

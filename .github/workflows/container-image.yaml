@@ -1,4 +1,4 @@
-name: Build Container Image
+name: Build container image
 on:
   push:
     paths:
@@ -14,21 +14,21 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Free Disk Space
+      - name: Free disk space
         uses: jlumbroso/free-disk-space@v1.3.1
         with:
           tool-cache: true
           docker-images: false
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           sparse-checkout: container
           sparse-checkout-cone-mode: false
-      - name: Move Container Files
+      - name: Move container files
         run: |
           mv container/* .
           rmdir container
-      - name: Run Repo2Docker
+      - name: Run repo2docker
         uses: jupyterhub/repo2docker-action@master
         with:
           DOCKER_USERNAME: ${{ github.repository_owner }}
