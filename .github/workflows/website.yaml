@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - ghpages:
+      - ghpages
 jobs:
   build:
     runs-on: ubuntu-latest
