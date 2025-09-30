@@ -1,0 +1,49 @@
+name: Update Website
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v6
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+        run: uv sync --locked --only-group tools
+      - name: Use GitHub Actions Cache
+        id: gha_cache
+        uses: actions/cache@v4
+        with:
+          path:
+            - docs/_build
+            - docs/_cache
+          key: jupyter-book-cache-${{ hashFiles("docs/_cache.dvc") }}
+      - name: Pull DVC Cache
+        if: steps.gha_cache.outputs.cache-hit != "true"
+        run:
+          - uv run dvc pull
+          - uv run dvc checkout
+      - name: Build Jupyter Book
+        run: uv run jb build docs
+      - name: Upload for Deployment
+        id: deployment
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs/_build/html
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v4

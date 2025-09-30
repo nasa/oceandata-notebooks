@@ -1,7 +1,7 @@
 [project]
 version = "0.3.0"
 name = "oceandata-notebooks"
-description = "Tutorials for data from NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC)"
+description = "Tutorials from NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC)"
 license.text = "NASA-1.3"
 requires-python = ">=3.11"
 readme = "README.md"
