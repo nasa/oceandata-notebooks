@@ -66,7 +66,7 @@ At the end of this notebook you will know:
 
 +++
 
-# 1. Setup
+## 1. Setup
 
 Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
 
@@ -112,7 +112,7 @@ The `installedTag` is our OCSSW version. Tags beginning with "V" are operational
 
 +++
 
-## Setting up AWS S3 credentials
+### Setting up AWS S3 credentials
 
 Accessing data from NASA's Earthdata Cloud, regardless of the tool, requires authentication.
 The `earthaccess` package works behind-the-scenes using the Earthdata Login credentials you provide to generate temporary AWS credentials for direct access to the Earthdata Cloud.
@@ -142,7 +142,7 @@ Earthdata Cloud sets a one-hour lifespan on your temporary AWS credentials. If y
 
 +++
 
-## Navigating GIOP files in OCSSW
+### Navigating GIOP files in OCSSW
 
 +++
 
@@ -150,7 +150,7 @@ In the 'Run Level-2 Generator (l2gen) OCSSW program on OCI data' tutorial, we le
 
 +++
 
-### The IOP product suite
+#### The IOP product suite
 
 +++
 
@@ -191,7 +191,7 @@ $r_{rs}$(λ) is subsurface remote sensing reflectance and G(λ) is a catch-all t
 
 +++
 
-### GIOP's default parameterization
+#### GIOP's default parameterization
 
 +++
 
@@ -214,7 +214,7 @@ Running `l2gen` on OCI data to produce the IOP data suite products will include 
 
 +++
 
-## Writing OCSSW parameter files
+### Writing OCSSW parameter files
 
 +++
 
@@ -260,7 +260,7 @@ def write_par(path, par):
         writer.writerows(par.items())
 ```
 
-# 2. Search and access L1B data
+## 2. Search and access L1B data
 
 Let's use the earthaccess Python package to access a L1B file.
 
@@ -290,7 +290,7 @@ dataset = dataset.set_coords(("longitude", "latitude"))
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 ```
 
-# 3. Run `l2gen` with default GIOP configurations
+## 3. Run `l2gen` with default GIOP configurations
 
 +++
 
@@ -358,7 +358,7 @@ dat = dat.set_coords(("longitude", "latitude"))
 dat
 ```
 
-# 4. Plot L2 IOP data products
+## 4. Plot L2 IOP data products
 
 +++
 
@@ -492,7 +492,7 @@ fig.tight_layout(pad=4.0)
 plt.show()
 ```
 
-# 5. Run GIOP with modifications to the configurations
+## 5. Run GIOP with modifications to the configurations
 
 +++
 

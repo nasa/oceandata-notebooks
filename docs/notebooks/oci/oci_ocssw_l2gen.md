@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-# Run Level-2 Generator (l2gen) OCSSW program on OCI data
+# Run OCSSW Level-2 Generator (l2gen) for PACE/OCI
 
 **Author(s):** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA)
 
@@ -65,7 +65,7 @@ At the end of this notebook you will know:
 
 +++
 
-# 1. Setup
+## 1. Setup
 
 Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
 
@@ -114,7 +114,7 @@ The `installedTag` is our OCSSW version. Tags beginning with "V" are operational
 
 +++
 
-## Setting up AWS S3 credentials
+### Setting up AWS S3 credentials
 
 Accessing data from NASA's Earthdata Cloud, regardless of the tool, requires authentication.
 The `earthaccess` package works behind-the-scenes using the Earthdata Login credentials you provide to generate temporary AWS credentials for direct access to the Earthdata Cloud.
@@ -144,7 +144,7 @@ Earthdata Cloud sets a one-hour lifespan on your temporary AWS credentials. If y
 
 +++
 
-## Navigating OCSSW
+### Navigating OCSSW
 
 +++
 
@@ -212,7 +212,7 @@ You can also see OCSSW parameter options by running 'l2gen --help'.
 !source {env}; l2gen --help
 ```
 
-## Writing OCSSW parameter files
+### Writing OCSSW parameter files
 
 +++
 
@@ -258,7 +258,7 @@ def write_par(path, par):
         writer.writerows(par.items())
 ```
 
-# 2. Search and access L1B data
+## 2. Search and access L1B data
 
 Let's use the `earthaccess` Python package to access a L1B and a corresponding L2 file.
 
@@ -303,7 +303,7 @@ dataset = dataset.set_coords(("longitude", "latitude"))
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
 ```
 
-# 3. Run `l2gen` with default configurations
+## 3. Run `l2gen` with default configurations
 
 +++
 
@@ -390,7 +390,7 @@ Let's do a quick plot of Rrs at 550 nm:
 plot = dat["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
 ```
 
-# 4. Compare the newly generated file with a standard OB.DAAC file
+## 4. Compare the newly generated file with a standard OB.DAAC file
 
 +++
 
@@ -469,11 +469,11 @@ Other than a negligible number of oddball points, the data are identical. This s
 
 +++
 
-# 5. Run l2gen with modifications to configurations
+## 5. Run l2gen with modifications to configurations
 
 +++
 
-## Selecting biogeochemical data products
+### Selecting biogeochemical data products
 
 +++
 
@@ -540,7 +540,7 @@ ax.gridlines(draw_labels=True)
 plt.show()
 ```
 
-## Disabling BRDF correction
+### Disabling BRDF correction
 
 +++
 

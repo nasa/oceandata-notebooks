@@ -11,7 +11,7 @@ kernelspec:
   language: python
 ---
 
-# Exploring nitrogen dioxide (NO<sub>2</sub>) data from OCI
+# Exploring nitrogen dioxide (NO<sub>2</sub>) data from PACE/OCI
 
 **Author(s):** Anna Windle (NASA, SSAI), Zachary Fasnacht (NASA, SSAI)
 
@@ -153,7 +153,7 @@ dataset["nitrogen_dioxide_total_vertical_column"].hvplot(
 )
 ```
 
-# 5. Time Series
+## 5. Time Series
 
 Since there are many NO<sub>2</sub> granules available for testing, we can make a time series of NO<sub>2</sub> concentrations over time. First, we have to get URLs for all the granules and "open" them for streaming. Alternatively, `fs.get` could be used to download files locally, but we don't want to duplicate data storage if working in the commercial cloud.
 

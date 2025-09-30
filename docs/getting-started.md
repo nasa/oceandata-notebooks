@@ -1,4 +1,4 @@
-# Setup
+# Get Started
 
 ## Earthdata Cloud
 
@@ -12,11 +12,11 @@ If you have a running Jupyter Lab, download our setup script ({download}`setup.p
 run it under either `pipx` or `uv` to create a Jupyter kernel ready for use with the notebooks. For
 example, if you have `uv` installed, execute the following from a Terminal.
 ```
-uv run setup.py --user --name oc
+uv run setup.py --user --name oceandata
 ```
 Alternatively, if you have `pipx` installed:
 ```
-pipx run setup.py --user --name oc
+pipx run setup.py --user --name oceandata
 ```
 Your JupyterLab should soon include "oc" and "bash" as kernel choices for notebooks and
 consoles. For more on the provided arguments, which customize the kernel location and name,

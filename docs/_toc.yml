@@ -2,7 +2,7 @@ format: jb-book
 root: index
 parts:
   - chapters:
-      - file: setup
+      - file: getting-started
   - caption: Help Hub Core
     chapters:
       - file: notebooks/oci/oci_data_access
@@ -28,24 +28,31 @@ parts:
   - caption: Cloud & Atmosphere
     chapters:
       - file: notebooks/harp2/harp2_l2_aerosol_product
-        title: FastMAPOL Aerosols from PACE/HARP2
+        title: Aerosols from PACE/HARP2
               # WARNING: Notebook exception traceback saved in: _build/html/reports/notebooks/harp2/harp2_l2_aerosol_product.err.log
       - file: notebooks/spexone/spexone_l2_aerosol_product
-        title: RemoTAP Aerosols from PACE/SPEXOne
+        title: Aerosols from PACE/SPEXOne
       - file: notebooks/oci/oci_no2
-        title: Nitrogen Dioxide (NO<sub>2</sub>) from PACE/OCI
+        title: Nitrogen Dioxide from PACE/OCI
   - caption: Land
     chapters:
       - file: notebooks/oci/oci_terrestrial_data
               # WARNING: skipping unknown output mime type: application/vnd.holoviews_load.v0+json [mystnb.unknown_mime_type]
-  - caption: SeaDAS
+        title: Land Surface from PACE/OCI
+  - caption: SeaDAS Toolbox
     chapters:
       - file: notebooks/oci/oci_ocssw_install
+        title: Install OCSSW
       - file: notebooks/oci/oci_ocssw_processing_overview
+        title: Getting Started
       - file: notebooks/oci/oci_ocssw_l2gen
+        title: Generate Level-2 Products
       - file: notebooks/oci/oci_ocssw_giop
+        title: Run the GIOP Algorithm
   - caption: Instruments
     chapters:
       - file: notebooks/harp2/harp2_basic_visualizations
               # WARNING: image file not readable: notebooks/harp2/harp2_red_anim_20250109T200019.gif
+        title: About HARP2
       - file: notebooks/spexone/spexone_basic_visualizations
+        title: About SPEXOne
