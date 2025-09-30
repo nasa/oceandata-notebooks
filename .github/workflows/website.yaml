@@ -23,9 +23,7 @@ jobs:
           key: jupyter-book-cache-${{ hashFiles('docs/_cache.dvc') }}
       - name: Pull DVC Cache
         if: steps.gha_cache.outputs.cache-hit != "true"
-        run:
-          - uv run dvc pull
-          - uv run dvc checkout
+        run: uv run dvc pull
       - name: Build Jupyter Book
         run: uv run jb build docs
       - name: Upload for Deployment
