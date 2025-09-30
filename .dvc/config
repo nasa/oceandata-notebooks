@@ -2,4 +2,3 @@
     remote = origin
 ['remote "origin"']
     url = s3://nasa-cryo-scratch/oceandata-notebooks-cache
-    region = us-west-2

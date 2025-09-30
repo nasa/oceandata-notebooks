@@ -28,6 +28,11 @@ jobs:
       - name: DVC pull
         if: steps.cache.outputs.cache-hit != 'true'
         run: uv run --no-sync dvc pull
+        env:
+          AWS_REGION: 'us-west-2'
+          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+          AWS_SESSION_TOKEN: '${{ secrets.AWS_SESSION_TOKEN }}'
       - name: Build book
         run: uv run --no-sync jb build docs
       - name: Upload html
