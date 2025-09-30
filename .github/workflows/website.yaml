@@ -1,6 +1,9 @@
 name: Update Website
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - ghpages:
 jobs:
   build:
     runs-on: ubuntu-latest
