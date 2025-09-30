@@ -28,7 +28,7 @@ The following sections relate to the content of this repository as follows:
 ├── uv.lock                  # -> Isolated Environment
 ├── docs                     # -> GitHub Pages Website
 ├── pyproject.toml           # -> Dependencies
-├── container                # -> Container Image for JupyterHub
+├── container                # -> Container Image for JupyterHubs
 └── .pre-commit-config.yaml  # -> Automation and Checks
 ```
 
@@ -40,10 +40,10 @@ The following sections relate to the content of this repository as follows:
 
 The `uv.lock` file gives a versioned list of all packages needed to run the tutorials;
 it includes packages listed in `pyproject.toml` along with all their dependencies.
-The `uv` tool will install thesee packages in an isolated [Python virtual environment][venv], which is used during the website build to ensure completeness.
-If `uv` is not already installed, install it by exectuing the cell below or by some other documented [installation method][uv].
+The `uv` tool will install these packages in an isolated [Python virtual environment][venv], which is used during the website build to ensure completeness.
+Execute the cell below to check if `uv` is already installed and, if not, install it with the recommended [installation method][uv].
 
-> [!Important]
+> [!IMPORTANT]
 > This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells on JupyterLab.
 
 [uv]: https://docs.astral.sh/uv/getting-started/installation
@@ -63,7 +63,7 @@ Create the environment using the `sync` subcommand.
 uv sync
 ```
 
-The `run` subcommand works in the environment, and our first use is installing the bash kernel:
+The `run` subcommand executes whatever follows in the isolated environment; our first use is installing the bash kernel:
 
 ```{code-cell}
 uv run python -m bash_kernel.install --sys-prefix
@@ -71,16 +71,16 @@ uv run python -m bash_kernel.install --sys-prefix
 
 ## GitHub Pages Website
 
-### Preview
+### Build and Preview
 
 The `docs` folder contains configuration and content for the [Jupyter Book] we host on GitHub Pages.
-The tutorials are written as executable MyST Markdown notebooks, and publishing the website requires executing tutorials ... unless they are in the cache.
+The tutorials are written in executable MyST Markdown, and publishing the website requires pulling execution results from a notebook cache.
 We use [DVC] to share that cache among maintainers as well as to the deployment workflow on GitHub.
 
-> [!Important]
+> [!IMPORTANT]
 > Only notebooks listed in `docs/_toc.yml` are built, so adding a new notebook requires updating `docs/_toc.yml`.
 
-The `dvc pull` command retrieves the cache.
+The `dvc pull` command retrieves the notebook cache.
 We execute it via `uv run` only because we've included the DVC tool in the project environment to simplify this workflow.
 
 [Jupyter Book]: https://jupyterbook.org/
@@ -90,8 +90,18 @@ We execute it via `uv run` only because we've included the DVC tool in the proje
 uv run dvc pull
 ```
 
-The next cell builds a static website in `docs/_build/html` using `jupyter-book<2`.
-We run the Jupyter Book (alias `jb`) build in the isolated virtual environment, to make sure the environment configuration is correct.
+Update the notebook cache as needed by executing notebooks.
+We use the isolated virtual environment to make sure the environment configuration is correct.
+We use `jcache` directly to achieve parallel execution.
+For a full but slow test of the environment configuration, delete `docs/_cache` before executing.
+
+```{code-cell}
+:scrolled: true
+
+uv run jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
+```
+
+The next cell builds a static website in `docs/_build/html` using `jupyter-book<2` (alias `jb`).
 
 ```{code-cell}
 :scrolled: true
@@ -102,7 +112,7 @@ uv run jb build docs
 Run the next cell to preview the website.
 Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 
-> [!Note]
+> [!NOTE]
 > On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
 
 ```{code-cell}
@@ -111,9 +121,10 @@ Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 python -m http.server -d docs/_build/html
 ```
 
-### Publish (a.k.a. Release)
+### Notebook Cache
 
-If any notebooks have been executed, rather than relying on cached outputs, follow the next steps to make the new outputs available to the GitHub Action that deploys the website.
+If any notebooks have been executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
+Follow the next steps to share the updates using DVC, starting with checking whether the cache has actually changed.
 
 ```{code-cell}
 uv run dvc status
@@ -133,10 +144,14 @@ Now use `dvc` to push your cache to the remote location accessible to the websit
 uv run dvc push
 ```
 
-Third, if there are changes committed by DVC, then there will be changes you need to commit with Git as well.
+Finally, if changes are committed by DVC, then there will be changes you also need to commit with Git.
 Use your preferred method of working with Git to stage the `docs/_cache.dvc` changes, commit, and push them.
 
-**Fourth** (this won't be necessary with AWS CodeBuilder, and maybe there's some other solution).
+### Temporary
+
+(this won't be necessary with AWS CodeBuilder, and maybe there's some other solution)
+
+Generate temporary credentials.
 
 ```python
 import os
@@ -160,15 +175,10 @@ The `secrets` dictionary contains the "AccessKeyId", "SecretAccessKey", and "Ses
 
 +++
 
-### Jupyter Cache
+### Publish (a.k.a. Release)
 
-Alternatively, and with the option for parallel notebook execution, update the cache without building the book.
-
-```{code-cell}
-:scrolled: true
-
-uv run jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
-```
+Website updates occur automatically whenever a pull request to main is merged.
+The `.github/workflows/website.yaml` file provides the instructions to GitHub Actions.
 
 ## Dependencies
 
@@ -182,7 +192,7 @@ uv add --group notebooks xarray
 
 The other keys in the `dependency-groups` table provide the additional dependencies needed for a working Jupyter kernel, for a complete JupyterLab in a container image, or for maintenance tasks.
 
-> [!Important]
+> [!IMPORTANT]
 > - No `requirements.*` file in this repository should be manually edited.
 > - Note where critical versions are pinned
 >   - python: container/environment.yml
@@ -196,12 +206,12 @@ We use PyPI for Python packages when able.
 1. `container/requirements.txt` lists the packages needed in the container image (export-container-dependencies)
 1. `container/requirements.in` lists the packages resulting from `repo2docker` and `container/environment.yml` (repo2docker-requirements)
 
-> [!Note]
+> [!NOTE]
 > Having a top-level `requirements.txt` file also makes our tutorials work on [Binder] ... most of them anyways.
 
 [Binder]: https://mybinder.org/
 
-## Container Image for a JupyterHub
+## Container Image for JupyterHubs
 
 The `container` folder has configuration files that [repo2docker] uses to build a container image suitable for use with a JupyterHub platform.
 The following command builds and runs the image locally, while the [repo2docker-action] builds images on GitHub and distributes them via the GitHub Container Registry.
