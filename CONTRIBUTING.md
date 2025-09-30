@@ -13,6 +13,8 @@ kernelspec:
 
 # Maintainer's Guide
 
++++
+
 We are glad to have your help maintaining the [Help Hub] for the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
 You should already be familiar with the [README](README.md).
 This guide provides additional information on the structure of this repository and maintainer tasks.
@@ -43,7 +45,7 @@ it includes packages listed in `pyproject.toml` along with all their dependencie
 The `uv` tool will install thesee packages in an isolated [Python virtual environment][venv], which is used during the website build to ensure completeness.
 If `uv` is not already installed, install it by exectuing the cell below or by some other documented [installation method][uv].
 
-> [!Important]
+> [!IMPORTANT]
 > This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells on JupyterLab.
 
 [uv]: https://docs.astral.sh/uv/getting-started/installation
@@ -102,7 +104,7 @@ uv run jb build docs
 Run the next cell to preview the website.
 Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 
-> [!Note]
+> [!NOTE]
 > On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
 
 ```{code-cell}
@@ -156,7 +158,7 @@ response = client.assume_role_with_web_identity(
 secrets = response["Credentials"]
 ```
 
-The `secrets` dictionary contains the "AccessKeyId", "SecretAccessKey", and "SessionToken" you need to provide to GitHub as follows.
+The `secrets` dictionary contains the "AccessKeyId", "SecretAccessKey", and "SessionToken" that a repo admin needs to provide to GitHub.
 
 +++
 
