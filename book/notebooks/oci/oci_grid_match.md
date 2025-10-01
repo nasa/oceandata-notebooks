@@ -8,17 +8,11 @@ kernelspec:
 # Projecting PACE Data onto a Predefined Grid
 
 **Authors:** Skye Caplan (NASA, SSAI) <br>
-Last updated: September 26, 2025
+Last updated: October 1, 2025
 
 <div class="alert alert-info" role="alert">
 
 An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA PACE data.
-
-</div>
-
-<div class="alert alert-warning" role="alert">
-
-Executing this notebook requires an instance with up to 8GB of memory.
 
 </div>
 
@@ -28,14 +22,14 @@ Executing this notebook requires an instance with up to 8GB of memory.
 ## Summary
 
 
-This notebook will use `rasterio` to generate a defined Affine transform with a desired pixel resolution, and `rioxarray` to project PACE OCI data from the instrument swath onto a defined grid. The process for both 2D and 3D variables will be covered. Utilities to export the data in GeoTIFF format are also explained. Several useful functions summarizing these steps are available at the end of the tutorial.
+This notebook will use `rasterio` and `rioxarray` to project PACE OCI data from the instrument swath onto a defined grid with a given resolution. The process for both 2D and 3D variables will be covered. Utilities to export the data in GeoTIFF format are also explained. Several useful functions summarizing these steps are available throughout the tutorial.
 
 ## Learning Objectives
 
 At the end of this notebook you will know how to:
 
 - Open and mask 2D and 3D PACE OCI products
-- Define your own affine transform for a given boundary and resolution
+- Define a grid with desired pixel resolution
 - Reproject data into defined coordinate reference systems and matching grids
 
 ## Contents
@@ -50,13 +44,15 @@ At the end of this notebook you will know how to:
 
 Begin by importing all of the packages used in this notebook. Please ensure your environment has the most recent versions of `rioxarray` (>=0.19.0) and `rasterio` (>=1.4.3), as the functionality allowing us to correctly convert PACE Level-2 (L2) files to GeoTIFF is relatively new.
 
-The following cells use `earthaccess` to set and persist your Earthdata login credentials, then search for and download the relevant datasets for a scene parts of North America. PACE OCI produces many types of datasets - this tutorial will use the LANDVI and SFREFL suites to demonstrate how to regrid both 2- and 3D variables.  
+PACE OCI has many data products. This tutorial will use the LANDVI and SFREFL data suites to demonstrate how to regrid both 2- and 3D variables.  
 
 <div class="alert alert-info" role="alert">
 
 Although this tutorial uses land-focused products, these methods will work with any type of 2D or 3D PACE OCI data
 
 </div>
+
+The following cells use `earthaccess` to set and persist your Earthdata login credentials, then search for and download the relevant datasets for two scenes which have some overlap in and around the Great Lakes region of North America. A function for a adding features to the plots in this tutorials is also included.
 
 ```{code-cell} ipython3
 from pathlib import Path
@@ -73,54 +69,54 @@ import xarray as xr
 from rasterio.enums import Resampling
 from rasterio.crs import CRS
 
+def plot_features(ax, gridline_alpha=1):
+    ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25, alpha=gridline_alpha)
+    ax.coastlines(linewidth=0.5)
+    ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
+    ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
+    ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
+
 auth = earthaccess.login(persist=True)
 ```
 
 ```{code-cell} ipython3
 scene = (-100, 38, -82, 48)
 
-# Search for granules using earthaccess
 sr_result = earthaccess.search_data(
     short_name=["PACE_OCI_L2_SFREFL","PACE_OCI_L2_SFREFL_NRT"],
     bounding_box=scene,
-    granule_name="*20240610T184843*",
+    granule_name="*20240610T184843*V3_1*",
 )
 
 vi_result = earthaccess.search_data(
     short_name=["PACE_OCI_L2_LANDVI","PACE_OCI_L2_LANDVI_NRT"],
     bounding_box=scene,
-    granule_name="*20250511T175448*",
+    granule_name="*20250511T175448*V3_1*",
 )
 results = [sr_result[0], vi_result[0]]
 for item in results:
     display(item)
 
 paths = earthaccess.download(results, local_path="data")
-
-paths = ['data/PACE_OCI.20240610T184843.L2.SFREFL.V3_0.nc',
-         'data/PACE_OCI.20250511T175448.L2.LANDVI.V3_0.NRT.nc']
 ```
 
 ### Opening the data
 
-Now we'll open the datasets in a way that will make them most useful for this reprojection process. As mentioned above, this tutorial demonstrates regridding with the LANDVI and SFREFL data suites. LANDVI contains 10 vegetation indices, or VIs, and SFREFL contains surface reflectances at 122 wavelengths. More information on PACE products can be found on the [PACE Data Products Table](https://pace.oceansciences.org/data_table.htm). 
+Now we'll open the datasets we downloaded above. As mentioned, this tutorial demonstrates regridding with the LANDVI and SFREFL data suites. LANDVI contains 10 vegetation indices, or VIs, and SFREFL contains surface reflectances at 122 wavelengths. More information on PACE products can be found on the [PACE Data Products Table](https://pace.oceansciences.org/data_table.htm). 
 
-The `open_l2()` function will combine different groups from within the full PACE L2 file and output a dataset with the relevant geophysical variables with latitude, longitude, and wavelength (if applicable) as coordinates. Note that L2 files contain additional information, so feel free to open the file's datatree and explore the rest of the contents as well. `open_l2()` also sets the spatial dimensions (rows and columns) and coordinate reference system (CRS) of the data, which will be important for when we do the reprojection.
+The `open_l2()` function combines different groups from within the full PACE L2 file and outputs a dataset including the relevant geophysical variables with latitude, longitude, and wavelength (if applicable) as coordinates. Note that L2 files contain additional information, so please open the file's datatree and explore the rest of the contents as well. The function will work for other PACE datasets as well, such as the AOP suite which includes remote sensing reflectances (Rrs).
 
 ```{code-cell} ipython3
-def open_l2(fpath, crs="epsg:4326"):
+def open_l2(fpath):
     """ 
     Opens a PACE L2 file as an xarray dataset, assigning lat/lons (and wavelength, 
         if the dataset is 3D) as coordinates.
     Args:
         fpath - file path to a L2 PACE file 
-        crs - the coordinate reference system of the data. Default is EPSG 4326 for
-                for PACE data
     Returns:
         ds - xarray dataset
     """
     dt = xr.open_datatree(fpath, decode_timedelta=False)
-    # First tries to open the dataset with wavelengths as a coordinate
     try:
         ds = xr.merge((
             dt.ds,
@@ -129,7 +125,6 @@ def open_l2(fpath, crs="epsg:4326"):
             dt["navigation_data"].ds.set_coords(("longitude", "latitude")).coords,
             )
         )
-    # if that fails, just use lat/lons alone
     except:
         ds = xr.merge((
             dt.ds,
@@ -137,9 +132,6 @@ def open_l2(fpath, crs="epsg:4326"):
             dt["navigation_data"].ds.set_coords(("longitude", "latitude")).coords,
             )
         )
-    # Set the spatial dimensions and CRS
-    #ds = ds.rio.set_spatial_dims("pixels_per_line", "number_of_lines")
-    #ds = ds.rio.write_crs(crs)
     return ds
 
 sr = open_l2(paths[0])
@@ -150,11 +142,7 @@ We can plot both files in the same figure to see how they overlap.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
-ax.coastlines(linewidth=0.5)
-ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
-ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
-ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
+plot_features(ax=ax)
 sr.rhos.sel({"wavelength_3d":860}, method="nearest").plot(x="longitude", y="latitude", 
                                                           cmap="Greys_r", vmin=0, vmax=1)
 vi.cire.plot(x="longitude", y="latitude", cmap="magma", vmin=0, vmax=3)
@@ -162,51 +150,46 @@ plt.title("")
 plt.show()
 ```
 
-Clearly our two datasets have some overlapping pixels, but the orbits are completely different. Practically, what that means is that none of the latitude/longitude pairs representing the pixel centers would align between granules, and the pixels could even be different sizes because of their location in the swath (edge pixels tend to be wider than those close to nadir). These are intended aspects of the data as L2 PACE files are still in the instrument swath. In other words, they are not on any defined or regular grid. 
+Clearly our two datasets have some overlapping pixels, but the orbits are completely different. Practically, what that means is that none of the latitude/longitude pairs representing the pixel centers would align between granules, and the pixels could even be different sizes because of their location in the swath (edge pixels tend to be wider than those close to nadir). These are intended aspects of the data as L2 PACE files are still in the instrument swath, or in other words, not on any defined or regular grid. This also means, though, that the data are at a finer spatial resolution than the Level 3 mapped datasets that are distributed from PACE.  
 
-The advantage to using L2 data is that they are at the instrument's native resolution, which is higher than the Level 3 mapped data that is also made available from PACE. The disadvatage is that the lack of grid can make comparing between different satellites, or even two PACE granules from different times, difficult. Each pixel does have an associated latitude and longitude, however, so we can project these L2 datasets onto the same grid to make our analyses more intuitive and fair.
+Using swath L2 data can make comparing between different satellites, or even two PACE granules from different times, difficult. However, each pixel does have an associated latitude and longitude. With those coordinates, we can project these L2 datasets onto the same grid to make our analyses more intuitive and fair.
 
 ## 2. Preparing Data for Regridding: Masking and Dimensions
 
-To begin, before we get to the actual regridding of our data, we need to make sure the datasets are prepared properly. 
+Before we get to the actual regridding of our data, we need to make sure the datasets are properly prepared. 
 
 ### Masking
-In the plot above, there are clearly cloudy pixels in both `rhos` and the VIs. L2 PACE data includes the `l2_flags` variable, which keeps track of quality flags for each pixel in the dataset. The `cf_xarray` package will allow us to make use of those flags and mask out any low-quality data we see fit (A list of all possible flags can be found [here](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/)).
+In the plot above, there are clearly cloudy pixels in both the surface reflectance (`rhos`) and the VIs. L2 PACE data includes the `l2_flags` variable, which keeps track of quality flags for each pixel in the dataset. The `cf_xarray` package will allow us to make use of those flags and mask out any low-quality data we see fit. A list of all possible flags can be found [here](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/).
 
 ```{code-cell} ipython3
-def mask_ds(ds, flag="CLDICE", mask_reverse=False):
+def mask_ds(ds, flag="CLDICE", reverse=False):
     """
-    Mask for a PACE dataset for an L2 flag. Default is clouds
+    Mask a PACE dataset for an L2 flag. Default is to mask for clouds
     Args:
         ds - xarray dataset containing "l2_flags" variable
-        flag - l2 flag to mask for
-        mask_reverse - keep only pixels with the desired flag. Default is False. E.g., use the
-                       "LAND" flag to mask water pixels. 
+        flag - l2 flag to mask for (see https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/)
+        reverse - keep only pixels with the desired flag. Default is False. E.g., use the
+                  "LAND" flag to mask water pixels. 
     Returns:
         Masked dataset
     """
-    # Check if cf_xarray recognizes l2_flags
     if ds["l2_flags"].cf.is_flag_variable:
-        # If so, mask
-        if mask_reverse==False:
+        if reverse==False:
             return ds.where(~(ds["l2_flags"].cf == flag))
         else:
             return ds.where((ds["l2_flags"].cf == flag))
     else:
-        print("l2flags not recognized as flag variable")
+        print("l2_flags not recognized as flag variable")
 
 sr_masked = mask_ds(sr)
 vi_masked = mask_ds(vi)
 ```
 
+Plot the data again to see the masked datasets:
+
 ```{code-cell} ipython3
-# Plot the data again to see the masked datasets
 fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
-ax.coastlines(linewidth=0.5)
-ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
-ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
-ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
+plot_features(ax=ax)
 sr_masked.rhos.sel({"wavelength_3d":860}, method="nearest").plot(x="longitude", y="latitude", 
                                                           cmap="Greys_r", vmin=0, vmax=1)
 vi_masked.cire.plot(x="longitude", y="latitude", cmap="magma", vmin=0, vmax=3)
@@ -218,26 +201,29 @@ Now the data should be clear of any pixels flagged as cloud-contaminated! Repeat
 
 ### Dimensions
 
-The final pieces before we reproject goes back to the dimensions of our datasets. Let's print out the dimensions of each dataset to illustrate their differences:
+The final piece before we reproject goes back to the dimensions of our datasets. Let's print out the dimensions of each dataset to illustrate their differences:
 
 ```{code-cell} ipython3
 print(f"Surface reflectance dimensions: {list(sr_masked.rhos.dims)}")
 print(f"Vegetation index dimensions: {list(vi.dims)}")
 ```
 
-For the surface reflectances, or `rhos`, we have dimensions `('number_of_lines', 'pixels_per_line', 'wavelength_3d')` corresponding to (Y, X, Z). Trying to reproject the data with that dimension order away will cause an `InvalidDimensionError` from `rioxarray` because the package expects 3D variables to have dimensions ordered (Z, Y, X), or in our dataset's terms, `('wavelength_3d', 'number_of_lines', 'pixels_per_line')`. This is also how many GIS software programs, such as [QGIS](https://qgis.org/), expect datasets to be ordered. 
+For `rhos` we have dimensions `('number_of_lines', 'pixels_per_line', 'wavelength_3d')` corresponding to (Y, X, Z). Trying to reproject the data with that dimension order away will cause an `InvalidDimensionError` from `rioxarray` because the package expects 3D variables to have dimensions ordered (Z, Y, X), or in our dataset's terms, `('wavelength_3d', 'number_of_lines', 'pixels_per_line')`. This is also how many GIS software programs, such as [QGIS](https://qgis.org/), expect datasets to be ordered. 
 
-To put `rhos` in the correct dimensional order, we'll use `.transpose()` to transpose the data so that the wavelength dimension, `wavelength_3d`, is first. We also have to drop the `l2_flags` variable from this dataset since `rioxarray` does not support reprojecting mixed-dimension variables in the same dataset. The VI dataset is 2D and in the form (Y, X), which is what the package expects, so we don't have to transpose the data in any way. We will also drop `l2_flags` from the VI dataset for consistency.
+To put `rhos` in the correct dimensional order, we'll use `.transpose()` to transpose the data so that the wavelength dimension, `wavelength_3d`, is first. For the reprojection, we also have to drop the `l2_flags` variable from this dataset since `rioxarray` does not support reprojecting mixed-dimension variables in the same dataset. Finally, we'll also update the attributes with those from the full dataset to retain some relevant information that would get lost by just selecting `rhos`.
+
+The VI dataset is 2D and in the form (Y, X), which is what the package expects, so we don't have to transpose the data in any way. We will drop `l2_flags` from the VI dataset for consistency. We also don't need to update `attrs` because we're dropping a variable from the full dataset rather than selecting a single variable with its own attributes, so the information stays. 
 
 <div class="alert alert-warning" role="alert">
 
-Because we have to drop the `l2_flags` variable, all masking should be done before you transpose and regrid your data
+Because we have to drop the `l2_flags` variable, all masking should be done before you transpose and grid your data
 
 </div>
 
 ```{code-cell} ipython3
 # Selecting only rhos from the masked dataset, and transposing
 sr_masked = sr_masked["rhos"].transpose("wavelength_3d", ...)
+sr_masked.attrs.update(sr.attrs)
 
 # Explicitly dropping l2_flags from vi_masked
 vi_masked = vi_masked.drop_vars("l2_flags")
@@ -245,78 +231,25 @@ vi_masked = vi_masked.drop_vars("l2_flags")
 
 ## 3. Projecting Data onto a Defined Grid
 
-We can now move on to the actual regridding of our data. There are several things we'll need to know in order to get our two granules on the same grid:
+We can now move on to the actual gridding of our data. We'll do this by defining a grid with the same parameters for both datasets, and applying that grid to each granule separately (so you don't end up with a grid full of `nan`s). There are several things we'll need to know in order to get our two granules on the same grid:
 1. The bounds of our desired grid
-2. The size of our largest input granule
 3. Our desired resolution for the data
-4. The coordinate reference system (CRS) of our data, and the one we want our data projected into
+4. The CRS of our data, and the one we want our data projected into
 
-All of these things will go into building an affine transformation, which is a sequence of six coefficients that tell the array how to restructure itself into the grid we're building. We won't go into too much detail on affine transformations here, but please see [these links](TO DO: find/add a good ref for affine transforms) for more information.
+All of these things will go into building an affine transform, which is a sequence of six coefficients that tell the array how to restructure itself into the grid we're building.
 
-Since we have the masked rasters we're using for this demonstration, we have pretty much all of the information required to create an affine transformation. First, we'll get the bounds of our grid, and we'll set up some of the variables we need.
-
-```{code-cell} ipython3
-# Using EPSG 4326 for destination data, but change it if desired!
-src_crs = CRS.from_epsg(4326)
-dst_crs = CRS.from_epsg(4326)
-
-# Find the min and max lat/lon bounds for these two granules
-min_lon = np.min([sr_masked.longitude.min(), vi_masked.longitude.min()])      # w
-min_lat = np.min([sr_masked.latitude.min(), vi_masked.latitude.min()])        # s
-max_lon = np.max([sr_masked.longitude.max(), vi_masked.longitude.max()])      # e
-max_lat = np.max([sr_masked.latitude.max(), vi_masked.latitude.max()])        # n
-
-# Define desired resolution, in dst CRS units (e.g., degrees for EPSG 4326)
-dst_res = 0.015
-
-# Define the shape of the input granule (both datasets are the same shape)
-src_height, src_width = sr_masked.shape[0], sr_masked.shape[1]
-```
-
-We'll use `rasterio`'s `rasterio.warp.calculate_default_transform` function with those variables defined above to build the affine transform for us. It will also give us the destination granule's width and height.
+Since we prepared the masked rasters we're using for this demonstration above, we have pretty much all of we need to create an affine transform. We'll define the `grid_data` function to take in our datasets and desired resolution, create the necessary grid, and project the data onto it.
 
 ```{code-cell} ipython3
-transform, dst_width, dst_height = rasterio.warp.calculate_default_transform(
-    src_crs = src_crs,
-    dst_crs = dst_crs, 
-    width = src_width,
-    height = src_height, 
-    left = min_lon,
-    bottom = min_lat,
-    right = max_lon,
-    top = max_lat,
-    resolution = dst_res)
-
-transform
-```
-
-If we look at the printed transform above, we see it is 6 numbers, which represent:
-
-- A[0] = x-component of the pixel size, in this case 0.015 degrees, which is ~1.6 km at the equator
-- A[1] = rotation of the pixel around the x-axis (this is 0 for north-up images)
-- A[2] = x coordinate (or longitude, here) of the upper left corner of the top left pixel
-- A[3] = rotation of the pixel around the y-axis (this is 0 for north-up images)
-- A[4] = y-component of the pixel size, in this case 0.015 degrees. Negative because rows in netCDF format (and GeoTIFF, and many others) increase downward, while a real-world y-axis would increase upward.
-- A[5] = y coordinate (or latitude, here) of the upper left corner of the top left pixel
-
-That is as far as we'll go into affine transforms, so please visit the links above if you want a more in depth description of the concept. Now that we have the transform and destination array shape, we proceed with the reprojection:
-
-```{code-cell} ipython3
-def regrid_data(src, 
-                transform, 
-                width, 
-                height, 
-                src_crs="epsg:4326", 
-                resampling=Resampling.nearest):
+def grid_data(src, resolution, dst_crs="epsg:4326", resampling=Resampling.nearest):
     """
     Reproject a L2 dataset to match an input grid. Makes sure 3D variables are
         in (Z, Y, X) dimension order, and all variables have spatial dims/crs 
         assigned.
     Args:
         src - an xarray dataset or dataarray to reproject
-        transform - affine transform to use for projection
-        width, height - dimensions of the output grid 
-        src_crs - CRS of the source data, EPSG 4326 for PACE L2 data
+        resolution - resolution of the output grid, in dst_crs units
+        dst_crs - CRS of the output data
         resampling - resampling method (see rasterio.enums)
     Returns:
         dst - projected xr dataset
@@ -324,40 +257,63 @@ def regrid_data(src,
     if (len(list(src.dims)) == 3) and (list(src.dims)[0] != "wavelength_3d"):
         src = src.transpose("wavelength_3d", ...)
     src = src.rio.set_spatial_dims("pixels_per_line", "number_of_lines")
-    src = src.rio.write_crs(src_crs)
+    src = src.rio.write_crs("epsg:4326")
+
+    # Calculating the default affine transform
+    defaults = rasterio.warp.calculate_default_transform(
+        src.rio.crs,
+        dst_crs,
+        src.rio.width,
+        src.rio.height,
+        left=src.attrs["geospatial_lon_min"],
+        bottom=src.attrs["geospatial_lat_min"],
+        right=src.attrs["geospatial_lon_max"],
+        top=src.attrs["geospatial_lat_max"],
+    )
+    # Aligning that transform to our desired resolution
+    transform, width, height = rasterio.warp.aligned_target(*defaults, resolution)
     
     dst = src.rio.reproject(
-        dst_crs=src.rio.crs,
+        dst_crs=dst_crs,
         shape=(height, width),
         transform=transform,
         src_geoloc_array=(
-            src.coords["longitude"],
-            src.coords["latitude"],
+            src["longitude"],
+            src["latitude"],
         ),
         nodata=np.nan,
         resample=resampling,
-    ).rename({"x":"longitude", "y":"latitude"})
-    return dst
+    )
+    dst["x"] = dst["x"].round(9)
+    dst["y"] = dst["y"].round(9)
+    
+    return dst.rename({"x":"longitude", "y":"latitude"})
 
-sr_gridded = regrid_data(sr_masked, transform, dst_width, dst_height)
-vi_gridded = regrid_data(vi_masked, transform, dst_width, dst_height)
+resolution = (0.015, 0.015)
+
+sr_gridded = grid_data(sr_masked, resolution)
+vi_gridded = grid_data(vi_masked, resolution)
+
+sr_gridded.rio.transform()
 ```
+
+Both our datasets should now be on an aligned grid thanks to the transform printed above. We can it is 6 numbers that represent:
+- A[0] = x-component of the pixel size, in this case 0.015 degrees, which is ~1.6 km at the equator
+- A[1] = rotation of the pixel around the x-axis (this is 0 for north-up images)
+- A[2] = x coordinate (or longitude, here) of the upper left corner of the top left pixel (i.e., the westernmost pixel)
+- A[3] = rotation of the pixel around the y-axis (this is 0 for north-up images)
+- A[4] = y-component of the pixel size, in this case 0.015 degrees. Negative because rows in netCDF format (and GeoTIFF, and many others) increase downward, while a real-world y-axis would increase upward.
+- A[5] = y coordinate (or latitude, here) of the upper left corner of the top left pixel (i.e., the northermost pixel)
+
+We can print out the 2nd dataset's transform as well to compare:
 
 ```{code-cell} ipython3
-# And plot to verify
-fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
-ax.coastlines(linewidth=0.5)
-ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
-ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
-ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
-sr_gridded.sel({"wavelength_3d":860}, method="nearest").plot(cmap="Greys_r", vmin=0, vmax=1)
-vi_gridded.cire.plot(cmap="magma", vmin=0, vmax=3)
-plt.title("")
-plt.show()
+vi_gridded.rio.transform()
 ```
 
-If you were to look at the latitudes and longitudes of each of our projected datasets, you'll see that each pixel has the exact same coordinates, and those coordinates increment by our chosen resolution. With the gridded data, we can now more easily subset datasets as well.
+The numbers in our affine transform are mostly the same, except for A[2] and A[5] which correspond to the origin of the granule. We expect this behaviour because we're working with two different granules that have varying top left corner coordinates. However, they should now both have pixels with the same resolution with centers that align where they overlap. 
+
+You can now do computations between the datasets knowing each pixel is aligned in space. We can visually check this is true by plotting an area of overlap with the pixel boundaries highlighted, seeing that overlap entirely. Gridding also makes subsetting for a given scene easier by leaving us with 1D lat/lon arrays, which means you could also compare the lat/lon pairs directly by printing out the arrays.
 
 ```{code-cell} ipython3
 scene = (-100, 38, -82, 48)
@@ -367,24 +323,32 @@ sr_sub = sr_gridded.sel({"longitude": slice(scene[0], scene[2]),
 vi_sub = vi_gridded.sel({"longitude": slice(scene[0], scene[2]),
                          "latitude": slice(scene[3], scene[1])})
 
-fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
-ax.coastlines(linewidth=0.5)
-ax.add_feature(cartopy.feature.OCEAN, edgecolor="w", linewidth=0.01)
-ax.add_feature(cartopy.feature.LAND, edgecolor="w", linewidth=0.01)
-ax.add_feature(cartopy.feature.LAKES, edgecolor="w", linewidth=0.01)
+fig, ax = plt.subplots(figsize=(9, 5), sharey=True, subplot_kw={"projection": ccrs.PlateCarree()})
+plot_features(ax=ax, gridline_alpha=0)
+sr_sub.sel({"wavelength_3d":860}, method="nearest").plot(cmap="Greys_r", vmin=0, vmax=1,
+                                                         linewidth=0.05, edgecolors="red", add_colorbar=False)
+vi_sub.cire.plot(cmap="magma", vmin=0, vmax=3, linewidth=0.05, edgecolors="white", add_colorbar=False, alpha=0.4)
+ax.set_extent((-86.5, -86.25, 46.25, 46.5))
+plt.title("Overlapping Pixels")
+plt.show()
+```
+
+Let's plot the whole overlapping area, just to fully visualize our scene:
+
+```{code-cell} ipython3
+fig, ax = plt.subplots(figsize=(13, 5), subplot_kw={"projection": ccrs.PlateCarree()})
+plot_features(ax=ax)
 sr_sub.sel({"wavelength_3d":860}, method="nearest").plot(cmap="Greys_r", vmin=0, vmax=1)
 vi_sub.cire.plot(cmap="magma", vmin=0, vmax=3)
 plt.title("")
 plt.show()
 ```
 
-And now our data are on the same grid!
+And now our data are fully gridded and comparable! You could go straight into your analysis from here, but if you don't want to have to repeat this process for your favourite granules every time you work with them, it is useful to export the data to your favourite file format. 
 
 ## 4. Exporting Data: GeoTIFF and netCDF
 
 ### Cloud Optimized GeoTIFFs (COGs)
-If you don't want to have to repeat this process for your favourite granules every time you work with them, it is useful to export the data to your favourite file format. 
 
 First, we export to a Cloud Optimized GeoTIFF, or a COG, using the "COG" driver with applicable profile options. COGs are a subset of GeoTIFFs which have been optimized to work in cloud environments. If you are not working in the cloud, you don't have to worry, as COGs are backwards compatible with GeoTIFFs. That is, any software that can be used to analyze a GeoTIFF can also be used with COGs. For more information on the COG format, please see the [cogeo website](https://cogeo.org/). There is also a very useful plug in for rasterio called `rio-cogeo` for creating/validating COGs, documentation for which can be found [here](https://cogeotiff.github.io/rio-cogeo/).
 
@@ -426,14 +390,13 @@ profile = {
 vi_sub.rio.to_raster(vi_dst_name, **profile)
 ```
 
-The files should be successfully exported as COGs! To make a nice quick true colour image in your program of choice, you can set R = 655 nm (band 60), G = 555 nm (band 42), and B = 470 nm (band 25).
+The files should be successfully exported as COGs. To make a nice quick true colour image in your program of choice, you can set R = 655 nm (band 60), G = 555 nm (band 42), and B = 470 nm (band 25).
 
 ### NetCDFs
 
-To export as a netCDF, all you need to do is use `xarray`'s `to_netcdf()` function:
+To export as a netCDF, all you need to do is use `xarray`'s `to_netcdf()` function. Uncomment the lines in the cell below to begin the export:
 
 ```{code-cell} ipython3
-# Uncomment to create to the files
 #sr_sub.to_netcdf("PACE_OCI.20240610T184843.SFREFL_gridded.nc")
 #vi_sub.to_netcdf("PACE_OCI.20240610T184843.LANDVI_gridded.nc")
 ```
