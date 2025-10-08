@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.16.7
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -91,7 +91,7 @@ We look for two different types of products. The Multiple Ordination ANAlysis, o
 
 ```{code-cell} ipython3
 results_moana = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_MOANA",
+    short_name="PACE_OCI_L4M_MOANA",
     granule_name="*.DAY.*0p1deg*",  # Daily only for MOANA | Resolution: 0p1deg or 4 (for 4km)
     temporal=tspan,
 )
@@ -485,7 +485,7 @@ tspan = ("2024-04-01", "2025-03-31")
 
 ```{code-cell} ipython3
 results_moana = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_MOANA",
+    short_name="PACE_OCI_L4M_MOANA",
     granule_name="*.Day.*0p1deg*",  # Daily: Day | Resolution: 0p1deg or 4 (for 4km)
     temporal=tspan,
 )
@@ -613,6 +613,8 @@ else:
 Then we plot a rectangle around our area of interest on our RGB map. We can try to choose an area that is at the edge of a population to see the changes in time.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 fig = plt.figure(figsize=(7, 7))
 ax1 = fig.add_subplot(projection=ccrs.PlateCarree(), facecolor="#080c17")
 ax2 = data_norm.plot.imshow(
@@ -743,11 +745,11 @@ plt.show()
 
 +++
 
-Now this looks a little noisy with the daily data, so let's make monthly means within our region with `groupby.mean`.
+Now this looks a little noisy with the daily data, so let's make monthly means within our region with `resample(date='MS')`, where 'MS' stands for the month's starting day.
 
 ```{code-cell} ipython3
-monthly_means = region_mean.groupby("date.month").mean()
-monthly_stds = region_std.groupby("date.month").mean()
+monthly_means = region_mean.resample(date='MS').mean()
+monthly_stds = region_std.resample(date='MS').mean()
 ```
 
 ```{code-cell} ipython3
@@ -755,10 +757,10 @@ monthly_stds.load()
 monthly_means.load()
 ```
 
-We can now plot our monthly averages. Note that we will manually indicate the month names here.
+We can now plot our monthly averages.
 
 ```{code-cell} ipython3
-fig, ax1 = plt.subplots(figsize=(10, 5))
+fig, ax1 = plt.subplots(figsize=(12, 5))
 
 # Style
 linewidth = 1
@@ -766,25 +768,11 @@ markersize = 5
 sns.set_style("white")
 palette = sns.color_palette("husl", 3)
 
-months = monthly_means["month"].values
-month_names = [
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-    "Jan",
-    "Feb",
-    "Mar",
-]  # Manually change if different range
+dates = monthly_means['date']
 
 # Left axis
 ax1.plot(
-    months,
+    dates,
     monthly_means["syncoccus_moana"].values,
     "o-",
     color=palette[0],
@@ -793,15 +781,15 @@ ax1.plot(
     markersize=markersize,
 )
 ax1.fill_between(
-    months,
-    monthly_means["syncoccus_moana"] - monthly_stds["syncoccus_moana"],
+    dates,
+    monthly_means["syncoccus_moana"] - monthly_stds["syncoccus_moana"], 
     monthly_means["syncoccus_moana"] + monthly_stds["syncoccus_moana"],
     color=palette[0],
     alpha=0.2,
 )
 
 ax1.plot(
-    months,
+    dates,
     monthly_means["picoeuk_moana"].values,
     "s-",
     color=palette[1],
@@ -810,8 +798,8 @@ ax1.plot(
     markersize=markersize,
 )
 ax1.fill_between(
-    months,
-    monthly_means["picoeuk_moana"] - monthly_stds["picoeuk_moana"],
+    dates,
+    monthly_means["picoeuk_moana"] - monthly_stds["picoeuk_moana"], 
     monthly_means["picoeuk_moana"] + monthly_stds["picoeuk_moana"],
     color=palette[1],
     alpha=0.2,
@@ -820,7 +808,7 @@ ax1.fill_between(
 # Second y-axis
 ax2 = ax1.twinx()
 ax2.plot(
-    months,
+    dates,
     monthly_means["prococcus_moana"].values,
     "^--",
     color=palette[2],
@@ -829,36 +817,26 @@ ax2.plot(
     markersize=markersize,
 )
 ax2.fill_between(
-    months,
-    monthly_means["prococcus_moana"] - monthly_stds["prococcus_moana"],
+    dates,
+    monthly_means["prococcus_moana"] - monthly_stds["prococcus_moana"], 
     monthly_means["prococcus_moana"] + monthly_stds["prococcus_moana"],
     color=palette[2],
     alpha=0.2,
 )
 
-# Add labels, titles and improve x-axis
-ax1.set_xlabel("Month", fontsize=12)
-ax1.set_ylabel("Synechococcus and Picoeucaryotes (cells/ml)", fontsize=12)
+# Formatting
+ax1.set_xlabel("Date", fontsize=12)
+ax1.set_ylabel("Synechococcus and Picoeukaryotes (cells/ml)", fontsize=12)
 ax2.set_ylabel("Prochlorococcus (cells/ml)", fontsize=12)
-ax1.set_xticks(range(1, 13))  # manually change if different months on x axis
-ax1.set_xticklabels(month_names)
+
+# Rotate x-axis labels for better readability
+plt.setp(ax1.get_xticklabels(), rotation=45, ha="right")
 
 ax1.legend(loc="upper left", frameon=True, framealpha=0.6)
 ax2.legend(loc="upper right", frameon=True, framealpha=0.6)
 
-plt.title(f"Monthly Averages for Region:", fontsize=14)
-fig.text(
-    0.5,
-    0.01,
-    "Shaded areas represent spatial standard deviation",
-    ha="center",
-    fontsize=10,
-    style="italic",
-)
-
-plt.setp(ax1.get_xticklabels(), rotation=45, ha="right")
-
-plt.tight_layout(rect=[0, 0.03, 1, 0.97])  # Adjust layout to make room for the note
+plt.title("Monthly Averages for Region", fontsize=14)
+plt.tight_layout()
 plt.show()
 ```
 
