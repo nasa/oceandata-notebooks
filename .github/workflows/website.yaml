@@ -3,6 +3,9 @@ on:
   schedule:
    - cron: "16 8 * * 4"
   pull_request:
+  push:
+    branches:
+      - ghpages
 jobs:
   build:
     runs-on: ubuntu-latest
