@@ -1,3 +1,8 @@
+from pathlib import Path
+
+from jupytext import jupytext
+
+
 def update_header_source_buttons(app, pagename, templatename, context, doctree):
     """Prepend .ipynb button to the download sources dropdown.
 
@@ -7,13 +12,23 @@ def update_header_source_buttons(app, pagename, templatename, context, doctree):
     dropdown_buttons = next((i["buttons"] for i in buttons if "fa-download" in i["icon"].split()), [])
     md_button = next((i for i in dropdown_buttons if i["text"] == ".md"), False)
     if md_button:
-        # FIXME import jupytext and write to md_button["url"], no action for unpaired MyST
-        ipynb_button = {
-            **md_button,
-            "text": ".ipynb",
-            "url": md_button["url"].replace(".md", ".ipynb"),
-        }
-        dropdown_buttons.insert(0, ipynb_button)
+        path = Path("docs", pagename).with_suffix(".md")
+        notebook = jupytext.read(path)
+        try:
+            fmt = notebook["metadata"]["jupytext"]["text_representation"]["format_name"]
+        except KeyError:
+            pass
+        else:
+            if fmt == "myst":
+                path = Path("docs", "_build", "html", "_sources", pagename).with_suffix(".ipynb")
+                path.parent.mkdir(parents=True, exist_ok=True)
+                jupytext.write(notebook, path)
+                ipynb_button = {
+                    **md_button,
+                    "text": ".ipynb",
+                    "url": md_button["url"][:-3] + ".ipynb",
+                }
+                dropdown_buttons.insert(0, ipynb_button)
 
 
 def setup(app):
