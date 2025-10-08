@@ -91,13 +91,13 @@ scene = (-100, 38, -82, 48)
 sr_result = earthaccess.search_data(
     short_name=["PACE_OCI_L2_SFREFL","PACE_OCI_L2_SFREFL_NRT"],
     bounding_box=scene,
-    granule_name="*20240610T184843*V3_1*",
+    granule_name="*20240610T184843*",
 )
 
 vi_result = earthaccess.search_data(
     short_name=["PACE_OCI_L2_LANDVI","PACE_OCI_L2_LANDVI_NRT"],
     bounding_box=scene,
-    granule_name="*20250511T175448*V3_1*",
+    granule_name="*20250511T175448*",
 )
 results = [sr_result[0], vi_result[0]]
 for item in results:
@@ -413,7 +413,7 @@ Level-3 Mapped (L3M) PACE data is already mapped to a Plate Carrée projection -
 # Example search for pulling a specific grnaule
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_LANDVI",
-    granule_name="PACE_OCI.20240601_20240630.L3m.MO.LANDVI.V3_1.0p1deg.nc",
+    granule_name="*.20240601_20240630.*.0p1deg.*",
 )
 l3_path = earthaccess.download(results, local_path="data")
 

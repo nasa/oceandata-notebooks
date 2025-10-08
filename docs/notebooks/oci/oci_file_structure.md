@@ -140,8 +140,8 @@ To show/hide attributes, press the piece-of-paper icon on the right hand side of
 To show/hide data representation, press the stacked-cylinders icon.
 For instance, you could check the attributes on "rhot_blue" to see that this variable is the "Top of Atmosphere Blue Band Reflectance".
 
-The dimensions of the "rhot_blue" variable are ("blue_bands", "number_of_scans", "ccd_pixels"), and it has shape (119, 1709, 1272).
-The `sizes` attribute of a variable gives us that information as a dictionary.
+The dimensions of the "rhot_blue" variable are ("blue_bands", "number_of_scans", "ccd_pixels"), as shown by the `sizes` attribute of the variable.
+This gives us a dictionary of the array's size in each dimension, keyed on the dimension names.
 
 ```{code-cell} ipython3
 datatree["observation_data"]["rhot_blue"].sizes
@@ -296,7 +296,7 @@ len(results)
 ```
 
 The L3M collections contain granules at different temporal and spatial resolutions.
-Let's take a closer look at one of the smaller sized results first, using the metadata available on each one's size.
+Let's take a closer look at one of the larger sized granules first, using the metadata available on each result.
 
 ```{code-cell} ipython3
 for item in results:
@@ -306,9 +306,11 @@ for item in results:
 ```
 
 Notice some special parts in the granule name:
-1. Right after `L3m` you have a temporal resolution marker.
-   The value `DAY` means a daily aggregate, `8D` means an 8-day aggregate, and `MO` means monthly aggregates.
-1. Right after `chlor_a` you have a spatial resolution marker, as horizontal cell size at the equator given either in `km` or `deg`. Read `p` as a decimal point.
+1. Right after `L3m` you have a period indicator.
+   The value `DAY` means a daily aggregate, `8D` means an 8-day aggregate, `MO` means a monthly aggregate,
+   and `SN(SP|SU|AU|WI)` indicates one of four seasonal aggregates.
+1. Right after `chlor_a` you have a spatial resolution marker,
+   as horizontal cell size at the equator given either in `km` or `deg`. Read `p` as a decimal point.
 
 Within a specific collection, `earthaccess` can retrieve granules whose name matches a pattern given in the `granule_name` argument.
 Let's use that to narrow our search to values aggregated to a month and 0.1 degree resolutions.
