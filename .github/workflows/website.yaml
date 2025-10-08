@@ -1,9 +1,8 @@
 name: Update website
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - ghpages
+  schedule:
+   - cron: "16 8 * * 4"
+  pull_request:
 jobs:
   build:
     runs-on: ubuntu-latest
