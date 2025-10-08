@@ -8,7 +8,7 @@ kernelspec:
 # Projecting PACE Data onto a Predefined Grid
 
 **Authors:** Skye Caplan (NASA, SSAI) <br>
-Last updated: October 1, 2025
+Last updated: October 8, 2025
 
 <div class="alert alert-info" role="alert">
 
@@ -52,7 +52,7 @@ Although this tutorial uses land-focused products, these methods will work with 
 
 </div>
 
-The following cells use `earthaccess` to set and persist your Earthdata login credentials, then search for and download the relevant datasets for two scenes which have some overlap in and around the Great Lakes region of North America. A function for a adding features to the plots in this tutorials is also included.
+The following cells use `earthaccess` to set and persist your Earthdata login credentials, then search for and download the relevant datasets for two scenes which have some overlap in and around the Great Lakes region of North America. A function for adding features to the plots in this tutorials is also included.
 
 ```{code-cell} ipython3
 from pathlib import Path
@@ -112,7 +112,7 @@ def open_l2(fpath):
     Opens a PACE L2 file as an xarray dataset, assigning lat/lons (and wavelength, 
         if the dataset is 3D) as coordinates.
     Args:
-        fpath - file path to a L2 PACE file 
+        fpath - path to a L2 PACE file 
     Returns:
         ds - xarray dataset
     """
@@ -145,7 +145,7 @@ fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarre
 plot_features(ax=ax)
 sr.rhos.sel({"wavelength_3d":860}, method="nearest").plot(x="longitude", y="latitude", 
                                                           cmap="Greys_r", vmin=0, vmax=1)
-vi.cire.plot(x="longitude", y="latitude", cmap="magma", vmin=0, vmax=3)
+vi.cire.plot(x="longitude", y="latitude", cmap="magma", vmin=0, vmax=2)
 plt.title("")
 plt.show()
 ```
@@ -192,25 +192,25 @@ fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarre
 plot_features(ax=ax)
 sr_masked.rhos.sel({"wavelength_3d":860}, method="nearest").plot(x="longitude", y="latitude", 
                                                           cmap="Greys_r", vmin=0, vmax=1)
-vi_masked.cire.plot(x="longitude", y="latitude", cmap="magma", vmin=0, vmax=3)
+vi_masked.cire.plot(x="longitude", y="latitude", cmap="magma", vmin=0, vmax=2)
 plt.title("")
 plt.show()
 ```
 
-Now the data should be clear of any pixels flagged as cloud-contaminated! Repeat that step with other flags if you want to exclude other potential quality indicators. 
+Now the data should be clear of any pixels flagged as cloudy! Repeat that step with other flags if you want to exclude other potential quality indicators. 
 
 ### Dimensions
 
-The final piece before we reproject goes back to the dimensions of our datasets. Let's print out the dimensions of each dataset to illustrate their differences:
+The final piece before we reproject goes back to the dimensions of our datasets. Let's print out those dimensions to illustrate their differences:
 
 ```{code-cell} ipython3
 print(f"Surface reflectance dimensions: {list(sr_masked.rhos.dims)}")
 print(f"Vegetation index dimensions: {list(vi.dims)}")
 ```
 
-For `rhos` we have dimensions `('number_of_lines', 'pixels_per_line', 'wavelength_3d')` corresponding to (Y, X, Z). Trying to reproject the data with that dimension order away will cause an `InvalidDimensionError` from `rioxarray` because the package expects 3D variables to have dimensions ordered (Z, Y, X), or in our dataset's terms, `('wavelength_3d', 'number_of_lines', 'pixels_per_line')`. This is also how many GIS software programs, such as [QGIS](https://qgis.org/), expect datasets to be ordered. 
+For `rhos` we have dimensions `('number_of_lines', 'pixels_per_line', 'wavelength_3d')` corresponding to (Y, X, Z). Trying to reproject the data with that dimension order will cause an `InvalidDimensionError` from `rioxarray` because the package expects 3D variables to have dimensions ordered (Z, Y, X), or in our dataset's terms, `('wavelength_3d', 'number_of_lines', 'pixels_per_line')`. This is also how many GIS software programs, such as [QGIS](https://qgis.org/), expect datasets to be ordered. 
 
-To put `rhos` in the correct dimensional order, we'll use `.transpose()` to transpose the data so that the wavelength dimension, `wavelength_3d`, is first. For the reprojection, we also have to drop the `l2_flags` variable from this dataset since `rioxarray` does not support reprojecting mixed-dimension variables in the same dataset. Finally, we'll also update the attributes with those from the full dataset to retain some relevant information that would get lost by just selecting `rhos`.
+To put `rhos` in the correct dimensional order, we'll use `.transpose()` to transpose the data so that the wavelength dimension, `wavelength_3d`, is first. For the reprojection, we also have to drop the `l2_flags` variable from this dataset since `rioxarray` does not support reprojecting mixed-dimension variables in the same dataset. Finally, we'll also update the attributes with those from the full dataset to retain some relevant information that would get lost by just selecting the `rhos` variable.
 
 The VI dataset is 2D and in the form (Y, X), which is what the package expects, so we don't have to transpose the data in any way. We will drop `l2_flags` from the VI dataset for consistency. We also don't need to update `attrs` because we're dropping a variable from the full dataset rather than selecting a single variable with its own attributes, so the information stays. 
 
@@ -297,7 +297,7 @@ vi_gridded = grid_data(vi_masked, resolution)
 sr_gridded.rio.transform()
 ```
 
-Both our datasets should now be on an aligned grid thanks to the transform printed above. We can it is 6 numbers that represent:
+Both our datasets should now be on an aligned grid. We can take a look at one of their transforms and see that it consists 6 numbers which represent:
 - A[0] = x-component of the pixel size, in this case 0.015 degrees, which is ~1.6 km at the equator
 - A[1] = rotation of the pixel around the x-axis (this is 0 for north-up images)
 - A[2] = x coordinate (or longitude, here) of the upper left corner of the top left pixel (i.e., the westernmost pixel)
@@ -311,13 +311,11 @@ We can print out the 2nd dataset's transform as well to compare:
 vi_gridded.rio.transform()
 ```
 
-The numbers in our affine transform are mostly the same, except for A[2] and A[5] which correspond to the origin of the granule. We expect this behaviour because we're working with two different granules that have varying top left corner coordinates. However, they should now both have pixels with the same resolution with centers that align where they overlap. 
+The numbers in our affine transform are mostly the same, except for A[2] and A[5] which correspond to the origin of the granule. We expect this behaviour because we're working with two different granules that have varying top left corner coordinates. However, they should now both have pixels with the same resolution and centers that align where they overlap. 
 
 You can now do computations between the datasets knowing each pixel is aligned in space. We can visually check this is true by plotting an area of overlap with the pixel boundaries highlighted, seeing that overlap entirely. Gridding also makes subsetting for a given scene easier by leaving us with 1D lat/lon arrays, which means you could also compare the lat/lon pairs directly by printing out the arrays.
 
 ```{code-cell} ipython3
-scene = (-100, 38, -82, 48)
-
 sr_sub = sr_gridded.sel({"longitude": slice(scene[0], scene[2]),
                          "latitude": slice(scene[3], scene[1])})
 vi_sub = vi_gridded.sel({"longitude": slice(scene[0], scene[2]),
@@ -339,7 +337,7 @@ Let's plot the whole overlapping area, just to fully visualize our scene:
 fig, ax = plt.subplots(figsize=(13, 5), subplot_kw={"projection": ccrs.PlateCarree()})
 plot_features(ax=ax)
 sr_sub.sel({"wavelength_3d":860}, method="nearest").plot(cmap="Greys_r", vmin=0, vmax=1)
-vi_sub.cire.plot(cmap="magma", vmin=0, vmax=3)
+vi_sub.cire.plot(cmap="magma", vmin=0, vmax=2)
 plt.title("")
 plt.show()
 ```
@@ -350,7 +348,7 @@ And now our data are fully gridded and comparable! You could go straight into yo
 
 ### Cloud Optimized GeoTIFFs (COGs)
 
-First, we export to a Cloud Optimized GeoTIFF, or a COG, using the "COG" driver with applicable profile options. COGs are a subset of GeoTIFFs which have been optimized to work in cloud environments. If you are not working in the cloud, you don't have to worry, as COGs are backwards compatible with GeoTIFFs. That is, any software that can be used to analyze a GeoTIFF can also be used with COGs. For more information on the COG format, please see the [cogeo website](https://cogeo.org/). There is also a very useful plug in for rasterio called `rio-cogeo` for creating/validating COGs, documentation for which can be found [here](https://cogeotiff.github.io/rio-cogeo/).
+First, we export to a Cloud Optimized GeoTIFF, or a COG, using the "COG" driver with applicable profile options. COGs are a subset of GeoTIFFs which have been optimized to work in cloud environments. If you are not working in the cloud, you don't have to worry, as COGs are backwards compatible with normal GeoTIFFs. That is, any software that can be used to analyze a GeoTIFF can also be used with COGs. For more information on the COG format, please see the [cogeo website](https://cogeo.org/). There is also a very useful plug in for rasterio called `rio-cogeo` for creating/validating COGs, documentation for which can be found [here](https://cogeotiff.github.io/rio-cogeo/).
 
 We create our files by building a profile from the destination datasets (`sr_sub` or `vi_sub`, in this case) and using the `rio.to_raster()` method. Each of the profile options is necessary for the format conversion, but can be changed to user preference as needed. For example, if you prefer a different `nodata` value, substitute the value you'd like to instead in the dictionaries below.
 
@@ -409,7 +407,7 @@ Level-3 Mapped (L3M) PACE data is already mapped to a Plate Carrée projection -
 # Example search for pulling a specific grnaule
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_LANDVI",
-    granule_name="PACE_OCI.20240601_20240630.L3m.MO.LANDVI.V3_0.0p1deg.nc",
+    granule_name="PACE_OCI.20240601_20240630.L3m.MO.LANDVI.V3_1.0p1deg.nc",
 )
 l3_path = earthaccess.download(results, local_path="data")
 
@@ -424,7 +422,7 @@ ds.rio.to_raster(Path(l3_path[0]).with_suffix(".tif"), driver="COG")
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on reprojecting and format conversion of PACE OCI L2 data. We suggest looking at the notebook on "Machine Learning with Satellite Data" to explore some more advanced analysis methods.
+You have completed the notebook on gridding and format conversion of PACE OCI L2 data. We suggest looking at the notebook on "Machine Learning with Satellite Data" to explore some more advanced analysis methods.
 
 </div>
 
