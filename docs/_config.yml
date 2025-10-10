@@ -27,5 +27,10 @@ sphinx:
       - "mystnb.unknown_mime_type"
     html_extra_path:
       - "assets"
+    html_theme_options:
+      show_navbar_depth: 2
+      collapse_navigation: false
+      navigation_depth: 4
+      show_toc_level: 2
   local_extensions:
     source_button: _ext
