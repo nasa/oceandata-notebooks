@@ -1,4 +1,0 @@
-nano
-imagemagick
-groff
-attr

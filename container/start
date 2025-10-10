@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+
+# share an ssh-agent across all of jupyter lab
+eval "$(ssh-agent -s)"
+
+# FIXME: jupyterlab-git fails to trigger socket creation outside of ~, this does it
+git credential approve <<EOF
+protocol=a
+host=b
+username=c
+password=d
+EOF
+
+exec "$@"

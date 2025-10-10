@@ -1,0 +1,23 @@
+# requested
+imagemagick
+groff
+
+# dependencies for OCSSW
+attr
+
+# dependencies for Navteca/OSS JupyterHub
+fuse
+
+# # dependencies for nbconvert and myst
+# pandoc
+
+# # LaTeX tools
+# texlive-xetex
+# texlive-plain-generic
+# texlive-fonts-extra
+# texlive-fonts-recommended
+# texlive-lang-chinese
+# texlive-science
+# latexmk
+# lmodern
+# latexdiff
