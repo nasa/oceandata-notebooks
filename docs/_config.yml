@@ -1,4 +1,3 @@
-logo: "HelpHub.png"
 title: "OB.DAAC Help Hub"
 author: "The Ocean Ecology Laboratory at NASA Goddard"
 only_build_toc_files: true
@@ -28,6 +27,9 @@ sphinx:
     html_extra_path:
       - "assets"
     html_theme_options:
+      logo:
+        image_light: "HelpHub.png"
+        image_dark: "HelpHub-dark.png" 
       show_navbar_depth: 2
       collapse_navigation: false
       navigation_depth: 4
