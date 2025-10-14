@@ -20,7 +20,19 @@ parts:
             title: Export for GIS
           - file: notebooks/oci/ml_cloud_mask
             title: Machine Learning Tutorial
-      
+     
+      - file: sections/visualizations
+        title: Visualizations
+        sections:
+          - file: notebooks/harp2/harp2_basic_visualizations
+            title: PACE HARP2
+          - file: notebooks/spexone/spexone_basic_visualizations
+            title: PACE SPEXone
+          - file: notebooks/oci/oci_data_visualization.md
+            title: PACE OCI part I
+          - file: notebooks/oci/oci_data_visualization_part2.md
+            title: PACE OCI part II
+    
       - file: sections/cloud-atmosphere
         title: Cloud & Atmosphere
         sections:
@@ -51,13 +63,7 @@ parts:
           - file: sections/seadas-gui
             title: SeaDAS GUI
       
-      - file: sections/instruments
-        title: Instruments
-        sections:
-          - file: notebooks/harp2/harp2_basic_visualizations
-            title: About HARP2
-          - file: notebooks/spexone/spexone_basic_visualizations
-            title: About SPEXone
+      
 
   - caption: Past trainings and events
     chapters:
