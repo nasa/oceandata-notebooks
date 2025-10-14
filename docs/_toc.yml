@@ -48,22 +48,22 @@ parts:
         sections:
           - file: notebooks/oci/oci_terrestrial_data
             title: Land Surface from PACE/OCI
-      
+    
+  - caption: SeaDAS - OCSSW Toolbox     
+    chapters:
       - file: sections/seadas-toolbox
-        title: SeaDAS Toolbox
+        title: About SeaDAS - OCSSW
         sections:
+          - file: sections/seadas-desktop
+            title: SeaDAS Desktop Application Resources
           - file: notebooks/oci/oci_ocssw_install
-            title: Install OCSSW
+            title: Install SeaDAS Processors
           - file: notebooks/oci/oci_ocssw_processing_overview
-            title: Getting Started
+            title: Basic Processing
           - file: notebooks/oci/oci_ocssw_l2gen
             title: Generate Level-2 Products
           - file: notebooks/oci/oci_ocssw_giop
-            title: Run the GIOP Algorithm
-          - file: sections/seadas-gui
-            title: SeaDAS GUI
-      
-      
+            title: Run the GIOP Algorithm   
 
   - caption: Past trainings and events
     chapters:
