@@ -65,15 +65,18 @@ parts:
           - file: notebooks/oci/oci_ocssw_giop
             title: Run the GIOP Algorithm   
 
-  - caption: Past trainings and events
+  - caption: Past trainings & events
     chapters:
-      - url: https://pacehackweek.github.io/pace-2025/presentations/notebooks.html
-        title: PACE Hackweek 2025
-      - url: https://nmfs-opensci.github.io/EDMW-EarthData-Workshop-2025/
-        title: NOAA EDMW 2025 - PACE
-      - url: https://appliedsciences.nasa.gov/get-involved/training/english/arset-introduction-plankton-aerosol-cloud-ocean-ecosystem-pace
-        title: ARSET - Hyperspectral Water Quality Monitoring
-      - url: https://pacehackweek.github.io/pace-2024/intro.html
-        title: PACE Hackweek 2024
-      - url: https://www.us-ocb.org/pace-mission-training-activity/
-        title: PACE Training Lectures 2022
+    - file: sections/past-trainings
+      title: See all past trainings and events
+      sections:
+          - url: https://pacehackweek.github.io/pace-2025/presentations/notebooks.html
+            title: PACE Hackweek 2025
+          - url: https://nmfs-opensci.github.io/EDMW-EarthData-Workshop-2025/
+            title: NOAA EDMW 2025 - PACE
+          - url: https://appliedsciences.nasa.gov/get-involved/training/english/arset-introduction-plankton-aerosol-cloud-ocean-ecosystem-pace
+            title: ARSET - Hyperspectral Water Quality Monitoring
+          - url: https://pacehackweek.github.io/pace-2024/intro.html
+            title: PACE Hackweek 2024
+          - url: https://www.us-ocb.org/pace-mission-training-activity/
+            title: PACE Training Lectures 2022
