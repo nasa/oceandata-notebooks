@@ -106,6 +106,7 @@ Learn More →
 ### Past trainings & events
 :::{card}
 :link: sections/past-trainings
+:link-type: doc
 Find the tutorials from past trainings and events
 +++
 See all events →
