@@ -81,7 +81,7 @@ Learn More →
 **COMING SOON - Ocean**
 ^^^
 
-![Coming soon](images/oceans.jpg)
+![Coming soon](images/oceans.png)
 Dive deeper into ocean data products.
 +++
 Coming soon
