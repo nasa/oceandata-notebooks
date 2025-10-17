@@ -14,24 +14,15 @@ jupyter:
     name: python3
 ---
 
-# SeaDAS Toolbox
+# About SeaDAS - OCSSW
 
-Learn to use the SeaDAS (SeaWiFS Data Analysis System) processing tools for ocean color data analysis. SeaDAS provides comprehensive software for processing, displaying, analyzing, and quality controlling ocean color data.
-
-## Tutorials:
-- {doc}`../notebooks/oci/oci_ocssw_install` - Install and set up OCSSW (Ocean Color Science Software)
-- {doc}`../notebooks/oci/oci_ocssw_processing_overview` - Get started with SeaDAS processing workflows
-- {doc}`../notebooks/oci/oci_ocssw_l2gen` - Generate Level-2 products from raw data
-- {doc}`../notebooks/oci/oci_ocssw_giop` - Run the Generalized Inherent Optical Property (GIOP) algorithm
+Learn to use the SeaDAS (Sea, earth and atmosphere Data Analysis System) processing tools for comprehensive ocean color data analysis. SeaDAS is the official NASA software package that incorporates OCSSW (Ocean Color Science Software), a collection of command-line processing algorithms and utilities used by the ocean color community worldwide. OCSSW provides the core computational engine that powers SeaDAS, containing standardized algorithms for atmospheric correction, bio-optical retrievals, and data product generation. While SeaDAS offers both a graphical desktop application and command-line interface, OCSSW can be used independently for automated processing workflows, making it ideal for batch processing large datasets and integration into custom analysis pipelines.
 
 ## What you'll learn:
-- Installing and setting up OCSSW (Ocean Color Science Software)
-- Processing raw data to Level-2 products
-- Running specialized algorithms like GIOP
-- Command-line processing workflows
-- Quality control and validation techniques
+- [SeaDAS Desktop Application Resources](../sections/seadas-desktop.md) - Resources and tutorials for using the SeaDAS graphical interface
+- [Install SeaDAS Processors](../notebooks/oci/oci_ocssw_install.md) - Setting up OCSSW command-line processing tools
+- [Basic Processing](../notebooks/oci/oci_ocssw_processing_overview.md) - Getting started with OCSSW processing workflows
+- [Generate Level-2 Products](../notebooks/oci/oci_ocssw_l2gen.md) - Creating Level-2 data products from raw satellite data
+- [Run the GIOP Algorithm](../notebooks/oci/oci_ocssw_giop.md) - Implementing the Generalized Inherent Optical Property algorithm
 
-## About SeaDAS:
-SeaDAS is the official NASA software package for processing ocean color satellite data, providing standardized algorithms and processing capabilities used by the ocean color community worldwide.
-
-Follow the tutorials above to get started with SeaDAS processing tools.
+Browse the tutorials above to master SeaDAS and OCSSW tools for ocean color data processing.

@@ -16,27 +16,12 @@ jupyter:
 
 # Visualizations
 
-Get familiar with visualizing data from the instruments aboard the PACE (Plankton, Aerosol, Cloud, ocean Ecosystem) satellite and learn about their unique capabilities and data products.
-
-## Tutorials:
-- {doc}`../notebooks/harp2/harp2_basic_visualizations` - Explore HARP2 data products and visualization techniques
-- {doc}`../notebooks/spexone/spexone_basic_visualizations` - Introduction to SPEXOne data and basic visualizations
-- {doc}`../notebooks/oci/oci_data_visualization` - Introduction to OCI data visualization
-- {doc}`../notebooks/oci/oci_data_visualization_part2` - OCI data visualization, part II
-
-## PACE Instrument Suite:
-- **HARP2**: Hyper-Angular Rainbow Polarimeter - measures polarized light for aerosol and cloud studies
-- **SPEXOne**: Spectropolarimeter for Planetary Exploration - provides detailed polarimetric measurements
-- **OCI**: Ocean Color Instrument - the primary hyperspectral radiometer for ocean color observations
+This section provides tutorials on visualizing data from the PACE mission instruments. Learn how to create effective plots, maps, and interactive visualizations for different types of ocean color and atmospheric data products.
 
 ## What you'll learn:
-- Instrument specifications and measurement principles
-- Data product characteristics and applications
-- Visualization techniques specific to each instrument
-- Understanding measurement geometries and viewing angles
+- [PACE HARP2](../notebooks/harp2/harp2_basic_visualizations.md) - Visualization techniques for HARP2 polarimeter data
+- [PACE SPEXone](../notebooks/spexone/spexone_basic_visualizations.md) - Creating plots and maps with SPEXone data products
+- [PACE OCI part I](../notebooks/oci/oci_data_visualization.md) - Basic visualization methods for OCI ocean color data and interactive plotting
+- [PACE OCI part II](../notebooks/oci/oci_data_visualization_part2.md) - Advanced visualization techniques for OCI and time  series
 
-The tutorials above provide hands-on experience with data from each PACE instrument, helping you understand their unique capabilities and optimal use cases.
-
-```python
-
-```
+Browse the tutorials above to get started with data visualization techniques for PACE instruments.

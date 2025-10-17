@@ -14,38 +14,15 @@ jupyter:
     name: python3
 ---
 
-# Training Archive
+# See all past trainings and events
 
-Access recordings and materials from past NASA ocean color training events, workshops, and webinars. These resources provide comprehensive coverage of ocean color science, data processing, and analysis techniques.
+Access recordings, materials, and resources from past NASA ocean color training events, workshops, and webinars. These comprehensive training resources provide coverage of ocean color science, PACE mission data products, data processing techniques, and analysis methods. The events range from intensive hackweeks and hands-on workshops to lecture series and specialized training programs, offering learning opportunities for users at all levels - from beginners getting started with ocean color data to experienced researchers looking to expand their knowledge of specific instruments, algorithms, and applications.
 
-## Recent Training Events:
+## Latest events and trainings:
+- [PACE Hackweek 2025](https://pacehackweek.github.io/pace-2025/presentations/notebooks.html) - Latest hackweek with presentations, notebooks, and hands-on PACE data tutorials
+- [NOAA EDMW 2025 - PACE](https://nmfs-opensci.github.io/EDMW-EarthData-Workshop-2025/) - NOAA Earth Data Management Workshop focused on PACE applications
+- [ARSET - Hyperspectral Water Quality Monitoring](https://appliedsciences.nasa.gov/get-involved/training/english/arset-introduction-plankton-aerosol-cloud-ocean-ecosystem-pace) - Applied Remote Sensing Training on water quality applications
+- [PACE Hackweek 2024](https://pacehackweek.github.io/pace-2024/intro.html) - Previous year's hackweek materials and collaborative learning resources
+- [PACE Training Lectures 2022](https://www.us-ocb.org/pace-mission-training-activity/) - Foundational lecture series on PACE mission science and applications
 
-### PACE Mission Training Series
-- [PACE Data Products Workshop 2024](https://www.youtube.com/playlist?list=EXAMPLE_PACE1)
-- [PACE Algorithm Training 2024](https://www.youtube.com/playlist?list=EXAMPLE_PACE2)
-- [PACE Early Adopters Workshop](https://www.youtube.com/playlist?list=EXAMPLE_PACE3)
-
-### Ocean Color Science Workshops
-- [Ocean Color Science Team Meeting 2024](https://www.youtube.com/playlist?list=EXAMPLE_OCSM1)
-- [Applied Remote Sensing Training 2023](https://www.youtube.com/playlist?list=EXAMPLE_ARST1)
-- [SeaDAS Workshop Series](https://www.youtube.com/playlist?list=EXAMPLE_SEADAS1)
-
-### Instrument-Specific Training
-- [MODIS-Aqua Data Analysis](https://www.youtube.com/playlist?list=EXAMPLE_MODIS1)
-- [VIIRS Ocean Color Processing](https://www.youtube.com/playlist?list=EXAMPLE_VIIRS1)
-- [Landsat Ocean Color Applications](https://www.youtube.com/playlist?list=EXAMPLE_LANDSAT1)
-
-### Specialized Topics
-- [Machine Learning for Ocean Color](https://www.youtube.com/playlist?list=EXAMPLE_ML1)
-- [Atmospheric Correction Techniques](https://www.youtube.com/playlist?list=EXAMPLE_ATMO1)
-- [Validation and Uncertainty Analysis](https://www.youtube.com/playlist?list=EXAMPLE_VAL1)
-
-## Additional Resources:
-- Training materials and presentations
-- Hands-on exercise datasets
-- Community discussion forums
-- Follow-up Q&A sessions
-
-These archived training materials serve as valuable references for both new users getting started with ocean color data and experienced researchers looking to expand their knowledge of specific techniques and applications.
-
-*Note: Replace the example playlist URLs with actual YouTube playlist links when available.*
+Browse the training resources above to access comprehensive learning materials from past events and expand your ocean color data analysis skills.

@@ -16,21 +16,15 @@ jupyter:
 
 # Data Access and Processing Basics
 
-This section covers fundamental concepts and tutorials for accessing and processing ocean data products from various instruments and platforms.
+This section covers fundamental concepts and tutorials for accessing and processing ocean data products from various instruments and platforms. Learn essential skills for working with satellite ocean color data, from initial data access through advanced processing techniques and analysis workflows.
 
 ## What you'll learn:
-- How to access data products programmatically
-- Understanding different product levels
-- Basic data processing workflows
-- Exporting data for use in GIS applications
-- Introduction to machine learning techniques
-
-## Tutorials:
-- {doc}`../notebooks/oci/oci_data_access` - Learn how to programmatically access PACE data products
-- {doc}`../notebooks/oci/oci_file_structure` - Understand the structure and organization of different product levels
-- {doc}`../notebooks/modis/modis_explore_l2` - Get oriented with Level-2 data products using MODIS examples
-- {doc}`../notebooks/modis/modis_explore_l3` - Explore Level-3 gridded data products and their applications
-- {doc}`../notebooks/oci/oci_grid_match` - Learn techniques for exporting ocean color data for GIS applications
-- {doc}`../notebooks/oci/ml_cloud_mask` - Introduction to machine learning approaches for cloud masking
+- [Access Data Products](../notebooks/oci/oci_data_access.md) - Learn how to programmatically access PACE data products
+- [Intro to Product Levels](../notebooks/oci/oci_file_structure.md) - Understand the structure and organization of different product levels
+- [Orientation to Level-2](../notebooks/modis/modis_explore_l2.md) - Get oriented with Level-2 data products using MODIS examples
+- [Orientation to Level-3](../notebooks/modis/modis_explore_l3.md) - Explore Level-3 gridded data products and their applications
+- [Export for GIS](../notebooks/oci/oci_grid_match.md) - Learn techniques for exporting ocean color data for GIS applications
+- [In situ matchups](../notebooks/hackweek/satellite_insitu_matchups.md) - Working with satellite and in situ data matchups
+- [Machine Learning Tutorial](../notebooks/oci/ml_cloud_mask.md) - Introduction to machine learning approaches for cloud masking
 
 Browse the tutorials above to get started with data access and processing.

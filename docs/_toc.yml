@@ -22,6 +22,8 @@ parts:
             title: Orientation to Level-3
           - file: notebooks/oci/oci_grid_match
             title: Export for GIS
+          - file: notebooks/hackweek/satellite_insitu_matchups.md
+            title: In situ matchups
           - file: notebooks/oci/ml_cloud_mask
             title: Machine Learning Tutorial
      

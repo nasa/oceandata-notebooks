@@ -16,15 +16,9 @@ jupyter:
 
 # Land
 
-Explore terrestrial data products and land surface observations from PACE/OCI. This section focuses on applications for monitoring vegetation, land cover, and terrestrial ecosystems.
-
-## Available tutorials:
-- {doc}`../notebooks/oci/oci_terrestrial_data` - Working with land surface reflectance and vegetation data from PACE/OCI
+This section focuses on terrestrial data products and land surface observations from PACE/OCI. Learn how to work with land surface reflectance data for monitoring vegetation, land cover, and terrestrial ecosystems using ocean color satellite measurements.
 
 ## What you'll learn:
-- Working with land surface reflectance data
-- Vegetation indices and terrestrial applications
-- Land-ocean interface studies
-- Data processing techniques for terrestrial observations
+- [Land Surface from PACE/OCI](../notebooks/oci/oci_terrestrial_data.md) - Working with land surface reflectance and vegetation data from PACE/OCI
 
-The tutorial above will guide you through analyzing land surface data from PACE/OCI.
+Browse the tutorial above to get started with analyzing land surface data from PACE.
