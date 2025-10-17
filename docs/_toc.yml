@@ -1,8 +1,12 @@
 format: jb-book
 root: index
 parts:
-  - chapters:
-      - file: getting-started
+  - caption: Welcome
+    chapters:
+      - file: home
+        title: Home
+      - file: getting-started    
+      - file: team
   - caption: Help Hub Core
     chapters:
       - file: sections/data-access-basics
