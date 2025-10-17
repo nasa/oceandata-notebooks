@@ -7,7 +7,7 @@ execute:
   execute_notebooks: "cache"  # re-use outputs (when none of the code cells change)
   cache: "docs/_cache"
 html:
-  home_page_in_navbar: false
+  home_page_in_navbar: true
   use_repository_button: true
   use_issues_button: false
   use_edit_page_button: true

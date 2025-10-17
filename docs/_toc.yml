@@ -38,6 +38,12 @@ parts:
             title: PACE OCI part I
           - file: notebooks/oci/oci_data_visualization_part2.md
             title: PACE OCI part II
+
+      - file: sections/ocean
+        title: Ocean
+        sections:
+          - file: notebooks/hackweek/oci_gpig.md
+            title: GPig Phytoplankton Community Composition
     
       - file: sections/cloud-atmosphere
         title: Cloud & Atmosphere

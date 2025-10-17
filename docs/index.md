@@ -78,13 +78,14 @@ Learn More →
 :::
 
 :::{grid-item-card} 
-**COMING SOON - Ocean**
+:link: sections/ocean
+:link-type: doc
+**Ocean**
 ^^^
-
-![Coming soon](images/oceans.png)
+![Ocean](images/ocean.png)
 Dive deeper into ocean data products.
 +++
-Coming soon
+Learn More →
 :::
 
 ::::
