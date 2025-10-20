@@ -76,6 +76,7 @@ We begin by importing the packages used in this notebook.
 ```{code-cell} ipython3
 import cartopy.crs as ccrs
 import earthaccess
+import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
@@ -300,20 +301,21 @@ dataset
 A common reason to generate a single dataset from multiple, daily images is to create a composite. Compare the map from a single day ...
 
 ```{code-cell} ipython3
-chla = np.log10(dataset["chlor_a"])
-chla.attrs.update(
-    {
-        "units": f'log({dataset["chlor_a"].attrs["units"]})',
-    }
+plot = (
+    dataset["chlor_a"]
+    .sel({"date": 0})
+    .plot(aspect=2, size=4, cmap="GnBu_r", norm=colors.LogNorm())
 )
-plot = chla.sel({"date": 0}).plot(aspect=2, size=4, cmap="GnBu_r")
 ```
 
 ... to a map of average values, skipping "NaN" values that result from clouds.
 
 ```{code-cell} ipython3
-chla_avg = chla.mean("date", keep_attrs=True)
-plot = chla_avg.plot(aspect=2, size=4, cmap="GnBu_r")
+plot = (
+    dataset["chlor_a"]
+    .mean("date", keep_attrs=True)
+    .plot(aspect=2, size=4, cmap="GnBu_r", norm=colors.LogNorm())
+)
 ```
 
 ## 6. Download Data
