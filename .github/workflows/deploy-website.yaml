@@ -1,4 +1,4 @@
-name: Publish website
+name: Deploy website
 on:
   workflow_run:
     workflows: ["Build website"]
