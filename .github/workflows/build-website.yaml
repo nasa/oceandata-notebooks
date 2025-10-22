@@ -1,4 +1,4 @@
-name: Update website
+name: Build website
 on:
   schedule:
    - cron: "16 8 * * 4"
@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - ghpages
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,7 +30,7 @@ jobs:
         with:
           path: docs/_cache
           key: jupyter-book-cache-${{ hashFiles('docs/_cache.dvc') }}
-      - name: DVC pull
+      - name: Update cache
         if: steps.cache.outputs.cache-hit != 'true'
         run: dvc pull
         env:
@@ -37,23 +38,10 @@ jobs:
           AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
           AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
           AWS_SESSION_TOKEN: '${{ secrets.AWS_SESSION_TOKEN }}'
-      - name: Build book
-        run: jb build docs
+      - name: Build jupyter book
+        run: jupyter-book build docs
       - name: Upload html
         id: deployment
         uses: actions/upload-pages-artifact@v4
         with:
-          path: docs/_build/html
-  deploy:
-    needs: build
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Publish
-        id: deployment
-        uses: actions/deploy-pages@v4
+          path: ./docs/_build/html

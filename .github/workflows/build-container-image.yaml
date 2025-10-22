@@ -2,7 +2,7 @@ name: Build container image
 on:
   push:
     paths:
-      - .github/workflows/container-image.yaml
+      - .github/workflows/build-container-image.yaml
       - container/**
 concurrency:
   group: ${{ github.workflow }}
