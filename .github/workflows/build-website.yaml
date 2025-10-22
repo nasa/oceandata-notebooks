@@ -1,0 +1,47 @@
+name: Build website
+on:
+  schedule:
+   - cron: "16 8 * * 4"
+  pull_request:
+  push:
+    branches:
+      - ghpages
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          activate-environment: true
+      - name: Install tools
+        run: uv sync --locked --only-group tools
+      - name: Use cache
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: docs/_cache
+          key: jupyter-book-cache-${{ hashFiles('docs/_cache.dvc') }}
+      - name: Update cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: dvc pull
+        env:
+          AWS_REGION: 'us-west-2'
+          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+          AWS_SESSION_TOKEN: '${{ secrets.AWS_SESSION_TOKEN }}'
+      - name: Build jupyter book
+        run: jupyter-book build docs
+      - name: Upload html
+        id: deployment
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./docs/_build/html

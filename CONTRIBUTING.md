@@ -1,107 +1,186 @@
 ---
+jupytext:
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.16.7
 kernelspec:
-  name: bash
-  language: bash
   display_name: Bash
+  language: bash
+  name: bash
 ---
 
 # Maintainer's Guide
 
-We are glad to have your help maintaining tutorials for the [Help Hub] at the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
++++
 
-The following subsections provide additional information on the structure of this repo and maintenaner tasks.
-Maintainers are responsible for building HTML files for publishing the content on the [Help Hub], which also tests that the notebooks run successfully in an isolated Python environment.
-Here is how some of the contents of this repo map to the subsections below:
+We are glad to have your help maintaining the [Help Hub] for the [Ocean Biology Distributed Active Archive Center (OB.DAAC)][OB].
+You should already be familiar with the [README](README.md).
+This guide provides additional information on the structure of this repository and maintainer tasks.
+Maintainers are responsible for:
+1. ensuring the reproducible environment configuration is correct, and
+2. publishing the notebooks to [GitHub Pages] as the [Help Hub] (a.k.a releasing!).
+
+The following sections relate to the content of this repository as follows:
 
 ```shell
 .
 ├── CONTRIBUTING.md          # (this document)
 ├── uv.lock                  # -> Isolated Environment
-├── book                     # -> Rendering to HTML
+├── docs                     # -> GitHub Pages Website
 ├── pyproject.toml           # -> Dependencies
-├── .pre-commit-config.yaml  # -> Automation and Checks
-└── docker                   # -> Container Image for a JupyterHub
+├── container                # -> Container Image for JupyterHubs
+└── .pre-commit-config.yaml  # -> Automation and Checks
 ```
 
 [OB]: https://www.earthdata.nasa.gov/centers/ob-daac
-[Help Hub]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
-
-Use the `uv` command line tool to create a Python environment for maintainer actions.
-Install `uv` as shown next or by one of [many other installation methods][uv].
-
-[uv]: https://docs.astral.sh/uv/getting-started/installation
-
-> [!Important]
-> This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells.
-
-```{code-cell}
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+[Help Hub]: https://nasa.github.io/oceandata-notebooks
+[GitHub Pages]: https://docs.github.com/en/pages
 
 ## Isolated Environment
 
-The `uv.lock` file defines the envrionment that should be sufficient to run the notebooks, and `uv` will install the packages listed here in a [Python virtual environment][venv] used for rendering to HTML.
-If being conscientious about storage (e.g. if you are `jovyan` on a cloud-based JupyterHub), tell `uv` to use temporary directories using the following environment variables.
-On a laptop or on-prem server, there are good reasons to not set these variables.
+The `uv.lock` file gives a versioned list of all packages needed to run the tutorials;
+it includes packages listed in `pyproject.toml` along with all their dependencies.
+The `uv` tool will install these packages in an isolated [Python virtual environment][venv], which is used during the website build to ensure completeness.
+Execute the cell below to check if `uv` is already installed and, if not, install it with the recommended [installation method][uv].
 
+> [!IMPORTANT]
+> This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells on JupyterLab.
+
+[uv]: https://docs.astral.sh/uv/getting-started/installation
 [venv]: https://docs.python.org/3/library/venv.html
 
-> [!Important]
-> The subsections below assume you have run the following cell to configure and activate the development environment. The last line ensures you can run a bash kernel from jupyter.
+```{code-cell}
+if ! command -v uv; then
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+```
+
+Create the environment using the `sync` subcommand.
 
 ```{code-cell}
 :scrolled: true
 
-if [ $(whoami) = "jovyan" ]; then
-  export UV_PROJECT_ENVIRONMENT=/tmp/uv/venv
-  export UV_CACHE_DIR=/tmp/uv/cache
-fi
 uv sync
+```
+
+The `run` subcommand executes whatever follows in the isolated environment; our first use is installing the bash kernel:
+
+```{code-cell}
 uv run python -m bash_kernel.install --sys-prefix
 ```
 
-## Rendering to HTML
+## GitHub Pages Website
 
-The `book` folder contains configuration for a [Jupyter Book], along with its content (the tutorials as MyST Markdown).
-Rendering the tutorials to HTML with Jupyter Book results in smaller files for tutorial content, a single source of JavaScript and CSS, the ability to cache unchanged tutorials, and some confirmation that all notebooks run without errors.
+### Build and Preview
 
-> [!Important]
-> Only notebooks listed in `book/_toc.yml` are built, so adding a new notebook requires updating `book/_toc.yml`.
+The `docs` folder contains configuration and content for the [Jupyter Book] we host on GitHub Pages.
+The tutorials are written in executable MyST Markdown, and publishing the website requires pulling execution results from a notebook cache.
+We use [DVC] to share that cache among maintainers as well as to the deployment workflow on GitHub.
 
-The next cell builds the HTML in `book/_build/html`.
-Presently (for `jupyter-book<2`), it's best to build from .ipynb rather than .md, so we generate clean notebooks and exclude (see `book/_config.yml`) the markdown files.
+> [!IMPORTANT]
+> Only notebooks listed in `docs/_toc.yml` are built, so adding a new notebook requires updating `docs/_toc.yml`.
+
+The `dvc pull` command retrieves the notebook cache.
+We execute it via `uv run` only because we've included the DVC tool in the project environment to simplify this workflow.
 
 [Jupyter Book]: https://jupyterbook.org/
+[DVC]: https://dvc.org/
 
 ```{code-cell}
-:scrolled: true
-
-uv run jupytext --quiet --to ipynb $(git ls-files book/notebooks)
+uv run dvc pull
 ```
 
-Now use `jupyter-book` to generate or update the `book/_build` folder.
-This folder is ignored by git, but its contents are provided to the website team.
+Update the notebook cache as needed by executing notebooks.
+We use the isolated virtual environment to make sure the environment configuration is correct.
+We use `jcache` directly to achieve parallel execution.
+For a full but slow test of the environment configuration, delete `docs/_cache` before executing.
 
 ```{code-cell}
 :scrolled: true
 
-uv run jupyter-book build book
+uv run jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
+```
+
+The next cell builds a static website in `docs/_build/html` using `jupyter-book<2` (alias `jb`).
+
+```{code-cell}
+:scrolled: true
+
+uv run jb build docs
 ```
 
 Run the next cell to preview the website.
 Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 
+> [!NOTE]
+> On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
+
 ```{code-cell}
 :scrolled: true
 
-python -m http.server -d book/_build/html
+python -m http.server -d docs/_build/html
 ```
 
-> [!Note]
-> On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
+### Notebook Cache
 
-The `_templates` make the website very plain, on purpose, for the benefit of the website.
-For a navigable website with the same content, comment out the `templates_path` part of `book/_config.yml` and rebuild the website.
+If any notebooks have been executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
+Follow the next steps to share the updates using DVC, starting with checking whether the cache has actually changed.
+
+```{code-cell}
+uv run dvc status
+```
+
+If the status is not "Data and pipelines are up to date." then commit the updated cache with `dvc commit`. (The purpose of `--force` is only to skip the confirmation prompt that you can't interact with from within a notebook).
+
+```{code-cell}
+uv run dvc commit --force
+```
+
+Now use `dvc` to push your cache to the remote location accessible to the website build.
+
+```{code-cell}
+:scrolled: true
+
+uv run dvc push
+```
+
+Finally, if changes are committed by DVC, then there will be changes you also need to commit with Git.
+Use your preferred method of working with Git to stage the `docs/_cache.dvc` changes, commit, and push them.
+
+### Temporary
+
+(this won't be necessary with AWS CodeBuilder, and maybe there's some other solution)
+
+Generate temporary credentials.
+
+```python
+import os
+import boto3
+
+client = boto3.client('sts')
+
+with open(os.environ['AWS_WEB_IDENTITY_TOKEN_FILE']) as f:
+    TOKEN = f.read()
+
+response = client.assume_role_with_web_identity(
+    RoleArn=os.environ['AWS_ROLE_ARN'],
+    RoleSessionName=os.environ['JUPYTERHUB_CLIENT_ID'],
+    WebIdentityToken=TOKEN,
+    DurationSeconds=3600
+)
+secrets = response["Credentials"]
+```
+
+The `secrets` dictionary contains the "AccessKeyId", "SecretAccessKey", and "SessionToken" that a repo admin needs to provide to GitHub.
+
++++
+
+### Publish (a.k.a. Release)
+
+Website updates occur automatically whenever a pull request to main is merged.
+The `.github/workflows/website.yaml` file provides the instructions to GitHub Actions.
 
 ## Dependencies
 
@@ -109,55 +188,37 @@ For every `import` statement, or if a notebook requires a package to be installe
 make sure the package is listed in the `notebooks` array under the `dependency-groups` table in `pyproject.toml`.
 You can add entries manually or using `uv add`, for example:
 
-```{code-cell}
+```shell
 uv add --group notebooks xarray
 ```
 
 The other keys in the `dependency-groups` table provide the additional dependencies needed for a working Jupyter kernel, for a complete JupyterLab in a container image, or for maintenance tasks.
 
-> [!Important]
+> [!IMPORTANT]
 > - No `requirements.*` file in this repository should be manually edited.
 > - Note where critical versions are pinned
->   - python: docker/environment.yml
+>   - python: container/environment.yml
 >   - jupyter-repo2docker: .pre-commit-config.yaml
 
-The ontology of the `requirements.*` files is a bit complicated, but updates happen automatically by `pre-commit` when necessary, i.e. when there are changes to `pyproject.toml`, `docker/environment.yml`, or the `repo2docker` version.
-The `docker/environment.yml` file is there for non-Python packages needed from conda-forge, as well as some special Python packages.
+The ontology of the `requirements.*` files is a bit complicated, but updates happen automatically by `pre-commit` when necessary, i.e. when there are changes to `pyproject.toml`, `container/environment.yml`, or the `repo2docker` version.
+The `container/environment.yml` file is there for non-Python packages needed from conda-forge, as well as some special Python packages.
 We use PyPI for Python packages when able.
 
-1. `requirements.txt` lists the packages needed in `book/setup.py` (compile-kernel-dependencies)
-1. `docker/requirements.txt` lists the packages needed in the container image (compile-docker-dependencies)
-1. `docker/requirements.in` lists the packages resulting from `repo2docker` and `docker/environment.yml` (repo2docker-requirements)
+1. `requirements.txt` lists the packages needed in `docs/setup.py` (export-kernel-dependencies)
+1. `container/requirements.txt` lists the packages needed in the container image (export-container-dependencies)
+1. `container/requirements.in` lists the packages resulting from `repo2docker` and `container/environment.yml` (repo2docker-requirements)
 
-> [!Note]
+> [!NOTE]
 > Having a top-level `requirements.txt` file also makes our tutorials work on [Binder] ... most of them anyways.
 
 [Binder]: https://mybinder.org/
 
-## (WIP) Automation and Checks
+## Container Image for JupyterHubs
 
-We use several automations to get standard code formatting, run lint checks, and ensure consistency between ".md" and ".ipynb" files.
-These are implemented using the [pre-commit] tool from the development environment.
-You can setup git hooks to run these automations, as needed, at every commit.
-
-[pre-commit]: https://pre-commit.com/
-
-```{code-cell}
-pre-commit install
-```
-
-You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
-
-```{code-cell}
-pre-commit run --from-ref main --to-ref HEAD
-```
-
-## Container Image for a JupyterHub
-
-The `docker` folder has configuration files that [repo2docker] uses to build a container image suitable for use with a JupyterHub platform.
+The `container` folder has configuration files that [repo2docker] uses to build a container image suitable for use with a JupyterHub platform.
 The following command builds and runs the image locally, while the [repo2docker-action] builds images on GitHub and distributes them via the GitHub Container Registry.
 
-If you have `docker` available, you can build the image defined in the `docker` folder.
+If you have Docker available, you can build the image defined in the `container` folder.
 
 [repo2docker]: https://repo2docker.readthedocs.io/
 [repo2docker-action]: https://github.com/marketplace/actions/repo2docker-action
@@ -167,9 +228,27 @@ If you have `docker` available, you can build the image defined in the `docker` 
 
 repo2docker \
     --Repo2Docker.platform=linux/amd64 \
-    --appendix "$(< docker/appendix-cryocloud)" \
+    --appendix "$(< container/appendix)" \
     --user-id 1000 \
     --user-name jovyan \
     --no-run \
-    docker
+    container
+```
+
+## (WIP) Automation and Checks
+
+We use several automations to get improve code formatting, and run checks or update.
+These are implemented using the [pre-commit] tool from the development environment.
+You may create hooks to run these automations, as needed, before making any commits.
+
+[pre-commit]: https://pre-commit.com/
+
+```{code-cell}
+uv run pre-commit install
+```
+
+You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
+
+```{code-cell}
+uv run pre-commit run --from-ref main --to-ref HEAD
 ```

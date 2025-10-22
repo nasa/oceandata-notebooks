@@ -1,0 +1,39 @@
+name: Build container image
+on:
+  push:
+    paths:
+      - .github/workflows/build-container-image.yaml
+      - container/**
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+          docker-images: false
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: container
+          sparse-checkout-cone-mode: false
+      - name: Move container files
+        run: |
+          mv container/* .
+          rmdir container
+      - name: Run repo2docker
+        uses: jupyterhub/repo2docker-action@master
+        with:
+          DOCKER_USERNAME: ${{ github.repository_owner }}
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_REGISTRY: ghcr.io
+          LATEST_TAG_OFF: true
+          REPO_DIR: /srv/container
+          APPENDIX_FILE: appendix
