@@ -1,4 +1,4 @@
-name: Update website
+name: Publish website
 on:
   workflow_run:
     workflows: ["Build website"]
