@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.7
+    jupytext_version: 1.17.2
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -782,7 +782,7 @@ ax1.plot(
 )
 ax1.fill_between(
     dates,
-    monthly_means["syncoccus_moana"] - monthly_stds["syncoccus_moana"], 
+    monthly_means["syncoccus_moana"] - monthly_stds["syncoccus_moana"],
     monthly_means["syncoccus_moana"] + monthly_stds["syncoccus_moana"],
     color=palette[0],
     alpha=0.2,
@@ -799,7 +799,7 @@ ax1.plot(
 )
 ax1.fill_between(
     dates,
-    monthly_means["picoeuk_moana"] - monthly_stds["picoeuk_moana"], 
+    monthly_means["picoeuk_moana"] - monthly_stds["picoeuk_moana"],
     monthly_means["picoeuk_moana"] + monthly_stds["picoeuk_moana"],
     color=palette[1],
     alpha=0.2,
@@ -818,7 +818,7 @@ ax2.plot(
 )
 ax2.fill_between(
     dates,
-    monthly_means["prococcus_moana"] - monthly_stds["prococcus_moana"], 
+    monthly_means["prococcus_moana"] - monthly_stds["prococcus_moana"],
     monthly_means["prococcus_moana"] + monthly_stds["prococcus_moana"],
     color=palette[2],
     alpha=0.2,
