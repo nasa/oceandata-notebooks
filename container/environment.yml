@@ -1,9 +1,19 @@
+# AUTO GENERATED FROM environment.yml, DO NOT MANUALLY MODIFY
+# Generated on 2025-02-09 21:07:33 UTC
 channels:
   - conda-forge
 dependencies:
-  - python>=3.11
-  - libnetcdf>=4.9.2
-  - libgdal-core>=3.10.3
-  - code-server>=4.23.1
-  - pyinterp>=2024.11.0
-  - numpy<2.3 # limited by numba==0.61.2
+  - python=3.12.*
+  - nodejs=20
+  - pip
+  - ipywidgets==8.* # https://github.com/jupyter-widgets/ipywidgets
+  - jupyter-offlinenotebook==0.3.* # https://github.com/manics/jupyter-offlinenotebook
+  - jupyter-resource-usage==1.* # https://github.com/jupyter-server/jupyter-resource-usage
+  - jupyter_server==2.* # https://github.com/jupyter-server/jupyter_server
+  - jupyterhub-singleuser==5.* # https://github.com/jupyterhub/jupyterhub
+  - jupyterlab==4.* # https://github.com/jupyterlab/jupyterlab
+  - notebook==7.* # https://github.com/jupyter/notebook
+# MANUALY ADDED
+platforms:
+  - linux-64
+category: r2d

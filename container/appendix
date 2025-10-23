@@ -29,11 +29,11 @@ USER ${NB_USER}
 # jupyter configuration
 COPY --chown=${NB_USER}:${NB_USER} src/prefix/ ${NB_PYTHON_PREFIX}/
 
-# install (locked) dependencies for oceandata-notebooks with the "docker" group
-RUN pip install --no-cache-dir --no-deps \
-      --extra-index-url "https://download.pytorch.org/whl/cpu" \
-      --no-binary netcdf4 \
-      -r requirements.txt
+# install (locked) dependencies
+RUN ${MAMBA_EXE} create --yes --quiet --name lock conda-lock \
+ && ${MAMBA_EXE} run --name lock conda-lock install --prefix ${NB_PYTHON_PREFIX} --extras container --extras r2d \
+ && ${MAMBA_EXE} env remove --yes --name lock \
+ && ${MAMBA_EXE} clean --yes --all --force-pkgs-dirs
 
 # set up the bash kernel
 RUN python -m bash_kernel.install --sys-prefix
