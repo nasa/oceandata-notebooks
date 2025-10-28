@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+dependencies:
+  - python # because an empty list is an error
+  - code-server>=4.23.1 # [linux]
+category: container

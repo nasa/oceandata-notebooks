@@ -1,5 +1,3 @@
-LABEL org.opencontainers.image.source="https://github.com/nasa/oceandata-notebooks"
-
 # change USER
 USER root
 
@@ -31,19 +29,10 @@ COPY --chown=${NB_USER}:${NB_USER} src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # install (locked) dependencies
 RUN ${MAMBA_EXE} create --yes --quiet --name lock conda-lock \
- && ${MAMBA_EXE} run --name lock conda-lock install --prefix ${NB_PYTHON_PREFIX} --extras container --extras r2d \
+ && ${MAMBA_EXE} run --name lock conda-lock install --prefix ${NB_PYTHON_PREFIX} --extras jupyter --extras container \
  && ${MAMBA_EXE} env remove --yes --name lock \
  && ${MAMBA_EXE} clean --yes --all --force-pkgs-dirs
-
-# set up the bash kernel
-RUN python -m bash_kernel.install --sys-prefix
 
 # ignore select Python warnings
 # TODO: specifically cartopy.io.DownloadWarning
 ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
-
-# configure uv tool
-ENV UV_TOOL_DIR=${NB_PYTHON_PREFIX}/bin
-ENV UV_CACHE_DIR=${NB_PYTHON_PREFIX}/cache
-ENV UV_CONSTRAINT=/srv/container/requirements.txt
-ENV UV_PROJECT_ENVIRONMENT=${NB_PYTHON_PREFIX}/share/venv

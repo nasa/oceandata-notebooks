@@ -1,9 +1,9 @@
-# AUTO GENERATED FROM environment.yml, DO NOT MANUALLY MODIFY
-# Generated on 2025-02-09 21:07:33 UTC
+# MODIFIED FROM https://github.com/jupyterhub/repo2docker/blob/2025.08.0/repo2docker/buildpacks/conda/environment.py-3.11.yml
+# Generated on 2025-02-09 21:05:55 UTC
 channels:
   - conda-forge
 dependencies:
-  - python=3.12.*
+  - python=3.11.*
   - nodejs=20
   - pip
   - ipywidgets==8.* # https://github.com/jupyter-widgets/ipywidgets
@@ -12,8 +12,5 @@ dependencies:
   - jupyter_server==2.* # https://github.com/jupyter-server/jupyter_server
   - jupyterhub-singleuser==5.* # https://github.com/jupyterhub/jupyterhub
   - jupyterlab==4.* # https://github.com/jupyterlab/jupyterlab
-  - notebook==7.* # https://github.com/jupyter/notebook
-# MANUALY ADDED
-platforms:
-  - linux-64
-category: r2d
+  - notebook==7.* # https://github.com/jupyter/notebookcategory: container
+category: container
