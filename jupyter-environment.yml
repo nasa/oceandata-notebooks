@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11 # because an empty list is an error
+  - bash_kernel>=0.9.3 # [unix]
+category: jupyter

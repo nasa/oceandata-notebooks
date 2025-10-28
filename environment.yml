@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+dependencies:
+  - libgdal-core>=3.10.3
+  - netcdf4>=1.6.5
+  - pyinterp>=2024.11.0
+  - pytorch>=2.8.0

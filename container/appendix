@@ -1,5 +1,3 @@
-LABEL org.opencontainers.image.source="https://github.com/nasa/oceandata-notebooks"
-
 # change USER
 USER root
 
@@ -29,21 +27,13 @@ USER ${NB_USER}
 # jupyter configuration
 COPY --chown=${NB_USER}:${NB_USER} src/prefix/ ${NB_PYTHON_PREFIX}/
 
-# install (locked) dependencies for oceandata-notebooks with the "docker" group
-RUN pip install --no-cache-dir --no-deps \
-      --extra-index-url "https://download.pytorch.org/whl/cpu" \
-      --no-binary netcdf4 \
-      -r requirements.txt
-
-# set up the bash kernel
-RUN python -m bash_kernel.install --sys-prefix
+# install (locked) dependencies
+# TODO use a build stage
+RUN ${MAMBA_EXE} create --yes --quiet --name lock conda-lock \
+ && ${MAMBA_EXE} run --name lock conda-lock install --prefix ${NB_PYTHON_PREFIX} --extras jupyter --extras container \
+ && ${MAMBA_EXE} env remove --yes --name lock \
+ && ${MAMBA_EXE} clean --yes --all --force-pkgs-dirs
 
 # ignore select Python warnings
 # TODO: specifically cartopy.io.DownloadWarning
 ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
-
-# configure uv tool
-ENV UV_TOOL_DIR=${NB_PYTHON_PREFIX}/bin
-ENV UV_CACHE_DIR=${NB_PYTHON_PREFIX}/cache
-ENV UV_CONSTRAINT=/srv/container/requirements.txt
-ENV UV_PROJECT_ENVIRONMENT=${NB_PYTHON_PREFIX}/share/venv
