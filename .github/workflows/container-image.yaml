@@ -50,7 +50,7 @@ jobs:
           --user-name jovyan
           --subdir container
           --image-name ${SHA_NAME}
-          --target-repo-dir /tmp/container
+          --target-repo-dir /srv/container
           --appendix "$(< ${PWD}/container/appendix)"
           --label "repo2docker.ref=${GITHUB_REF}"
           --label "repo2docker.repo=https://github.com/${GITHUB_REPOSITORY}"
