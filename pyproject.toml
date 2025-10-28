@@ -61,6 +61,8 @@ container = [
   # "scikit-learn>=1.5.2",
   # "zarr>=2.18.2",
 ]
+
+[dependency-groups]
 # packages that provide command-line tools for maintainers
 tools = [
   "dvc[s3]>=3.63.0",
