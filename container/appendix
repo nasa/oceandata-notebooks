@@ -1,3 +1,7 @@
+# add conda-lock to base
+RUN ${MAMBA_EXE} install --yes --quiet --name base conda-lock \
+ && ${MAMBA_EXE} clean --yes --all --force-pkgs-dirs
+
 # change USER
 USER root
 
@@ -28,11 +32,7 @@ USER ${NB_USER}
 COPY --chown=${NB_USER}:${NB_USER} src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # install (locked) dependencies
-# TODO use a build stage
-RUN ${MAMBA_EXE} create --yes --quiet --name lock conda-lock \
- && ${MAMBA_EXE} run --name lock conda-lock install --prefix ${NB_PYTHON_PREFIX} --extras jupyter --extras container \
- && ${MAMBA_EXE} env remove --yes --name lock \
- && ${MAMBA_EXE} clean --yes --all --force-pkgs-dirs
+RUN conda-lock install --prefix ${NB_PYTHON_PREFIX} --extras jupyter --extras container
 
 # ignore select Python warnings
 # TODO: specifically cartopy.io.DownloadWarning
