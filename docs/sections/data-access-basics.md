@@ -16,7 +16,7 @@ jupyter:
 
 # Data Access and Processing Basics
 
-This section covers fundamental concepts and tutorials for accessing and processing ocean data products from various instruments and platforms. Learn essential skills for working with satellite ocean color data, from initial data access through advanced processing techniques and analysis workflows.
+This section covers fundamental concepts and tutorials for accessing and processing data products from various instruments and platforms. Learn essential skills for working with satellite ocean color data, from initial data access through advanced processing techniques and analysis workflows.
 
 ## What you'll learn:
 - [Access Data Products](../notebooks/oci/oci_data_access.md) - Learn how to programmatically access PACE data products

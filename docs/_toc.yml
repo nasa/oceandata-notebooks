@@ -5,7 +5,8 @@ parts:
     chapters:
       - file: home
         title: Home
-      - file: getting-started    
+      - file: getting-started
+        title: Getting Started - Help
       - file: team
   - caption: Help Hub Core
     chapters:

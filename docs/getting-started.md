@@ -1,3 +1,25 @@
+---
+jupyter:
+  jupytext:
+    cell_metadata_filter: all,-trusted
+    notebook_metadata_filter: -all,kernelspec,jupytext
+    text_representation:
+      extension: .md
+      format_name: markdown
+      format_version: '1.3'
+      jupytext_version: 1.18.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
+---
+
+TODO: 
+- Will we still have Earthdata cloud icons? If not, should edit this paragraph.
+- Should we include instructions (or a link) on how to get a running JupyterLab? (Or Jupyter interface)
+- Maybe we say “execute the following from a terminal inside your Jupyter interface”?
+
+
 # Get Started
 
 ## Earthdata Cloud
@@ -24,16 +46,6 @@ execute `pipx run setup.py --help`. The `pipx` documenation provides
 [install instructions](https://pipx.pypa.io/stable/installation/) that include the
 simple approach of `pip install --user pipx`. Uninstall kernels with `jupyter kernelspec`.
 
+# Help
 
-[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
-[jupyterlab]: https://jupyter.org/
-[cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook/
-[openscapes]: https://nasa-openscapes.github.io/
-[openscapes-hub]: https://openscapes.2i2c.cloud/
-[cryocloud]: https://hub.cryointhecloud.com/
-[maap]: https://scimaap.net/
-[oss]: https://oss.smce.nasa.gov/
-[edcloud]: https://www.earthdata.nasa.gov/learn/webinars-and-tutorials/cloud-primer-amazon-web-services
-[conda-env]: https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file
-[nb_conda_kernels]: https://github.com/anaconda/nb_conda_kernels
-[conda-kernel]: https://ipython.readthedocs.io/en/stable/install/kernel_install.html#kernels-for-different-environments
+Have a question or an idea? Share it with us on the Earthdata Forum using the tags OB.DAAC under DAAC and Data Recipes under Services/Usage. 
