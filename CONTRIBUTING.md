@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.7
+    jupytext_version: 1.18.1
 kernelspec:
   display_name: Bash
   language: bash
@@ -21,6 +21,10 @@ This guide provides additional information on the structure of this repository a
 Maintainers are responsible for:
 1. ensuring the reproducible environment configuration is correct, and
 2. publishing the notebooks to [GitHub Pages] as the [Help Hub] (a.k.a releasing!).
+
+> [!IMPORTANT]
+> 
+> This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells on JupyterLab.
 
 The following sections relate to the content of this repository as follows:
 
@@ -40,35 +44,27 @@ The following sections relate to the content of this repository as follows:
 
 ## Isolated Environment
 
-The `uv.lock` file gives a versioned list of all packages needed to run the tutorials;
-it includes packages listed in `pyproject.toml` along with all their dependencies.
-The `uv` tool will install these packages in an isolated [Python virtual environment][venv], which is used during the website build to ensure completeness.
-Execute the cell below to check if `uv` is already installed and, if not, install it with the recommended [installation method][uv].
+The `conda-lock.yml` file gives a versioned list of all packages needed to run the tutorials;
+it includes the packages specified in `pyproject.toml` along with all their dependencies.
+The [conda-lock] tool will install these packages in an isolated conda [environment], which is used during the website build to ensure completeness.
 
-> [!IMPORTANT]
-> This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells on JupyterLab.
+[conda-lock]: https://conda.github.io/conda-lock/
+[environment]: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
 
-[uv]: https://docs.astral.sh/uv/getting-started/installation
-[venv]: https://docs.python.org/3/library/venv.html
++++
 
-```{code-cell}
-if ! command -v uv; then
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-fi
-```
-
-Create the environment using the `sync` subcommand.
+Create the environment using `conda-lock install`.
 
 ```{code-cell}
 :scrolled: true
 
-uv sync
+conda-lock install --name env container/conda-lock.yml --extras jupyter --extras tools
 ```
 
-The `run` subcommand executes whatever follows in the isolated environment; our first use is installing the bash kernel:
+Store the command meaning "run the following in the isolated environment while displaying output" as an alias.
 
 ```{code-cell}
-uv run python -m bash_kernel.install --sys-prefix
+alias envx='conda run --no-capture-output --name env'
 ```
 
 ## GitHub Pages Website
@@ -89,7 +85,7 @@ We execute it via `uv run` only because we've included the DVC tool in the proje
 [DVC]: https://dvc.org/
 
 ```{code-cell}
-uv run dvc pull
+envx dvc pull
 ```
 
 Update the notebook cache as needed by executing notebooks.
@@ -100,7 +96,7 @@ For a full but slow test of the environment configuration, delete `docs/_cache` 
 ```{code-cell}
 :scrolled: true
 
-uv run jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
+envx jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
 ```
 
 The next cell builds a static website in `docs/_build/html` using `jupyter-book<2` (alias `jb`).
@@ -108,7 +104,7 @@ The next cell builds a static website in `docs/_build/html` using `jupyter-book<
 ```{code-cell}
 :scrolled: true
 
-uv run jb build docs
+envx jb build docs
 ```
 
 Run the next cell to preview the website.
@@ -129,13 +125,13 @@ If any notebooks have been executed, the updated notebook cache needs to be made
 Follow the next steps to share the updates using DVC, starting with checking whether the cache has actually changed.
 
 ```{code-cell}
-uv run dvc status
+envx dvc status
 ```
 
 If the status is not "Data and pipelines are up to date." then commit the updated cache with `dvc commit`. (The purpose of `--force` is only to skip the confirmation prompt that you can't interact with from within a notebook).
 
 ```{code-cell}
-uv run dvc commit --force
+envx dvc commit --force
 ```
 
 Now use `dvc` to push your cache to the remote location accessible to the website build.
@@ -143,7 +139,7 @@ Now use `dvc` to push your cache to the remote location accessible to the websit
 ```{code-cell}
 :scrolled: true
 
-uv run dvc push
+envx dvc push
 ```
 
 Finally, if changes are committed by DVC, then there will be changes you also need to commit with Git.
@@ -244,11 +240,11 @@ You may create hooks to run these automations, as needed, before making any comm
 [pre-commit]: https://pre-commit.com/
 
 ```{code-cell}
-uv run pre-commit install
+envx pre-commit install
 ```
 
 You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
 
 ```{code-cell}
-uv run pre-commit run --from-ref main --to-ref HEAD
+envx pre-commit run --from-ref main --to-ref HEAD
 ```
