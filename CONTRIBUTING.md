@@ -61,7 +61,7 @@ Create the environment using `conda-lock install`.
 conda-lock install --name env container/conda-lock.yml --extras jupyter --extras tools
 ```
 
-Store the command meaning "run the following in the isolated environment while displaying output" as an alias.
+Create a shorthand "envx" ("x" for execute) for the command meaning "run the following in the isolated environment while displaying output".
 
 ```{code-cell}
 alias envx='conda run --no-capture-output --name env'
@@ -182,11 +182,6 @@ The `.github/workflows/website.yaml` file provides the instructions to GitHub Ac
 
 For every `import` statement, or if a notebook requires a package to be installed for a backend (e.g. h5netcdf),
 make sure the package is listed in the `notebooks` array under the `dependency-groups` table in `pyproject.toml`.
-You can add entries manually or using `uv add`, for example:
-
-```shell
-uv add --group notebooks xarray
-```
 
 The other keys in the `dependency-groups` table provide the additional dependencies needed for a working Jupyter kernel, for a complete JupyterLab in a container image, or for maintenance tasks.
 
