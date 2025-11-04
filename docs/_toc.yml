@@ -1,14 +1,17 @@
 format: jb-book
 root: index
 parts:
+
   - caption: Welcome
     chapters:
       - file: home
         title: Home
-      - file: getting-started    
+      - file: getting-started
       - file: team
+
   - caption: Help Hub Core
     chapters:
+    
       - file: sections/data-access-basics
         title: Data Access and Processing Basics
         sections: 
@@ -63,6 +66,7 @@ parts:
     
   - caption: SeaDAS - OCSSW Toolbox     
     chapters:
+
       - file: sections/seadas-toolbox
         title: About SeaDAS - OCSSW
         sections:
@@ -79,9 +83,10 @@ parts:
 
   - caption: Past trainings & events
     chapters:
-    - file: sections/past-trainings
-      title: See all past trainings and events
-      sections:
+    
+      - file: sections/past-trainings
+        title: See all past trainings and events
+        sections:
           - url: https://pacehackweek.github.io/pace-2025/presentations/notebooks.html
             title: PACE Hackweek 2025
           - url: https://nmfs-opensci.github.io/EDMW-EarthData-Workshop-2025/

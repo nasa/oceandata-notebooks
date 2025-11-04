@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.18.1
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -60,46 +60,51 @@ As usual, we will begin by importing some libraries. Some of the more notable on
 
 ```{code-cell} ipython3
 import json
+import multiprocessing
 import pathlib
 import shutil
 import tarfile
 from functools import cache
 
 import matplotlib.pyplot as plt
-import multiprocessing
 import numpy as np
+import requests
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from matplotlib.patches import Patch
 from PIL import Image, UnidentifiedImageError
-import requests
 from torch.utils.data import DataLoader, Dataset
 from tqdm.notebook import tqdm
+```
 
-# change this if you'd like the cloud mask dataset to be downloaded or extracted elsewhere
-CLDMASK_DOWNLOAD_PATH = pathlib.Path("cldmask_dataset.tar.gz")  # download path
-CLDMASK_PATH = pathlib.Path("cldmask_dataset/")  # extract path
+Set file system locations for the cloud mask dataset to be downloaded and extracted.
 
-# this is needed to get dataloader to work with workers from an ipython environment
+```{code-cell} ipython3
+CLDMASK_DOWNLOAD_PATH = pathlib.Path("/tmp/cldmask_dataset.tar.gz")  # download path
+CLDMASK_PATH = pathlib.Path("/tmp/cldmask_dataset")  # extract path
+```
+
+Multiprocessing must "fork" to get the torch dataloader to succeed with workers from an ipython environment.
+
+```{code-cell} ipython3
 if multiprocessing.get_start_method() != 'fork':
     multiprocessing.set_start_method('fork')
 ```
 
-Download and extract the cloud mask dataset. This will take several minutes.
+Download and extract the cloud mask dataset (a 5 GiB archive). This will take several minutes.
 
 ```{code-cell} ipython3
 if not pathlib.Path(CLDMASK_PATH).exists():
     if not pathlib.Path(CLDMASK_DOWNLOAD_PATH).exists():
-        r = requests.get('https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek-2024/cldmask_dataset.tar.gz')
+        url = "https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek-2024/cldmask_dataset.tar.gz"
+        r = requests.get(url, stream=True)
         with open(CLDMASK_DOWNLOAD_PATH, 'wb') as f:
-            f.write(r.content)
+            for chunk in r.iter_content(chunk_size=2**24):
+                f.write(chunk)
     tar = tarfile.open(CLDMASK_DOWNLOAD_PATH, 'r:gz')
-    tar.extractall(CLDMASK_PATH, filter='data')
+    tar.extractall(CLDMASK_PARENT, filter='data')
     tar.close()
-    shutil.move(pathlib.Path(CLDMASK_PATH, "cldmask_dataset"), "_temp_cldmask_dataset")
-    shutil.rmtree(pathlib.Path(CLDMASK_PATH))
-    shutil.move("_temp_cldmask_dataset", pathlib.Path(CLDMASK_PATH))
 ```
 
 ## 2. Cloud Masking
