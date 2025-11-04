@@ -13,7 +13,7 @@ def update_header_source_buttons(app, pagename, templatename, context, doctree):
     md_button = next((i for i in dropdown_buttons if i["text"] == ".md"), False)
     if md_button:
         path = Path("docs", pagename).with_suffix(".md")
-        notebook = jupytext.read(path)
+        notebook = jupytext.read(path, fmt="md:myst")
         try:
             fmt = notebook["metadata"]["jupytext"]["text_representation"]["format_name"]
         except KeyError:
