@@ -1,6 +1,9 @@
 # change USER
 USER root
 
+# FIXME: see https://github.com/docker/for-mac/issues/7440
+RUN rm -rf "/home/${NB_USER}/.cache/"
+
 # system configuration
 RUN git config --system credential.helper 'cache --timeout 86400 --socket /tmp/git-credential-cache/socket' \
  && git config --system core.excludesFile '/etc/gitignore' \
@@ -25,7 +28,7 @@ RUN chmod +x install_ocssw \
 USER ${NB_USER}
 
 # install (locked) dependencies
-RUN ${MAMBA_EXE} install --yes --quiet --prefix ${NB_PYTHON_PREFIX} --file conda-lock.yml \
+RUN ${MAMBA_EXE} install --yes --log-level error --file conda-lock.yml \
       --category notebooks \
       --category jupyter \
       --category container \
