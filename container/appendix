@@ -28,7 +28,8 @@ RUN chmod +x install_ocssw \
 USER ${NB_USER}
 
 # install (locked) dependencies
-RUN ${MAMBA_EXE} install --yes --log-level error --file conda-lock.yml \
+COPY --chown=${NB_USER}:${NB_USER} src/conda-lock.yml ${REPO_DIR}/conda-lock.yml
+RUN ${MAMBA_EXE} install --yes --log-level error --file "conda-lock.yml" \
       --category notebooks \
       --category jupyter \
       --category container \
