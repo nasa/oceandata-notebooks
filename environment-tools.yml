@@ -1,5 +1,5 @@
 channels:
   - conda-forge
 dependencies:
-  - conda-lock
+  - conda-lock>=3.0.4
 category: tools

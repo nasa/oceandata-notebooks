@@ -64,14 +64,12 @@ mamba install --quiet --log-level error --yes --category tools --file container/
 ```
 
 If any dependency list is updated (in `pyproject.toml` or any `environment-*.yml` file,
-then `conda-lock` should be run, a new image built, and the new image used to rebuild all the notebooks.
+then `conda-lock` should be run, a new image built, and the new image used to execute all the notebooks (see below).
 Realistically, that's unlikely to be done manually for every change,
-but really must be done before updating the `latest` tag on the GitHub Container Registry.
+but it really must be done before updating the `latest` tag on the GitHub Container Registry.
 
 ```{code-cell}
-conda-lock lock \
-  --lockfile container/conda-lock.yml \
-  --without-cuda \
+conda-lock lock --log-level ERROR --check-input-hash --without-cuda --lockfile container/conda-lock.yml \
   --file pyproject.toml \
   --file container/environment.yml \
   --file environment-container.yml \
@@ -92,11 +90,6 @@ repo2docker \
     --user-name "jovyan" \
     container
 ```
-
-> [!IMPORTANT]
-> 
-> 
-
 
 [repo2docker]: https://repo2docker.readthedocs.io/
 [repo2docker-action]: https://github.com/marketplace/actions/repo2docker-action
