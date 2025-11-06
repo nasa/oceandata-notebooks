@@ -63,13 +63,10 @@ container = [
   # "scikit-learn>=1.5.2",
   # "zarr>=2.18.2",
 ]
-
-[dependency-groups]
 # packages that provide command-line tools for maintainers
 tools = [
   "dvc[s3]>=3.63.0",
-  "jupyter-book<2",
-  "jupytext>=1.17.2",
+  "jupyter-book>=1.0,<2",
   "pre-commit>=4.0.1",
   "ruff>=0.7.1",
 ]
