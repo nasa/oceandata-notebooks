@@ -1,19 +1,3 @@
----
-jupyter:
-  jupytext:
-    cell_metadata_filter: all,-trusted
-    notebook_metadata_filter: -all,kernelspec,jupytext
-    text_representation:
-      extension: .md
-      format_name: markdown
-      format_version: '1.3'
-      jupytext_version: 1.16.7
-  kernelspec:
-    display_name: Python 3 (ipykernel)
-    language: python
-    name: python3
----
-
 # Help Hub Team
 
 ::::{grid} 2 3 4 4
@@ -113,7 +97,7 @@ jupyter:
 :text-align: center
 :link: https://science.gsfc.nasa.gov/sci/bio/90238
 
-![Bing Yang](images/Bing.jpg)
+![Bing Yang](images/bing.jpg)
 +++
 **Bing Yang**
 :::

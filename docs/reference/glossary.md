@@ -5,6 +5,13 @@
   Package, dependency, and environment management for any language&mdash;Python, R,
   Ruby, Lua, Scala, Java, JavaScript, C/ C++, FORTRAN, and more.
 
+[Conda-Forge](https://conda-forge.org/)
+  A build, archive, and distribution system for packages installed by {term}`Conda`.
+
+[container](https://en.wikipedia.org/wiki/Containerization_(computing))
+  A software environment that appears to applications running inside it like a complete computer,
+  while actually running in parallel with other containers on the same computer.
+
 [CryoCloud](https://book.cryointhecloud.com/)
   A NASA-supported community and cloud platform built in partnership with the
   International Interactive Computing Collaboration ([2i2c](https://2i2c.org)) and
@@ -57,6 +64,10 @@
   The next-generation user interface created by the {term}`Jupyter` community
   to view and edit documents in the {term}`Jupyter Notebook` format.
 
+[Mamba](https://mamba.readthedocs.io/)
+  A re-implementation of {term}`Conda` with additional features,
+  including the ability to install dependencies from "*-lock.yml" files.
+
 [Markdown](https://commonmark.org/help/)
   A syntax for including markup within text, whether plain text files or Markdown
   cells within a {term}`Jupyter Notebook`, that provides simple formatting instructions.
@@ -64,4 +75,8 @@
 [MyST](https://myst-parser.readthedocs.io)
   Markedly Structured Text (MyST) is a rich and extensible flavor of {term}`Markdown`
   meant for technical documentation and publishing. It is used by {term}`Jupyter Book`.
+
+[PyPI](https://pypi.org)
+  The Python Package Index is an archive and distribution system for Python packages,
+  searched and accessed by `pip` as well as other Python package installers.
 ```

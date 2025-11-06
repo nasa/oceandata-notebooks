@@ -1,30 +1,17 @@
----
-jupyter:
-  jupytext:
-    cell_metadata_filter: all,-trusted
-    notebook_metadata_filter: -all,kernelspec,jupytext
-    text_representation:
-      extension: .md
-      format_name: markdown
-      format_version: '1.3'
-      jupytext_version: 1.16.7
-  kernelspec:
-    display_name: Python 3 (ipykernel)
-    language: python
-    name: python3
----
-
-<!-- #region -->
 # Satellite data processing can be difficult.
+
 ## We're here to help you climb out of that hole!
 
-This constantly updated collection of Jupyter notebooks is meant to help you get started accessing, visualizing, and analyzing
-OB.DAAC (Ocean Biology Distributed Archive Center) data products with Python. You can learn from these notebooks either by viewing the code and results on this
-webpage or by downloading the notebook files and running them with a [Jupyter Interface][jupyterlab]. If you
-plan to run any of these notebooks, please continue to the next section for information about the Earthdata Cloud and environments in Python. If you are familiar with running our notebooks, feel free to explore the Help Hub's different sections: 
-
+This constantly updated collection of Jupyter notebooks is meant to help you get started accessing, visualizing,
+and analyzing OB.DAAC (Ocean Biology Distributed Archive Center) data products with Python.
+You can learn from these notebooks either by viewing the code and results on this webpage,
+or by downloading the notebook files and running them with [JupyterLab][jupyterlab].
+If you plan to run any of these notebooks but don't know how to start,
+please continue to the next section for information about the Earthdata Cloud and environments in Python.
+If you are familiar with running our notebooks, feel free to explore the Help Hub's different sections:
 
 ### Help Hub Core
+
 Explore these themes to get essential skills to access, process and visualize data.
 
 ::::{grid} 1 2 2 3
@@ -103,6 +90,7 @@ Learn More →
 :::
 
 ### Past trainings & events
+
 :::{card}
 :link: sections/past-trainings
 :link-type: doc
@@ -112,4 +100,3 @@ See all events →
 :::
 
 [jupyterlab]: https://jupyter.org/
-<!-- #endregion -->

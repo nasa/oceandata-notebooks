@@ -26,7 +26,6 @@ notebooks = [
   "holoviews>=1.19.1",
   "hvplot>=0.9.2",
   "matplotlib>=3.8.4",
-  # "numba>=0.60.0", # TODO still needed?
   "pandas>=2.2.1",
   "pillow>=10.4.0",
   "pvlib>=0.11.1",

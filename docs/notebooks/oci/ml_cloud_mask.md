@@ -23,7 +23,7 @@ The following notebooks are **prerequisites** for this tutorial:
 
 - [Earthdata Cloud Access](../earthdata_cloud_access)
 
-**NOTE**: This notebook will download a [cloud mask dataset](https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek-2024/cldmask_dataset.tar.gz) to your local machine and extract it. Update CLDMASK_DOWNLOAD_PATH and CLDMASK_PATH if you'd like this to be downloaded or extracted elsewhere.
+**NOTE**: This notebook will download a [cloud mask dataset](https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek/). Update `CLDMASK_PATH` if you would like the download and extracted archive to be persisted after running this notebook.
 
 </div>
 
@@ -61,9 +61,9 @@ As usual, we will begin by importing some libraries. Some of the more notable on
 ```{code-cell} ipython3
 import json
 import multiprocessing
-import pathlib
-import shutil
 import tarfile
+import tempfile
+from pathlib import Path
 from functools import cache
 
 import matplotlib.pyplot as plt
@@ -78,13 +78,6 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm.notebook import tqdm
 ```
 
-Set file system locations for the cloud mask dataset to be downloaded and extracted.
-
-```{code-cell} ipython3
-CLDMASK_DOWNLOAD_PATH = pathlib.Path("/tmp/cldmask_dataset.tar.gz")  # download path
-CLDMASK_PATH = pathlib.Path("/tmp/cldmask_dataset")  # extract path
-```
-
 Multiprocessing must "fork" to get the torch dataloader to succeed with workers from an ipython environment.
 
 ```{code-cell} ipython3
@@ -92,19 +85,30 @@ if multiprocessing.get_start_method() != 'fork':
     multiprocessing.set_start_method('fork')
 ```
 
-Download and extract the cloud mask dataset (a 5 GiB archive). This will take several minutes.
+Provide a file system location where the cloud mask dataset (~ 5 GiB) will be stored.
+If left as `None` in the cell below, then a temporary location will be used and discarded.
 
 ```{code-cell} ipython3
-if not pathlib.Path(CLDMASK_PATH).exists():
-    if not pathlib.Path(CLDMASK_DOWNLOAD_PATH).exists():
-        url = "https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek-2024/cldmask_dataset.tar.gz"
+CLDMASK_PATH = None  # customize if needed: e.g. "./cldmask_dataset"
+```
+
+Download and extract the cloud mask dataset (a 5 GiB archive). This will take some minutes.
+
+```{code-cell} ipython3
+if CLDMASK_PATH is not None:
+    CLDMASK_PATH = Path(CLDMASK_PATH)
+if CLDMASK_PATH is None or not CLDMASK_PATH.exists():
+    tempdir = tempfile.TemporaryDirectory()
+    CLDMASK_PATH = Path(tempdir.name)
+    with tempfile.TemporaryFile() as f:
+        url = "https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek/cldmask_dataset.tar.gz"
         r = requests.get(url, stream=True)
-        with open(CLDMASK_DOWNLOAD_PATH, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=2**24):
-                f.write(chunk)
-    tar = tarfile.open(CLDMASK_DOWNLOAD_PATH, 'r:gz')
-    tar.extractall(CLDMASK_PARENT, filter='data')
-    tar.close()
+        for chunk in r.iter_content(chunk_size=2**24):
+            f.write(chunk)
+        f.seek(0)
+        tar = tarfile.open('r:gz', fileobj=f)
+        tar.extractall(CLDMASK_PATH, filter='data')
+        tar.close()
 ```
 
 ## 2. Cloud Masking
@@ -118,7 +122,7 @@ We have pre-processed the cloud mask data and associated OCI imagery into an eas
 Let's look at an example. The next cell will open and display the images for a single instance.
 
 ```{code-cell} ipython3
-ex_img_idx = 57  # this image index displays a meaningful cloud mask and
+ex_img_idx = 57  # this image index displays a meaningful cloud mask
 input_imgs = [
     Image.open(CLDMASK_PATH / "input" / f"{ex_img_idx:07d}_{i}.png") for i in range(4)
 ]
@@ -197,7 +201,7 @@ def generate_split(name: str, replace: bool = False) -> None:
         "test": sorted(img_idxs[-num_test:].tolist()),
     }
 
-    split_path = pathlib.Path(f"{name}.json")
+    split_path = Path(f"{name}.json")
     if not replace and split_path.exists():
         raise ValueError(f"Uh oh, you tried to create a split called '{name}', but '{split_path}' already exists. \
                          Please either choose a different name or pass 'replace=True' to this function.")
@@ -222,7 +226,7 @@ from io import BytesIO
 
 ```{code-cell} ipython3
 class CloudMaskDataset(Dataset):
-    def __init__(self, root_path: pathlib.Path, mode: str, split: dict) -> None:
+    def __init__(self, root_path: Path, mode: str, split: dict) -> None:
         """Create a CloudMaskDataset.
 
         Args:

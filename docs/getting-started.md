@@ -1,51 +1,79 @@
----
-jupyter:
-  jupytext:
-    cell_metadata_filter: all,-trusted
-    notebook_metadata_filter: -all,kernelspec,jupytext
-    text_representation:
-      extension: .md
-      format_name: markdown
-      format_version: '1.3'
-      jupytext_version: 1.18.1
-  kernelspec:
-    display_name: Python 3 (ipykernel)
-    language: python
-    name: python3
----
+# Getting Started
 
-TODO: 
-- Will we still have Earthdata cloud icons? If not, should edit this paragraph.
-- Should we include instructions (or a link) on how to get a running JupyterLab? (Or Jupyter interface)
-- Maybe we say “execute the following from a terminal inside your Jupyter interface”?
+Many of our Help Hub resources are Jupyter notebooks that demonstrate accessing, visualizing,
+and analyzing data products from NASA's {term}`Earthdata Cloud`.
+You can learn from these notebooks either by viewing the code and results as displayed here,
+or by downloading the notebooks for your own use in a local or cloud-hosted {term}`JupyterLab`.
+If you are unfamiliar with the Earthdata Cloud or the {term}`Jupyter` project,
+please read the information below for some important background.
 
-
-# Get Started
+:::{important}
+Sign up for an [Earthdata Login][edl] acount for access to NASA Earthdata.
+:::
 
 ## Earthdata Cloud
 
-The **Earthdata Cloud** icon next to some notebooks indicates they are meant to be run using Amazon Web Services (AWS), which is the cloud provider used for NASA Earthdata Cloud. If you are not set up on AWS, you can still use those notebooks, but will need to download data as descibed below in the Data Access notebook. If you are new to using NASA Earthdata Cloud, the [Cloud Cookbook][cookbook] provides a lot of background and resources that are constantly being improved by the [NASA-Openscapes][openscapes] community.
+Data in NASA's Earthdata Cloud are distributed from Amazon Web Services (AWS) simple storage service (S3),
+allowing users to freely access Earth observations either by download to their own computer or by direct access from other AWS platforms.
+Direct access to the Earthdata Cloud from AWS is an *alternative* to downloading data;
+this can benefit workflows that process a large amount of data or that require highly concurrent access to lots of different data.
+We recommend the [NASA Earthdata Cloud Cookbook][cookbook], a resource maintained by the [NASA-Openscapes][nasa-openscapes] community,
+for in-depth guidance on these topics.
 
-**Can I use an existing AWS platform?** You may already have access to the AWS platform through your institution or research community. For example, JupyterHubs maintained by [Openscapes][openscapes-hub], [Cryo in the Cloud][cryocloud], [MAAP][maap], and NASA Goddard's [Open Science Studio][oss] are running on AWS in the same "us-west-2" region that hosts the NASA Earthdata Cloud. If that is not the case, you may want to learn about [getting started with AWS for NASA Earthdata Cloud][edcloud].
+{term}`JupyterHub` instances maintained by {term}`CryoCloud`, [Openscapes][openscapes-hub], [NASA MAAP][maap],
+and NASA Goddard's [Open Science Studio][oss] are all examples of platforms operating in AWS with direct access to the Earthdata Cloud.
+We encourage you to visit these organizations to learn about options for using these existing platforms.
+Alternatively, you may want to learn about [getting started with AWS for Earth data][edcloud].
 
-## Jupyter Kernel
+All tutorials in the Help Hub are applicable whether you plan to download data or access it directly from AWS.
+The [Data Access](notebooks/oci/oci_data_access) notebook steps through differences between the two approaches in detail.
 
-If you have a running Jupyter Lab, download our setup script ({download}`setup.py`) and
-run it under either `pipx` or `uv` to create a Jupyter kernel ready for use with the notebooks. For
-example, if you have `uv` installed, execute the following from a Terminal.
+## Jupyter Setup
+
+An advantage that comes with community-maintained JupyterHubs is having a complete Jupyter ecosystem at your fingertips.
+Even so, the default configuration will not be capable of running all the Help Hub tutorials.
+Here are two ways to get a Jupyter ecosystem that's ready to run them all:
+  1. **On a bring-your-own-image capable JupyterHub**: run a {term}`container` built for CryoCloud
+  1. **Without a JupyterHub**: run JupyterLab from a {term}`Conda` environment
+
+For the first option, login to your JupyterHub and start a server from the `ghcr.io/nasa/oceandata-notebooks:latest` image.
+
+```{image} images/custom-image.png
+:alt: Start a server with the image
+:width: 80%
+:align: center
 ```
-uv run setup.py --user --name oceandata
-```
-Alternatively, if you have `pipx` installed:
-```
-pipx run setup.py --user --name oceandata
-```
-Your JupyterLab should soon include "oc" and "bash" as kernel choices for notebooks and
-consoles. For more on the provided arguments, which customize the kernel location and name,
-execute `pipx run setup.py --help`. The `pipx` documenation provides
-[install instructions](https://pipx.pypa.io/stable/installation/) that include the
-simple approach of `pip install --user pipx`. Uninstall kernels with `jupyter kernelspec`.
 
-# Help
+For the second option, download our {download}`conda-lock.yml <../container/conda-lock.yml>` configuration file,
+which specifies exact versions of packages on {term}`Conda-Forge` and {term}`PyPI` that must be installed.
+You need {term}`Mamba` availble to create an environment from this configuration file;
+you can use either the `mamba` command that comes with {term}`Conda` (recommended) or the [Micromamba][micromamba] distribution.
+With that file in a download folder (denoted by `<DIR>`) and a name you've chosen (denoted by `<NAME>`) for a new environment, run in a Terminal:
 
-Have a question or an idea? Share it with us on the Earthdata Forum using the tags OB.DAAC under DAAC and Data Recipes under Services/Usage. 
+```shell
+mamba create --name <NAME> --file <DIR>/conda-lock.yml --category notebooks jupyter
+```
+
+If you are familiar with creating additional ipython kernels for an existing Jupyter server, you can leave off `jupyter` above and do that instead.
+Otherwise, start JupyterLab from within the new environment as follows, and try out any Help Hub notebooks you care to download.
+
+```shell
+mamba run --name <NAME> jupyter lab
+```
+
+## Getting Help
+
+Have a question or an idea? Share it with us on the [Earthdata Forum using tags][forum] OBDAAC (under DAAC) and Data Recipes (under Services/Usage). 
+
+[cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook/
+[cryocloud]: https://hub.cryointhecloud.com/
+[edcloud]: https://www.earthdata.nasa.gov/learn/webinars-and-tutorials/cloud-primer-amazon-web-services
+[edl]: https://urs.earthdata.nasa.gov/
+[forum]: https://forum.earthdata.nasa.gov/viewforum.php?f=7&&DAAC=86&ServicesUsage=16&tagMatch=all
+[image]: https://github.com/nasa/oceandata-notebooks/pkgs/container/oceandata-notebooks
+[maap]: https://scimaap.net/
+[micromamba]: https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html
+[nasa-openscapes]: https://nasa-openscapes.github.io/
+[openscapes-hub]: https://openscapes.cloud/
+[oss]: https://smce.nasa.gov/overview/
+[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
