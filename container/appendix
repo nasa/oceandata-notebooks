@@ -2,7 +2,7 @@
 USER root
 
 # FIXME: see https://github.com/docker/for-mac/issues/7440
-RUN rm -rf "/home/${NB_USER}/.cache/"
+RUN chown -R ${NB_USER}:${NB_USER} "/home/${NB_USER}/.cache"
 
 # system configuration
 RUN git config --system credential.helper 'cache --timeout 86400 --socket /tmp/git-credential-cache/socket' \
@@ -29,10 +29,9 @@ USER ${NB_USER}
 
 # install (locked) dependencies
 COPY --chown=${NB_USER}:${NB_USER} src/conda-lock.yml ${REPO_DIR}/conda-lock.yml
-RUN ${MAMBA_EXE} install --yes --log-level error --file "conda-lock.yml" \
-      --category notebooks \
-      --category jupyter \
-      --category container \
+RUN ${MAMBA_EXE} install --yes --log-level error --file "conda-lock.yml" --category notebooks \
+ && ${MAMBA_EXE} install --yes --log-level error --file "conda-lock.yml" --category jupyter \
+ && ${MAMBA_EXE} install --yes --log-level error --file "conda-lock.yml" --category container \
  && ${MAMBA_EXE} clean --yes --all --force-pkgs-dirs
 
 # jupyter configuration
