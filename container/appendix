@@ -1,9 +1,6 @@
 # change USER
 USER root
 
-# FIXME: see https://github.com/docker/for-mac/issues/7440
-RUN chown -R ${NB_USER}:${NB_USER} "/home/${NB_USER}/.cache"
-
 # system configuration
 RUN git config --system credential.helper 'cache --timeout 86400 --socket /tmp/git-credential-cache/socket' \
  && git config --system core.excludesFile '/etc/gitignore' \
