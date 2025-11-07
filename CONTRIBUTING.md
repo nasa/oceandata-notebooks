@@ -24,17 +24,18 @@ Maintainers are responsible for:
 
 > [!IMPORTANT]
 > 
-> This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open, and select the `bash` kernel to run code cells on JupyterLab.
+> This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open,
+> and select the `bash` kernel to run code cells on JupyterLab.
 
 The following sections relate to the content of this repository as follows:
 
 ```shell
 .
 ├── CONTRIBUTING.md          # (this document)
-├── uv.lock                  # -> Isolated Environment
+├── container
+│   └── conda-lock.yml       # -> Reproducible Environment
 ├── docs                     # -> GitHub Pages Website
 ├── pyproject.toml           # -> Dependencies
-├── container                # -> Container Image for JupyterHubs
 └── .pre-commit-config.yaml  # -> Automation and Checks
 ```
 
@@ -42,34 +43,68 @@ The following sections relate to the content of this repository as follows:
 [Help Hub]: https://nasa.github.io/oceandata-notebooks
 [GitHub Pages]: https://docs.github.com/en/pages
 
-## Isolated Environment
++++
 
-The `conda-lock.yml` file gives a versioned list of all packages needed to run the tutorials;
-it includes the packages specified in `pyproject.toml` along with all their dependencies.
-The [conda-lock] tool will install these packages in an isolated conda [environment], which is used during the website build to ensure completeness.
+## Reproducible Environment
+
++++
+
+The `conda-lock.yml` file records all packages, locked to explicit versions, used by Help Hub contributors;
+it includes the packages specified in `pyproject.toml` and multiple `environment-*.yml` files, along with all their dependencies.
+The [conda-lock] tool generates this file, and `mamba` can install the packages it specifies in a conda [environment].
+
+The `conda-lock.yml` file includes multiple categories of dependencies; the container image is built with all but the `tools` category.
+If you are running this guide from the image, to get the additional tools used below, install them with `mamba`.
 
 [conda-lock]: https://conda.github.io/conda-lock/
 [environment]: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
 
-+++
-
-Create the environment using `conda-lock install`.
-
 ```{code-cell}
 :scrolled: true
 
-conda-lock install --name env container/conda-lock.yml --extras jupyter --extras tools
+mamba install --quiet  --yes --log-level error --category tools --file container/conda-lock.yml
 ```
 
-Create a shorthand "envx" ("x" for execute) for the command meaning "run the following in the isolated environment while displaying output".
+If any dependency list is updated in `pyproject.toml` or any `environment-*.yml` file,
+then `conda-lock` should be run, a new image built, and the new image used to execute all the notebooks (see below).
+Realistically, that's unlikely to be done manually for every change,
+but it really must be done before updating the `latest` tag on the GitHub Container Registry.
 
 ```{code-cell}
-alias envx='conda run --no-capture-output --name env'
+conda-lock lock --log-level ERROR --check-input-hash --without-cuda --lockfile container/conda-lock.yml \
+  --file pyproject.toml \
+  --file container/environment.yml \
+  --file environment-container.yml \
+  --file environment-jupyter.yml \
+  --file environment-notebooks.yml \
+  --file environment-tools.yml
 ```
+
+The `container` folder has additional configuration files that [repo2docker] uses to build the container image.
+The following command builds and runs the image locally, while the (.github/container-image.yml) workflow causes GitHub to build the image and deploy it to the GitHub Container Registry.
+
+If you have Docker available, you can build and run the image locally.
+
+```shell
+repo2docker \
+    --Repo2Docker.platform=linux/arm64 \
+    --appendix "$(< container/appendix)" \
+    --user-name "jovyan" \
+    container
+```
+
+[repo2docker]: https://repo2docker.readthedocs.io/
+[repo2docker-action]: https://github.com/marketplace/actions/repo2docker-action
+
++++
 
 ## GitHub Pages Website
 
++++
+
 ### Build and Preview
+
++++
 
 The `docs` folder contains configuration and content for the [Jupyter Book] we host on GitHub Pages.
 The tutorials are written in executable MyST Markdown, and publishing the website requires pulling execution results from a notebook cache.
@@ -85,7 +120,7 @@ We execute it via `uv run` only because we've included the DVC tool in the proje
 [DVC]: https://dvc.org/
 
 ```{code-cell}
-envx dvc pull
+dvc pull
 ```
 
 Update the notebook cache as needed by executing notebooks.
@@ -96,7 +131,7 @@ For a full but slow test of the environment configuration, delete `docs/_cache` 
 ```{code-cell}
 :scrolled: true
 
-envx jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
+jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
 ```
 
 The next cell builds a static website in `docs/_build/html` using `jupyter-book<2` (alias `jb`).
@@ -104,7 +139,7 @@ The next cell builds a static website in `docs/_build/html` using `jupyter-book<
 ```{code-cell}
 :scrolled: true
 
-envx jb build docs
+jb build docs
 ```
 
 Run the next cell to preview the website.
@@ -114,6 +149,10 @@ Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 > On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
 
 ```{code-cell}
+find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
+```
+
+```{code-cell}
 :scrolled: true
 
 python -m http.server -d docs/_build/html
@@ -121,17 +160,19 @@ python -m http.server -d docs/_build/html
 
 ### Notebook Cache
 
++++
+
 If any notebooks have been executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
 Follow the next steps to share the updates using DVC, starting with checking whether the cache has actually changed.
 
 ```{code-cell}
-envx dvc status
+dvc status
 ```
 
 If the status is not "Data and pipelines are up to date." then commit the updated cache with `dvc commit`. (The purpose of `--force` is only to skip the confirmation prompt that you can't interact with from within a notebook).
 
 ```{code-cell}
-envx dvc commit --force
+dvc commit --force
 ```
 
 Now use `dvc` to push your cache to the remote location accessible to the website build.
@@ -139,13 +180,17 @@ Now use `dvc` to push your cache to the remote location accessible to the websit
 ```{code-cell}
 :scrolled: true
 
-envx dvc push
+dvc push
 ```
 
 Finally, if changes are committed by DVC, then there will be changes you also need to commit with Git.
 Use your preferred method of working with Git to stage the `docs/_cache.dvc` changes, commit, and push them.
 
++++
+
 ### Temporary
+
++++
 
 (this won't be necessary with AWS CodeBuilder, and maybe there's some other solution)
 
@@ -175,56 +220,30 @@ The `secrets` dictionary contains the "AccessKeyId", "SecretAccessKey", and "Ses
 
 ### Publish (a.k.a. Release)
 
++++
+
 Website updates occur automatically whenever a pull request to main is merged.
-The `.github/workflows/website.yaml` file provides the instructions to GitHub Actions.
+The `.github/workflows/deploy-website.yaml` file provides this instruction to GitHub Actions.
+
++++
 
 ## Dependencies
 
++++
+
 For every `import` statement, or if a notebook requires a package to be installed for a backend (e.g. h5netcdf),
-make sure the package is listed in the `notebooks` array under the `dependency-groups` table in `pyproject.toml`.
+make sure the package is listed in the `notebooks` array under the `project.optional-dependencies` table in `pyproject.toml`,
+or in `environment-notebooks.yml`.
+The other keys in the table provide the additional dependencies needed for a working JupyterLab, for our container image, or for maintenance tasks.
+For each <EXTRA>, there is also an `environment-<EXTRA>.yml` containing `category: <EXTRA>`.
+These are Conda packages that are also part of the dependencies; we prefer PyPI packages when available.
 
-The other keys in the `dependency-groups` table provide the additional dependencies needed for a working Jupyter kernel, for a complete JupyterLab in a container image, or for maintenance tasks.
+1. `pyproject.toml` should be the only manifest file needed, but ...
+1. `environment-*.yml` each category of conda packages needs its own file, and
+1. `container/environment.yml` lists the package constraints we must inherit from `repo2docker`.
+1. `container/conda-lock.yml` is a combined conda-forge and pypi lock file that `repo2docker` ought to read
 
-> [!IMPORTANT]
-> - No `requirements.*` file in this repository should be manually edited.
-> - Note where critical versions are pinned
->   - python: container/environment.yml
->   - jupyter-repo2docker: .pre-commit-config.yaml
-
-The ontology of the `requirements.*` files is a bit complicated, but updates happen automatically by `pre-commit` when necessary, i.e. when there are changes to `pyproject.toml`, `container/environment.yml`, or the `repo2docker` version.
-The `container/environment.yml` file is there for non-Python packages needed from conda-forge, as well as some special Python packages.
-We use PyPI for Python packages when able.
-
-1. `requirements.txt` lists the packages needed in `docs/setup.py` (export-kernel-dependencies)
-1. `container/requirements.txt` lists the packages needed in the container image (export-container-dependencies)
-1. `container/requirements.in` lists the packages resulting from `repo2docker` and `container/environment.yml` (repo2docker-requirements)
-
-> [!NOTE]
-> Having a top-level `requirements.txt` file also makes our tutorials work on [Binder] ... most of them anyways.
-
-[Binder]: https://mybinder.org/
-
-## Container Image for JupyterHubs
-
-The `container` folder has configuration files that [repo2docker] uses to build a container image suitable for use with a JupyterHub platform.
-The following command builds and runs the image locally, while the [repo2docker-action] builds images on GitHub and distributes them via the GitHub Container Registry.
-
-If you have Docker available, you can build the image defined in the `container` folder.
-
-[repo2docker]: https://repo2docker.readthedocs.io/
-[repo2docker-action]: https://github.com/marketplace/actions/repo2docker-action
-
-```{code-cell}
-:scrolled: true
-
-repo2docker \
-    --Repo2Docker.platform=linux/amd64 \
-    --appendix "$(< container/appendix)" \
-    --user-id 1000 \
-    --user-name jovyan \
-    --no-run \
-    container
-```
++++
 
 ## (WIP) Automation and Checks
 
@@ -235,11 +254,11 @@ You may create hooks to run these automations, as needed, before making any comm
 [pre-commit]: https://pre-commit.com/
 
 ```{code-cell}
-envx pre-commit install
+pre-commit install
 ```
 
 You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
 
 ```{code-cell}
-envx pre-commit run --from-ref main --to-ref HEAD
+pre-commit run --from-ref main --to-ref HEAD
 ```

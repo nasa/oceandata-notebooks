@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.18.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -281,7 +281,7 @@ Now let's do the same for the corresponding L2 file, which we'll use later.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_AOP_NRT",
+    short_name="PACE_OCI_L2_AOP",
     temporal=tspan,
     bounding_box=bbox,
 )

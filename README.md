@@ -17,6 +17,7 @@ Please take a minute to familiarize yourself with the following information abou
 ### Edit Notebooks & Commit Markdown
 
 > [!IMPORTANT]
+> 
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
 > - The entire `notebooks` folder is ignored by Git, so it's not present on GitHub.
 
@@ -39,6 +40,7 @@ jupytext --sync $(git ls-files book/notebooks)
 ### Create a New Notebook
 
 > [!NOTE]
+> 
 > Create new notebooks by copying `COPYME.ipynb` into a suitable location within the `notebooks` folder.
 
 When you save your new notebook, watch for a new markdown file to appear in the `docs/notebooks` folder and add that file to a commit.

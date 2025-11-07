@@ -1,18 +1,20 @@
 format: jb-book
 root: index
 parts:
+
   - caption: Welcome
     chapters:
       - file: home
         title: Home
       - file: getting-started
-        title: Getting Started - Help
       - file: team
+
   - caption: Help Hub Core
     chapters:
+
       - file: sections/data-access-basics
         title: Data Access and Processing Basics
-        sections: 
+        sections:
           - file: notebooks/oci/oci_data_access
             title: Access Data Products
           - file: notebooks/oci/oci_file_structure
@@ -27,7 +29,7 @@ parts:
             title: In situ matchups
           - file: notebooks/oci/ml_cloud_mask
             title: Machine Learning Tutorial
-     
+
       - file: sections/visualizations
         title: Visualizations
         sections:
@@ -45,7 +47,7 @@ parts:
         sections:
           - file: notebooks/hackweek/oci_gpig.md
             title: GPig Phytoplankton Community Composition
-    
+
       - file: sections/cloud-atmosphere
         title: Cloud & Atmosphere
         sections:
@@ -55,15 +57,16 @@ parts:
             title: Aerosols from PACE/SPEXOne
           - file: notebooks/oci/oci_no2
             title: Nitrogen Dioxide from PACE/OCI
-      
+
       - file: sections/land
         title: Land
         sections:
           - file: notebooks/oci/oci_terrestrial_data
             title: Land Surface from PACE/OCI
-    
-  - caption: SeaDAS - OCSSW Toolbox     
+
+  - caption: SeaDAS - OCSSW Toolbox
     chapters:
+
       - file: sections/seadas-toolbox
         title: About SeaDAS - OCSSW
         sections:
@@ -76,20 +79,27 @@ parts:
           - file: notebooks/oci/oci_ocssw_l2gen
             title: Generate Level-2 Products
           - file: notebooks/oci/oci_ocssw_giop
-            title: Run the GIOP Algorithm   
+            title: Run the GIOP Algorithm
 
-  - caption: Past trainings & events
+  - caption: Trainings & Events
     chapters:
-    - file: sections/past-trainings
-      title: See all past trainings and events
-      sections:
+
+      - file: sections/past-trainings
+        title: Past trainings & events
+        sections:
           - url: https://pacehackweek.github.io/pace-2025/presentations/notebooks.html
-            title: PACE Hackweek 2025
+            title: PACE Data Hackweek 2025
           - url: https://nmfs-opensci.github.io/EDMW-EarthData-Workshop-2025/
             title: NOAA EDMW 2025 - PACE
           - url: https://appliedsciences.nasa.gov/get-involved/training/english/arset-introduction-plankton-aerosol-cloud-ocean-ecosystem-pace
             title: ARSET - Hyperspectral Water Quality Monitoring
           - url: https://pacehackweek.github.io/pace-2024/intro.html
-            title: PACE Hackweek 2024
+            title: PACE Data Hackweek 2024
           - url: https://www.us-ocb.org/pace-mission-training-activity/
             title: PACE Training Lectures 2022
+
+  - caption: Reference
+    chapters:
+      # TODO: some notebooks have references that should be standardized
+      # - file: reference/bibliography
+      - file: reference/glossary

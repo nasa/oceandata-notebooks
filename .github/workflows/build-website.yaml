@@ -10,25 +10,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Setup python
-        uses: actions/setup-python@v6
+      - name: Setup micromamba
+        uses: mamba-org/setup-micromamba@v2
         with:
-          python-version-file: ".python-version"
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
-          activate-environment: true
-      - name: Install tools
-        run: uv sync --locked --only-group tools
-      - name: Use cache
-        id: cache
+          environment-name: build
+          environment-file: container/conda-lock.yml
+          create-args: --category jupyter tools
+          cache-environment-key: environment-${{ runner.os }}-${{ hashFiles('container/conda-lock.yml') }}
+          init-shell: none
+      - name: Fetch jcache
+        id: jcache
         uses: actions/cache@v4
         with:
           path: docs/_cache
           key: jupyter-book-cache-${{ hashFiles('docs/_cache.dvc') }}
-      - name: Update cache
-        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Update jcache
+        if: steps.jcache.outputs.cache-hit != 'true'
+        shell: micromamba-shell {0}
         run: dvc pull
         env:
           AWS_REGION: 'us-west-2'
@@ -36,7 +34,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
           AWS_SESSION_TOKEN: '${{ secrets.AWS_SESSION_TOKEN }}'
       - name: Build jupyter book
+        shell: micromamba-shell {0}
         run: jupyter-book build docs
+      - name: Fix ampersand escape
+        run: find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
       - name: Upload html
         id: deployment
         uses: actions/upload-pages-artifact@v4
