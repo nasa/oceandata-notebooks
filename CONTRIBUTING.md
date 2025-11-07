@@ -49,8 +49,8 @@ The following sections relate to the content of this repository as follows:
 
 +++
 
-The `conda-lock.yml` file records all packages, locked to explicit versions, used by Help Hub contributors;
-it includes the packages specified in `pyproject.toml` and multiple `environment-*.yml` files, along with all their dependencies.
+The `conda-lock.yml` file records all packages, locked to explicit versions, used by Help Hub contributors and in the container image.
+It includes the packages specified in `pyproject.toml` and multiple `environment-*.yml` files, along with all their dependencies.
 The [conda-lock] tool generates this file, and `mamba` can install the packages it specifies in a conda [environment].
 
 The `conda-lock.yml` file includes multiple categories of dependencies; the container image is built with all but the `tools` category.
@@ -66,7 +66,7 @@ mamba install --quiet  --yes --log-level error --category tools --file container
 ```
 
 If any dependency list is updated in `pyproject.toml` or any `environment-*.yml` file,
-then `conda-lock` should be run, a new image built, and the new image used to execute all the notebooks (see below).
+then a new lock file should be generated, a new image built, and the new image used to execute all the notebooks (see below).
 Realistically, that's unlikely to be done manually for every change,
 but it really must be done before updating the `latest` tag on the GitHub Container Registry.
 
