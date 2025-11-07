@@ -51,11 +51,12 @@ you can use either the `mamba` command that comes with {term}`Conda` (recommende
 With that file in a download folder (denoted by `<DIR>`) and a name you've chosen (denoted by `<NAME>`) for a new environment, run in a Terminal:
 
 ```shell
-mamba create --name <NAME> --file <DIR>/conda-lock.yml --category notebooks jupyter
+mamba create --name <NAME> --file <DIR>/conda-lock.yml --category notebooks
+mamba install --name <NAME> --file <DIR>/conda-lock.yml --category jupyter
 ```
 
-If you are familiar with creating additional ipython kernels for an existing Jupyter server, you can leave off `jupyter` above and do that instead.
-Otherwise, start JupyterLab from within the new environment as follows, and try out any Help Hub notebooks you care to download.
+If you are familiar with creating additional ipython kernels for an existing Jupyter server, you can skip the installs from `--category jupyter` and do that instead.
+Otherwise, start JupyterLab from within the new environment as follows, and try out any Help Hub notebook locally.
 
 ```shell
 mamba run --name <NAME> jupyter lab
@@ -63,13 +64,13 @@ mamba run --name <NAME> jupyter lab
 
 ## Getting Help
 
-Have a question or an idea? Share it with us on the [Earthdata Forum using tags][forum] OBDAAC (under DAAC) and Data Recipes (under Services/Usage). 
+Have a question or an idea? Share it with us on the [Earthdata Forum][forum] using tags OBDAAC (under DAAC) and Data Recipes (under Services/Usage).
 
 [cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook/
 [cryocloud]: https://hub.cryointhecloud.com/
 [edcloud]: https://www.earthdata.nasa.gov/learn/webinars-and-tutorials/cloud-primer-amazon-web-services
 [edl]: https://urs.earthdata.nasa.gov/
-[forum]: https://forum.earthdata.nasa.gov/viewforum.php?f=7&&DAAC=86&ServicesUsage=16&tagMatch=all
+[forum]: https://forum.earthdata.nasa.gov/viewforum.php?f=7&DAAC=86&ServicesUsage=16&tagMatch=all
 [image]: https://github.com/nasa/oceandata-notebooks/pkgs/container/oceandata-notebooks
 [maap]: https://scimaap.net/
 [micromamba]: https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html

@@ -37,6 +37,8 @@ jobs:
           AWS_SESSION_TOKEN: '${{ secrets.AWS_SESSION_TOKEN }}'
       - name: Build jupyter book
         run: jupyter-book build docs
+      - name: Fix ampersand escape
+        run: find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
       - name: Upload html
         id: deployment
         uses: actions/upload-pages-artifact@v4
