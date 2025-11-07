@@ -134,12 +134,12 @@ For a full but slow test of the environment configuration, delete `docs/_cache` 
 jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
 ```
 
-The next cell builds a static website in `docs/_build/html` using `jupyter-book<2` (alias `jb`).
+The next cell builds a static website in `docs/_build/html` using `jupyter-book`.
 
 ```{code-cell}
 :scrolled: true
 
-jb build docs
+jupyter-book build docs
 ```
 
 Fix faulty links in the html (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715))
