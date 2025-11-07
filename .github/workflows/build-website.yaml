@@ -15,7 +15,7 @@ jobs:
         with:
           environment-name: build
           environment-file: container/conda-lock.yml
-          create-args: --category tools
+          create-args: --category jupyter tools
           cache-environment-key: environment-${{ runner.os }}-${{ hashFiles('container/conda-lock.yml') }}
           init-shell: none
       - name: Fetch jcache
