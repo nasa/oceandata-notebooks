@@ -158,6 +158,7 @@ Let's take a look at the msl12_defaults_IOP.par file, which is the "parameter" f
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !cat $OCSSWROOT/share/oci/msl12_defaults_IOP.par
 ```
@@ -343,6 +344,7 @@ Now, let's run `l2gen` using this new .par file. This can take several minutes.
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !source {env}; l2gen par=l2gen_iop.par
 ```
@@ -529,6 +531,7 @@ write_par("l2gen_iop_mod.par", par)
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !source {env}; l2gen par=l2gen_iop_mod.par
 ```

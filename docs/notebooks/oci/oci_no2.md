@@ -158,8 +158,6 @@ dataset["nitrogen_dioxide_total_vertical_column"].hvplot(
 Since there are many NO<sub>2</sub> granules available for testing, we can make a time series of NO<sub>2</sub> concentrations over time. First, we have to get URLs for all the granules and "open" them for streaming. Alternatively, `fs.get` could be used to download files locally, but we don't want to duplicate data storage if working in the commercial cloud.
 
 ```{code-cell} ipython3
-:scrolled: true
-
 pattern = "https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/NO2_L3_Gridded_NAmerica/PACE_NO2_Gridded_*.nc"
 results = fs.glob(pattern)
 paths = [fs.open(i, cache_type="blockcache") for i in results]

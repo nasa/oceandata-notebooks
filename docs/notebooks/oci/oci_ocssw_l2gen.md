@@ -152,6 +152,7 @@ Within the OCSSW directory, there are sub-directories that contain files that co
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !ls $OCSSWROOT/share/common
 ```
@@ -174,6 +175,7 @@ Now, let's look at the PACE OCI-specific files within the `share/oci` directory:
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !ls $OCSSWROOT/share/oci
 ```
@@ -182,6 +184,7 @@ Let's print "msl12_defaults.par", where the `l2gen` default parameters for OCI a
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !cat $OCSSWROOT/share/oci/msl12_defaults.par
 ```
@@ -208,6 +211,7 @@ You can also see OCSSW parameter options by running 'l2gen --help'.
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !source {env}; l2gen --help
 ```
@@ -315,6 +319,7 @@ We can run `getanc -h` to see options for the program:
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !source {env}; getanc -h
 ```
@@ -369,6 +374,7 @@ Now, let's run l2gen using this new par file AND the ancillary information in th
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !source {env}; l2gen par=l2gen.par par=l2gen.anc
 ```
@@ -424,6 +430,7 @@ This output gets fed into `l2extract` to create a new, smaller file that only in
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !source {env}; l2extract
 ```
@@ -505,6 +512,7 @@ write_par("l2gen_mod.par", par)
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !source {env}; l2gen par=l2gen_mod.par par=l2gen.anc
 ```
@@ -564,6 +572,7 @@ write_par("l2gen_brdf.par", par)
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 !source {env}; l2gen par=l2gen_brdf.par par=l2gen.anc
 ```

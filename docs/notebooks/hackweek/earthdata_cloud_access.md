@@ -119,6 +119,7 @@ results = earthaccess.search_datasets(instrument="oci")
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 for item in results:
     summary = item.summary()

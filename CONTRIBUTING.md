@@ -62,7 +62,7 @@ If you are running this guide from the image, to get the additional tools used b
 ```{code-cell}
 :scrolled: true
 
-mamba install --quiet  --yes --log-level error --category tools --file container/conda-lock.yml
+mamba install --quiet --yes --log-level error --category tools --file container/conda-lock.yml
 ```
 
 If any dependency list is updated in `pyproject.toml` or any `environment-*.yml` file,
@@ -142,15 +142,17 @@ The next cell builds a static website in `docs/_build/html` using `jupyter-book<
 jb build docs
 ```
 
+Fix faulty links in the html (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715))
+
+```{code-cell}
+find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
+```
+
 Run the next cell to preview the website.
 Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 
 > [!NOTE]
 > On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
-
-```{code-cell}
-find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
-```
 
 ```{code-cell}
 :scrolled: true

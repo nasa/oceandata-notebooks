@@ -51,15 +51,11 @@ At the end of this notebook you will know:
 
 ## 1. Setup
 
-The GPig Python code has been packaged to allow it to be easily installed, imported, and reused. We will use pip install to get the current packaged code from Github. You may need to restart the kernel after the installation before continuing.
+The GPig Python code has been packaged to allow it to be easily installed, imported, and reused.
+While the package is not on PyPI or conda-forge, it can be installed directly from the [source repository][gpig] on GitHub.
+If you have followed the setup instructions, then GPig is available to import along with the other packages needed for this notebook.
 
-```{code-cell} ipython3
-:scrolled: true
-
-%pip install git+https://github.com/max-danenhower/pace-rrs-inversions-pigments
-```
-
-Next, we'll import all of the packages used in this notebook.
+[gpig]: https://github.com/max-danenhower/pace-rrs-inversions-pigments
 
 ```{code-cell} ipython3
 import cartopy.crs as ccrs
@@ -157,6 +153,9 @@ fig
 Let's run it. This can take some time depending on bounding box size.
 
 ```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
 l2_pigments = L2_utils.estimate_inv_pigments(rrs[0], sss, sst, bbox)
 ```
 
@@ -310,3 +309,9 @@ for ax, var, title in zip(axs.flat, variables, titles):
 plt.tight_layout()
 plt.show()
 ```
+
+<div class="alert alert-info" role="alert">
+
+You have completed the notebook on the GPig Python algorithm!
+
+</div>

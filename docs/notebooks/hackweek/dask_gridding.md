@@ -314,8 +314,6 @@ client
 Just like `np.random`, we can use `da.random` from `dask` to generate a data array.
 
 ```{code-cell} ipython3
-:scrolled: true
-
 dask_random = da.random.default_rng(random)
 dask_array = dask_random.normal(1, 2, size=2**27, chunks=2**22)
 dask_array
@@ -375,7 +373,7 @@ Now, if you try `xr.open_mfdataset` you will probably encounter an error due to 
 
 ```{code-cell} ipython3
 :scrolled: true
-:tags: [raises-exception]
+:tags: [scroll-output, raises-exception]
 
 products = xr.open_mfdataset(paths, group="geophysical_data", **kwargs)
 ```

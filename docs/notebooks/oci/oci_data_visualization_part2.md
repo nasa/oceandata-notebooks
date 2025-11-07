@@ -319,8 +319,6 @@ dataset_norm = (
 ```
 
 ```{code-cell} ipython3
-:scrolled: true
-
 dataset_v_norm = dataset_veg.astype(np.float64)
 dataset_v_norm = (
     (dataset_veg - dataset_veg.min())
@@ -613,8 +611,6 @@ else:
 Then we plot a rectangle around our area of interest on our RGB map. We can try to choose an area that is at the edge of a population to see the changes in time.
 
 ```{code-cell} ipython3
-:scrolled: true
-
 fig = plt.figure(figsize=(7, 7))
 ax1 = fig.add_subplot(projection=ccrs.PlateCarree(), facecolor="#080c17")
 ax2 = data_norm.plot.imshow(

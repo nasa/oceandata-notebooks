@@ -1437,6 +1437,7 @@ There are three "levels" of AERONET-OC data in terms of data quality: 1, 1.5, an
 
 ```{code-cell} ipython3
 :scrolled: true
+:tags: [scroll-output]
 
 df_aeronet = process_aeronet(
     aeronet_site="AAOT",
@@ -1501,8 +1502,8 @@ We will use the function `match_data` to create a matchup dataframe based on sel
 ```
 
 ```{code-cell} ipython3
-:tags: [scroll-output]
 :scrolled: true
+:tags: [scroll-output]
 
 matchups = match_data(
     df_satellite,
