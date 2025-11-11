@@ -39,17 +39,6 @@ At the end of this notebook you will know:
 - How to make an interactive tool to explore OCI data
 - What goes into an animation of multi-angular HARP2 data
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Easy Global Chlorophyll-a Map](#2.-Easy-Global-Chlorophyll-a-Map)
-3. [Global Oceans in Quasi True Color](#3.-Global-Oceans-in-Quasi-True-Color)
-4. [Complete Scene in True Color](#4.-Complete-Scene-in-True-Color)
-5. [False Color for Ice Clouds](#5.-False-Color-for-Ice-Clouds)
-6. [Phytoplankton in False Color](#6.-Phytoplankton-in-False-Color)
-7. [Full Spectra from Global Oceans](#7.-Full-Spectra-from-Global-Oceans)
-8. [Animation from Multiple Angles](#8.-Animation-from-Multiple-Angles)
-
 +++
 
 ## 1. Setup
@@ -73,7 +62,6 @@ from matplotlib import animation
 from matplotlib.colors import ListedColormap
 from PIL import Image, ImageEnhance
 from scipy.ndimage import gaussian_filter1d
-from xarray.backends.api import open_datatree
 ```
 
 ```{code-cell} ipython3
@@ -339,7 +327,7 @@ dataset
 ```
 
 ```{code-cell} ipython3
-datatree = open_datatree(paths[0])
+datatree = xr.open_datatree(paths[0])
 datatree
 ```
 
@@ -489,24 +477,33 @@ A uniquely innovative type of product from PACE is the phytoplankton community c
 We first open the dataset that is created with l2gen. This will be covered in the OCSSW tutorial.
 
 ```{code-cell} ipython3
-path = "/home/jovyan/shared/pace-hackweek-2024/PACE_OCI.20240309T115927.L2_MOANA.V2.nc"
-
-datatree = open_datatree(path)
-dataset = xr.merge(datatree.to_dict().values())
-dataset
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L4M_MOANA",
+    temporal=("2024-03-09","2024-03-09"),
+    granule_name="*.DAY.*.0p1deg.nc",
+)
+for item in results:
+    display(item)
 ```
 
-We can see the MOANA products, RGB bands and other level-2 products in the dataset. We still need to set the spatial variables as coordinates of the dataset.
+```{code-cell} ipython3
+paths = earthaccess.open(results)
+```
 
 ```{code-cell} ipython3
-dataset = dataset.set_coords(("longitude", "latitude"))
+dataset = xr.open_dataset(paths[0])
+dataset
 ```
 
 Let's make a quick MOANA product plot to see if everything looks normal.
 
 ```{code-cell} ipython3
 artist = dataset["picoeuk_moana"].plot(
-    x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true"
+    x="lon",
+    y="lat",
+    cmap="viridis",
+    vmin=0,
+    robust="true",
 )
 plt.gca().set_aspect("equal")
 ```
