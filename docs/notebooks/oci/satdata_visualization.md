@@ -27,7 +27,7 @@ The following notebooks are **prerequisites** for this tutorial:
 
 ## Summary
 
-This is an introductory tutorial to the visualization possibilities arising from PACE data, meant to give you ideas and tools to develop your own scientific data visualizations.
+testThis is an introductory tutorial to the visualization possibilities arising from PACE data, meant to give you ideas and tools to develop your own scientific data visualizations.
 
 ## Learning Objectives
 
