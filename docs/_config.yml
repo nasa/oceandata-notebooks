@@ -2,9 +2,9 @@ title: "OB.DAAC Help Hub"
 author: "The Ocean Ecology Laboratory at NASA Goddard"
 only_build_toc_files: true
 execute:
-  timeout: -1  # no cell timeout
-  run_in_temp: true  # no reuse of downloads, etc.
-  execute_notebooks: "cache"  # re-use outputs (when none of the code cells change)
+  timeout: -1
+  run_in_temp: true
+  execute_notebooks: "cache"
   cache: "docs/_cache"
 html:
   home_page_in_navbar: false
@@ -12,13 +12,16 @@ html:
   use_issues_button: false
   use_edit_page_button: true
   baseurl: "https://nasa.github.io/oceandata-notebooks/"
+  analytics:
+    google_analytics_id: "G-E0VPP0Z29X"
 repository:
   url: "https://github.com/nasa/oceandata-notebooks/"
-  branch: main
-  path_to_book: docs
+  branch: "main"
+  path_to_book: "docs"
 sphinx:
+  recursive_update: true
   config:
-    nb_merge_streams: true # stdout lines combined in output
+    nb_merge_streams: true
     suppress_warnings:
       - "myst.xref_missing"
       - "mystnb.unknown_mime_type"
@@ -33,4 +36,4 @@ sphinx:
       navigation_depth: 4
       show_toc_level: 2
   local_extensions:
-    source_button: _ext
+    source_button: "_ext"

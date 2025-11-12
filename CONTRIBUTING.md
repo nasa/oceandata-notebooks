@@ -111,6 +111,7 @@ The tutorials are written in executable MyST Markdown, and publishing the websit
 We use [DVC] to share that cache among maintainers as well as to the deployment workflow on GitHub.
 
 > [!IMPORTANT]
+> 
 > Only notebooks listed in `docs/_toc.yml` are built, so adding a new notebook requires updating `docs/_toc.yml`.
 
 The `dvc pull` command retrieves the notebook cache.
@@ -142,7 +143,7 @@ The next cell builds a static website in `docs/_build/html` using `jupyter-book`
 jupyter-book build docs
 ```
 
-Fix faulty links in the html (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715))
+Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
 
 ```{code-cell}
 find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
@@ -152,6 +153,7 @@ Run the next cell to preview the website.
 Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 
 > [!NOTE]
+> 
 > On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
 
 ```{code-cell}

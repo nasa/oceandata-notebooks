@@ -75,7 +75,7 @@ parts:
           - file: notebooks/oci/oci_ocssw_giop
             title: Run the GIOP Algorithm
 
-  - caption: Trainings & Events
+  - caption: Trainings and Events
     chapters:
 
       - file: sections/past-trainings
