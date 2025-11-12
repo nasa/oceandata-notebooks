@@ -13,7 +13,6 @@ parts:
     chapters:
 
       - file: sections/data-access-basics
-        title: Data Access and Processing Basics
         sections:
           - file: notebooks/oci/oci_data_access
             title: Access Data Products
@@ -26,49 +25,44 @@ parts:
           - file: notebooks/oci/oci_grid_match
             title: Export for GIS
           - file: notebooks/hackweek/satellite_insitu_matchups.md
-            title: In situ matchups
+            title: In situ Matchups
           - file: notebooks/oci/ml_cloud_mask
             title: Machine Learning Tutorial
 
       - file: sections/visualizations
-        title: Visualizations
         sections:
           - file: notebooks/harp2/harp2_basic_visualizations
-            title: PACE HARP2
+            title: PACE-HARP2
           - file: notebooks/spexone/spexone_basic_visualizations
-            title: PACE SPEXone
+            title: PACE-SPEXone
           - file: notebooks/oci/satdata_visualization.md
-            title: PACE OCI part I
+            title: PACE-OCI Part I
           - file: notebooks/oci/oci_data_visualization_part2.md
-            title: PACE OCI part II
+            title: PACE-OCI Part II
 
       - file: sections/ocean
-        title: Ocean
         sections:
           - file: notebooks/hackweek/oci_gpig.md
             title: GPig Phytoplankton Community Composition
 
       - file: sections/cloud-atmosphere
-        title: Cloud & Atmosphere
         sections:
           - file: notebooks/harp2/harp2_l2_aerosol_product
-            title: Aerosols from PACE/HARP2
+            title: Aerosols from PACE-HARP2
           - file: notebooks/spexone/spexone_l2_aerosol_product
-            title: Aerosols from PACE/SPEXOne
+            title: Aerosols from PACE-SPEXOne
           - file: notebooks/oci/oci_no2
-            title: Nitrogen Dioxide from PACE/OCI
+            title: Nitrogen Dioxide from PACE-OCI
 
       - file: sections/land
-        title: Land
         sections:
           - file: notebooks/oci/oci_terrestrial_data
-            title: Land Surface from PACE/OCI
+            title: Land Surface from PACE-OCI
 
   - caption: SeaDAS - OCSSW Toolbox
     chapters:
 
       - file: sections/seadas-toolbox
-        title: About SeaDAS - OCSSW
         sections:
           - file: sections/seadas-desktop
             title: SeaDAS Desktop Application Resources
@@ -85,7 +79,6 @@ parts:
     chapters:
 
       - file: sections/past-trainings
-        title: Past trainings & events
         sections:
           - url: https://pacehackweek.github.io/pace-2025/presentations/notebooks.html
             title: PACE Data Hackweek 2025
@@ -100,6 +93,5 @@ parts:
 
   - caption: Reference
     chapters:
-      # TODO: some notebooks have references that should be standardized
       # - file: reference/bibliography
       - file: reference/glossary

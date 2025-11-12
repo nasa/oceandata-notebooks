@@ -1,4 +1,4 @@
-# Cloud & Atmosphere
+# Cloud and Atmosphere
 
 This section explores atmospheric and cloud data products from PACE instruments including aerosol retrievals and atmospheric trace gases. Learn how to work with polarimetric and hyperspectral measurements to study atmospheric composition and aerosol properties.
 
