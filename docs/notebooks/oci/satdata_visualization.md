@@ -41,16 +41,6 @@ At the end of this notebook you will know:
 - How to make an interactive tool to explore OCI data
 - What goes into an animation of multi-angular HARP2 data
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Easy Global Chlorophyll-a Map](#2.-Easy-Global-Chlorophyll-a-Map)
-3. [Global Oceans in Quasi True Color](#3.-Global-Oceans-in-Quasi-True-Color)
-4. [Complete Scene in True Color](#4.-Complete-Scene-in-True-Color)
-5. [False Color for Ice Clouds](#5.-False-Color-for-Ice-Clouds)
-6. [Full Spectra from Global Oceans](#7.-Full-Spectra-from-Global-Oceans)
-7. [Animation from Multiple Angles](#8.-Animation-from-Multiple-Angles)
-
 +++
 
 ## 1. Setup
@@ -74,7 +64,6 @@ from matplotlib import animation
 from matplotlib.colors import ListedColormap
 from PIL import Image, ImageEnhance
 from scipy.ndimage import gaussian_filter1d
-from xarray.backends.api import open_datatree
 ```
 
 ```{code-cell} ipython3
@@ -340,7 +329,7 @@ dataset
 ```
 
 ```{code-cell} ipython3
-datatree = open_datatree(paths[0])
+datatree = xr.open_datatree(paths[0])
 datatree
 ```
 
@@ -479,11 +468,9 @@ pcolormesh(rhos_ice_enhanced)
 
 Here, the ice clouds are purple and water vapor clouds are white, like we can see in the northwestern region of the scene.
 
-+++
-
 [back to top](#Contents)
 
-+++ {"lines_to_next_cell": 2}
++++
 
 ## 6. Full Spectra from Global Oceans
 
