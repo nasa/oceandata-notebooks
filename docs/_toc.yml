@@ -37,7 +37,7 @@ parts:
             title: PACE HARP2
           - file: notebooks/spexone/spexone_basic_visualizations
             title: PACE SPEXone
-          - file: notebooks/oci/satdata_visualization_v2.md
+          - file: notebooks/oci/satdata_visualization_v3.md
             title: PACE OCI part I
           - file: notebooks/oci/oci_data_visualization_part2.md
             title: PACE OCI part II
