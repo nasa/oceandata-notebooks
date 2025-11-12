@@ -15,6 +15,8 @@ kernelspec:
 
 # Satellite Data Visualization
 
+Updated Nov 12, 2025
+
 **Tutorial Leads:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC) and Sean Foley (NASA, MSU)
 
 <div class="alert alert-success" role="alert">
@@ -27,7 +29,7 @@ The following notebooks are **prerequisites** for this tutorial:
 
 ## Summary
 
-testThis is an introductory tutorial to the visualization possibilities arising from PACE data, meant to give you ideas and tools to develop your own scientific data visualizations.
+This is an introductory tutorial to the visualization possibilities arising from PACE data, meant to give you ideas and tools to develop your own scientific data visualizations.
 
 ## Learning Objectives
 
