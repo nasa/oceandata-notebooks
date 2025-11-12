@@ -21,7 +21,7 @@ Last updated: August 3, 2025
 
 The following notebooks are **prerequisites** for this tutorial:
 
-- [Earthdata Cloud Access](../earthdata_cloud_access)
+- [Data Access](./oci_data_access)
 
 **NOTE**: This notebook will download a [cloud mask dataset](https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek/). Update `CLDMASK_PATH` if you would like the download and extracted archive to be persisted after running this notebook.
 

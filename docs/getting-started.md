@@ -46,7 +46,7 @@ For the first option, login to your JupyterHub and start a server from the `ghcr
 
 For the second option, download our {download}`conda-lock.yml <../container/conda-lock.yml>` configuration file,
 which specifies exact versions of packages on {term}`Conda-Forge` and {term}`PyPI` that must be installed.
-You need {term}`Mamba` availble to create an environment from this configuration file;
+You need {term}`Mamba` available to create an environment from this configuration file;
 you can use either the `mamba` command that comes with {term}`Conda` (recommended) or the [Micromamba][micromamba] distribution.
 With that file in a download folder (denoted by `<DIR>`) and a name you've chosen (denoted by `<NAME>`) for a new environment, run in a Terminal:
 

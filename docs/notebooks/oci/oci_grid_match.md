@@ -38,13 +38,7 @@ At the end of this notebook you will know how to:
 - Define a grid with desired pixel resolution
 - Reproject data into defined coordinate reference systems and matching grids
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Preparing Data for Regridding: Masking and Dimensions](#2.-Preparing-Data-for-Regridding:-Masking-and-Dimensions)
-3. [Projecting Data onto a Defined Grid](#3.-Projecting-Data-onto-a-Defined-Grid)
-4. [Exporting Data: GeoTIFF and netCDF](#4.-Exporting-Data:-GeoTIFF-and-netCDF)
-5. [About Projecting/Exporting Level-3 Data](#5.-About-Projecting/Exporting-Level-3-Data)
++++
 
 ## 1. Setup
 
@@ -165,6 +159,7 @@ Using swath L2 data can make comparing between different satellites, or even two
 Before we get to the actual regridding of our data, we need to make sure the datasets are properly prepared. 
 
 ### Masking
+
 In the plot above, there are clearly cloudy pixels in both the surface reflectance (`rhos`) and the VIs. L2 PACE data includes the `l2_flags` variable, which keeps track of quality flags for each pixel in the dataset. The `cf_xarray` package will allow us to make use of those flags and mask out any low-quality data we see fit. A list of all possible flags can be found [here](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/).
 
 ```{code-cell} ipython3
@@ -431,5 +426,3 @@ ds.rio.to_raster(Path(l3_path[0]).with_suffix(".tif"), driver="COG")
 You have completed the notebook on gridding and format conversion of PACE OCI L2 data. We suggest looking at the notebook on "Machine Learning with Satellite Data" to explore some more advanced analysis methods.
 
 </div>
-
-[back to top](#Contents)

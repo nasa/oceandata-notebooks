@@ -23,7 +23,7 @@ The following notebooks are **prerequisites** for this tutorial.
 
 - Learn with OCI: [Data Access][oci-data-access]
 - Learn with OCI: [Installing and Running OCSSW Command-line Tools][ocssw_install]
-- Learn with OCI: [Run Level-2 Generator (l2gen) OCSSW program on OCI data][ocssw_l2gen]
+- Learn with OCI: [Run Level-2 Generator (l2gen) OCSSW program on OCI data](./oci_ocssw_l2gen)
 
 </div>
 
@@ -42,7 +42,6 @@ This notebook was desgined to use cloud-enabled OCSSW programs, which are availa
 [edl]: https://urs.earthdata.nasa.gov/
 [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
 [ocssw_install]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_ocssw_install/
-[ocssw_l2gen]: tbd
 
 ## Summary
 
@@ -498,7 +497,7 @@ plt.show()
 
 +++
 
-There are many ways you can configure GIOP to run to best suit your research needs. Let's say you want to run the GIOP with a dynamic $S_{dg}$ calculation instead of the default fixed value at 0.018 $nm^{-1}$. We can choose to use the QAA dynamic calculation instead by setting giop_adg_opt to 2 (exponential with exponent derived via [Lee et al. (2002)](Lee), and removing giop_adg_s from the l2prod in the par file:
+There are many ways you can configure GIOP to run to best suit your research needs. Let's say you want to run the GIOP with a dynamic $S_{dg}$ calculation instead of the default fixed value at 0.018 $nm^{-1}$. We can choose to use the QAA dynamic calculation instead by setting giop_adg_opt to 2 (exponential with exponent derived via [Lee et al. (2002)][Lee], and removing giop_adg_s from the l2prod in the par file:
 
 [Lee]: https://doi.org/10.1364/AO.41.005755
 

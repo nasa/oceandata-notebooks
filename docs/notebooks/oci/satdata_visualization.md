@@ -23,7 +23,7 @@ Updated Nov 12, 2025
 
 The following notebooks are **prerequisites** for this tutorial:
 
-- [Earthdata Cloud Access](../earthdata_cloud_access)
+- [Data Access](./oci_data_access)
 
 </div>
 
@@ -173,10 +173,6 @@ def pcolormesh(rgb):
     axes.set_aspect("equal")
 ```
 
-[back to top](#Contents)
-
-+++
-
 ## 2. Easy Global Chlorophyll-a Map
 
 +++
@@ -293,10 +289,6 @@ ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, color="white", linewidth=
 ax.coastlines(color="white", linewidth=1)
 plt.show()
 ```
-
-[back to top](#Contents)
-
-+++
 
 ## 4. Complete Scene in True Color
 
@@ -436,10 +428,6 @@ rhos_rgb_enhanced = enhance(rhos_rgb, contrast=1.2, brightness=1.1, saturation=0
 pcolormesh(rhos_rgb_enhanced)
 ```
 
-[back to top](#Contents)
-
-+++
-
 ## 5. False Color for Ice Clouds
 
 +++
@@ -467,10 +455,6 @@ pcolormesh(rhos_ice_enhanced)
 ```
 
 Here, the ice clouds are purple and water vapor clouds are white, like we can see in the northwestern region of the scene.
-
-[back to top](#Contents)
-
-+++
 
 ## 6. Full Spectra from Global Oceans
 
@@ -561,10 +545,6 @@ slider
 ```{code-cell} ipython3
 (band_dmap * points + spectrum_dmap).opts(shared_axes=False)
 ```
-
-[back to top](#Contents)
-
-+++
 
 ## 7. Animation from Multiple Angles
 
@@ -715,7 +695,3 @@ This scene is a great example of multi-layer clouds. You can use the parallax ef
 The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
 
 Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By default, `matplotlib` will not display an animation. To view the animation, we saved it as a file and displayed the result in the next cell. Alternatively, you could change the default by executing `%matplotlib widget`. The `widget` setting, which works in Jupyter Lab but not on a static website, you can use `plt.show()` as well as `an.pause()` and `an.resume()`.
-
-+++
-
-[back to top](#Contents)

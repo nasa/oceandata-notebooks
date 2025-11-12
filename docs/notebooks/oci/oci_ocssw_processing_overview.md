@@ -210,7 +210,7 @@ Using this pattern, run the `l2gen` command with the single argument `help` to v
 To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can also indicate a data suite or L2 products; in this example, we will proceed with chlorophyll *a* estimates.
 
 Parameters can be passed to OCSSW programs through a text file. They can also be passed as arguments, but writing to a text file leaves a clear processing record. Define the parameters in a dictionary, then send it to the `write_par` function
-defined in the [Setup](#1.-Setup) section.
+defined in the [Setup](#setup) section.
 
 We can limit the geographical boundaries of the processing. Here we use the `location` variable to set Northwestern and Southeastern boundaries.
 
