@@ -48,9 +48,8 @@ At the end of this notebook you will know:
 3. [Global Oceans in Quasi True Color](#3.-Global-Oceans-in-Quasi-True-Color)
 4. [Complete Scene in True Color](#4.-Complete-Scene-in-True-Color)
 5. [False Color for Ice Clouds](#5.-False-Color-for-Ice-Clouds)
-6. [Phytoplankton in False Color](#6.-Phytoplankton-in-False-Color)
-7. [Full Spectra from Global Oceans](#7.-Full-Spectra-from-Global-Oceans)
-8. [Animation from Multiple Angles](#8.-Animation-from-Multiple-Angles)
+6. [Full Spectra from Global Oceans](#7.-Full-Spectra-from-Global-Oceans)
+7. [Animation from Multiple Angles](#8.-Animation-from-Multiple-Angles)
 
 +++
 
@@ -484,235 +483,9 @@ Here, the ice clouds are purple and water vapor clouds are white, like we can se
 
 [back to top](#Contents)
 
-+++
-
-A uniquely innovative type of product from PACE is the phytoplankton community composition, using the MOANA algorithm. It gives the abundance of three types of plankton: picoeucaryotes, prochlorococcus and synechococcus. These products were used to create the first light image for PACE. Let's see how.
-
-We first open the dataset that is created with l2gen. This will be covered in the OCSSW tutorial.
-
-```{code-cell} ipython3
-path = "/home/jovyan/shared/pace-hackweek-2024/PACE_OCI.20240309T115927.L2_MOANA.V2.nc"
-
-datatree = open_datatree(path)
-dataset = xr.merge(datatree.to_dict().values())
-dataset
-```
-
-We can see the MOANA products, RGB bands and other level-2 products in the dataset. We still need to set the spatial variables as coordinates of the dataset.
-
-```{code-cell} ipython3
-dataset = dataset.set_coords(("longitude", "latitude"))
-```
-
-Let's make a quick MOANA product plot to see if everything looks normal.
-
-```{code-cell} ipython3
-artist = dataset["picoeuk_moana"].plot(
-    x="longitude", y="latitude", cmap="viridis", vmin=0, robust="true"
-)
-plt.gca().set_aspect("equal")
-```
-
-Now we create a RGB image using our three rhos bands and the usual log-transform, vmin/vmax adjustments and normalization. We also project the map using cartopy.
-
-```{code-cell} ipython3
-# OCI True Color 1 band -min/max adjusted
-vmin = 0.01
-vmax = 1.04  # Above 1 because whites can be higher than 1
-# ----
-
-rhos_red = dataset["rhos_645"]
-rhos_green = dataset["rhos_555"]
-rhos_blue = dataset["rhos_465"]
-red = np.log(rhos_red / 0.01) / np.log(1 / 0.01)
-green = np.log(rhos_green / 0.01) / np.log(1 / 0.01)
-blue = np.log(rhos_blue / 0.01) / np.log(1 / 0.01)
-red = red.where((red >= vmin) & (red <= vmax), vmin, vmax)
-green = green.where((green >= vmin) & (green <= vmax), vmin, vmax)
-blue = blue.where((blue >= vmin) & (blue <= vmax), vmin, vmax)
-rgb = np.dstack((red, green, blue))
-rgb = (rgb - np.nanmin(rgb)) / (np.nanmax(rgb) - np.nanmin(rgb))  # normalize
-
-fig = plt.figure(figsize=(5, 5))
-axes = fig.add_subplot(projection=ccrs.PlateCarree())
-artist = axes.imshow(
-    rgb,
-    extent=(
-        dataset.longitude.min(),
-        dataset.longitude.max(),
-        dataset.latitude.min(),
-        dataset.latitude.max(),
-    ),
-    origin="lower",
-    transform=ccrs.PlateCarree(),
-    interpolation="none",
-)
-```
-
-We then enhance the image.
-
-```{code-cell} ipython3
-:lines_to_next_cell: 0
-
-# Image adjustments: change values from 0 to 2, 1 being unchanged
-contrast = 1.72
-brightness = 1
-sharpness = 2
-saturation = 1.3
-gamma = 0.43
-# ----
-
-normalized_image = (rgb - rgb.min()) / (rgb.max() - rgb.min())
-normalized_image = normalized_image**gamma
-normalized_image = (normalized_image * 255).astype(np.uint8)
-image_pil = Image.fromarray(normalized_image)
-enhancer = ImageEnhance.Contrast(image_pil)
-image_enhanced = enhancer.enhance(contrast)
-enhancer = ImageEnhance.Brightness(image_enhanced)
-image_enhanced = enhancer.enhance(brightness)
-enhancer = ImageEnhance.Sharpness(image_enhanced)
-image_enhanced = enhancer.enhance(sharpness)
-enhancer = ImageEnhance.Color(image_enhanced)
-image_enhanced = enhancer.enhance(saturation)
-enhanced_image_np = np.array(image_enhanced) / 255.0  # Normalize back to [0, 1] range
-
-fig = plt.figure(figsize=(5, 5))
-axes = fig.add_subplot(projection=ccrs.PlateCarree())
-extent = (
-    dataset.longitude.min(),
-    dataset.longitude.max(),
-    dataset.latitude.min(),
-    dataset.latitude.max(),
-)
-artist = axes.imshow(
-    enhanced_image_np,
-    extent=extent,
-    origin="lower",
-    transform=ccrs.PlateCarree(),
-    alpha=1,
-)
-```
-
-We then project the MOANA products on the same grid. We can look at Synechococcus as an example.
-
-```{code-cell} ipython3
-fig = plt.figure(figsize=(5, 5))
-axes = fig.add_subplot(projection=ccrs.PlateCarree())
-extent = (
-    dataset.longitude.min(),
-    dataset.longitude.max(),
-    dataset.latitude.min(),
-    dataset.latitude.max(),
-)
-artist = axes.imshow(
-    dataset["syncoccus_moana"],
-    extent=extent,
-    origin="lower",
-    transform=ccrs.PlateCarree(),
-    interpolation="none",
-    cmap="Reds",
-    vmin=0,
-    vmax=35000,
-    alpha=1,
-)
-```
-
-To layer the three products on our true-color image, we will add transparency to our colormaps for the three plankton products. Look at the Synechococcus product again.
-
-```{code-cell} ipython3
-cmap_greens = pl.cm.Greens  # Get original color map
-my_cmap_greens = cmap_greens(np.arange(cmap_greens.N))
-my_cmap_greens[:, -1] = np.linspace(0, 1, cmap_greens.N)  # Set alpha for transparency
-my_cmap_greens = ListedColormap(my_cmap_greens)  # Create new colormap
-cmap_reds = pl.cm.Reds
-my_cmap_reds = cmap_reds(np.arange(cmap_reds.N))
-my_cmap_reds[:, -1] = np.linspace(0, 1, cmap_reds.N)
-my_cmap_reds = ListedColormap(my_cmap_reds)
-cmap_blues = pl.cm.Blues
-my_cmap_blues = cmap_blues(np.arange(cmap_blues.N))
-my_cmap_blues[:, -1] = np.linspace(0, 1, cmap_blues.N)
-my_cmap_blues = ListedColormap(my_cmap_blues)
-
-fig = plt.figure(figsize=(5, 5))
-axes = fig.add_subplot(projection=ccrs.PlateCarree())
-extent = (
-    dataset.longitude.min(),
-    dataset.longitude.max(),
-    dataset.latitude.min(),
-    dataset.latitude.max(),
-)
-artist = axes.imshow(
-    dataset["syncoccus_moana"],
-    extent=extent,
-    origin="lower",
-    transform=ccrs.PlateCarree(),
-    interpolation="none",
-    cmap=my_cmap_reds,
-    vmin=0,
-    vmax=35000,
-    alpha=1,
-)
-```
-
-We finally assemble the image using the plankton layers and the true-color base layer.
-
-```{code-cell} ipython3
-fig = plt.figure(figsize=(7, 7))
-axes = plt.subplot(projection=ccrs.PlateCarree())
-extent = (
-    dataset.longitude.min(),
-    dataset.longitude.max(),
-    dataset.latitude.min(),
-    dataset.latitude.max(),
-)
-axes.imshow(
-    enhanced_image_np,
-    extent=extent,
-    origin="lower",
-    transform=ccrs.PlateCarree(),
-    alpha=1,
-)
-axes.imshow(
-    dataset["prococcus_moana"],
-    extent=extent,
-    origin="lower",
-    transform=ccrs.PlateCarree(),
-    interpolation="none",
-    cmap=my_cmap_blues,
-    vmin=0,
-    vmax=300000,
-    alpha=0.5,
-)
-axes.imshow(
-    dataset["syncoccus_moana"],
-    extent=extent,
-    origin="lower",
-    transform=ccrs.PlateCarree(),
-    interpolation="none",
-    cmap=my_cmap_reds,
-    vmin=0,
-    vmax=20000,
-    alpha=0.5,
-)
-axes.imshow(
-    dataset["picoeuk_moana"],
-    extent=extent,
-    origin="lower",
-    transform=ccrs.PlateCarree(),
-    interpolation="none",
-    cmap=my_cmap_greens,
-    vmin=0,
-    vmax=50000,
-    alpha=0.5,
-)
-plt.show()
-```
-
-[back to top](#Contents)
-
 +++ {"lines_to_next_cell": 2}
 
-## 7. Full Spectra from Global Oceans
+## 6. Full Spectra from Global Oceans
 
 +++
 
@@ -806,7 +579,7 @@ slider
 
 +++
 
-## 8. Animation from Multiple Angles
+## 7. Animation from Multiple Angles
 
 Let's look at the multi-angular datasets from HARP2. First, download some HARP2 Level-1C data using the short_name value "PACE_HARP2_L1C_SCI" in earthaccess.search_data. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface.
 
