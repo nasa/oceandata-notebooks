@@ -1,12 +1,17 @@
-name: Deploy website
+name: Update website
 on:
-  workflow_run:
-    workflows: ["Build website"]
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
     types:
-      - completed
+      - closed
 jobs:
+  call:
+    if: ${{ github.event.pull_request.merged }}
+    uses: ./.github/workflows/build-website.yaml
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: call
     permissions:
       pages: write
       id-token: write

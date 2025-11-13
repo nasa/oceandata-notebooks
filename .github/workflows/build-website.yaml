@@ -1,9 +1,8 @@
 name: Build website
 on:
-  workflow_dispatch:
   schedule:
    - cron: "16 8 * * 4"
-  pull_request:
+  workflow_call:
 jobs:
   build:
     runs-on: ubuntu-latest

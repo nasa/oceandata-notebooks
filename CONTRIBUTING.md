@@ -249,7 +249,9 @@ These are Conda packages that are also part of the dependencies; we prefer PyPI 
 
 +++
 
-## (WIP) Automation and Checks
+## Automation and Checks (WIP)
+
++++
 
 We use several automations to get improve code formatting, and run checks or update.
 These are implemented using the [pre-commit] tool from the development environment.
