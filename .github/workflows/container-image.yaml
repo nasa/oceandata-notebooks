@@ -1,15 +1,23 @@
 name: Container image
 on:
   push:
-    paths:
+    paths: &paths
       - .github/workflows/container-image.yaml
       - container/**
+  pull_request:
+    paths: *paths
+    branches:
+      - main
+    types:
+      - closed
+  schedule:
+    - cron: "32 8 * * *"
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/oceandata-jupyterlab
+      IMAGE_TITLE: oceandata-jupyterlab
       BUILDX_NO_DEFAULT_ATTESTATIONS: 1
     permissions:
       packages: write
@@ -23,12 +31,14 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_TITLE }}
           tags: |
             type=sha,prefix=
-            type=raw,value=latest,enable=true
+            type=schedule,pattern={{date 'YYMMDD'}}
+            type=raw,value=latest,enable=${{ github.event_name == 'pull_request' }}
           labels: |
-            org.opencontainers.image.description="environment with JupyterLab for the oceandata-notebooks"
+            org.opencontainers.image.title=oceandata-jupyterlab
+            org.opencontainers.image.description=environment_with_JupyterLab_for_the_oceandata-notebooks
             repo2docker.repo=https://github.com/${{ github.repository }}
             repo2docker.ref=${{ github.ref }}
       - name: Build args
@@ -39,6 +49,7 @@ jobs:
           LABELS=($DOCKER_METADATA_OUTPUT_LABELS)
           LABELS=${LABELS[@]/#/--label }
           echo "LABELS=$LABELS" >> "$GITHUB_ENV"
+          echo "IMAGE_NAME=$REGISTRY/$GITHUB_REPOSITORY_OWNER/$IMAGE_TITLE" >> "$GITHUB_ENV"
       - name: Authenticate with registry
         uses: docker/login-action@v3
         with:
