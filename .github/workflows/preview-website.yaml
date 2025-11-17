@@ -4,11 +4,11 @@ on:
   pull_request:
     branches:
       - workflow
+env:
+  TEST: ${{ vars.TEST }}
 jobs:
   # call:
   #   uses: ./.github/workflows/build-website.yaml
-  env:
-   TEST: ${{ vars.TEST }}
   deploy:
     # needs: call
     # permissions:
