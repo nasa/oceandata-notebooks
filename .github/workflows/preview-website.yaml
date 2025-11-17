@@ -7,6 +7,8 @@ on:
 jobs:
   # call:
   #   uses: ./.github/workflows/build-website.yaml
+  env:
+   TEST: ${{ vars.TEST }}
   deploy:
     # needs: call
     # permissions:
