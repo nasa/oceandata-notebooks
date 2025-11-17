@@ -3,7 +3,7 @@ on:
   push:
 jobs:
   call:
-    if: ${{ github.repository_owner }} != 'nasa'
+    if: ${{ github.repository_owner != 'nasa' }}
     uses: ./.github/workflows/build-website.yaml
     secrets: inherit
   deploy:
@@ -16,9 +16,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Debug
-        run: |
-          echo ${{ github.repository_owner }}
-      # - name: Publish
-      #   id: deployment
-      #   uses: actions/deploy-pages@v4
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v4
