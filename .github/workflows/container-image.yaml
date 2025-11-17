@@ -2,7 +2,7 @@ name: Container image
 on:
   push:
     paths:
-      - .github/workflows/container-image.yml
+      - .github/workflows/container-image.yaml
       - container/**
 jobs:
   build_and_push:
