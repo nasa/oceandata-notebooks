@@ -34,7 +34,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_TITLE }}
           tags: |
             type=sha,prefix=
-            type=schedule,pattern={{date 'YYMMDD'}}
+            type=schedule,pattern={{date 'YYYYMMDD'}}
             type=raw,value=latest,enable=${{ github.event_name == 'pull_request' }}
           labels: |
             org.opencontainers.image.title=oceandata-jupyterlab
