@@ -1,17 +1,18 @@
 name: Container image
 on:
-  push:
-    paths: &paths
+  pull_request:
+    paths:
       - .github/workflows/container-image.yaml
       - container/**
-  pull_request:
-    paths: *paths
     branches:
       - main
     types:
+      - opened
+      - synchronize
+      - reopened
       - closed
   schedule:
-    - cron: "32 8 * * *"
+    - cron: "32 16 * * *"
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
@@ -35,7 +36,7 @@ jobs:
           tags: |
             type=sha,prefix=
             type=schedule,pattern={{date 'YYYYMMDD'}}
-            type=raw,value=latest,enable=${{ github.event_name == 'pull_request' }}
+            type=raw,value=latest,enable=${{ github.event.pull_request.merged }}
           labels: |
             org.opencontainers.image.title=oceandata-jupyterlab
             org.opencontainers.image.description=environment_with_JupyterLab_for_the_oceandata-notebooks
