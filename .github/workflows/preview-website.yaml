@@ -1,5 +1,6 @@
 name: Preview website
 on:
+  push:
   pull_request:
     branches:
       - workflow
@@ -16,9 +17,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Publish
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # - name: Publish
+      #   id: deployment
+      #   uses: actions/deploy-pages@v4
       - name: Debug
         id: debug
         run: |
