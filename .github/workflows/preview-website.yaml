@@ -5,13 +5,13 @@ on:
     branches:
       - workflow
 jobs:
-  call:
-    uses: ./.github/workflows/build-website.yaml
+  # call:
+  #   uses: ./.github/workflows/build-website.yaml
   deploy:
-    needs: call
-    permissions:
-      pages: write
-      id-token: write
+    # # needs: call
+    # permissions:
+    #   pages: write
+    #   id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -23,4 +23,5 @@ jobs:
       - name: Debug
         id: debug
         run: |
-          echo "page_url: ${{ steps.deployment.outputs.page_url }}"
+          echo $TEST
+          
