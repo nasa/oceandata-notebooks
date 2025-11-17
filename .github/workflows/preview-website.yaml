@@ -8,13 +8,13 @@ jobs:
   # call:
   #   uses: ./.github/workflows/build-website.yaml
   deploy:
-    # # needs: call
+    # needs: call
     # permissions:
     #   pages: write
     #   id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # environment:
+    #   name: github-pages
+    #   url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       # - name: Publish
@@ -24,4 +24,3 @@ jobs:
         id: debug
         run: |
           echo $TEST
-          
