@@ -16,6 +16,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Publish
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Debug
+        run: |
+          echo ${{ github.repository_owner }}
+      # - name: Publish
+      #   id: deployment
+      #   uses: actions/deploy-pages@v4
