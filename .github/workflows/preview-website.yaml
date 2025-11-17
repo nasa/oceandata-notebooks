@@ -5,7 +5,8 @@ on:
     branches:
       - workflow
 env:
-  TEST: ${{ vars.TEST }}
+  TEST: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  FAIL: ${{ secrets.FAIL }}
 jobs:
   # call:
   #   uses: ./.github/workflows/build-website.yaml
@@ -26,3 +27,4 @@ jobs:
         id: debug
         run: |
           echo $TEST
+          echo $FAIL
