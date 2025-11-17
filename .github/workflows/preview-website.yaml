@@ -21,4 +21,5 @@ jobs:
         uses: actions/deploy-pages@v4
       - name: Debug
         id: debug
-        run: echo "page_url: ${{ steps.deployment.outputs.page_url }}"
+        run: |
+          echo "page_url: ${{ steps.deployment.outputs.page_url }}"
