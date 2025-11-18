@@ -33,6 +33,7 @@ The [Data Access](notebooks/oci/oci_data_access) notebook steps through differen
 An advantage that comes with community-maintained JupyterHubs is having a complete Jupyter ecosystem at your fingertips.
 Even so, the default configuration will not be capable of running all the Help Hub tutorials.
 Here are two ways to get a Jupyter ecosystem that's ready to run them all:
+
   1. **On a bring-your-own-image capable JupyterHub**: run a {term}`container` built for CryoCloud
   1. **Without a JupyterHub**: run JupyterLab from a {term}`Conda` environment
 
