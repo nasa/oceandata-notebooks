@@ -3,6 +3,7 @@ on:
   schedule:
    - cron: "16 8 * * 4"
   workflow_call:
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
