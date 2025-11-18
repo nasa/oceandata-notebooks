@@ -1,3 +1,19 @@
+---
+jupyter:
+  jupytext:
+    cell_metadata_filter: all,-trusted
+    notebook_metadata_filter: -all,kernelspec,jupytext
+    text_representation:
+      extension: .md
+      format_name: markdown
+      format_version: '1.3'
+      jupytext_version: 1.16.7
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
+---
+
 # SeaDAS GUI
 
 ## Summary
@@ -9,8 +25,7 @@ The SeaDAS GUI provides an intuitive interface for users who prefer visual tools
 
 - Navigating the SeaDAS GUI interface
 - Interactive data loading and visualization
-- Point-and-click processing workflows
-- Quality control and validation techniques
+- Point-and-click processing and analysis workflows
 - Exporting results for further analysis
 
 ## Video Training Playlists
@@ -19,20 +34,21 @@ These video tutorials provide comprehensive training on using SeaDAS GUI for oce
 
 ### Getting Started with SeaDAS GUI
 
-- [SeaDAS Installation and Setup](https://www.youtube.com/playlist?list=EXAMPLE1) - Complete installation guide and initial setup
-- [SeaDAS GUI Overview](https://www.youtube.com/playlist?list=EXAMPLE2) - Tour of the interface and main features
+- [SeaDAS | Introduction 30th Anniversary](https://www.youtube.com/watch?v=GZG2saE9ecc&list=PLf60TttfDm30SjrRVBSXptm0tGRax5fKq&index=6&pp=iAQB0gcJCQgKAYcqIYzv) 
+- [ SeaDAS | Getting Started : Installation : Install and Open SeaDAS (on a Mac OS)](https://www.youtube.com/watch?v=xYjfd--JLFI&list=PLf60TttfDm30SjrRVBSXptm0tGRax5fKq&index=1&pp=iAQB)
 
-### Data Processing Workflows
+### SeaDAS Science Processors
 
-- [Level-1 to Level-2 Processing](https://www.youtube.com/playlist?list=EXAMPLE3) - Step-by-step atmospheric correction and product generation
-- [Level-3 Binning and Mapping](https://www.youtube.com/playlist?list=EXAMPLE4) - Creating time series and composite products
+- [SeaDAS | Science Processors : Installation : Set up Earthdata Login access](https://www.youtube.com/watch?v=HR-5-Q5Emfg&list=PLf60TttfDm30AkfKNAJU6lW_YZODNCFZB&index=1&pp=iAQB0gcJCQgKAYcqIYzv)
+- [SeaDAS | Science Processors : Installation : Set up Python for the Science Processors (Mac, Linux)](https://www.youtube.com/watch?v=bvyxNYY_C4A&list=PLf60TttfDm30AkfKNAJU6lW_YZODNCFZB&index=2&pp=iAQB)
+- [SeaDAS | Science Processors : Installation : Install and Update Science Processors (OCSSW)](https://www.youtube.com/watch?v=lvyWC77gaYA&list=PLf60TttfDm30AkfKNAJU6lW_YZODNCFZB&index=3&pp=iAQB)
 
-### Visualization and Analysis
+### SeaDAS Tutorials: General Tools
 
-- [Data Visualization Tools](https://www.youtube.com/playlist?list=EXAMPLE5) - Plotting, color scaling, and image export
-- [Quality Assessment](https://www.youtube.com/playlist?list=EXAMPLE6) - Using quality flags and validation tools
+- [SeaDAS | General Tools : Layer Manager - Manage & Edit Graphic Image Layers](https://www.youtube.com/watch?v=wx08vP2JorA&list=PLf60TttfDm31z76SS4l4neSOAbyjzyQhq&index=1&pp=iAQB)
+- [SeaDAS | General Tools : Pins - Create and Manage Pin Location Markers](https://www.youtube.com/watch?v=PBt0Ye2tqvY&list=PLf60TttfDm31z76SS4l4neSOAbyjzyQhq&index=2&pp=iAQB)
+- [SeaDAS | General Tools : Export Image - Create Publication Quality Scene Images](https://www.youtube.com/watch?v=2UIfXDjfpEs&list=PLf60TttfDm31z76SS4l4neSOAbyjzyQhq&index=3&pp=iAQB)
 
-### Advanced Features
-
-- [Custom Algorithms](https://www.youtube.com/playlist?list=EXAMPLE7) - Implementing and running custom processing algorithms
-- [Batch Processing](https://www.youtube.com/playlist?list=EXAMPLE8) - Automating workflows for large datasets
+### More about SeaDAS
+- [SeaDAS 101: Data Processing & Analysis Training](https://seadas.gsfc.nasa.gov/tutorials/seadas101/)
+- [SeaDAS Ocean Optics 2024 Tutorial](https://seadas.gsfc.nasa.gov/files/docs/2024_OceanOptics_final.pdf)
