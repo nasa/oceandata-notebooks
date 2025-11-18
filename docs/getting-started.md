@@ -33,16 +33,25 @@ The [Data Access](notebooks/oci/oci_data_access) notebook steps through differen
 An advantage that comes with community-maintained JupyterHubs is having a complete Jupyter ecosystem at your fingertips.
 Even so, the default configuration will not be capable of running all the Help Hub tutorials.
 Here are two ways to get a Jupyter ecosystem that's ready to run them all:
+
   1. **On a bring-your-own-image capable JupyterHub**: run a {term}`container` built for CryoCloud
   1. **Without a JupyterHub**: run JupyterLab from a {term}`Conda` environment
 
-For the first option, login to your JupyterHub and start a server from the `ghcr.io/nasa/oceandata-notebooks:latest` image.
+### Using a Container
+
+For the first option, login to your JupyterHub and start a server from the `ghcr.io/nasa/oceandata-jupyterlab` image.
+We recommend using the "latest" version of this image to create your container,
+but note that this version is dynamic and will be updated without warning.
+Use this version by entering `ghcr.io/nasa/oceandata-jupyterlab:latest`, with no spaces, as depicted below.
+Alternatively, to avoid any updates, use a date string formatted as "YYYYMMDD" for the version in place of "latest".
 
 ```{image} images/custom-image.png
 :alt: Start a server with the image
 :width: 80%
 :align: center
 ```
+
+### Using a Conda Environment
 
 For the second option, download our {download}`conda-lock.yml <../container/conda-lock.yml>` configuration file,
 which specifies exact versions of packages on {term}`Conda-Forge` and {term}`PyPI` that must be installed.
