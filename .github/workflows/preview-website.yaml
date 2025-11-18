@@ -1,14 +1,11 @@
-name: Update website
+name: Preview website
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
+  push:
 jobs:
   call:
-    if: ${{ github.event.pull_request.merged }}
+    if: ${{ github.repository_owner != 'nasa' }}
     uses: ./.github/workflows/build-website.yaml
+    secrets: inherit
   deploy:
     needs: call
     permissions:

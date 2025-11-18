@@ -1,32 +1,57 @@
 name: Container image
 on:
-  workflow_dispatch:
-  push:
+  pull_request:
     paths:
-      - .github/workflows/container-image.yml
+      - .github/workflows/container-image.yaml
       - container/**
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+  schedule:
+    - cron: "32 16 * * *"
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
+      IMAGE_NAME: oceandata-jupyterlab
+      BUILDX_NO_DEFAULT_ATTESTATIONS: 1
     permissions:
-      contents: read
       packages: write
     steps:
-      - name: Export variables
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const registry = process.env.REGISTRY
-            const repo = process.env.GITHUB_REPOSITORY
-            const hash = process.env.GITHUB_SHA.substring(0, 12)
-            core.exportVariable('INPUT_IMAGE_NAME', `${registry}/${repo}`)
-            core.exportVariable('SHA_NAME', `${registry}/${repo}:${hash}`)
       - name: Checkout container files
         uses: actions/checkout@v5
         with:
           sparse-checkout: container
+      - name: Repository metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=schedule,pattern={{date 'YYYYMMDD'}}
+            type=raw,value=latest,enable=${{ github.event.pull_request.merged }}
+          labels: |
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
+            org.opencontainers.image.description=environment_with_JupyterLab_for_the_oceandata-notebooks
+            repo2docker.repo=https://github.com/${{ github.repository }}
+            repo2docker.ref=${{ github.ref }}
+      - name: Build args
+        run: |
+          echo "CACHE=$REGISTRY/$GITHUB_REPOSITORY_OWNER/$IMAGE_NAME:cache" >> "$GITHUB_ENV"
+          TAGS=($DOCKER_METADATA_OUTPUT_TAGS)
+          echo "FIRST_TAG=${TAGS[0]}" >> "$GITHUB_ENV"
+          TAGS=${TAGS[@]/#/--DockerEngine.extra_buildx_build_args=--tag=}
+          echo "TAGS=$TAGS" >> "$GITHUB_ENV"
+          LABELS=($DOCKER_METADATA_OUTPUT_LABELS)
+          LABELS=${LABELS[@]/#/--label }
+          echo "LABELS=$LABELS" >> "$GITHUB_ENV"
       - name: Authenticate with registry
         uses: docker/login-action@v3
         with:
@@ -49,11 +74,11 @@ jobs:
           --user-id 1000
           --user-name jovyan
           --subdir container
-          --image-name ${SHA_NAME}
+          --image-name "$FIRST_TAG"
           --target-repo-dir /srv/container
-          --appendix "$(< ${PWD}/container/appendix)"
-          --label "repo2docker.ref=${GITHUB_REF}"
-          --label "repo2docker.repo=https://github.com/${GITHUB_REPOSITORY}"
-          --DockerEngine.extra_buildx_build_args="--cache-from=type=registry,ref=${INPUT_IMAGE_NAME}:buildcache"
-          --DockerEngine.extra_buildx_build_args="--cache-to=type=registry,ref=${INPUT_IMAGE_NAME}:buildcache,mode=max"
-          ${PWD}
+          --appendix "$(< $PWD/container/appendix)"
+          --DockerEngine.extra_buildx_build_args=--cache-from="type=registry,ref=$CACHE"
+          --DockerEngine.extra_buildx_build_args=--cache-to="type=registry,ref=$CACHE,mode=max"
+          $TAGS
+          $LABELS
+          $PWD
