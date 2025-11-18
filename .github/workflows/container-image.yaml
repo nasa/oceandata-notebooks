@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
-      IMAGE_TITLE: oceandata-jupyterlab
+      IMAGE_NAME: oceandata-jupyterlab
       BUILDX_NO_DEFAULT_ATTESTATIONS: 1
     permissions:
       packages: write
@@ -32,20 +32,22 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_TITLE }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags: |
             type=sha,prefix=
             type=schedule,pattern={{date 'YYYYMMDD'}}
             type=raw,value=latest,enable=${{ github.event.pull_request.merged }}
           labels: |
-            org.opencontainers.image.title=oceandata-jupyterlab
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
             org.opencontainers.image.description=environment_with_JupyterLab_for_the_oceandata-notebooks
             repo2docker.repo=https://github.com/${{ github.repository }}
             repo2docker.ref=${{ github.ref }}
       - name: Build args
         run: |
+          echo "CACHE=$REGISTRY/$GITHUB_REPOSITORY_OWNER/$IMAGE_NAME:cache" >> "$GITHUB_ENV"
           TAGS=($DOCKER_METADATA_OUTPUT_TAGS)
-          TAGS=${TAGS[@]/#/--DockerEngine.extra_buildx_build_args=--tag=}
+          echo "FIRST_TAG=${TAGS[0]}" >> "$GITHUB_ENV"
+          TAGS=${TAGS[@]:1/#/--DockerEngine.extra_buildx_build_args=--tag=}
           echo "TAGS=$TAGS" >> "$GITHUB_ENV"
           LABELS=($DOCKER_METADATA_OUTPUT_LABELS)
           LABELS=${LABELS[@]/#/--label }
@@ -73,11 +75,11 @@ jobs:
           --user-id 1000
           --user-name jovyan
           --subdir container
-          --image-name $IMAGE_NAME
+          --image-name $FIRST_TAG
           --target-repo-dir /srv/container
           --appendix "$(< $PWD/container/appendix)"
-          --DockerEngine.extra_buildx_build_args=--cache-from="type=registry,ref=$IMAGE_NAME:cache"
-          --DockerEngine.extra_buildx_build_args=--cache-to="type=registry,ref=$IMAGE_NAME:cache,mode=max"
+          --DockerEngine.extra_buildx_build_args=--cache-from="type=registry,ref=$CACHE"
+          --DockerEngine.extra_buildx_build_args=--cache-to="type=registry,ref=$CACHE,mode=max"
           $TAGS
           $LABELS
           $PWD
