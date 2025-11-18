@@ -52,7 +52,6 @@ jobs:
           LABELS=($DOCKER_METADATA_OUTPUT_LABELS)
           LABELS=${LABELS[@]/#/--label }
           echo "LABELS=$LABELS" >> "$GITHUB_ENV"
-          echo "IMAGE_NAME=$REGISTRY/$GITHUB_REPOSITORY_OWNER/$IMAGE_TITLE" >> "$GITHUB_ENV"
       - name: Authenticate with registry
         uses: docker/login-action@v3
         with:
