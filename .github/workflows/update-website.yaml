@@ -1,13 +1,10 @@
 name: Update website
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types:
-      - closed
 jobs:
   call:
-    if: ${{ github.event.pull_request.merged }}
     uses: ./.github/workflows/build-website.yaml
   deploy:
     needs: call
