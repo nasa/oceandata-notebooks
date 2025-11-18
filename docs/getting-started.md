@@ -40,9 +40,10 @@ Here are two ways to get a Jupyter ecosystem that's ready to run them all:
 ### Using a Container
 
 For the first option, login to your JupyterHub and start a server from the `ghcr.io/nasa/oceandata-jupyterlab` image.
-Use the "latest" version of this image (as depicted below) to create your container for early work on a project,
+We recommend using the "latest" version of this image to create your container,
 but note that this version is dynamic and will be updated without warning.
-Alternatively, to avoid any updates, use a date string formatted as "YYYYMMDD" for the version.
+Use this version by entering `ghcr.io/nasa/oceandata-jupyterlab:latest`, with no spaces, as depicted below.
+Alternatively, to avoid any updates, use a date string formatted as "YYYYMMDD" for the version in place of "latest".
 
 ```{image} images/custom-image.png
 :alt: Start a server with the image
