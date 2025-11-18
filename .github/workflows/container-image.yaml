@@ -47,7 +47,8 @@ jobs:
           echo "CACHE=$REGISTRY/$GITHUB_REPOSITORY_OWNER/$IMAGE_NAME:cache" >> "$GITHUB_ENV"
           TAGS=($DOCKER_METADATA_OUTPUT_TAGS)
           echo "FIRST_TAG=${TAGS[0]}" >> "$GITHUB_ENV"
-          TAGS=${TAGS[@]:1/#/--DockerEngine.extra_buildx_build_args=--tag=}
+          LAST_TAGS=${TAGS[@]:1}
+          TAGS=${LAST_TAGS[@]/#/--DockerEngine.extra_buildx_build_args=--tag=}
           echo "TAGS=$TAGS" >> "$GITHUB_ENV"
           LABELS=($DOCKER_METADATA_OUTPUT_LABELS)
           LABELS=${LABELS[@]/#/--label }
@@ -74,7 +75,7 @@ jobs:
           --user-id 1000
           --user-name jovyan
           --subdir container
-          --image-name $FIRST_TAG
+          --image-name "$FIRST_TAG"
           --target-repo-dir /srv/container
           --appendix "$(< $PWD/container/appendix)"
           --DockerEngine.extra_buildx_build_args=--cache-from="type=registry,ref=$CACHE"
