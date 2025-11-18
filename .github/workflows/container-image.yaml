@@ -47,8 +47,7 @@ jobs:
           echo "CACHE=$REGISTRY/$GITHUB_REPOSITORY_OWNER/$IMAGE_NAME:cache" >> "$GITHUB_ENV"
           TAGS=($DOCKER_METADATA_OUTPUT_TAGS)
           echo "FIRST_TAG=${TAGS[0]}" >> "$GITHUB_ENV"
-          LAST_TAGS=${TAGS[@]:1}
-          TAGS=${LAST_TAGS[@]/#/--DockerEngine.extra_buildx_build_args=--tag=}
+          TAGS=${TAGS[@]/#/--DockerEngine.extra_buildx_build_args=--tag=}
           echo "TAGS=$TAGS" >> "$GITHUB_ENV"
           LABELS=($DOCKER_METADATA_OUTPUT_LABELS)
           LABELS=${LABELS[@]/#/--label }
