@@ -36,13 +36,20 @@ Here are two ways to get a Jupyter ecosystem that's ready to run them all:
   1. **On a bring-your-own-image capable JupyterHub**: run a {term}`container` built for CryoCloud
   1. **Without a JupyterHub**: run JupyterLab from a {term}`Conda` environment
 
-For the first option, login to your JupyterHub and start a server from the `ghcr.io/nasa/oceandata-notebooks:latest` image.
+### Using a Container
+
+For the first option, login to your JupyterHub and start a server from the `ghcr.io/nasa/oceandata-jupyterlab` image.
+Use the "latest" version of this image (as depicted below) to create your container for early work on a project,
+but note that this version is dynamic and will be updated without warning.
+Alternatively, to avoid any updates, use a date string formatted as "YYYYMMDD" for the version.
 
 ```{image} images/custom-image.png
 :alt: Start a server with the image
 :width: 80%
 :align: center
 ```
+
+### Using a Conda Environment
 
 For the second option, download our {download}`conda-lock.yml <../container/conda-lock.yml>` configuration file,
 which specifies exact versions of packages on {term}`Conda-Forge` and {term}`PyPI` that must be installed.
