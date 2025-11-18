@@ -8,7 +8,7 @@ Welcome to the repository of tutorials for users of the [Ocean Biology Distribut
 
 Head over to our [Help Hub] to access the published tutorials.
 
-[Help Hub]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
+[Help Hub]: https://nasa.github.io/oceandata-notebooks/
 
 ## For Notebook Authors and Reviewers
 
@@ -16,19 +16,20 @@ Please take a minute to familiarize yourself with the following information abou
 
 ### Edit Notebooks & Commit Markdown
 
-> [!Important]
+> [!IMPORTANT]
+> 
 > - Edit notebooks in JupyterLab so Jupytext can do its magic.
-> - When you first clone this repository, the `notebooks` folder will not exist!
+> - The entire `notebooks` folder is ignored by Git, so it's not present on GitHub.
 
-Keeping Jupyter Notebooks (.ipynb) in a code repository is tough for collaboration because Jupyter Notebooks contain large, binary outputs and metadata that frequently changes.
+Keeping Jupyter Notebooks (.ipynb) in a code repository is tough for collaboration because Jupyter Notebooks contain large, binary outputs and metadata that frequently change.
 By means of the [Jupytext] extension to JupyterLab, MyST Markdown (.md) files can be opened like notebooks without saving content troublesome for collaboration.
 Going one step further, Jupytext can pair an actual Jupyter Notebook file with a MyST Markdown file.
 That lets us enjoy the benefits of Jupyter Notebooks (e.g. saved outputs and metadata) while only storing MyST Markdown in the repository.
 
 What does this mean for authors and reviewers?
-You can use the Jupyter Notebooks in the `notebooks` folder normally, but you must commit the synchronous changes to the paired MyST Markdown files within the `book/notebooks` folder.
-To create the `notebooks` folder after cloning the repository, or when a new MyST Markdown file is pulled, run the following Terminal command.
-The Terminal command will synchronize, creating if necessary, the paired Jupyter Notebook files with all MyST Markdown files tracked by git.
+You can use Jupyter Notebooks in the `notebooks` folder normally, but you must commit the synchronous changes to the paired MyST Markdown files within the `docs/notebooks` folder.
+To create the `notebooks` folder after cloning the repository, or to add a paired Jupyter Notebook when a new MyST Markdown file is pulled, run the following Terminal command.
+It tells Jupytext to synchronize, creating if necessary, the paired Jupyter Notebook files with the MyST Markdown files tracked by Git.
 
 ```shell
 jupytext --sync $(git ls-files book/notebooks)
@@ -38,10 +39,11 @@ jupytext --sync $(git ls-files book/notebooks)
 
 ### Create a New Notebook
 
-> [!Note]
+> [!NOTE]
+> 
 > Create new notebooks by copying `COPYME.ipynb` into a suitable location within the `notebooks` folder.
 
-When you save your new notebook, watch for a new markdown file to appear in the `book/notebooks` folder and add that file to a commit.
+When you save your new notebook, watch for a new markdown file to appear in the `docs/notebooks` folder and add that file to a commit.
 
 ## Acknowledgements
 

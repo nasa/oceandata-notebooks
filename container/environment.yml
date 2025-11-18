@@ -1,0 +1,16 @@
+# MODIFIED FROM https://github.com/jupyterhub/repo2docker/blob/2025.08.0/repo2docker/buildpacks/conda/environment.py-3.11.yml
+# Generated on 2025-02-09 21:05:55 UTC
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11.*
+  - nodejs=20
+  - pip
+  - ipywidgets==8.* # https://github.com/jupyter-widgets/ipywidgets
+  - jupyter-offlinenotebook==0.3.* # https://github.com/manics/jupyter-offlinenotebook
+  - jupyter-resource-usage==1.* # https://github.com/jupyter-server/jupyter-resource-usage
+  - jupyter_server==2.* # https://github.com/jupyter-server/jupyter_server
+  - jupyterhub-singleuser==5.* # https://github.com/jupyterhub/jupyterhub
+  - jupyterlab==4.* # https://github.com/jupyterlab/jupyterlab
+  - notebook==7.* # https://github.com/jupyter/notebookcategory: container
+category: container

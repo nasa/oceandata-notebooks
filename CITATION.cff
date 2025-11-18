@@ -1,31 +1,53 @@
 cff-version: 1.2.0
-title: Data recipes for the Ocean Biology DAAC
+message: "Please cite these tutorials using these metadata."
+title: Tutorials using data produced by NASA's Ocean Biology Distributed Active Archive Center.
 authors:
   - family-names: Carroll
     given-names: Ian
-    affiliation: "NASA Goddard Space Flight Center; University of Maryland Baltimore County"
-    orcid: "https://orcid.org/0000-0002-3616-810X"
+    orcid: https://orcid.org/0000-0002-3616-810X
   - family-names: Windle
     given-names: Anna
-    affiliation: "NASA Goddard Space Flight Center; Science Systems and Applications, Inc."
-    orcid: "https://orcid.org/0000-0002-4852-5848"
+    orcid: https://orcid.org/0000-0002-4852-5848
   - family-names: Wang
     given-names: Guoqing
-    affiliation: "NASA Goddard Space Flight Center; Science Systems and Applications, Inc."
-    orcid: "https://orcid.org/0000-0001-5552-319X"
+    orcid: https://orcid.org/0000-0001-5552-319X
   - family-names: Poulin
     given-names: Carina
-    affiliation: "NASA Goddard Space Flight Center; Science Systems and Applications, Inc."
-    orcid: "https://orcid.org/0000-0001-5907-7473"
+    orcid: https://orcid.org/0000-0001-5907-7473
   - family-names: Foley
     given-names: Sean
-    affiliation: "NASA Goddard Space Flight Center; Morgan State University"
-    orcid: "https://orcid.org/0000-0001-5907-7473"
+    orcid: https://orcid.org/0000-0001-5907-7473
   - family-names: Gray
     given-names: Patrick
-    affiliation: "University of Maine; University of Haifa"
-    orcid: "https://orcid.org/0000-0002-8997-5255"
+    orcid: https://orcid.org/0000-0002-8997-5255
   - family-names: Holmes
     given-names: Eli
-    affiliation: "NOAA Fisheries; University of Washington"
-    orcid: "https://orcid.org/0000-0001-9128-8393"
+    orcid: https://orcid.org/0000-0001-9128-8393
+  - family-names: Caplan
+    given-names: Skye
+    orcid: https://orcid.org/0009-0004-8003-2551
+  - family-names: Allen
+    given-names: James
+    orcid: https://orcid.org/0000-0002-6765-7571
+  - family-names: Gao
+    given-names: Meng
+    orcid: https://orcid.org/0000-0002-5818-1639
+  - family-names: Danenhower
+    given-names: Max
+  - family-names: Chase
+    given-names: Alison
+    orcid: https://orcid.org/0000-0002-1862-9822
+  - family-names: Aryal
+    given-names: Kamal
+    orcid: https://orcid.org/0000-0003-0871-8650
+  - family-names: Fu
+    given-names: Guangliang
+    orcid: https://orcid.org/0000-0001-8916-0243
+  - family-names: Fasnacht
+    given-names: Zachary
+    orcid: https://orcid.org/0000-0002-0030-6187
+  - family-names: Werdell
+    given-names: Jeremy
+    orcid: https://orcid.org/0000-0002-3592-0152
+  - family-names: Knowles
+    given-names: Daniel

@@ -1,0 +1,97 @@
+format: jb-book
+root: index
+parts:
+
+  - caption: Welcome
+    chapters:
+      - file: home
+        title: Home
+      - file: getting-started
+      - file: team
+
+  - caption: Help Hub Core
+    chapters:
+
+      - file: sections/data-access-basics
+        sections:
+          - file: notebooks/oci/oci_data_access
+            title: Access Data Products
+          - file: notebooks/oci/oci_file_structure
+            title: Intro to Product Levels
+          - file: notebooks/modis/modis_explore_l2
+            title: Orientation to Level-2
+          - file: notebooks/modis/modis_explore_l3
+            title: Orientation to Level-3
+          - file: notebooks/oci/oci_grid_match
+            title: Export for GIS
+          - file: notebooks/hackweek/satellite_insitu_matchups.md
+            title: In situ Matchups
+          - file: notebooks/oci/ml_cloud_mask
+            title: Machine Learning Tutorial
+
+      - file: sections/visualizations
+        sections:
+          - file: notebooks/harp2/harp2_basic_visualizations
+            title: PACE-HARP2
+          - file: notebooks/spexone/spexone_basic_visualizations
+            title: PACE-SPEXone
+          - file: notebooks/oci/satdata_visualization.md
+            title: PACE-OCI Part I
+          - file: notebooks/oci/oci_data_visualization_part2.md
+            title: PACE-OCI Part II
+
+      - file: sections/ocean
+        sections:
+          - file: notebooks/hackweek/oci_gpig.md
+            title: GPig Phytoplankton Community Composition
+
+      - file: sections/cloud-atmosphere
+        sections:
+          - file: notebooks/harp2/harp2_l2_aerosol_product
+            title: Aerosols from PACE-HARP2
+          - file: notebooks/spexone/spexone_l2_aerosol_product
+            title: Aerosols from PACE-SPEXOne
+          - file: notebooks/oci/oci_no2
+            title: Nitrogen Dioxide from PACE-OCI
+
+      - file: sections/land
+        sections:
+          - file: notebooks/oci/oci_terrestrial_data
+            title: Land Surface from PACE-OCI
+
+  - caption: SeaDAS - OCSSW Toolbox
+    chapters:
+
+      - file: sections/seadas-toolbox
+        sections:
+          - file: sections/seadas-desktop
+            title: SeaDAS Desktop Application Resources
+          - file: notebooks/oci/oci_ocssw_install
+            title: Install SeaDAS Processors
+          - file: notebooks/oci/oci_ocssw_processing_overview
+            title: Basic Processing
+          - file: notebooks/oci/oci_ocssw_l2gen
+            title: Generate Level-2 Products
+          - file: notebooks/oci/oci_ocssw_giop
+            title: Run the GIOP Algorithm
+
+  - caption: Trainings and Events
+    chapters:
+
+      - file: sections/past-trainings
+        sections:
+          - url: https://pacehackweek.github.io/pace-2025/presentations/notebooks.html
+            title: PACE Data Hackweek 2025
+          - url: https://nmfs-opensci.github.io/EDMW-EarthData-Workshop-2025/
+            title: NOAA EDMW 2025 - PACE
+          - url: https://appliedsciences.nasa.gov/get-involved/training/english/arset-introduction-plankton-aerosol-cloud-ocean-ecosystem-pace
+            title: ARSET - Hyperspectral Water Quality Monitoring
+          - url: https://pacehackweek.github.io/pace-2024/intro.html
+            title: PACE Data Hackweek 2024
+          - url: https://www.us-ocb.org/pace-mission-training-activity/
+            title: PACE Training Lectures 2022
+
+  - caption: Reference
+    chapters:
+      # - file: reference/bibliography
+      - file: reference/glossary
