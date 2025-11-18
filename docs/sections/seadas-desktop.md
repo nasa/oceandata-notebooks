@@ -1,19 +1,3 @@
----
-jupyter:
-  jupytext:
-    cell_metadata_filter: all,-trusted
-    notebook_metadata_filter: -all,kernelspec,jupytext
-    text_representation:
-      extension: .md
-      format_name: markdown
-      format_version: '1.3'
-      jupytext_version: 1.16.7
-  kernelspec:
-    display_name: Python 3 (ipykernel)
-    language: python
-    name: python3
----
-
 # SeaDAS GUI
 
 ## Summary
@@ -50,5 +34,6 @@ These video tutorials provide comprehensive training on using SeaDAS GUI for oce
 - [SeaDAS | General Tools : Export Image - Create Publication Quality Scene Images](https://www.youtube.com/watch?v=2UIfXDjfpEs&list=PLf60TttfDm31z76SS4l4neSOAbyjzyQhq&index=3&pp=iAQB)
 
 ### More about SeaDAS
+
 - [SeaDAS 101: Data Processing & Analysis Training](https://seadas.gsfc.nasa.gov/tutorials/seadas101/)
 - [SeaDAS Ocean Optics 2024 Tutorial](https://seadas.gsfc.nasa.gov/files/docs/2024_OceanOptics_final.pdf)
