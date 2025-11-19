@@ -267,6 +267,9 @@ fig
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
 l3_pigments = L3_utils.estimate_inv_pigments(rrs, sss, sst, bbox)
 ```
 
