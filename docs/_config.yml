@@ -22,6 +22,7 @@ sphinx:
   recursive_update: true
   config:
     nb_merge_streams: true
+    nb_execution_raise_on_error: true
     suppress_warnings:
       - "myst.xref_missing"
       - "mystnb.unknown_mime_type"

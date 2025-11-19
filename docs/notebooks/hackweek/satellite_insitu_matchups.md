@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.16.7
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -52,11 +52,11 @@ Note: The `get_f0` function requires an OCI sensor data file from the OCSSW shar
 
 ```{code-cell} ipython3
 ---
+jupyter:
+  source_hidden: true
 lines_to_end_of_cell_marker: 0
 lines_to_next_cell: 1
 tags: [hide-cell]
-jupyter:
-  source_hidden: true
 ---
 """Helper functions for PACE Hackweek Validation Tutorial.
 
@@ -1529,7 +1529,7 @@ waves_sat = np.array(dict_sat["rrs"]["wavelengths"])
 rrs_sat = matchups[dict_sat["rrs"]["columns"]].to_numpy()
 ```
 
-## 4. Make plots
+## 5. Make plots
 
 We will use the function `plot_BAvsScat` to plot the paired matchup data as Bland_Altman and scatter plots. The Bland-Altman plots provide insights into the bias and precision of the satellite measurements compared to field measurements. A mean difference close to zero indicates good agreement, while the spread of differences (limits of agreement) puts the bias within the context of the variability of the field data. Additionally, a check is done to assess the scale dependency of the bias, such as errors increasing when the magnitude of the observations increases. If a scale dependency exists, the limits of agreement are replaced with a regression line showing its direction and magnitude. Scatter plots complement Bland-Altman plots by showing the strength of the linear relationship between the two datasets, with high correlation coefficients and low RMSE values indicating strong agreement and high accuracy of the satellite-derived measurements.
 
