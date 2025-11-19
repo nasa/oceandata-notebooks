@@ -2,8 +2,8 @@ name: Build website
 on:
   schedule:
    - cron: "16 8 * * 4"
+  pull_request:
   workflow_call:
-  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,6 +40,7 @@ jobs:
         run: find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
       - name: Upload html
         id: deployment
+        if: ${{ github.event_name == 'workflow_call' }}
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./docs/_build/html
