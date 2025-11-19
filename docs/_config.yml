@@ -9,8 +9,8 @@ execute:
 html:
   home_page_in_navbar: false
   use_repository_button: true
-  use_issues_button: false
-  use_edit_page_button: true
+  use_issues_button: true
+  use_edit_page_button: false
   baseurl: "https://nasa.github.io/oceandata-notebooks/"
   analytics:
     google_analytics_id: "G-E0VPP0Z29X"
