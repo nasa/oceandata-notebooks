@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-# Visualize HARP2 CLOUD GPC Product
+# HARP2 CLOUD GPC Product
 
 **Author(s):** Chamara (NASA, SSAI), Kirk (NASA), Andy (NASA, UMBC), Meng (NASA, SSAI), Sean (NASA, MSU)
 
@@ -29,8 +29,6 @@ By the end of this notebook, you will understand:
 - How to acquire HARP2 L2 data
 - Available variables in the product
 - How to visualize variables
-
-+++
 
 ## 1. Setup
 
@@ -60,7 +58,7 @@ fs = earthaccess.get_fsspec_https_session()
 
 ## 2. Get Level-2 Data
 
-HARP2 L2.CLOUD_GPC_NRT products are currently available starting from 2025-07-01. You can use the following "short name" to search with earthaccess.search_data:
+HARP2 L2.CLOUD_GPC_NRT products are currently available starting from 2025-07-01. You can find the appropriate product "short name" as follows.:
 
 ```{code-cell} ipython3
 results = earthaccess.search_datasets(instrument="harp2")
