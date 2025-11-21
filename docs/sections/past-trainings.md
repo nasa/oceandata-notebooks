@@ -13,3 +13,7 @@ Access recordings, materials, and resources from past NASA ocean color training 
 - [OCSSW and SeaDAS 101: data processing & analysis training](https://seadas.gsfc.nasa.gov/tutorials/seadas101/) - Learn the basics of SeaDAS usage
 
 Browse the training resources above to access comprehensive learning materials from past events and expand your ocean color data analysis skills.
+
+**Other useful resources**
+
+-[Wekeo - Learn OLCI](https://github.com/wekeo/learn-olci) - Repository of python-based Jupyter Notebooks for learning about using the Copernicus Sentinel-3 OLCI sensor for marine applications. 
