@@ -79,7 +79,7 @@ Learn More →
 
 ### SeaDAS - OCSSW Toolbox
 
-:::{grid} 2
+::::{grid} 2 2 2 2
 :gutter: 2
 
 :::{grid-item-card}
