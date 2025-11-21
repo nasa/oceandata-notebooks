@@ -16,4 +16,4 @@ Browse the training resources above to access comprehensive learning materials f
 
 **Other useful resources**
 
--[Wekeo - Learn OLCI](https://github.com/wekeo/learn-olci) - Repository of python-based Jupyter Notebooks for learning about using the Copernicus Sentinel-3 OLCI sensor for marine applications. 
+- [Wekeo - Learn OLCI](https://github.com/wekeo/learn-olci) - Repository of python-based Jupyter Notebooks for learning about using the Copernicus Sentinel-3 OLCI sensor for marine applications.

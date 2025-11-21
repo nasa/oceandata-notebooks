@@ -17,7 +17,7 @@ Explore these themes to get essential skills to access, process and visualize da
 ::::{grid} 1 2 2 3
 :gutter: 2
 
-:::{grid-item-card} 
+:::{grid-item-card}
 :link: sections/data-access-basics
 :link-type: doc
 **Data Basics**
@@ -28,7 +28,7 @@ Learn fundamentals of accessing and processing data products.
 Learn More →
 :::
 
-:::{grid-item-card} 
+:::{grid-item-card}
 :link: sections/visualizations
 :link-type: doc
 
@@ -53,7 +53,7 @@ Explore atmospheric and cloud data products including aerosol retrievals and tra
 Learn More →
 :::
 
-:::{grid-item-card} 
+:::{grid-item-card}
 :link: sections/land
 :link-type: doc
 **Land Surface**
@@ -64,7 +64,7 @@ Work with terrestrial data products for monitoring vegetation and land cover.
 Learn More →
 :::
 
-:::{grid-item-card} 
+:::{grid-item-card}
 :link: sections/ocean
 :link-type: doc
 **Ocean**
@@ -79,25 +79,29 @@ Learn More →
 
 ### SeaDAS - OCSSW Toolbox
 
-:::{grid} 2
+::::{grid} 1 2 2 2
 :gutter: 2
 
-:::{card}
+:::{grid-item-card}
 :link: sections/seadas-desktop
 :link-type: doc
-![OCSSW](images/ocssw.jpg)
+**SeaDAS Videos**
+^^^
+![OCSSW](images/seadas.jpg)
 
 Learn how to use the official software of the OB.DAAC for analysis and visualization of remote sensing data with these videos.
 +++
 Learn More →
 :::
 
-:::{card}
+:::{grid-item-card}
 :link: sections/seadas-toolbox
 :link-type: doc
-![SeaDAS](images/seadas.jpg)
+**SeaDAS-OCSSW Notebooks**
+^^^
+![SeaDAS](images/ocssw.jpg)
 
-Use this series of Jupyter Notebooks to learn to use the SeaDAS-OCSSW tools. 
+Use this series of Jupyter Notebooks to learn to use the SeaDAS-OCSSW tools.
 +++
 Learn More →
 :::
