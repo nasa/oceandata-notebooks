@@ -82,20 +82,24 @@ Learn More →
 :::{grid} 2
 :gutter: 2
 
-:::{card}
+:::{grid-item-card}
 :link: sections/seadas-desktop
 :link-type: doc
-![OCSSW](images/ocssw.jpg)
+**SeaDAS Videos**
+^^^
+![OCSSW](images/seadas.jpg)
 
 Learn how to use the official software of the OB.DAAC for analysis and visualization of remote sensing data with these videos.
 +++
 Learn More →
 :::
 
-:::{card}
+:::{grid-item-card}
 :link: sections/seadas-toolbox
 :link-type: doc
-![SeaDAS](images/seadas.jpg)
+**SeaDAS-OCSSW Notebooks**
+^^^
+![SeaDAS](images/ocssw.jpg)
 
 Use this series of Jupyter Notebooks to learn to use the SeaDAS-OCSSW tools. 
 +++
