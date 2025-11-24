@@ -51,6 +51,8 @@ parts:
             title: Aerosols from PACE-HARP2
           - file: notebooks/spexone/spexone_l2_aerosol_product
             title: Aerosols from PACE-SPEXOne
+          - file: notebooks/harp2/harp2_l2_cloud_gpc_product
+            title: Clouds from PACE-HARP2
           - file: notebooks/oci/oci_no2
             title: Nitrogen Dioxide from PACE-OCI
 
@@ -82,6 +84,8 @@ parts:
         sections:
           - url: https://pacehackweek.github.io/pace-2025/presentations/notebooks.html
             title: PACE Data Hackweek 2025
+          - url: https://misclab.umeoce.maine.edu/OceanOpticsClass2025/
+            title: Ocean Optics Class 2025
           - url: https://nmfs-opensci.github.io/EDMW-EarthData-Workshop-2025/
             title: NOAA EDMW 2025 - PACE
           - url: https://appliedsciences.nasa.gov/get-involved/training/english/arset-introduction-plankton-aerosol-cloud-ocean-ecosystem-pace
@@ -90,6 +94,8 @@ parts:
             title: PACE Data Hackweek 2024
           - url: https://www.us-ocb.org/pace-mission-training-activity/
             title: PACE Training Lectures 2022
+          - url: https://seadas.gsfc.nasa.gov/tutorials/seadas101/
+            title: OCSSW and SeaDAS 101
 
   - caption: Reference
     chapters:
