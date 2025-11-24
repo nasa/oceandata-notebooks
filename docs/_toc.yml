@@ -51,6 +51,8 @@ parts:
             title: Aerosols from PACE-HARP2
           - file: notebooks/spexone/spexone_l2_aerosol_product
             title: Aerosols from PACE-SPEXOne
+          - file: notebooks/harp2/harp2_l2_cloud_gpc_product
+            title: Clouds from PACE-HARP2
           - file: notebooks/oci/oci_no2
             title: Nitrogen Dioxide from PACE-OCI
 
