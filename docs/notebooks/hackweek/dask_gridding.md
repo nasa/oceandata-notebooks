@@ -47,9 +47,9 @@ At the end of this notebook you will know:
 - How to start a `dask` client for parallel and larger-than-memory pipelines
 - One method for averaging Level-2 "swath" data over time
 
-[oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access
-[oci-ocssw-processing]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-ocssw-processing
-[oci_project_and_format]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_project_and_format
+[oci-data-access]: /notebooks/oci_data_access
+[oci-ocssw-processing]: /notebooks/oci-ocssw-processing
+[oci_project_and_format]: /notebooks/oci_project_and_format
 
 [dask]: https://docs.dask.org
 
@@ -57,9 +57,7 @@ At the end of this notebook you will know:
 
 ## 1. Setup
 
-Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
-
-[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting-Started](/getting-started) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 import cartopy.crs as ccrs

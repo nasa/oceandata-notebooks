@@ -48,9 +48,7 @@ At the end of this notebok you will know:
 
 ## 1. Setup
 
-We begin by importing all of the packages used in this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the imports will be successful.
-
-[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting-Started](/getting-started) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 :lines_to_next_cell: 2

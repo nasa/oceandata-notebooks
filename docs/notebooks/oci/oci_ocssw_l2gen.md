@@ -39,8 +39,8 @@ This notebook was desgined to use cloud-enabled OCSSW programs, which are availa
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
-[ocssw_install]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_ocssw_install/
+[oci-data-access]: /notebooks/oci_data_access/
+[ocssw_install]: /notebooks/oci_ocssw_install/
 
 ## Summary
 
@@ -67,9 +67,7 @@ At the end of this notebook you will know:
 
 ## 1. Setup
 
-Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
-
-[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting-Started](/getting-started) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 import csv

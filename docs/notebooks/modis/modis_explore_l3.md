@@ -32,7 +32,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[modis_explore_l2]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/modis_explore_l2/
+[modis_explore_l2]: /notebooks/modis_explore_l2/
 
 ## Summary
 
@@ -58,9 +58,7 @@ At the end of this notebok you will know:
 
 ## 1. Setup
 
-We begin by importing all of the packages used in this notebook. If you have created an environment following the [guidance][tutorials] provided with this tutorial, then the imports will be successful.
-
-[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting-Started](/getting-started) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 import cartopy

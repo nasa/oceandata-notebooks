@@ -60,7 +60,7 @@ At the end of this notebook you will know:
 * How to download OCI data, but only when you need to
 
 [pypi]: https://pypi.org/
-[conda]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-data-access/
+[conda]: /notebooks/oci-data-access/
 [cmr]: https://www.earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/cmr
 [edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
 [earthaccess-docs]: https://earthaccess.readthedocs.io/en/latest/

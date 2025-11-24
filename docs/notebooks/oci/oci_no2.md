@@ -21,7 +21,7 @@ Last updated: July 28, 2025
 
 The following notebooks are **prerequisites** for this tutorial.
 
-- [File Structure (OCI Example)](https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-file-structure/)
+- [File Structure (OCI Example)](/notebooks/oci-file-structure/)
 
 </div>
 
@@ -44,9 +44,7 @@ At the end of this notebook you will know:
 
 ## 1. Setup
 
-Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
-
-[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting-Started](/getting-started) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 from datetime import datetime
@@ -224,4 +222,4 @@ You have completed the notebook introducing NO<sub>2</sub> data products from OC
 
 </div>
 
-[terrestrial]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-terrestrial-data/
+[terrestrial]: /notebooks/oci-terrestrial-data/
