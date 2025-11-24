@@ -1,11 +1,10 @@
 ---
 jupytext:
-  formats: ipynb,md:myst
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.17.2
+    jupytext_version: 1.18.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -14,9 +13,9 @@ kernelspec:
 
 # Visualize HARP2 CLOUD GPC Product
 
-**Author(s):** Chamara (NASA, SSAI), Kirk (NASA), Andy (NASA, UMBC), Meng (NASA, SSAI), Sean (NASA, MSU)
+**Author(s):** Chamara Rajapakshe (NASA, SSAI), Kirk Knobelspiesse (NASA), Andy Sayer (NASA, UMBC), Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU)
 
-Last updated: August 3, 2025
+Last updated: November 24, 2025
 
 ## Summary
 
@@ -27,7 +26,7 @@ Note that this notebook is based on an early preliminary version of the product 
 
 By the end of this notebook, you will understand:
 
-- How to acquire HARP2 L2 data
+- How to acquire HARP2 Level-2 data
 - Available variables in the product
 - How to visualize variables
 
@@ -35,14 +34,14 @@ By the end of this notebook, you will understand:
 
 ## 1. Setup
 
-Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
++++
 
-[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting-Started](/getting-started) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 from pathlib import Path
 from textwrap import wrap
-from fnmatch import fnmatch
+
 import cartopy.crs as ccrs
 import earthaccess
 import matplotlib.colors as mcolors
@@ -61,7 +60,9 @@ fs = earthaccess.get_fsspec_https_session()
 
 ## 2. Get Level-2 Data
 
-You can use "PACE_HARP2_L2_CLOUD_GPC" (or PACE_HARP2_L2_CLOUD_GPC_NRT) as the short name to get the most recent version available for HARP2 L2.CLOUD_GPC_NRT provisional product (or "Near-Real-Time" products).
++++
+
+You can use PACE_HARP2_L2_CLOUD_GPC as the short name to get the most recent version available for the CLOUD_GPC provisional product at Level-2 for the HARP2 instrument. Add the Near Real Time (NRT) suffix for the most recent observations (i.e. PACE_HARP2_L2_CLOUD_GPC_NRT).
 
 ```{code-cell} ipython3
 results = earthaccess.search_datasets(instrument="harp2")
@@ -71,11 +72,13 @@ for item in results:
         print(summary["short-name"])
 ```
 
+Search for the available granules within a time range and geospatial area of interest. The order of values in a "bounding_box" is always West (longitude), South (latitude), East (longitude), North (latitude). The tight bounds below give a single Level-2 granule for the given day.
+
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_HARP2_L2_CLOUD_GPC",
     temporal=("2025-07-02", "2025-07-02"),
-    bounding_box=(-90, -15, -89, -14),  # (west, south, east, north) if desired
+    bounding_box=(-90, -15, -89, -14),
     count=1,
 )
 paths = earthaccess.open(results)
@@ -168,6 +171,8 @@ print_variable_description(datatree, ["index", "rft", "bow"], exclude=True)
 ```{code-cell} ipython3
 transform = ccrs.PlateCarree(central_longitude=0)
 projection = ccrs.PlateCarree()
+
+
 def extremes_removed_ids(x):
     """
     Return a boolean mask indicating which elements of `x` are not extreme
@@ -189,6 +194,8 @@ def extremes_removed_ids(x):
     xmin = q1 - 1.5 * (q3 - q1)
     xmax = q3 + 1.5 * (q3 - q1)
     return (xmin <= x) * (x < xmax)
+
+
 def geo_axis_tags(ax, crs=ccrs.PlateCarree(central_longitude=0)):
     """
     Add coastlines and labeled latitude/longitude gridlines to a Cartopy axis.
@@ -244,6 +251,7 @@ gl = geo_axis_tags(ax1, crs=transform)
 fig1.colorbar(
     ctf, ax=ax1, orientation="vertical", label="%s [%s]" % (var, dataset[var].units)
 )
+plt.show()
 ```
 
 Cloud Effective Variance is a key parameter uniquely provided by polarimetry, and together with Cloud Effective Radius, it fully characterizes the modified gamma distribution of cloud droplet sizes. A logarithmic color scale is used to display its detailed variability.
@@ -268,6 +276,7 @@ gl = geo_axis_tags(ax1, crs=transform)
 fig1.colorbar(
     ctf, ax=ax1, orientation="vertical", label="%s [%s]" % (var, dataset[var].units)
 )
+plt.show()
 ```
 
 When the cloud effective radius is known, the cloud liquid water path can be derived by combining it with OCI’s cloud optical thickness retrievals. The GPC products include such derived cloud liquid water path fields based on the cloud-bow effective radius.
@@ -296,6 +305,7 @@ gl = geo_axis_tags(ax1, crs=transform)
 fig1.colorbar(
     ctf, ax=ax1, orientation="vertical", label="%s [%s]" % (var, dataset[var].units)
 )
+plt.show()
 ```
 
 ## 5. Reference
@@ -304,7 +314,3 @@ fig1.colorbar(
 - Alexandrov, M. D., Cairns, B., Emde, C., Ackerman, A. S., & Van Diedenhoven, B. (2012). Accuracy assessments of cloud droplet size retrievals from polarized reflectance measurements by the research scanning polarimeter. Remote Sensing of Environment, 125, 92–111. https://doi.org/10.1016/j.rse.2012.07.012
 - Van Diedenhoven, B., Fridlind, A. M., Ackerman, A. S., & Cairns, B. (2012). Evaluation of Hydrometeor Phase and Ice Properties in Cloud-Resolving Model Simulations of Tropical Deep Convection Using Radiance and Polarization Measurements. Journal of the Atmospheric Sciences, 69(11), 3290–3314. https://doi.org/10.1175/JAS-D-11-0314.1
 - Alexandrov, M. D., Cairns, B., & Mishchenko, M. I. (2012). Rainbow Fourier transform. Journal of Quantitative Spectroscopy and Radiative Transfer, 113(18), 2521–2535. https://doi.org/10.1016/j.jqsrt.2012.03.025
-
-```{code-cell} ipython3
-
-```
