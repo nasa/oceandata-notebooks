@@ -34,7 +34,7 @@ To create the `notebooks` folder after cloning the repository, or to add a paire
 It tells Jupytext to synchronize, creating if necessary, the paired Jupyter Notebook files with the MyST Markdown files tracked by Git.
 
 ```shell
-jupytext --sync $(git ls-files book/notebooks)
+jupytext --sync $(git ls-files docs/notebooks)
 ```
 
 [Jupytext]: https://jupytext.readthedocs.io/
@@ -43,7 +43,7 @@ jupytext --sync $(git ls-files book/notebooks)
 
 > [!NOTE]
 > 
-> Create new notebooks by copying `COPYME.ipynb` into a suitable location within the `notebooks` folder.
+> Create new notebooks by copying `COPYME.ipynb` into a suitable location within the top-level `notebooks` folder.
 
 When you save your new notebook, watch for a new markdown file to appear in the `docs/notebooks` folder and add that file to a commit.
 
