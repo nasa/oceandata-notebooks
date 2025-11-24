@@ -36,7 +36,7 @@ By the end of this notebook, you will understand:
 
 ## 1. Setup
 
-Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting-Started](/getting-started) page, then the imports will be successful.
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting Started](/getting-started) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 from pathlib import Path
