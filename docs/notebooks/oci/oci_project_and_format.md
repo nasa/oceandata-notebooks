@@ -30,7 +30,7 @@ Executing this notebook requires an instance with up to 8GB of memory.
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
+[oci-data-access]: /notebooks/oci_data_access/
 
 ## Summary
 
