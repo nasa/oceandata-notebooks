@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/769139779.svg)](https://doi.org/10.5281/zenodo.17642133)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17642133.svg)](https://doi.org/10.5281/zenodo.17642133)
 
 # Oceandata Notebooks
 
