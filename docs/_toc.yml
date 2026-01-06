@@ -23,7 +23,7 @@ parts:
           - file: notebooks/modis/modis_explore_l3
             title: Orientation to Level-3
           - file: notebooks/oci/oci_grid_match
-            title: Export for GIS
+            title: Projecting & GeoTIFFs
           - file: notebooks/hackweek/satellite_insitu_matchups.md
             title: In situ Matchups
           - file: notebooks/oci/ml_cloud_mask
@@ -93,7 +93,7 @@ parts:
           - url: https://www.us-ocb.org/pace-mission-training-activity/
             title: PACE Training Lectures 2022
           - url: https://seadas.gsfc.nasa.gov/tutorials/seadas101/
-            title: OCSSW and SeaDAS 101
+            title: OCSSW & SeaDAS 101
 
   - caption: Reference
     chapters:
