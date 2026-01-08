@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Oceandata Notebooks &#8212; My Jupyter Book</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Access Data from the Ocean Color Instrument (OCI)" href="notebooks/oci/oci_data_access.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Oceandata Notebooks</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about">About</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#earthdata-cloud">Earthdata Cloud</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#jupyter-kernel">Jupyter Kernel</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="oceandata-notebooks">
+<h1>Oceandata Notebooks<a class="headerlink" href="#oceandata-notebooks" title="Link to this heading">#</a></h1>
+<section id="about">
+<h2>About<a class="headerlink" href="#about" title="Link to this heading">#</a></h2>
+<p>This collection of Jupyter notebooks is meant to help you get started accessing, visualizing, and analyzing
+OB.DAAC data products with Python. You can learn from these notebooks either by viewing the code and results on this
+webpage or by downloading the notebook files and running them with <a class="reference external" href="https://jupyter.org/">JupyterLab</a>. If you
+plan to run any of these notebooks, please continue reading for information about the Earthdata Cloud and environments in Python.</p>
+<section id="earthdata-cloud">
+<h3>Earthdata Cloud<a class="headerlink" href="#earthdata-cloud" title="Link to this heading">#</a></h3>
+<p>The <strong>Earthdata Cloud</strong> icon next to some notebooks indicates they are meant to be run using Amazon Web Services (AWS), which is the cloud provider used for NASA Earthdata Cloud. If you are not set up on AWS, you can still use those notebooks, but will need to download data as descibed below in the Data Access notebook. If you are new to using NASA Earthdata Cloud, the <a class="reference external" href="https://nasa-openscapes.github.io/earthdata-cloud-cookbook/">Cloud Cookbook</a> provides a lot of background and resources that are constantly being improved by the <a class="reference external" href="https://nasa-openscapes.github.io/">NASA-Openscapes</a> community.</p>
+<p><strong>Can I use an existing AWS platform?</strong> You may already have access to the AWS platform through your institution or research community. For example, JupyterHubs maintained by <a class="reference external" href="https://openscapes.2i2c.cloud/">Openscapes</a>, <a class="reference external" href="https://hub.cryointhecloud.com/">Cryo in the Cloud</a>, <a class="reference external" href="https://scimaap.net/">MAAP</a>, and NASA Goddard’s <a class="reference external" href="https://oss.smce.nasa.gov/">Open Science Studio</a> are running on AWS in the same “us-west-2” region that hosts the NASA Earthdata Cloud. If that is not the case, you may want to learn about <a class="reference external" href="https://www.earthdata.nasa.gov/learn/webinars-and-tutorials/cloud-primer-amazon-web-services">getting started with AWS for NASA Earthdata Cloud</a>.</p>
+</section>
+<section id="jupyter-kernel">
+<h3>Jupyter Kernel<a class="headerlink" href="#jupyter-kernel" title="Link to this heading">#</a></h3>
+<p>If you have a running Jupyter Lab, download our setup script (<a class="reference download internal" download="" href="_downloads/2eeaed663bd0d25b7e608891384b7298/setup.py"><code class="xref download docutils literal notranslate"><span class="pre">setup.py</span></code></a>) and
+run it under either <code class="docutils literal notranslate"><span class="pre">pipx</span></code> or <code class="docutils literal notranslate"><span class="pre">uv</span></code> to create a Jupyter kernel ready for use with the notebooks. For
+example, if you have <code class="docutils literal notranslate"><span class="pre">uv</span></code> installed, execute the following from a Terminal.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">uv</span> <span class="n">run</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">user</span> <span class="o">--</span><span class="n">name</span> <span class="n">oc</span>
+</pre></div>
+</div>
+<p>Alternatively, if you have <code class="docutils literal notranslate"><span class="pre">pipx</span></code> installed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipx</span> <span class="n">run</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">user</span> <span class="o">--</span><span class="n">name</span> <span class="n">oc</span>
+</pre></div>
+</div>
+<p>Your JupyterLab should soon include “oc” and “bash” as kernel choices for notebooks and
+consoles. For more on the provided arguments, which customize the kernel location and name,
+execute <code class="docutils literal notranslate"><span class="pre">pipx</span> <span class="pre">run</span> <span class="pre">setup.py</span> <span class="pre">--help</span></code>. The <code class="docutils literal notranslate"><span class="pre">pipx</span></code> documenation provides
+<a class="reference external" href="https://pipx.pypa.io/stable/installation/">install instructions</a> that include the
+simple approach of <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--user</span> <span class="pre">pipx</span></code>. Uninstall kernels with <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">kernelspec</span></code>.</p>
+</section>
+</section>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+
+  </body>
+</html>
