@@ -2,6 +2,7 @@ name: Build website
 on:
   schedule:
    - cron: "16 8 * * 4"
+  pull_request:
   workflow_call:
   workflow_dispatch:
 jobs:
@@ -35,11 +36,12 @@ jobs:
           AWS_SESSION_TOKEN: '${{ secrets.AWS_SESSION_TOKEN }}'
       - name: Build jupyter book
         shell: micromamba-shell {0}
-        run: jupyter-book build docs
+        run: jupyter-book build -W -n docs
       - name: Fix ampersand escape
         run: find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
       - name: Upload html
         id: deployment
+        if: ${{ github.event_name == 'push' }}
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./docs/_build/html

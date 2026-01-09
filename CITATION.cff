@@ -8,12 +8,12 @@ authors:
   - family-names: Windle
     given-names: Anna
     orcid: https://orcid.org/0000-0002-4852-5848
-  - family-names: Wang
-    given-names: Guoqing
-    orcid: https://orcid.org/0000-0001-5552-319X
   - family-names: Poulin
     given-names: Carina
     orcid: https://orcid.org/0000-0001-5907-7473
+  - family-names: Wang
+    given-names: Guoqing
+    orcid: https://orcid.org/0000-0001-5552-319X
   - family-names: Foley
     given-names: Sean
     orcid: https://orcid.org/0000-0001-5907-7473
@@ -51,3 +51,12 @@ authors:
     orcid: https://orcid.org/0000-0002-3592-0152
   - family-names: Knowles
     given-names: Daniel
+  - family-names: Rajapakshe
+    given-names: Chamara
+    orcid: https://orcid.org/0000-0002-7264-9867
+  - family-names: Knobelspiesse
+    given-names: Kirk
+    orcid: https://orcid.org/0000-0001-5986-1751
+  - family-names: Sayer
+    given-names: Andrew
+    orcid: https://orcid.org/0000-0001-9149-1789

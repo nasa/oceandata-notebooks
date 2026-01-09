@@ -32,7 +32,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
+[oci-data-access]: /notebooks/oci_data_access/
 
 ## Summary
 
@@ -267,6 +267,9 @@ fig
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
 l3_pigments = L3_utils.estimate_inv_pigments(rrs, sss, sst, bbox)
 ```
 

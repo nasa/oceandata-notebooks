@@ -32,7 +32,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
+[oci-data-access]: /notebooks/oci_data_access/
 
 ## Summary
 
@@ -57,9 +57,7 @@ At the end of this notebok you will know:
 
 ## 1. Setup
 
-Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
-
-[tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting Started](/getting-started) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 import cartopy.crs as ccrs
@@ -98,7 +96,7 @@ paths = earthaccess.open(results)
 We want to know whether we are running code on a remote host with direct access to the NASA Earthdata Cloud.
 If without direct access, consider the substitution explained in the [Data Access][data-access] notebook to download granules.
 
-[data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci-data-access/
+[data-access]: /notebooks/oci-data-access/
 
 +++
 
