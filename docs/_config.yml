@@ -30,6 +30,13 @@ sphinx:
       - "mystnb.unknown_mime_type"
     html_extra_path:
       - "assets"
+    html_sidebars:
+      "**":
+          - "navbar-logo"
+          - "icon-links"
+          - "search-button-field"
+          - "google-translate"
+          - "sbt-sidebar-nav"
     html_theme_options:
       logo:
         image_light: "HelpHub.png"
@@ -38,7 +45,6 @@ sphinx:
       collapse_navigation: false
       navigation_depth: 4
       show_toc_level: 2
-      secondary_sidebar_items: ["page-toc", "google-translate"]
     templates_path: "_templates"
   local_extensions:
     source_button: "_ext"
