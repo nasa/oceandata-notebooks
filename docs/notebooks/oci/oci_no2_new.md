@@ -6,11 +6,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.0
+    jupytext_version: 1.18.1
 kernelspec:
-  display_name: custom
+  name: python3
+  display_name: Python 3 (ipykernel)
   language: python
-  name: custom
 ---
 
 # Exploring nitrogen dioxide (NO<sub>2</sub>) data from PACE/OCI
@@ -115,19 +115,20 @@ Let's plot it!
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
-ax.coastlines(linewidth=0.5)
-ax.add_feature(cfeature.BORDERS, linewidth=0.5)
-ax.add_feature(cfeature.OCEAN, linewidth=0.5)
-ax.add_feature(cfeature.LAKES, linewidth=0.5)
-ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.5)
+ax.coastlines(linewidth=0.2, zorder=6)
+ax.add_feature(cfeature.BORDERS, linewidth=0.1, zorder=5)
+ax.add_feature(cfeature.OCEAN, linewidth=0.2)
+ax.add_feature(cfeature.LAKES, linewidth=0.2)
+ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.2, zorder=1)
 cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
     "",
     ["lightgrey", "cyan", "yellow", "orange", "red", "darkred"],
 )
 dataset["total_column_no2"].plot(
-    x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap, zorder=100
+    x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap, zorder=2, ax=ax
 )
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25, zorder=10, color='grey', alpha=0.8)
+
 plt.show()
 ```
 
@@ -135,15 +136,19 @@ Let's zoom in to Los Angeles, California.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
-ax.coastlines(linewidth=0.5)
-ax.add_feature(cfeature.BORDERS, linewidth=0.5)
-ax.add_feature(cfeature.OCEAN, linewidth=0.5)
-ax.add_feature(cfeature.LAKES, linewidth=0.5)
-ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.5)
-dataset["total_column_no2"].plot(
-    x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap, zorder=100
+ax.coastlines(linewidth=0.2, zorder=6)
+ax.add_feature(cfeature.BORDERS, linewidth=0.1, zorder=5)
+ax.add_feature(cfeature.OCEAN, linewidth=0.2)
+ax.add_feature(cfeature.LAKES, linewidth=0.2)
+ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.2, zorder=1)
+cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
+    "",
+    ["lightgrey", "cyan", "yellow", "orange", "red", "darkred"],
 )
+dataset["total_column_no2"].plot(
+    x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap, zorder=2, ax=ax
+)
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25, zorder=10, color='grey', alpha=0.8)
 ax.set_extent([-125, -110, 30, 40])
 plt.show()
 ```
