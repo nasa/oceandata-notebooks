@@ -6,11 +6,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.16.0
 kernelspec:
-  name: python3
-  display_name: Python 3 (ipykernel)
+  display_name: custom
   language: python
+  name: custom
 ---
 
 # Exploring nitrogen dioxide (NO<sub>2</sub>) data from PACE/OCI
@@ -64,6 +64,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import earthaccess
 import hvplot.xarray
+import math
 import matplotlib.colors
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -174,7 +175,7 @@ dataset["total_column_no2"].hvplot(
 
 ## 5. Time Series
 
-Since there are many NO<sub>2</sub> granules available, we can make a time series of NO<sub>2</sub> concentrations over time. Let's search for L3M trace gas data as monthly composites at 4km from January-December 2025:
+Since there are many L3M NO<sub>2</sub> granules available, we can make a time series of NO<sub>2</sub> concentrations over time. Let's search for L3M trace gas data as monthly composites at 4km spatial resolution from January-December 2025:
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
@@ -234,7 +235,7 @@ You can see how this selection creates a new 1D dataset with values for one pixe
 
 # 6. Search and open Level-2 trace gas data
 
-PACE OCI trace gas data is also available as Level-2 granules. Let's search, open, and plot L2 TRGAS data of the LA region for two weeks in July 2025.
+PACE OCI trace gas data are also available as Level-2 granules. Let's search, open, and plot L2 TRGAS data of the LA region for two weeks in July 2025.
 
 ```{code-cell} ipython3
 tspan = ("2025-07-01", "2025-07-14")
@@ -249,7 +250,11 @@ paths = earthaccess.open(results)
 ```
 
 ```{code-cell} ipython3
-fig, axes = plt.subplots(3, 7, figsize=(20, 6), subplot_kw={"projection": ccrs.PlateCarree()}) #, constrained_layout=True)
+n_files = len(paths)
+ncols = 7                          
+nrows = math.ceil(n_files / ncols) 
+
+fig, axes = plt.subplots(nrows, ncols, figsize=(20, 6), subplot_kw={"projection": ccrs.PlateCarree()})
 axes = axes.flatten()
 
 extent = [-119.0, -117.5, 33.5, 34.5]
@@ -260,6 +265,7 @@ for i, file_path in enumerate(paths):
     ds = ds.set_coords(("longitude", "latitude"))
     
     var = ds["total_column_no2"]
+    #print(var.name)
     start_date = ds.attrs.get("time_coverage_start")
     start_date = datetime.fromisoformat(start_date.replace("Z", ""))
 
@@ -288,11 +294,11 @@ for i, file_path in enumerate(paths):
     gl.bottom_labels = (i // ncols == nrows - 1)
 
 # Hide unused axes if n_files < nrows*ncols
-for j in range(i+1, len(axes)):
+for j in range(n_files, len(axes)):
     axes[j].axis("off")
 
 # Add a single colorbar
-fig.colorbar(im, ax=axes, orientation="vertical", fraction=0.02, pad=0.02, label=var_name)
+fig.colorbar(im, ax=axes, orientation="vertical", fraction=0.02, pad=0.02, label="total vertical column NO₂ (molecules cm⁻²)")
 
 plt.show()
 ```
