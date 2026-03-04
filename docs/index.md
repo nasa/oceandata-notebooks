@@ -5,8 +5,7 @@
 This constantly updated collection of Jupyter notebooks is meant to help you get started accessing, visualizing,
 and analyzing OB.DAAC (Ocean Biology Distributed Archive Center) data products with Python.
 You can learn from these notebooks either by viewing the code and results on this webpage,
-or by downloading the notebook files by using the download button in the upper right and selecting .ipynb, and running them with [JupyterLab][jupyterlab].  **We welcome your input! If you have suggestions for new notebooks or ideas to improve existing ones, please share them with us at [carina.poulin@nasa.gov](mailto:carina.poulin@nasa.gov).**
-
+or by downloading the notebook files by using the download button in the upper right and selecting .ipynb, and running them with [JupyterLab][jupyterlab].
 If you plan to run any of these notebooks but don't know how to start,
 please continue to the next section for information about the Earthdata Cloud and environments in Python.
 If you are familiar with running our notebooks, feel free to explore the Help Hub's different sections:
