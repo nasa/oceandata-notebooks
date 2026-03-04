@@ -6,11 +6,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.0
+    jupytext_version: 1.18.1
 kernelspec:
-  display_name: custom
+  name: python3
+  display_name: Python 3 (ipykernel)
   language: python
-  name: custom
 ---
 
 # Exploring nitrogen dioxide (NO<sub>2</sub>) data from PACE/OCI
@@ -70,11 +70,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
 import holoviews
-holoviews.config.image_rtol = 1e-2
+holoviews.config.image_rtol = 1e-2 # Set the tolerance to allow for slightly irregular grids
 ```
 
 ```{code-cell} ipython3
-auth = earthaccess.login(persist=True)
+auth = earthaccess.login()
 ```
 
 ## 2. Search for L3M PACE Trace Gas Data
@@ -298,7 +298,7 @@ for j in range(n_files, len(axes)):
     axes[j].axis("off")
 
 # Add a single colorbar
-fig.colorbar(im, ax=axes, orientation="vertical", fraction=0.02, pad=0.02, label="total vertical column NO₂ (molecules cm⁻²)")
+fig.colorbar(im, ax=axes, orientation="vertical", fraction=0.02, pad=0.02, label="Total vertical column NO₂ (molecules cm⁻²)")
 
 plt.show()
 ```
