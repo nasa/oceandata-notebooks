@@ -1,21 +1,23 @@
 ---
 jupytext:
+  cell_metadata_filter: all,-trusted
+  notebook_metadata_filter: -all,kernelspec,jupytext
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.16.0
 kernelspec:
-  name: python3
-  display_name: Python 3 (ipykernel)
+  display_name: custom
   language: python
+  name: custom
 ---
 
 # Exploring nitrogen dioxide (NO<sub>2</sub>) data from PACE/OCI
 
 **Author(s):** Anna Windle (NASA, SSAI), Zachary Fasnacht (NASA, SSAI)
 
-Last updated: July 28, 2025
+Last updated: February 26, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -25,9 +27,17 @@ The following notebooks are **prerequisites** for this tutorial.
 
 </div>
 
+<div class="alert alert-info" role="alert">
+
+An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+
+</div>
+
+[edl]: https://urs.earthdata.nasa.gov/
+
 ## Summary
 
-This tutorial describes how to access and download nitrogen dioxide (NO<sub>2</sub>) data products developed from PACE OCI data. More information on how these products were created can be found in [Fasnacht et al. (2025)][paper]. This notebook will also include examples on how to plot NO<sub>2</sub> data as a static and interactive map, as well as how to plot an interactive time series plot.
+This tutorial describes how to access and download trace gas data products developed from PACE OCI data. More information on how these products were created can be found in [Fasnacht et al. (2025)][paper]. This notebook includes examples on how to plot L3M NO<sub>2</sub> data as a static and interactive map, as well as how to plot an interactive time series plot. It also provides examples on how to open and plot L2 NO<sub>2</sub> data.
 
 [paper]: http://doi.org/10.1088/1748-9326/addfef
 
@@ -35,16 +45,16 @@ This tutorial describes how to access and download nitrogen dioxide (NO<sub>2</s
 
 At the end of this notebook you will know:
 
-- Where to access NO<sub>2</sub> data products in development for the PACE Mission at the NASA Aura Validation Data Center
-- What to select from the XArray `DataTree` objects representing hierarchichal datasets
+- How to access PACE OCI trace gas data products
 - Where to find high NO<sub>2</sub> vertical column retrievals (hint: it's a big city)
 - How to create a time series of NO<sub>2</sub> data collected at a single location
+- Open and plot L2 NO<sub>2</sub> data
 
 +++
 
 ## 1. Setup
 
-Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting Started](/getting-started) page, then the imports will be successful.
+Begin by importing all of the packages used in this notebook and setting your Earthdata Login credentials.
 
 ```{code-cell} ipython3
 from datetime import datetime
@@ -52,94 +62,106 @@ from datetime import datetime
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-import fsspec
+import earthaccess
 import hvplot.xarray
+import math
 import matplotlib.colors
 import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
 import holoviews
 holoviews.config.image_rtol = 1e-2
-
-swap_dims = {"nlon": "longitude", "nlat": "latitude"}
 ```
 
-## 2. Download NO<sub>2</sub> Data
-
-While under development, the NO<sub>2</sub> product is available at
-[NASA’s Aura Validation Data Center
-(AVDC)][aura]. While the data are hosted there, we can access files from this site using the `fsspec` package. Once this product is implemented by the PACE Mission Science Data Segment (SDS), it will be available in the Earthdata Cloud and accessible as usual using the `earthaccess` package.
-
-[aura]: https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/
-
 ```{code-cell} ipython3
-url = "https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/NO2_L3_Gridded_NAmerica/PACE_NO2_Gridded_NAmerica_2024m0401.nc"
-fs = fsspec.filesystem("https")
-path = fs.open(url, cache_type="blockcache")
+auth = earthaccess.login(persist=True)
 ```
 
-## 3. Preview this hierarchical dataset
+## 2. Search for L3M PACE Trace Gas Data
 
-We will use `xarray.open_datatree` to open all groups in the NetCDF and then merge them into a single dataset. We need to clean up some superfluous data stored as `nlat` and `nlon` along the way.
+Level-2 (L2) and Level-3 mapped (L3M) trace gas (TRGAS) data products are available on NASA Earthdata. 
+
+Let's search and open up the first L3M file collected during the temporal span of January 2025 to December 2025:
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(path)
-datatree["/"].dataset = datatree["/"].dataset.drop_vars(swap_dims)
-dataset = xr.merge(datatree.to_dict().values()).swap_dims(swap_dims)
+tspan = ("2025-01-01", "2025-12-31")
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_TRGAS",
+    temporal = tspan,
+    count=1,
+)
+paths = earthaccess.open(results)
+```
+
+```{code-cell} ipython3
+paths
+```
+
+You can see that this search opened `PACE_OCI.20250101_20250131.L3m.MO.TRGAS.V3_0.0p1deg.nc` which is a L3M monthly (MO) composite with a 0.1 (0p1deg) degree pixel resolution.
+
++++
+
+## 3. Open as an `XArray` dataset
+
+We will use `xarray.open_dataset` to open the NetCDF and then merge them into a single dataset.
+
+```{code-cell} ipython3
+dataset = xr.open_dataset(paths[0])
 dataset
 ```
 
-If you expand the `nitrogen_dioxide_total_vertical_column` variable, you'll see that it is a 2D variable consisting of total vertical column NO<sub>2</sub> measurements with units of molecules cm<sup>-2</sup>.
+If you expand the `total_column_no2` variable, you'll see that it is a 2D variable consisting of total vertical column NO<sub>2</sub> measurements with units of molecules cm<sup>-2</sup>.
 Let's plot it!
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
-ax.coastlines(linewidth=0.5)
-ax.add_feature(cfeature.BORDERS, linewidth=0.5)
-ax.add_feature(cfeature.OCEAN, linewidth=0.5)
-ax.add_feature(cfeature.LAKES, linewidth=0.5)
-ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.5)
+ax.coastlines(linewidth=0.2, zorder=6)
+ax.add_feature(cfeature.BORDERS, linewidth=0.1, zorder=5)
+ax.add_feature(cfeature.OCEAN, linewidth=0.2)
+ax.add_feature(cfeature.LAKES, linewidth=0.2)
+ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.2, zorder=1)
 cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
     "",
     ["lightgrey", "cyan", "yellow", "orange", "red", "darkred"],
 )
-dataset["nitrogen_dioxide_total_vertical_column"].plot(
-    x="longitude", y="latitude", vmin=3e15, vmax=10e15, cmap=cmap, zorder=100
+dataset["total_column_no2"].plot(
+    x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap, zorder=2, ax=ax
 )
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25, zorder=10, color='grey', alpha=0.8)
+
 plt.show()
 ```
 
-Let's zoom in to Los Angeles, California ... i.e., the bright red blob in the lower left.
+Let's zoom in to Los Angeles, California.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25)
-ax.coastlines(linewidth=0.5)
-ax.add_feature(cfeature.BORDERS, linewidth=0.5)
-ax.add_feature(cfeature.OCEAN, linewidth=0.5)
-ax.add_feature(cfeature.LAKES, linewidth=0.5)
-ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.5)
-dataset["nitrogen_dioxide_total_vertical_column"].plot(
-    x="longitude", y="latitude", vmin=3e15, vmax=10e15, cmap=cmap, zorder=100
+ax.coastlines(linewidth=0.2, zorder=6)
+ax.add_feature(cfeature.BORDERS, linewidth=0.1, zorder=5)
+ax.add_feature(cfeature.OCEAN, linewidth=0.2)
+ax.add_feature(cfeature.LAKES, linewidth=0.2)
+ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.2, zorder=1)
+cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
+    "",
+    ["lightgrey", "cyan", "yellow", "orange", "red", "darkred"],
 )
+dataset["total_column_no2"].plot(
+    x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap, zorder=2, ax=ax
+)
+ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25, zorder=10, color='grey', alpha=0.8)
 ax.set_extent([-125, -110, 30, 40])
 plt.show()
 ```
-
-You'll also see other variables in the dataset `U10M`, and `V10M`.
-These are 10-meter Eastward Wind, and 10-meter Northward Wind, respectively.
-
-+++
 
 ## 4. Interactive NO<sub>2</sub> plot
 
 An interative plot allows you to engage with the data such as zooming, panning, and hovering over for more information. We will use the `hvplot` accessor on XArray data structures to make an interactive plot of the single file we accessed above.
 
 ```{code-cell} ipython3
-dataset["nitrogen_dioxide_total_vertical_column"].hvplot(
-    x="longitude",
-    y="latitude",
+dataset["total_column_no2"].hvplot(
+    x="lon",
+    y="lat",
     cmap=cmap,
     clim=(3e15, 10e15),
     aspect=2,
@@ -153,45 +175,43 @@ dataset["nitrogen_dioxide_total_vertical_column"].hvplot(
 
 ## 5. Time Series
 
-Since there are many NO<sub>2</sub> granules available for testing, we can make a time series of NO<sub>2</sub> concentrations over time. First, we have to get URLs for all the granules and "open" them for streaming. Alternatively, `fs.get` could be used to download files locally, but we don't want to duplicate data storage if working in the commercial cloud.
+Since there are many L3M NO<sub>2</sub> granules available, we can make a time series of NO<sub>2</sub> concentrations over time. Let's search for L3M trace gas data as monthly composites at 4km spatial resolution from January-December 2025:
 
 ```{code-cell} ipython3
-:scrolled: true
-
-pattern = "https://avdc.gsfc.nasa.gov/pub/tmp/PACE_NO2/NO2_L3_Gridded_NAmerica/PACE_NO2_Gridded_*.nc"
-results = fs.glob(pattern)
-paths = [fs.open(i, cache_type="blockcache") for i in results]
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L3M_TRGAS",
+    granule_name="*.MO.*.4km.*",
+    temporal=tspan,
+)
+paths = earthaccess.open(results)
 ```
 
-Now we will combine the files into one `xarray` dataset, for which we have to access one group at a time within the hierarchichal datasets. This can take several minutes.
+You can see that 12 L3M files were found, one for each month. Now we will combine the files into one `xarray` dataset. This can take several minutes.
 
 ```{code-cell} ipython3
 dataset = xr.open_mfdataset(
     paths,
-    group="geophysical_data",
-    concat_dim="time",
+    concat_dim="date",
     combine="nested",
 )
+dataset
 ```
 
-We can get the spatial coordinates from the first granule, since these are invariant.
-We have concatenated along a new dimension (i.e., a dimension not present in the datasets). To incorporate the temporal coordinates, we can add a variable for the "time" dimension by grabbing it from the filename.
+Let's replace the date coordiante with date information from dataset attributes.
 
 ```{code-cell} ipython3
-space = xr.open_dataset(paths[0], group="navigation_data")
-time = [datetime.strptime(i[-12:-3], "%Ym%m%d") for i in results]
-dataset = (
-    xr.merge((dataset, space, {"time": ("time", time)}))
-    .swap_dims(swap_dims)
-)
+dates = [xr.open_dataset(i).attrs["time_coverage_end"] for i in paths]
+dt = pd.to_datetime(dates)
+dataset = dataset.assign_coords(date=dt.values)
+dataset
 ```
 
-Let's select the nearest pixel to 34°N, 118°W.
+Let's select the nearest pixel to 34°N, 118°W (Los Angeles).
 
 ```{code-cell} ipython3
 array = (
-    dataset["nitrogen_dioxide_total_vertical_column"]
-    .sel({"latitude": 34, "longitude": -118}, method="nearest")
+    dataset["total_column_no2"]
+    .sel({"lat": 34, "lon": -118}, method="nearest")
 )
 array
 ```
@@ -199,21 +219,88 @@ array
 You can see how this selection creates a new 1D dataset with values for one pixel across time. Let's plot it using `hvplot`.
 
 ```{code-cell} ipython3
-line = array.hvplot.line(line_width=2, color="darkblue", alpha=0.8)
-dots = array.hvplot.scatter(size=20, color="crimson", marker="o", alpha=0.7)
-```
-
-We've created two plots, and now we combine them, add styling, and display.
-
-```{code-cell} ipython3
-(line * dots).opts(
-    title="Time series of total vertical column NO₂ at (34, -118)",
+(array.hvplot.line(
+        x="date",
+        line_width=2)
+* array.hvplot.scatter(
+        x="date",
+        size=60, color="crimson")).opts(
+    title="Time series of total vertical column NO₂ at (34°N, -118°W)",
     width=800,
     height=400,
-    xlabel="Time",
     ylabel="NO₂ (molecules cm⁻²)",
     show_grid=True,
 )
+```
+
+# 6. Search and open Level-2 trace gas data
+
+PACE OCI trace gas data are also available as Level-2 granules. Let's search, open, and plot L2 TRGAS data of the LA region for two weeks in July 2025.
+
+```{code-cell} ipython3
+tspan = ("2025-07-01", "2025-07-14")
+bbox = (-119.0, 33.5, -117.5, 34.5)
+
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L2_TRGAS",
+    temporal = tspan,
+    bounding_box = bbox)
+
+paths = earthaccess.open(results)
+```
+
+```{code-cell} ipython3
+n_files = len(paths)
+ncols = 7                          
+nrows = math.ceil(n_files / ncols) 
+
+fig, axes = plt.subplots(nrows, ncols, figsize=(20, 6), subplot_kw={"projection": ccrs.PlateCarree()})
+axes = axes.flatten()
+
+extent = [-119.0, -117.5, 33.5, 34.5]
+
+for i, file_path in enumerate(paths):
+    ds = xr.open_datatree(file_path)
+    ds = xr.merge(ds.to_dict().values())
+    ds = ds.set_coords(("longitude", "latitude"))
+    
+    var = ds["total_column_no2"]
+    #print(var.name)
+    start_date = ds.attrs.get("time_coverage_start")
+    start_date = datetime.fromisoformat(start_date.replace("Z", ""))
+
+    im = var.plot(ax=axes[i], x="longitude", y="latitude", vmin=3e15, vmax=10e15, cmap=cmap, add_colorbar=False)
+    axes[i].set_title(start_date.strftime("%Y-%m-%d %H:%M:%S"))
+
+    # Remove default axes ticks/labels
+    axes[i].set_xticks([])
+    axes[i].set_yticks([])
+    axes[i].set_xlabel("")
+    axes[i].set_ylabel("")
+    axes[i].set_extent(extent)
+
+    axes[i].coastlines(resolution="10m")
+    axes[i].add_feature(cfeature.BORDERS, linestyle=":")
+     
+    # Gridlines
+    gl = axes[i].gridlines(draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--")
+    gl.top_labels = False
+    gl.right_labels = False
+
+    # Show left labels only for first column
+    gl.left_labels = (i % ncols == 0)
+
+    # Show bottom labels only for bottom row
+    gl.bottom_labels = (i // ncols == nrows - 1)
+
+# Hide unused axes if n_files < nrows*ncols
+for j in range(n_files, len(axes)):
+    axes[j].axis("off")
+
+# Add a single colorbar
+fig.colorbar(im, ax=axes, orientation="vertical", fraction=0.02, pad=0.02, label="total vertical column NO₂ (molecules cm⁻²)")
+
+plt.show()
 ```
 
 <div class="alert alert-info" role="alert">
