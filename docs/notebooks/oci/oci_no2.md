@@ -6,11 +6,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.0
+    jupytext_version: 1.19.1
 kernelspec:
-  display_name: custom
+  name: python3
+  display_name: Python 3 (ipykernel)
   language: python
-  name: custom
 ---
 
 # Exploring nitrogen dioxide (NO<sub>2</sub>) data from PACE/OCI
@@ -57,29 +57,30 @@ At the end of this notebook you will know:
 Begin by importing all of the packages used in this notebook and setting your Earthdata Login credentials.
 
 ```{code-cell} ipython3
+import math
 from datetime import datetime
 
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import earthaccess
+import holoviews
 import hvplot.xarray
-import math
 import matplotlib.colors
 import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
-import holoviews
+
 holoviews.config.image_rtol = 1e-2
 ```
 
 ```{code-cell} ipython3
-auth = earthaccess.login(persist=True)
+auth = earthaccess.login()
 ```
 
 ## 2. Search for L3M PACE Trace Gas Data
 
-Level-2 (L2) and Level-3 mapped (L3M) trace gas (TRGAS) data products are available on NASA Earthdata. 
+Level-2 (L2) and Level-3 mapped (L3M) trace gas (TRGAS) data products are available on NASA Earthdata.
 
 Let's search and open up the first L3M file collected during the temporal span of January 2025 to December 2025:
 
@@ -88,7 +89,7 @@ tspan = ("2025-01-01", "2025-12-31")
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L3M_TRGAS",
-    temporal = tspan,
+    temporal=tspan,
     count=1,
 )
 paths = earthaccess.open(results)
@@ -128,7 +129,13 @@ cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
 dataset["total_column_no2"].plot(
     x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap, zorder=2, ax=ax
 )
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25, zorder=10, color='grey', alpha=0.8)
+ax.gridlines(
+    draw_labels={"left": "y", "bottom": "x"},
+    linewidth=0.25,
+    zorder=10,
+    color="grey",
+    alpha=0.8,
+)
 
 plt.show()
 ```
@@ -149,7 +156,13 @@ cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
 dataset["total_column_no2"].plot(
     x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap, zorder=2, ax=ax
 )
-ax.gridlines(draw_labels={"left": "y", "bottom": "x"}, linewidth=0.25, zorder=10, color='grey', alpha=0.8)
+ax.gridlines(
+    draw_labels={"left": "y", "bottom": "x"},
+    linewidth=0.25,
+    zorder=10,
+    color="grey",
+    alpha=0.8,
+)
 ax.set_extent([-125, -110, 30, 40])
 plt.show()
 ```
@@ -209,22 +222,17 @@ dataset
 Let's select the nearest pixel to 34°N, 118°W (Los Angeles).
 
 ```{code-cell} ipython3
-array = (
-    dataset["total_column_no2"]
-    .sel({"lat": 34, "lon": -118}, method="nearest")
-)
+array = dataset["total_column_no2"].sel({"lat": 34, "lon": -118}, method="nearest")
 array
 ```
 
 You can see how this selection creates a new 1D dataset with values for one pixel across time. Let's plot it using `hvplot`.
 
 ```{code-cell} ipython3
-(array.hvplot.line(
-        x="date",
-        line_width=2)
-* array.hvplot.scatter(
-        x="date",
-        size=60, color="crimson")).opts(
+(
+    array.hvplot.line(x="date", line_width=2)
+    * array.hvplot.scatter(x="date", size=60, color="crimson")
+).opts(
     title="Time series of total vertical column NO₂ at (34°N, -118°W)",
     width=800,
     height=400,
@@ -242,19 +250,20 @@ tspan = ("2025-07-01", "2025-07-14")
 bbox = (-119.0, 33.5, -117.5, 34.5)
 
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_TRGAS",
-    temporal = tspan,
-    bounding_box = bbox)
+    short_name="PACE_OCI_L2_TRGAS", temporal=tspan, bounding_box=bbox
+)
 
 paths = earthaccess.open(results)
 ```
 
 ```{code-cell} ipython3
 n_files = len(paths)
-ncols = 7                          
-nrows = math.ceil(n_files / ncols) 
+ncols = 7
+nrows = math.ceil(n_files / ncols)
 
-fig, axes = plt.subplots(nrows, ncols, figsize=(20, 6), subplot_kw={"projection": ccrs.PlateCarree()})
+fig, axes = plt.subplots(
+    nrows, ncols, figsize=(20, 6), subplot_kw={"projection": ccrs.PlateCarree()}
+)
 axes = axes.flatten()
 
 extent = [-119.0, -117.5, 33.5, 34.5]
@@ -263,13 +272,21 @@ for i, file_path in enumerate(paths):
     ds = xr.open_datatree(file_path)
     ds = xr.merge(ds.to_dict().values())
     ds = ds.set_coords(("longitude", "latitude"))
-    
+
     var = ds["total_column_no2"]
-    #print(var.name)
+    # print(var.name)
     start_date = ds.attrs.get("time_coverage_start")
     start_date = datetime.fromisoformat(start_date.replace("Z", ""))
 
-    im = var.plot(ax=axes[i], x="longitude", y="latitude", vmin=3e15, vmax=10e15, cmap=cmap, add_colorbar=False)
+    im = var.plot(
+        ax=axes[i],
+        x="longitude",
+        y="latitude",
+        vmin=3e15,
+        vmax=10e15,
+        cmap=cmap,
+        add_colorbar=False,
+    )
     axes[i].set_title(start_date.strftime("%Y-%m-%d %H:%M:%S"))
 
     # Remove default axes ticks/labels
@@ -281,24 +298,33 @@ for i, file_path in enumerate(paths):
 
     axes[i].coastlines(resolution="10m")
     axes[i].add_feature(cfeature.BORDERS, linestyle=":")
-     
+
     # Gridlines
-    gl = axes[i].gridlines(draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--")
+    gl = axes[i].gridlines(
+        draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+    )
     gl.top_labels = False
     gl.right_labels = False
 
     # Show left labels only for first column
-    gl.left_labels = (i % ncols == 0)
+    gl.left_labels = i % ncols == 0
 
     # Show bottom labels only for bottom row
-    gl.bottom_labels = (i // ncols == nrows - 1)
+    gl.bottom_labels = i // ncols == nrows - 1
 
 # Hide unused axes if n_files < nrows*ncols
 for j in range(n_files, len(axes)):
     axes[j].axis("off")
 
 # Add a single colorbar
-fig.colorbar(im, ax=axes, orientation="vertical", fraction=0.02, pad=0.02, label="total vertical column NO₂ (molecules cm⁻²)")
+fig.colorbar(
+    im,
+    ax=axes,
+    orientation="vertical",
+    fraction=0.02,
+    pad=0.02,
+    label="total vertical column NO₂ (molecules cm⁻²)",
+)
 
 plt.show()
 ```
