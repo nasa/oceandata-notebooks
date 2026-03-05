@@ -6,7 +6,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.1
+    jupytext_version: 1.18.1
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -99,7 +99,7 @@ paths = earthaccess.open(results)
 paths
 ```
 
-You can see that this search opened `PACE_OCI.20250101_20250131.L3m.MO.TRGAS.V3_0.0p1deg.nc` which is a L3M monthly (MO) composite with a 0.1 (0p1deg) degree pixel resolution.
+You can see that this search opened `PACE_OCI.20250101_20250131.L3m.MO.TRGAS.V3_0.0p1deg.nc` which is a L3M monthly (MO) composite with a 0.1 degree (0p1deg) pixel resolution.
 
 +++
 
@@ -220,47 +220,52 @@ You can see how this selection creates a new 1D dataset with values for one pixe
 )
 ```
 
-# 6. Search and open Level-2 trace gas data
+## 6. Search and open Level-2 trace gas data
 
 PACE OCI trace gas data are also available as Level-2 granules. Let's search, open, and plot L2 TRGAS data of the LA region for two weeks in July 2025.
 
 ```{code-cell} ipython3
 tspan = ("2025-07-01", "2025-07-14")
-bbox = (-119.0, 33.5, -117.5, 34.5)
+coord = (-118, 34)
 
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_TRGAS",
     temporal=tspan,
-    bounding_box=bbox,
+    point=coord,
 )
 
 paths = earthaccess.open(results)
 ```
 
+Notice there are more than 14 results, because even a single coordinate can be viewed twice in one day by OCI when its at the edge of the swath. It requires some fine-tuning to get a grid of daily plots that shows the better (i.e. closer to nadir) scenes, which we choose by thresholding the distance to the minimum and maximum longitudes for each scene.
+
 ```{code-cell} ipython3
-n_files = len(paths)
-ncols = 7
-nrows = ceil(n_files / ncols)
-
-fig, axes = plt.subplots(
-    nrows, ncols, figsize=(20, 6), subplot_kw={"projection": ccrs.PlateCarree()}
-)
-axes = axes.flatten()
-
+rows = 2
+cols = 7
+crs = ccrs.PlateCarree()
 extent = [-119.0, -117.5, 33.5, 34.5]
 
-for i, file_path in enumerate(paths):
-    ds = xr.open_datatree(file_path)
+fig = plt.figure(figsize=(20, 4))
+
+i = 0
+for item in paths:
+    ds = xr.open_datatree(item)
     ds = xr.merge(ds.to_dict().values())
     ds = ds.set_coords(("longitude", "latitude"))
+    
+    lon_min = ds["longitude"].min().item()
+    lon_max = ds["longitude"].max().item()
+    if coord[0] - lon_min < 5.5:
+        continue
+    if lon_max - coord[0] < 5.5:
+        continue
 
     var = ds["total_column_no2"]
-    # print(var.name)
     start_date = ds.attrs.get("time_coverage_start")
     start_date = datetime.fromisoformat(start_date.replace("Z", ""))
 
+    ax = plt.subplot(rows, cols, i + 1, projection=crs)
     im = var.plot(
-        ax=axes[i],
         x="longitude",
         y="latitude",
         vmin=3e15,
@@ -268,43 +273,25 @@ for i, file_path in enumerate(paths):
         cmap=cmap,
         add_colorbar=False,
     )
-    axes[i].set_title(start_date.strftime("%Y-%m-%d %H:%M:%S"))
-
-    # Remove default axes ticks/labels
-    axes[i].set_xticks([])
-    axes[i].set_yticks([])
-    axes[i].set_xlabel("")
-    axes[i].set_ylabel("")
-    axes[i].set_extent(extent)
-
-    axes[i].coastlines(resolution="10m")
-    axes[i].add_feature(cfeature.BORDERS, linestyle=":")
-
-    # Gridlines
-    gl = axes[i].gridlines(
-        draw_labels=True,
+    ax.set_title(start_date.strftime("%Y-%m-%d %H:%M:%S"))
+    ax.set_extent(extent)
+    ax.coastlines(resolution="10m")
+    ax.add_feature(cfeature.BORDERS, linestyle=":")
+    ax.gridlines(
+        draw_labels={
+            "left": i % cols == 0,
+            "bottom": i // cols == rows - 1,
+        },
         linewidth=0.5,
         color="gray",
         alpha=0.5,
         linestyle="--",
     )
-    gl.top_labels = False
-    gl.right_labels = False
+    i = i + 1
 
-    # Show left labels only for first column
-    gl.left_labels = i % ncols == 0
-
-    # Show bottom labels only for bottom row
-    gl.bottom_labels = i // ncols == nrows - 1
-
-# Hide unused axes if n_files < nrows*ncols
-for j in range(n_files, len(axes)):
-    axes[j].axis("off")
-
-# Add a single colorbar
 fig.colorbar(
     im,
-    ax=axes,
+    ax=fig.axes, # make colorbar span axes
     orientation="vertical",
     fraction=0.02,
     pad=0.02,
