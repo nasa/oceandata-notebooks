@@ -17,7 +17,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Zachary Fasnacht (NASA, SSAI)
 
-Last updated: February 26, 2026
+Last updated: March 5, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -58,7 +58,6 @@ Begin by importing all of the packages used in this notebook and setting your Ea
 
 ```{code-cell} ipython3
 from datetime import datetime
-from math import ceil
 
 import cartopy
 import cartopy.crs as ccrs
@@ -99,7 +98,7 @@ paths = earthaccess.open(results)
 paths
 ```
 
-You can see that this search opened `PACE_OCI.20250101_20250131.L3m.MO.TRGAS.V3_0.0p1deg.nc` which is a L3M monthly (MO) composite with a 0.1 degree (0p1deg) pixel resolution.
+You can see that this search opened `PACE_OCI.20250101_20250131.L3m.MO.TRGAS.V3_0.0p1deg.nc` which is a L3M monthly (MO) composite with a 0.1° (0p1deg) pixel resolution."
 
 +++
 
@@ -130,7 +129,6 @@ dataset["total_column_no2"].plot(x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=c
 ax.gridlines(
     draw_labels={"left": "y", "bottom": "x"},
     linewidth=0.25,
-    zorder=10,
     color="grey",
     alpha=0.8,
 )
@@ -208,8 +206,7 @@ array
 You can see how this selection creates a new 1D dataset with values for one pixel across time. Let's plot it using `hvplot`.
 
 ```{code-cell} ipython3
-(
-    array.hvplot.line(x="date", line_width=2)
+(array.hvplot.line(x="date", line_width=2)
     * array.hvplot.scatter(x="date", size=60, color="crimson")
 ).opts(
     title="Time series of total vertical column NO₂ at (34°N, -118°W)",
@@ -220,9 +217,9 @@ You can see how this selection creates a new 1D dataset with values for one pixe
 )
 ```
 
-## 6. Search and open Level-2 trace gas data
+## 6. Search and open L2 trace gas data
 
-PACE OCI trace gas data are also available as Level-2 granules. Let's search, open, and plot L2 TRGAS data of the LA region for two weeks in July 2025.
+PACE OCI trace gas data are also available as L2 granules. Let's search, open, and plot L2 TRGAS data of the LA region for two weeks in July 2025.
 
 ```{code-cell} ipython3
 tspan = ("2025-07-01", "2025-07-14")
@@ -237,7 +234,7 @@ results = earthaccess.search_data(
 paths = earthaccess.open(results)
 ```
 
-Notice there are more than 14 results, because even a single coordinate can be viewed twice in one day by OCI when its at the edge of the swath. It requires some fine-tuning to get a grid of daily plots that shows the better (i.e. closer to nadir) scenes, which we choose by thresholding the distance to the minimum and maximum longitudes for each scene.
+Notice there are more than 14 results, because even a single coordinate can be viewed twice in one day by OCI when its at the edge of the swath. It requires some fine-tuning to get a grid of daily plots that shows the better (i.e. closer to nadir) scenes, which we choose by thresholding the distance (5.5°) to the minimum and maximum longitudes for each scene.
 
 ```{code-cell} ipython3
 rows = 2
