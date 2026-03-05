@@ -173,7 +173,7 @@ Follow the next steps to share the updates using DVC, starting with checking whe
 dvc status
 ```
 
-If the status is not "Data and pipelines are up to date." then commit the updated cache with `dvc commit`. (The purpose of `--force` is only to skip the confirmation prompt that you can't interact with from within a notebook).
+If the status is *not* "Data and pipelines are up to date." then commit the updated cache with `dvc commit`. (The purpose of `--force` is only to skip the confirmation prompt that you can't interact with from within a notebook).
 
 ```{code-cell}
 dvc commit --force
@@ -198,7 +198,7 @@ Use your preferred method of working with Git to stage the `docs/_cache.dvc` cha
 
 (this won't be necessary with AWS CodeBuilder, and maybe there's some other solution)
 
-Generate temporary credentials.
+The temporary credentials shown after running the next block in a Python console must be recorded at [GitHub Secrets](https://github.com/nasa/oceandata-notebooks/settings/secrets/actions).
 
 ```python
 import os
@@ -216,9 +216,10 @@ response = client.assume_role_with_web_identity(
     DurationSeconds=3600
 )
 secrets = response["Credentials"]
+print("AWS_ACCESS_KEY_ID:", secrets["AccessKeyId"], sep="\n", end="\n\n")
+print("AWS_SECRET_ACCESS_KEY:", secrets["SecretAccessKey"], sep="\n", end="\n\n")
+print("AWS_SESSION_TOKEN:", secrets["SessionToken"], sep="\n", end="\n\n")
 ```
-
-The `secrets` dictionary contains the "AccessKeyId", "SecretAccessKey", and "SessionToken" that a repo admin needs to provide to GitHub.
 
 +++
 
