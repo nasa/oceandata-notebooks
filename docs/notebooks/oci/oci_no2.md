@@ -57,8 +57,8 @@ At the end of this notebook you will know:
 Begin by importing all of the packages used in this notebook and setting your Earthdata Login credentials.
 
 ```{code-cell} ipython3
-import math
 from datetime import datetime
+from math import ceil
 
 import cartopy
 import cartopy.crs as ccrs
@@ -117,18 +117,16 @@ Let's plot it!
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-ax.coastlines(linewidth=0.2, zorder=6)
-ax.add_feature(cfeature.BORDERS, linewidth=0.1, zorder=5)
+ax.coastlines(linewidth=0.2)
+ax.add_feature(cfeature.BORDERS, linewidth=0.1)
 ax.add_feature(cfeature.OCEAN, linewidth=0.2)
 ax.add_feature(cfeature.LAKES, linewidth=0.2)
-ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.2, zorder=1)
+ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.2)
 cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-    "",
-    ["lightgrey", "cyan", "yellow", "orange", "red", "darkred"],
+    name="no2",
+    colors=["lightgrey", "cyan", "yellow", "orange", "red", "darkred"],
 )
-dataset["total_column_no2"].plot(
-    x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap, zorder=2, ax=ax
-)
+dataset["total_column_no2"].plot(x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap)
 ax.gridlines(
     draw_labels={"left": "y", "bottom": "x"},
     linewidth=0.25,
@@ -136,34 +134,15 @@ ax.gridlines(
     color="grey",
     alpha=0.8,
 )
-
 plt.show()
 ```
 
 Let's zoom in to Los Angeles, California.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(figsize=(9, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-ax.coastlines(linewidth=0.2, zorder=6)
-ax.add_feature(cfeature.BORDERS, linewidth=0.1, zorder=5)
-ax.add_feature(cfeature.OCEAN, linewidth=0.2)
-ax.add_feature(cfeature.LAKES, linewidth=0.2)
-ax.add_feature(cfeature.LAND, facecolor="oldlace", linewidth=0.2, zorder=1)
-cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-    "",
-    ["lightgrey", "cyan", "yellow", "orange", "red", "darkred"],
-)
-dataset["total_column_no2"].plot(
-    x="lon", y="lat", vmin=3e15, vmax=10e15, cmap=cmap, zorder=2, ax=ax
-)
-ax.gridlines(
-    draw_labels={"left": "y", "bottom": "x"},
-    linewidth=0.25,
-    zorder=10,
-    color="grey",
-    alpha=0.8,
-)
-ax.set_extent([-125, -110, 30, 40])
+plt.sca(ax)
+plt.xlim(-125, -110)
+plt.ylim(30, 40)
 plt.show()
 ```
 
@@ -250,7 +229,9 @@ tspan = ("2025-07-01", "2025-07-14")
 bbox = (-119.0, 33.5, -117.5, 34.5)
 
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_TRGAS", temporal=tspan, bounding_box=bbox
+    short_name="PACE_OCI_L2_TRGAS",
+    temporal=tspan,
+    bounding_box=bbox,
 )
 
 paths = earthaccess.open(results)
@@ -259,7 +240,7 @@ paths = earthaccess.open(results)
 ```{code-cell} ipython3
 n_files = len(paths)
 ncols = 7
-nrows = math.ceil(n_files / ncols)
+nrows = ceil(n_files / ncols)
 
 fig, axes = plt.subplots(
     nrows, ncols, figsize=(20, 6), subplot_kw={"projection": ccrs.PlateCarree()}
@@ -301,7 +282,11 @@ for i, file_path in enumerate(paths):
 
     # Gridlines
     gl = axes[i].gridlines(
-        draw_labels=True, linewidth=0.5, color="gray", alpha=0.5, linestyle="--"
+        draw_labels=True,
+        linewidth=0.5,
+        color="gray",
+        alpha=0.5,
+        linestyle="--",
     )
     gl.top_labels = False
     gl.right_labels = False
