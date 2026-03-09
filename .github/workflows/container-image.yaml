@@ -60,7 +60,7 @@ jobs:
       - name: Inspect registry
         run: |
           TAGS=($DOCKER_METADATA_OUTPUT_TAGS)
-          LAYERS=$(docker manifest inspect "${TAGS[-1]}" | jq '[.layers[].digest]')
+          LAYERS=$(docker manifest inspect "${TAGS[-1]}" | jq -c '[.layers[].digest]')
           echo "OLD_LAYERS=$LAYERS" >> "$GITHUB_ENV"
       - name: Setup python
         uses: actions/setup-python@v6
@@ -86,7 +86,7 @@ jobs:
       - name: Compare layers
         if: github.event_name == 'schedule'
         run: |
-          NEW_LAYERS=$(docker manifest inspect "${DOCKER_METADATA_OUTPUT_TAGS[0]}" | jq '[.layers[].digest]')
+          NEW_LAYERS=$(docker manifest inspect "${DOCKER_METADATA_OUTPUT_TAGS[0]}" | jq -c '[.layers[].digest]')
           if [ "$NEW_LAYERS" = "$OLD_LAYERS" ]; then
             echo "Layers are identical, overwriting pushed image."
             docker buildx imagetools create --tag ${DOCKER_METADATA_OUTPUT_TAGS[0]} ${DOCKER_METADATA_OUTPUT_TAGS[-1]}
