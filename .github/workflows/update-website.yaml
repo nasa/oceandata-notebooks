@@ -5,10 +5,10 @@ on:
       - main
 jobs:
   call:
-    if: ${{ github.repository_owner == 'nasa' }}
     uses: ./.github/workflows/build-website.yaml
     secrets: inherit
   deploy:
+    if: github.repository_owner == 'nasa'
     needs: call
     permissions:
       pages: write

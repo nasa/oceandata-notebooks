@@ -8,8 +8,6 @@ on:
       - main
   pull_request:
     paths: *paths
-    branches:
-      - main
   schedule:
     - cron: "32 16 * * *"
 jobs:
