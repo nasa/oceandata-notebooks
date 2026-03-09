@@ -45,7 +45,6 @@ jobs:
         run: |
           echo "CACHE=$REGISTRY/$GITHUB_REPOSITORY_OWNER/$IMAGE_NAME:cache" >> "$GITHUB_ENV"
           TAGS=($DOCKER_METADATA_OUTPUT_TAGS)
-          echo "FIRST_TAG=${TAGS[0]}" >> "$GITHUB_ENV"
           TAGS=${TAGS[@]/#/--DockerEngine.extra_buildx_build_args=--tag=}
           echo "TAGS=$TAGS" >> "$GITHUB_ENV"
           LABELS=($DOCKER_METADATA_OUTPUT_LABELS)
@@ -59,12 +58,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup docker buildx
         uses: docker/setup-buildx-action@v3
+      - name: Inspect registry
+        run: |
+          LAYERS=$(docker manifest inspect "${DOCKER_METADATA_OUTPUT_TAGS[-1]}" | jq '[.layers[].digest]')
+          echo "OLD_LAYERS=$LAYERS" >> "$GITHUB_ENV"
       - name: Setup python
         uses: actions/setup-python@v6
         with:
-          cache: 'pip'
-      - name: Install repo2docker
-        run: pip install jupyter-repo2docker
+          cache: pip
+          pip-install: jupyter-repo2docker
       - name: Run repo2docker
         run: >
           jupyter-repo2docker
@@ -73,7 +75,6 @@ jobs:
           --user-id 1000
           --user-name jovyan
           --subdir container
-          --image-name "$FIRST_TAG"
           --target-repo-dir /srv/container
           --appendix "$(< $PWD/container/appendix)"
           --DockerEngine.extra_buildx_build_args=--cache-from="type=registry,ref=$CACHE"
@@ -81,3 +82,11 @@ jobs:
           $TAGS
           $LABELS
           $PWD
+      - name: Compare layers
+        if: github.event_name == 'schedule'
+        run: |
+          NEW_LAYERS=$(docker manifest inspect "${DOCKER_METADATA_OUTPUT_TAGS[0]}" | jq '[.layers[].digest]')
+          if [ "$NEW_LAYERS" = "$OLD_LAYERS" ]; then
+            echo "Layers are identical, overwriting pushed image."
+            docker buildx imagetools create --tag ${DOCKER_METADATA_OUTPUT_TAGS[0]} ${DOCKER_METADATA_OUTPUT_TAGS[-1]}
+          fi
