@@ -25,14 +25,13 @@ jobs:
           path: docs/_cache
           key: jupyter-book-cache-${{ hashFiles('docs/_cache.dvc') }}
       - name: Update jcache
-        if: steps.jcache.outputs.cache-hit != 'true'
         shell: micromamba-shell {0}
-        run: dvc pull
+        run: dvc status --quiet docs/_cache || dvc pull docs/_cache
         env:
           AWS_REGION: 'us-west-2'
-          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
-          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
-          AWS_SESSION_TOKEN: '${{ secrets.AWS_SESSION_TOKEN }}'
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
       - name: Build jupyter book
         shell: micromamba-shell {0}
         run: jupyter-book build -W -n docs
@@ -40,7 +39,7 @@ jobs:
         run: find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
       - name: Upload html
         id: deployment
-        if: ${{ github.event_name == 'push' }}
+        if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./docs/_build/html
