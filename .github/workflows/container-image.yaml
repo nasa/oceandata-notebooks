@@ -43,9 +43,9 @@ jobs:
         run: |
           echo "CACHE=$REGISTRY/$GITHUB_REPOSITORY_OWNER/$IMAGE_NAME:cache" >> "$GITHUB_ENV"
           TAGS=($DOCKER_METADATA_OUTPUT_TAGS)
+          echo "IMAGE_NAME=${TAGS[0]}" >> "$GITHUB_ENV"
           TAGS=${TAGS[@]/#/--DockerEngine.extra_buildx_build_args=--tag=}
           echo "TAGS=$TAGS" >> "$GITHUB_ENV"
-          echo "IMAGE_NAME=${TAGS[1]}" >> "$GITHUB_ENV"
           LABELS=($DOCKER_METADATA_OUTPUT_LABELS)
           LABELS=${LABELS[@]/#/--label }
           echo "LABELS=$LABELS" >> "$GITHUB_ENV"
@@ -86,8 +86,8 @@ jobs:
       - name: Compare layers
         if: github.event_name == 'schedule'
         run: |
-          NEW_LAYERS=$(docker manifest inspect "${DOCKER_METADATA_OUTPUT_TAGS[1]}" | jq '[.layers[].digest]')
+          NEW_LAYERS=$(docker manifest inspect "${DOCKER_METADATA_OUTPUT_TAGS[0]}" | jq '[.layers[].digest]')
           if [ "$NEW_LAYERS" = "$OLD_LAYERS" ]; then
             echo "Layers are identical, overwriting pushed image."
-            docker buildx imagetools create --tag ${DOCKER_METADATA_OUTPUT_TAGS[1]} ${DOCKER_METADATA_OUTPUT_TAGS[-1]}
+            docker buildx imagetools create --tag ${DOCKER_METADATA_OUTPUT_TAGS[0]} ${DOCKER_METADATA_OUTPUT_TAGS[-1]}
           fi
