@@ -11,17 +11,17 @@ kernelspec:
   language: python
 ---
 
-# File Structure at Three Processing Levels for the Ocean Color Instrument (OCI)
+# Data Structure at Three Processing Levels for the Ocean Color Instrument (OCI)
 
 **Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 
-Last updated: August 3, 2025
+Last updated: March 17, 2026
 
 <div class="alert alert-success" role="alert">
 
 The following notebooks are **prerequisites** for this tutorial.
 
-- Learn with OCI: [Data Access][oci-data-access]
+- [Access Data Products][oci-data-access]
 
 </div>
 
@@ -32,7 +32,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: /notebooks/oci_data_access/
+[oci-data-access]: https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_access.html
 
 ## Summary
 
@@ -69,10 +69,10 @@ import pandas as pd
 import xarray as xr
 ```
 
-Set (and persist to your user profile on the host, if needed) your Earthdata Login credentials.
+Set your Earthdata Login credentials. You can add `persist=True` to save your credentials in a `.netrc` file, allowing you to authenticate automatically in the future sessions without re-entering your Earthdata credentials.
 
 ```{code-cell} ipython3
-auth = earthaccess.login(persist=True)
+auth = earthaccess.login()
 ```
 
 ## 2. Explore L1B File Structure
@@ -434,6 +434,8 @@ im = chla_avg.plot(linestyle="-", marker="o", color="b")
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on OCI file structure.
+You have completed the notebook on OCI data structure. We now suggest reviewing the notebook on [PACE OCI  visualizations].
+
+[PACE OCI  visualizations]:[https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_visualization_part2.html]
 
 </div>
