@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 
-Last updated: August 3, 2025
+Last updated: March 17, 2026
 
 <div class="alert alert-info" role="alert">
 
@@ -27,8 +27,8 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-In this example we will use the `earthaccess` package to search for
-OCI products on NASA Earthdata. The `earthaccess` package, published
+In this example we will use the `earthaccess` package to search for PACE Ocean Color Instrument
+(OCI) products on NASA Earthdata. The `earthaccess` package, published
 on the [Python Package Index][pypi] and [conda-forge][conda],
 facilitates discovery and use of all NASA Earth Science data
 products by providing an abstraction layer for NASA’s [Common
@@ -66,6 +66,12 @@ At the end of this notebook you will know:
 * How to use `earthaccess` to search for OCI data using search filters
 * How to download OCI data, but only when you need to
 
+<div class="alert alert-warning" role="alert">
+
+Note: This notebook focuses on accessing PACE OCI data, but the workflow can be easily adapted to work with *any* dataset available through NASA Earthdata.  
+
+</div>
+
 +++
 
 ## 1. Setup
@@ -92,14 +98,13 @@ allow you to input credentials.
 
 <div class="alert alert-info" role="alert">
 
-The `persist=True` argument ensures any discovered credentials are
-stored in a `.netrc` file, so the argument is not necessary (but
-it's also harmless) for subsequent calls to `earthaccess.login`.
+You can add `persist=True` to `earthaccess.login` to save your credentials
+in a `.netrc` file. This allows you to authenticate automatically in the future sessions without re-entering your Earthdata credentials.
 
 </div>
 
 ```{code-cell} ipython3
-auth = earthaccess.login(persist=True)
+auth = earthaccess.login()
 ```
 
 ## 3. Search for Data
@@ -279,6 +284,8 @@ Anywhere in any of [these notebooks](/) where `paths = earthaccess.open(...)` is
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on downloading and opening datasets. We now suggest starting the notebook on "File Structure at Three Processing Levels".
+You have completed the notebook on accessing NASA Earthdata data. We now suggest reviewing the notebook on [Intro to Product Levels].
+
+[Intro to Product Levels]: https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_file_structure.html
 
 </div>
