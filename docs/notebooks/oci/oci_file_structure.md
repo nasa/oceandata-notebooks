@@ -57,7 +57,7 @@ At the end of this notebok you will know:
 
 ## 1. Setup
 
-Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting Started](/getting-started) page, then the imports will be successful.
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting Started](https://nasa.github.io/oceandata-notebooks/getting-started.html) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 import cartopy.crs as ccrs
@@ -436,6 +436,6 @@ im = chla_avg.plot(linestyle="-", marker="o", color="b")
 
 You have completed the notebook on OCI data structure. We now suggest reviewing the notebook on [PACE OCI  visualizations].
 
-[PACE OCI  visualizations]:[https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_visualization_part2.html]
+[PACE OCI  visualizations]: https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_visualization_part2.html
 
 </div>

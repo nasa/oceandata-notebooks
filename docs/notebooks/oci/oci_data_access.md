@@ -286,5 +286,6 @@ Anywhere in any of [these notebooks](/) where `paths = earthaccess.open(...)` is
 
 You have completed the notebook on accessing NASA Earthdata data. We now suggest reviewing the notebook on [Intro to Product Levels].
 
-[Intro to Product Levels]:[https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_file_structure.html
+[Intro to Product Levels]: https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_file_structure.html
+
 </div>
