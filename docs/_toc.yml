@@ -100,4 +100,5 @@ parts:
   - caption: Reference
     chapters:
       # - file: reference/bibliography
+      - file: reference/how-to-cite
       - file: reference/glossary
