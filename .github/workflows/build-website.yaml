@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup micromamba
-        uses: mamba-org/setup-micromamba@v2
+        uses: mamba-org/setup-micromamba@v3
         with:
           environment-name: build
           environment-file: container/conda-lock.yml
@@ -24,7 +24,7 @@ jobs:
           init-shell: none
       - name: Fetch jcache
         id: jcache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: docs/_cache
           key: jupyter-book-cache-${{ hashFiles('docs/_cache.dvc') }}
@@ -44,6 +44,6 @@ jobs:
         run: find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
       - name: Upload html
         if: ${{ inputs.upload }}
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./docs/_build/html
