@@ -8,9 +8,11 @@ on:
 jobs:
   call:
     uses: ./.github/workflows/build-website.yaml
+    with:
+      upload: &UPLOAD ${{ github.ref == 'refs/heads/main' || github.repository_owner != 'nasa' }}
     secrets: inherit
   deploy:
-    if: (github.repository_owner == 'nasa' && github.ref == 'refs/heads/main') || github.repository_owner != 'nasa'
+    if: *UPLOAD
     needs: call
     permissions:
       pages: write
@@ -22,4 +24,4 @@ jobs:
     steps:
       - name: Publish
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

@@ -2,14 +2,18 @@ name: Build website
 on:
   schedule:
    - cron: "16 8 * * 4"
-  workflow_call:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      upload:
+        required: true
+        type: boolean
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup micromamba
         uses: mamba-org/setup-micromamba@v2
         with:
@@ -20,7 +24,7 @@ jobs:
           init-shell: none
       - name: Fetch jcache
         id: jcache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: docs/_cache
           key: jupyter-book-cache-${{ hashFiles('docs/_cache.dvc') }}
@@ -39,8 +43,7 @@ jobs:
       - name: Fix ampersand escape
         run: find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
       - name: Upload html
-        id: deployment
-        if: ${{ github.event_name == 'push' }}
-        uses: actions/upload-pages-artifact@v4
+        if: ${{ inputs.upload }}
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./docs/_build/html
