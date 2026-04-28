@@ -9,10 +9,10 @@ jobs:
   call:
     uses: ./.github/workflows/build-website.yaml
     with:
-      upload: github.ref == 'refs/heads/main' || github.repository_owner != 'nasa'
+      upload: ${{ github.ref == 'refs/heads/main' || github.repository_owner != 'nasa' }}
     secrets: inherit
   deploy:
-    if: github.ref == 'refs/heads/main' || github.repository_owner != 'nasa'
+    if: ${{ github.ref == 'refs/heads/main' || github.repository_owner != 'nasa' }}
     needs: call
     permissions:
       pages: write
