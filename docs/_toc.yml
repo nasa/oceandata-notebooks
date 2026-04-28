@@ -82,8 +82,8 @@ parts:
 
       - file: sections/past-trainings
         sections:
-          - url: https://fish-pace.github.io/hackweek-2025/presentations/tutorials.html
-            title: Fish-PACE Hackweek
+          - url: https://fish-pace.github.io/hackweek-2025/intro.html
+            title: Fish-PACE Hackweek 2026
           - url: https://pacehackweek.github.io/pace-2025/presentations/notebooks.html
             title: PACE Data Hackweek 2025
           - url: https://misclab.umeoce.maine.edu/OceanOpticsClass2025/
