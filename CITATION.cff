@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "Please cite these tutorials using these metadata."
+message: "Please cite these tutorials as below."
 title: Tutorials using data produced by NASA's Ocean Biology Distributed Active Archive Center.
 authors:
   - family-names: Carroll
@@ -60,3 +60,5 @@ authors:
   - family-names: Sayer
     given-names: Andrew
     orcid: https://orcid.org/0000-0001-9149-1789
+doi: https://doi.org/10.5281/zenodo.17642133
+date-released: 2025-11-18

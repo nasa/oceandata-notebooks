@@ -47,6 +47,16 @@ jupytext --sync $(git ls-files docs/notebooks)
 
 When you save your new notebook, watch for a new markdown file to appear in the `docs/notebooks` folder and add that file to a commit.
 
+## How to Cite
+
+If you reference the tutorials in a publication, or report on work performed using the [oceandata-jupyterlab] container image, please cite as follows:
+
+```
+Carroll, I., Windle, A., Wang, G., Poulin, C., Foley, S., Gray, P., Holmes, E., Caplan, S., Allen, J., Gao, M., Danenhower, M., Chase, A., Aryal, K., Fu, G., Fasnacht, Z., Werdell, J., & Knowles, D. (2025). Tutorials using data produced by NASA's Ocean Biology Distributed Active Archive Center. Zenodo. https://doi.org/10.5281/zenodo.17642133
+```
+
+[oceandata-jupyterlab]: https://github.com/nasa/oceandata-notebooks/pkgs/container/oceandata-jupyterlab
+
 ## Acknowledgements
 
 This repository has greatly benefited from works of multiple open-science projects, notably [Learn OLCI] and the [NASA Earthdata Cloud Cookbook].
