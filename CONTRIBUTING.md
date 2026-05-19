@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.18.1
 kernelspec:
+  name: bash
   display_name: Bash
   language: bash
-  name: bash
 ---
 
 # Maintainer's Guide
@@ -59,7 +59,7 @@ If you are running this guide from the image, to get the additional tools used b
 [conda-lock]: https://conda.github.io/conda-lock/
 [environment]: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 
 mamba install --yes --log-level error --category tools --file container/conda-lock.yml
@@ -70,20 +70,22 @@ then a new lock file should be generated, a new image built, and the new image u
 Realistically, that's unlikely to be done manually for every change,
 but it really must be done before updating the `latest` tag on the GitHub Container Registry.
 
-```{code-cell}
+```{code-cell} ipython3
+:scrolled: true
+
 conda-lock lock --log-level ERROR --check-input-hash --without-cuda --lockfile container/conda-lock.yml \
   --file pyproject.toml \
-  --file container/environment.yml \
   --file environment-container.yml \
   --file environment-jupyter.yml \
   --file environment-notebooks.yml \
-  --file environment-tools.yml
+  --file environment-tools.yml \
+  --file container/environment.yml
 ```
 
 The `container` folder has additional configuration files that [repo2docker] uses to build the container image.
 The following command builds and runs the image locally, while the (.github/container-image.yml) workflow causes GitHub to build the image and deploy it to the GitHub Container Registry.
 
-If you have Docker available, you can build and run the image locally.
+If you have Docker available, you can build the image and run a container locally.
 
 ```shell
 repo2docker \
@@ -120,8 +122,8 @@ We execute it via `uv run` only because we've included the DVC tool in the proje
 [Jupyter Book]: https://jupyterbook.org/
 [DVC]: https://dvc.org/
 
-```{code-cell}
-dvc pull
+```{code-cell} ipython3
+dvc pull --force
 ```
 
 Update the notebook cache as needed by executing notebooks.
@@ -129,7 +131,11 @@ We use the isolated virtual environment to make sure the environment configurati
 We use `jcache` directly to achieve parallel execution.
 For a full but slow test of the environment configuration, delete `docs/_cache` before executing.
 
-```{code-cell}
+```{code-cell} ipython3
+jcache notebook -p docs/_cache list
+```
+
+```{code-cell} ipython3
 :scrolled: true
 
 jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
@@ -137,7 +143,7 @@ jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
 
 The next cell builds a static website in `docs/_build/html` using `jupyter-book`.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 
 jupyter-book build docs
@@ -145,7 +151,7 @@ jupyter-book build docs
 
 Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
 
-```{code-cell}
+```{code-cell} ipython3
 find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
 ```
 
@@ -156,7 +162,7 @@ Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 > 
 > On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 
 python -m http.server -d docs/_build/html
@@ -169,19 +175,19 @@ python -m http.server -d docs/_build/html
 If any notebooks have been executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
 Follow the next steps to share the updates using DVC, starting with checking whether the cache has actually changed.
 
-```{code-cell}
+```{code-cell} ipython3
 dvc status
 ```
 
 If the status is *not* "Data and pipelines are up to date." then commit the updated cache with `dvc commit`. (The purpose of `--force` is only to skip the confirmation prompt that you can't interact with from within a notebook).
 
-```{code-cell}
+```{code-cell} ipython3
 dvc commit --force
 ```
 
 Now use `dvc` to push your cache to the remote location accessible to the website build.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 
 dvc push
@@ -190,7 +196,11 @@ dvc push
 Finally, if changes are committed by DVC, then there will be changes you also need to commit with Git.
 Use your preferred method of working with Git to stage the `docs/_cache.dvc` changes, commit, and push them.
 
-+++
+```{code-cell} ipython3
+git add docs/_cache.dvc
+git commit -m "jupyter-book build"
+git push
+```
 
 ### Temporary
 
@@ -199,6 +209,8 @@ Use your preferred method of working with Git to stage the `docs/_cache.dvc` cha
 (this won't be necessary with AWS CodeBuilder, and maybe there's some other solution)
 
 The temporary credentials shown after running the next block in a Python console must be recorded at [GitHub Secrets](https://github.com/nasa/oceandata-notebooks/settings/secrets/actions).
+
++++
 
 ```python
 import os
@@ -260,12 +272,12 @@ You may create hooks to run these automations, as needed, before making any comm
 
 [pre-commit]: https://pre-commit.com/
 
-```{code-cell}
+```{code-cell} ipython3
 pre-commit install
 ```
 
 You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
 
-```{code-cell}
+```{code-cell} ipython3
 pre-commit run --from-ref main --to-ref HEAD
 ```
