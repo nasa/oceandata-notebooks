@@ -25,7 +25,9 @@ jobs:
       - name: Checkout container files
         uses: actions/checkout@v6
         with:
-          sparse-checkout: container
+          sparse-checkout: |
+            pyproject.toml
+            container
       - name: Repository metadata
         id: meta
         uses: docker/metadata-action@v5
