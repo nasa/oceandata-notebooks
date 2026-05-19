@@ -70,11 +70,7 @@ then a new lock file should be generated, a new image built, and the new image u
 Realistically, that's unlikely to be done manually for every change,
 but it really must be done before updating the `latest` tag on the GitHub Container Registry.
 
-<<<<<<< Updated upstream
 ```{code-cell} ipython3
-=======
-```{code-cell}
->>>>>>> Stashed changes
 :scrolled: true
 
 conda-lock lock --log-level ERROR --check-input-hash --without-cuda --lockfile container/conda-lock.yml \
@@ -131,13 +127,13 @@ dvc pull --force
 
 The notebooks now available in the cache can be displayed with `jcache`.
 
-```{code-cell}
+```{code-cell} ipython3
 jcache notebook -p docs/_cache list
 ```
 
 Clear the notebook cache if you want to re-execute all notebooks.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 
 jcache cache -p docs/_cache clear --force
