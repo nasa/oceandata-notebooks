@@ -70,7 +70,11 @@ then a new lock file should be generated, a new image built, and the new image u
 Realistically, that's unlikely to be done manually for every change,
 but it really must be done before updating the `latest` tag on the GitHub Container Registry.
 
+<<<<<<< Updated upstream
 ```{code-cell} ipython3
+=======
+```{code-cell}
+>>>>>>> Stashed changes
 :scrolled: true
 
 conda-lock lock --log-level ERROR --check-input-hash --without-cuda --lockfile container/conda-lock.yml \
@@ -117,13 +121,26 @@ We use [DVC] to share that cache among maintainers as well as to the deployment 
 > Only notebooks listed in `docs/_toc.yml` are built, so adding a new notebook requires updating `docs/_toc.yml`.
 
 The `dvc pull` command retrieves the notebook cache.
-We execute it via `uv run` only because we've included the DVC tool in the project environment to simplify this workflow.
 
 [Jupyter Book]: https://jupyterbook.org/
 [DVC]: https://dvc.org/
 
 ```{code-cell} ipython3
 dvc pull --force
+```
+
+The notebooks now available in the cache can be displayed with `jcache`.
+
+```{code-cell}
+jcache notebook -p docs/_cache list
+```
+
+Clear the notebook cache if you want to re-execute all notebooks.
+
+```{code-cell}
+:scrolled: true
+
+jcache cache -p docs/_cache clear --force
 ```
 
 Update the notebook cache as needed by executing notebooks.
@@ -146,7 +163,7 @@ The next cell builds a static website in `docs/_build/html` using `jupyter-book`
 ```{code-cell} ipython3
 :scrolled: true
 
-jupyter-book build docs
+jupyter-book build --all docs
 ```
 
 Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
