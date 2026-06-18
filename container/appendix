@@ -1,7 +1,7 @@
 # change USER
 USER root
 
-# update MICROMAMBA_EXE
+# update MAMBA_EXE
 RUN ${MAMBA_EXE} update --yes --name base --all
 
 # system configuration
@@ -29,6 +29,8 @@ USER ${NB_USER}
 
 # install (locked) dependencies
 COPY --chown=${NB_USER}:${NB_USER} src/conda-lock.yml ${REPO_DIR}/conda-lock.yml
+RUN ${MAMBA_EXE} env remove --yes --prefix ${NB_PYTHON_PREFIX}
+
 RUN ${MAMBA_EXE} create --yes --prefix ${NB_PYTHON_PREFIX} \
    --file "conda-lock.yml" \
    --category notebooks \
