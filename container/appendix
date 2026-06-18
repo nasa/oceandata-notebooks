@@ -1,6 +1,9 @@
 # change USER
 USER root
 
+# update MICROMAMBA_EXE
+RUN ${MAMBA_EXE} update --yes --name base --all
+
 # system configuration
 RUN git config --system credential.helper 'cache --timeout 86400 --socket /tmp/git-credential-cache/socket' \
  && git config --system core.excludesFile '/etc/gitignore' \

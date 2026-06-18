@@ -57,7 +57,6 @@ container = [
   "jupyterlab-code-formatter>=3.0.2",
   "jupyterlab-git>=0.50.1",
   "jupyterlab-h5web>=12.3.0",
-  "notebook-intelligence>=4.3.1",
 ]
 # packages that provide command-line tools for maintainers
 tools = [
