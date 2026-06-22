@@ -74,7 +74,6 @@ but it really must be done before updating the `latest` tag on the GitHub Contai
 :scrolled: true
 
 conda-lock lock --log-level ERROR --check-input-hash --without-cuda --lockfile container/conda-lock.yml \
-  --kind lock \
   --file pyproject.toml \
   --file environment-container.yml \
   --file environment-jupyter.yml \
