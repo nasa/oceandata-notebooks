@@ -24,7 +24,9 @@ RUN git config --system credential.helper 'cache --timeout 86400 --socket /tmp/g
 # install (locked) dependencies
 COPY src/conda-lock.yml ${REPO_DIR}/conda-lock.yml
 RUN ${MAMBA_EXE} create --yes --prefix ${NB_PYTHON_PREFIX} --file conda-lock.yml \
-    --category main notebooks jupyter container \
+ && ${MAMBA_EXE} install --yes --prefix ${NB_PYTHON_PREFIX} --file conda-lock.yml --category notebooks \
+ && ${MAMBA_EXE} install --yes --prefix ${NB_PYTHON_PREFIX} --file conda-lock.yml --category jupyter \
+ && ${MAMBA_EXE} install --yes --prefix ${NB_PYTHON_PREFIX} --file conda-lock.yml --category container \
  && ${MAMBA_EXE} clean --yes --all --force-pkgs-dirs
 
 # revert USER
