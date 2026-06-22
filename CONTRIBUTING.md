@@ -23,7 +23,7 @@ Maintainers are responsible for:
 2. publishing the notebooks to [GitHub Pages] as the [Help Hub] (a.k.a releasing!).
 
 > [!IMPORTANT]
-> 
+>
 > This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open,
 > and select the `bash` kernel to run code cells on JupyterLab.
 
@@ -74,12 +74,15 @@ but it really must be done before updating the `latest` tag on the GitHub Contai
 :scrolled: true
 
 conda-lock lock --log-level ERROR --check-input-hash --without-cuda --lockfile container/conda-lock.yml \
+  --kind lock \
   --file pyproject.toml \
   --file environment-container.yml \
   --file environment-jupyter.yml \
   --file environment-notebooks.yml \
   --file environment-tools.yml \
   --file container/environment.yml
+cd container
+conda-lock render --kind explicit --extras notebooks --extras container --extras jupyter --platform linux-aarch64
 ```
 
 The `container` folder has additional configuration files that [repo2docker] uses to build the container image.
@@ -113,7 +116,7 @@ The tutorials are written in executable MyST Markdown, and publishing the websit
 We use [DVC] to share that cache among maintainers as well as to the deployment workflow on GitHub.
 
 > [!IMPORTANT]
-> 
+>
 > Only notebooks listed in `docs/_toc.yml` are built, so adding a new notebook requires updating `docs/_toc.yml`.
 
 The `dvc pull` command retrieves the notebook cache.
@@ -172,7 +175,7 @@ Run the next cell to preview the website.
 Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
 
 > [!NOTE]
-> 
+>
 > On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
 
 ```{code-cell} ipython3
