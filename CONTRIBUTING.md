@@ -80,8 +80,6 @@ conda-lock lock --log-level ERROR --check-input-hash --without-cuda --lockfile c
   --file environment-notebooks.yml \
   --file environment-tools.yml \
   --file container/environment.yml
-cd container
-conda-lock render --kind explicit --extras notebooks --extras container --extras jupyter --platform linux-aarch64
 ```
 
 The `container` folder has additional configuration files that [repo2docker] uses to build the container image.
