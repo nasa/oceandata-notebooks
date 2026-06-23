@@ -16,6 +16,7 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 1
       matrix:
         name:
           - jupyterlab
