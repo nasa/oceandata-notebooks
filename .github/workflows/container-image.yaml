@@ -15,9 +15,14 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        name:
+          - jupyterlab
+          - oss
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: oceandata-jupyterlab
+      IMAGE_NAME: oceandata-${{ matrix.name }}
       BUILDX_NO_DEFAULT_ATTESTATIONS: 1
     permissions:
       packages: write
@@ -77,7 +82,7 @@ jobs:
           --subdir container
           --image-name "$FIRST_TAG"
           --target-repo-dir /srv/container
-          --appendix "$(< $PWD/container/appendix)"
+          --appendix "$(< container/appendix-${{ matrix.name }} $(< container/appendix)"
           --DockerEngine.extra_buildx_build_args=--cache-from="type=registry,ref=$CACHE"
           --DockerEngine.extra_buildx_build_args=--cache-to="type=registry,ref=$CACHE,mode=max"
           $TAGS

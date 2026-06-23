@@ -1,0 +1,2 @@
+# set location for shared OCSSW data
+ARG OCSSWROOT_PUBLIC=/home/${NB_USER}/shared-public/pace-hackweek/ocssw
