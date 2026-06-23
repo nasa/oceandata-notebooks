@@ -35,9 +35,9 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-[Harmony](https://harmony.earthdata.nasa.gov/) is a transformation is a service that allows you to customize many NASA datasets, including the ability to subset, reproject and reformat files. Data can be subsetted for a geographic region, a temporal range and by variable. Data can be “reprojected” from its native coordinate reference system (CRS) to the coordinate reference system relevant to your analysis. And data can be reformatted from its native file format to a format that is more relevant for your application. These services are collectively called transformation services. However, not all services are available for all datasets. You will learn how to discover which services are available for a given dataset.
+[Harmony](https://harmony.earthdata.nasa.gov/) is a service that allows you to customize many NASA datasets, including the ability to subset, reproject and reformat files. Data can be subsetted for a geographic region, a temporal range and by variable. Data can be “reprojected” from its native coordinate reference system (CRS) to the coordinate reference system relevant to your analysis. Data can be reformatted from its native file format to a format that is more relevant for your application. These services are collectively called transformation services. However, not all services are available for all datasets. You will learn how to discover which services are available for a given dataset.
 
-[`harmony-py`](https://github.com/nasa/harmony-py) is a Python library alternative to directly using Harmony's RESTful API. You can find more information about `harmony-py` in the [readthedocs](https://harmony-py.readthedocs.io/en/main/) documentation. It handles NASA Earthdata Login (EDL) authentication and optionally integrates with the CMR Python Wrapper by accepting collection results as a request parameter. It's convenient for scientists who wish to use Harmony from Jupyter notebooks. 
+Harmony can be used via [`harmony-py`](https://github.com/nasa/harmony-py), a Python library alternative to  Harmony's RESTful API. You can find more information about `harmony-py` in the [readthedocs](https://harmony-py.readthedocs.io/en/main/) documentation. It handles NASA Earthdata Login (EDL) authentication and optionally integrates with the CMR Python Wrapper by accepting collection results as a request parameter. It's convenient for scientists who wish to use Harmony from Jupyter notebooks. 
 
 This tutorial demonstrates how to subset and reformat PACE OCI data from the NASA Earthdata Cloud using `harmony-py`. It is modelled off of tutorials developed by [NSIDC](https://github.com/nsidc/NSIDC-Data-Tutorials/blob/main/notebooks/NASA_Earthdata_webinar_short/harmony-py-webinar-short.ipynb) and [Openscapes](https://nasa-openscapes.github.io/earthdata-cloud-cookbook/tutorials/Harmony.html). 
 
@@ -49,7 +49,7 @@ At the end of this notebook you will know:
 - How to use the `harmony-py` Python library to spatially and temporally subset PACE OCI Level-2 data
 - Download the subsetted data to your local directory
 - Stream the subsetted data
-- Open and plot subsetted L2 PACE OCI data 
+- Open and plot subsetted L2 PACE OCI data
 
 +++
 
@@ -93,7 +93,7 @@ capabilities = harmony_client.submit(capabilities_request)
 capabilities
 ```
 
-You can see here that this dataset be subsetted.
+You can see here under 'services' > 'capabilities' that this dataset can be subsetted.
 
 +++
 
@@ -110,7 +110,7 @@ request = Request(
 )
 ```
 
-Submit the request:
+Submit the request to the harmony client:
 
 ```{code-cell} ipython3
 job_id = harmony_client.submit(request)
@@ -118,12 +118,17 @@ job_id
 ```
 
 The `job_id` can be used to check on the details of your job progress. If you are logged into Earthdata, you can see your jobs here: https://harmony.earthdata.nasa.gov/workflow-ui
+or look at your process by running this line:
 
 ```{code-cell} ipython3
 harmony_client.wait_for_processing(job_id, show_progress=True)
 ```
 
 Note: Requesting a job can take a variable amount of time. In our experience, running this particular job has ranged from 2 to 24 minutes.
+
+```{code-cell} ipython3
+job_summary = harmony_client.result_json(job_id)
+```
 
 ```{code-cell} ipython3
 print("Number of granules:", job_summary["numInputGranules"])
@@ -156,7 +161,7 @@ url = list(harmony_client.result_urls(job_id))[0]
 filepath = harmony_client.download(url, directory=".", overwrite=False).result()
 ```
 
-You should see this file saved in your local directory. 
+You should see this file saved in your local directory.
 
 +++
 
@@ -178,11 +183,6 @@ As with `download`, the download directory path on the local machine can be spec
 The paths fo the files are returned as a list.
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
 futures = harmony_client.download_all(
     job_id, directory="subsetted_data", overwrite=False
 )
@@ -208,11 +208,8 @@ You must be running this notebook in the AWS us-west-2 region to run the followi
 We need to get the url for the data in the S3 bucket. We can do this using `result_urls`, as we did for `download` but we set link_type=LinkType.s3 to specify we want the S3 url.
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
+:scrolled: true
+
 urls = list(harmony_client.result_urls(job_id, link_type=LinkType.s3))
 urls
 ```
@@ -239,11 +236,8 @@ We then open the S3 url as a file-like object.
 A file-like object is just what it sounds like, an object - a collection of bytes in memory - that is recognized as a file by applications.
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
+:scrolled: true
+
 f = [s3_fs.open(url, mode="rb") for url in urls]
 f
 ```
@@ -268,6 +262,8 @@ ds.chlor_a.plot()
 Now let's plot multiple subsetted granules:
 
 ```{code-cell} ipython3
+import matplotlib.pyplot as plt
+
 files = f[:10]
 
 fig, axes = plt.subplots(2, 5, figsize=(10, 4), constrained_layout=True)
@@ -289,14 +285,6 @@ fig.colorbar(im, ax=axes, orientation="vertical", shrink=0.8, label="Chl a (mg m
 plt.show()
 ```
 
-```{code-cell} ipython3
-
-```
-
-```{code-cell} ipython3
-
-```
-
 ## Anna notes:
 
 +++
@@ -304,6 +292,7 @@ plt.show()
 Only way I could figure out how to plot with lat/lon:
 
 ```{code-cell} ipython3
+import numpy as np
 files = f[:10]
 
 fig, axes = plt.subplots(2, 5, figsize=(10, 4), constrained_layout=True)
@@ -350,7 +339,7 @@ Looks like I can't with L3M....
 
 +++
 
-So, I think this tool is great to subset spatially/temporally/ by variable to download less data. This workflow cut the data size by  99.3% which is prety significant. But then it's kind of hard to work with the data because they are all on a common grid. So, if we could come up with a way to combine/concatenate them so they're all on same grid that could be useful. I also am not sure why it doesn't work with L3M data, but if it did that would be easier to work with. 
+So, I think this tool is great to subset spatially/temporally/ by variable to download less data. This workflow cut the data size by  99.3% which is prety significant. But then it's kind of hard to work with the data because they are all on a common grid. So, if we could come up with a way to combine/concatenate them so they're all on same grid that could be useful. I also am not sure why it doesn't work with L3M data, but if it did that would be easier to work with.
 
 +++
 
