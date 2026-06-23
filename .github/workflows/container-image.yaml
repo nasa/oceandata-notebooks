@@ -82,7 +82,7 @@ jobs:
           --subdir container
           --image-name "$FIRST_TAG"
           --target-repo-dir /srv/container
-          --appendix "$(< container/appendix-${{ matrix.name }} $(< container/appendix)"
+          --appendix "$(< container/appendix-${{ matrix.name }}) $(< container/appendix)"
           --DockerEngine.extra_buildx_build_args=--cache-from="type=registry,ref=$CACHE"
           --DockerEngine.extra_buildx_build_args=--cache-to="type=registry,ref=$CACHE,mode=max"
           $TAGS
