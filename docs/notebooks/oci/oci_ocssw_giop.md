@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA)
 
-Last updated: August 3, 2025
+Last updated: June 24, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -115,7 +115,7 @@ Accessing data from NASA's Earthdata Cloud, regardless of the tool, requires aut
 The `earthaccess` package works behind-the-scenes using the Earthdata Login credentials you provide to generate temporary AWS credentials for direct access to the Earthdata Cloud.
 
 ```{code-cell} ipython3
-earthaccess.login(persist=True)
+earthaccess.login()
 credentials = earthaccess.get_s3_credentials(provider="OB_CLOUD")
 ```
 
@@ -351,10 +351,11 @@ You'll know `l2gen` processing is finished when you see "Processing Completed" a
 Let's open up this new L2 data using XArray's open_datatree function:
 
 ```{code-cell} ipython3
-dat = xr.open_datatree(par["ofile"])
-dat = xr.merge(dat.to_dict().values())
-dat = dat.set_coords(("longitude", "latitude"))
-dat
+dt = xr.open_datatree(par["ofile"])
+ds = dt["geophysical_data"].to_dataset()
+for item in ("longitude", "latitude"):
+    ds.coords[item] = dt["navigation_data"][item]
+ds
 ```
 
 ## 4. Plot L2 IOP data products
@@ -365,7 +366,8 @@ Let's plot each of the IOP variables:
 
 ```{code-cell} ipython3
 target_wavelength = 443
-wl_idx = dat["wavelength_3d"].sel({"wavelength_3d": target_wavelength}, method="nearest").item()
+ds_443 = ds.sel({"wavelength": target_wavelength}, method="nearest")
+wl_idx = ds_443["wavelength"].item()
 
 vars_to_plot = {
     "fit_par_1_giop": "M_aph",
@@ -399,7 +401,7 @@ axes = axes.flatten()
 
 for i, (var, title) in enumerate(vars_to_plot.items()):
     ax = axes[i]
-    da = dat[var].sel({"wavelength_3d": wl_idx}) if var in ["a", "bb", "aph"] else dat[var]
+    da = ds_443[var]
 
     vmin, vmax = limits.get(var, (None, None))
 
@@ -431,8 +433,8 @@ We can also plot the shapes of absorption (a), backscattering (bb), and aph (phy
 lat1, lon1 = 38, -74.5
 lat2, lon2 = 35.5, -74
 plot = (
-    dat["aph"]
-    .sel({"wavelength_3d": 510})
+    ds["aph"]
+    .sel({"wavelength": 510}, method="nearest")
     .plot(x="longitude", y="latitude", vmin=0, vmax=0.025)
 )
 plt.plot(lon1, lat1, marker="o", color="red", markersize=8)
@@ -443,14 +445,14 @@ plt.show()
 Use `argmin` to find the index in the `number_of_lines` and `pixels_per_line` dimension of the nearest pixel center to each station, and concatentate the result into a dataset with a `station` dimension.
 
 ```{code-cell} ipython3
-distance1 = np.sqrt((dat.latitude - lat1) ** 2 + (dat.longitude - lon1) ** 2)
+distance1 = np.sqrt((ds.latitude - lat1) ** 2 + (ds.longitude - lon1) ** 2)
 index1 = distance1.argmin(...)
 
-distance2 = np.sqrt((dat.latitude - lat2) ** 2 + (dat.longitude - lon2) ** 2)
+distance2 = np.sqrt((ds.latitude - lat2) ** 2 + (ds.longitude - lon2) ** 2)
 index2 = distance2.argmin(...)
 
-station_dat = xr.concat((dat[index1], dat[index2]), "station")
-station_dat
+station_ds = xr.concat((ds[index1], ds[index2]), "station")
+station_ds
 ```
 
 The spectral plots for the two stations.
@@ -476,12 +478,12 @@ fig.text(
     color="magenta",
 )
 
-station_dat["a"][0].plot(ax=axs[0, 0], color="blue")
-station_dat["a"][1].plot(ax=axs[1, 0], color="blue")
-station_dat["bb"][0].plot(ax=axs[0, 1], color="orange")
-station_dat["bb"][1].plot(ax=axs[1, 1], color="orange")
-station_dat["aph"][0].plot(ax=axs[0, 2], color="green")
-station_dat["aph"][1].plot(ax=axs[1, 2], color="green")
+station_ds["a"][0].plot(ax=axs[0, 0], color="blue")
+station_ds["a"][1].plot(ax=axs[1, 0], color="blue")
+station_ds["bb"][0].plot(ax=axs[0, 1], color="orange")
+station_ds["bb"][1].plot(ax=axs[1, 1], color="orange")
+station_ds["aph"][0].plot(ax=axs[0, 2], color="green")
+station_ds["aph"][1].plot(ax=axs[1, 2], color="green")
 
 for ax in axs.flat:
     ax.set_title(None)
@@ -534,10 +536,11 @@ write_par("l2gen_iop_mod.par", par)
 ```
 
 ```{code-cell} ipython3
-dat_mod = xr.open_datatree(par["ofile"])
-dat_mod = xr.merge(dat_mod.to_dict().values())
-dat_mod = dat_mod.set_coords(("longitude", "latitude"))
-dat_mod
+dt_mod = xr.open_datatree(par["ofile"])
+ds_mod = dt_mod["geophysical_data"].to_dataset()
+for item in ("longitude", "latitude"):
+    ds_mod.coords[item] = dt_mod["navigation_data"][item]
+ds_mod
 ```
 
 Let's compare $a_{dg}$(442) between the two GIOP runs to see how changing the $S_{dg}$ eigenvector changes the $a_{dg}$ output:
@@ -545,8 +548,8 @@ Let's compare $a_{dg}$(442) between the two GIOP runs to see how changing the $S
 ```{code-cell} ipython3
 fig, ax = plt.subplots()
 
-x = dat["adg_442"]
-y = dat_mod["adg_442"]
+x = ds["adg_442"]
+y = ds_mod["adg_442"]
 
 ax.scatter(x, y, s=20)
 ax.set_xlabel("adg with fixed Sdg")

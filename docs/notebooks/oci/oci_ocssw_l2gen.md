@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA)
 
-Last updated: August 1, 2025
+Last updated: June 24, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -118,7 +118,7 @@ Accessing data from NASA's Earthdata Cloud, regardless of the tool, requires aut
 The `earthaccess` package works behind-the-scenes using the Earthdata Login credentials you provide to generate temporary AWS credentials for direct access to the Earthdata Cloud.
 
 ```{code-cell} ipython3
-earthaccess.login(persist=True)
+auth = earthaccess.login()
 credentials = earthaccess.get_s3_credentials(provider="OB_CLOUD")
 ```
 
@@ -272,7 +272,7 @@ results = earthaccess.search_data(
     temporal=tspan,
     bounding_box=bbox,
 )
-results[0]
+results[-1]
 ```
 
 ```{code-cell} ipython3
@@ -287,7 +287,7 @@ results = earthaccess.search_data(
     temporal=tspan,
     bounding_box=bbox,
 )
-results[0]
+results[-1]
 ```
 
 Next, let's define variables with the path of the input file to process using `l2gen`and a corresponding L2 output file that we'll create.
@@ -299,7 +299,7 @@ l2_paths = earthaccess.open(results)
 And let's plot a `rhot_red` wavelength to see what the data looks like:
 
 ```{code-cell} ipython3
-dataset = xr.open_datatree(l1b_paths[0])
+dataset = xr.open_datatree(l1b_paths[-1])
 dataset = xr.merge(dataset.to_dict().values())
 dataset = dataset.set_coords(("longitude", "latitude"))
 plot = dataset["rhot_red"].sel({"red_bands": 100}).plot()
@@ -326,7 +326,7 @@ Let's run it on our L1B file, using the `--use_filename` parameter to parse only
 We can parse the filename from `l1b_paths` to use with `{}` variable expansion after the `!` prefix like have done with `{env}` above.
 
 ```{code-cell} ipython3
-l1b_path = l1b_paths[0].full_name
+l1b_path = l1b_paths[-1].full_name
 l1b_name = Path(l1b_path).name
 l1b_name
 ```
@@ -382,16 +382,17 @@ You'll know `l2gen` processing is finished successfully when you see "Processing
 Let's open up this new L2 data using XArray's open_datatree function:
 
 ```{code-cell} ipython3
-dat = xr.open_datatree(par["ofile"])
-dat = xr.merge(dat.to_dict().values())
-dat = dat.set_coords(("longitude", "latitude"))
-dat
+dt = xr.open_datatree(par["ofile"])
+ds = dt["geophysical_data"]
+for item in ("longitude", "latitude"):
+    ds.coords[item] = dt["navigation_data"][item]
+ds
 ```
 
 Let's do a quick plot of Rrs at 550 nm:
 
 ```{code-cell} ipython3
-plot = dat["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
+plot = ds["Rrs"].sel({"wavelength": 550}, method="nearest").plot(vmin=0, vmax=0.008)
 ```
 
 ## 4. Compare the newly generated file with a standard OB.DAAC file
@@ -407,9 +408,9 @@ First, we'll use the program `lonlat2pixline` to identify the scan line and pixe
 We need the full path to the input file (this will become the `$1` argument).
 
 ```{code-cell} ipython3
-l2_path = l2_paths[0].full_name
+l2_path = l2_paths[-1].full_name
 l2_name = Path(l2_path).name
-l2_sub_path = data / l2_name.replace("L2", "L2_sub")
+l2_sub_path = str(data / l2_name.replace("L2", "L2_sub"))
 l2_sub_path
 ```
 
@@ -442,14 +443,15 @@ This should have created a new file including "L2_sub" in the data subdirectory.
 Let's open it and see how it compares with the L2 file we generated.
 
 ```{code-cell} ipython3
-dat_sub = xr.open_datatree(l2_sub_path)
-dat_sub = xr.merge(dat_sub.to_dict().values())
-dat_sub = dat_sub.set_coords(("longitude", "latitude"))
-dat_sub
+dt_sub = xr.open_datatree(l2_sub_path)
+ds_sub = dt_sub["geophysical_data"].to_dataset() 
+for item in ("longitude", "latitude"):
+    ds_sub.coords[item] = dt_sub["navigation_data"][item]
+ds_sub
 ```
 
 ```{code-cell} ipython3
-plot = dat_sub["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
+plot = ds_sub["Rrs"].sel({"wavelength": 550}, method="nearest").plot(vmin=0, vmax=0.008)
 ```
 
 The two maps of Rrs(550) look extremely similar.  But, let's compare the data in a scatter plot to be sure.
@@ -457,8 +459,8 @@ The two maps of Rrs(550) look extremely similar.  But, let's compare the data in
 ```{code-cell} ipython3
 fig, ax = plt.subplots()
 
-x = dat["Rrs"].sel({"wavelength_3d": 550})
-y = dat_sub["Rrs"].sel({"wavelength_3d": 550})
+x = ds["Rrs"].sel({"wavelength": 550}, method="nearest")
+y = ds_sub["Rrs"].sel({"wavelength": 550}, method="nearest")
 
 ax.scatter(x, y, s=20)
 ax.set_xlabel("OB.DAAC Rrs(550)")
