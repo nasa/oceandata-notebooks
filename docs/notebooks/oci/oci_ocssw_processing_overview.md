@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
 
-Last updated: August 3, 2025
+Last updated: June 24, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -210,13 +210,20 @@ To process a L1B file using `l2gen`, at a minimum, you need to set an infile nam
 Parameters can be passed to OCSSW programs through a text file. They can also be passed as arguments, but writing to a text file leaves a clear processing record. Define the parameters in a dictionary, then send it to the `write_par` function
 defined in the [Setup](#setup) section.
 
+Let's first make a folder called 'data' to store the outputs:
+
+```{code-cell} ipython3
+granules = Path("granules")
+granules.mkdir(exist_ok=True)
+```
+
 We can limit the geographical boundaries of the processing. Here we use the `location` variable to set Northwestern and Southeastern boundaries.
 
 ```{code-cell} ipython3
 location = [(-62, 49), (-60, 47)]
 par = {
     "ifile": ifile,
-    "ofile": os.path.basename(ifile).replace("L1B", "L2"),
+    "ofile": granules / os.path.basename(ifile).replace("L1B", "L2"),
     "l2prod": "chlor_a",
     "proc_uncertainty": 0,
     "north": location[0][1],
@@ -227,7 +234,7 @@ par = {
 write_par("l2gen.par", par)
 ```
 
-With the parameter file ready, it's time to call `l2gen` from a `%%bash` cell.
+With the parameter file ready, it's time to call `l2gen`.
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -278,6 +285,7 @@ adjacent to eachother. Pass a list of latitude and longitude tuples to the `line
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_BGC",
+    version="3.2",
     temporal=tspan,
     line=location,
 )
@@ -303,8 +311,7 @@ with open("l2bin_ifile.txt", "w") as file:
 Then we use that text file as an `ifile` parameter in the `l2bin` par file.
 
 ```{code-cell} ipython3
-ofile = "granules/PACE_OCI.L3B.nc"
-os.makedirs("granules", exist_ok=True)
+ofile = str(granules / "PACE_OCI.L3B.nc")
 par = {
     "ifile": "l2bin_ifile.txt",
     "ofile": ofile,
@@ -338,7 +345,7 @@ The `l3mapgen` function of OCSSW allows you to create maps with a wide array of 
 Run `l3mapgen` to make a 9km map with a Plate Carree projection.
 
 ```{code-cell} ipython3
-ifile = "granules/PACE_OCI.L3B.nc"
+ifile = ofile
 ofile = ifile.replace(".L3B.", ".L3M.")
 par = {
     "ifile": ifile,

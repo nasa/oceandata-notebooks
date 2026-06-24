@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.7
+    jupytext_version: 1.19.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** James Allen (NASA, MSU), Anna Windle (NASA, SSAI)
 
-Last updated: August 3, 2025
+Last updated: June 24, 2026
 
 ## Summary
 
@@ -1426,7 +1426,7 @@ def plot_BAvsScat(
 For those starting this demonstration fresh, we'll double-check that we've got our earthaccess credentials set up!
 
 ```{code-cell} ipython3
-auth = earthaccess.login(strategy="interactive", persist=True)
+auth = earthaccess.login()
 ```
 
 ## 2. Process AERONET-OC data

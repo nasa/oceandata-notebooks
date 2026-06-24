@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 
-Last updated: March 17, 2026
+Last updated: June 23, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -178,30 +178,16 @@ if not earthaccess.__store__.in_region:
 ```
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(paths[0])
+datatree = xr.open_datatree(paths[-1])
 rrs = datatree["geophysical_data"]["Rrs"]
 rrs
 ```
 
-```{code-cell} ipython3
-rrs.sizes
-```
-
-The Rrs variable has 172 values in the `wavelength_3d`; the blue, red, and SWIR wavelengths have been combined.
-Note that `wavelength_3d` is one of the dimensions, but also that the `Rrs` variable doesn't have any "Coordinates" or "Indexes".
-Indices let us look up positions in an array by the value of it's coordinates, so we need to dig more variables out of this L2 file.
-The coordinates variable for `wavelength_3d` is in the "sensor_band_parameters" group.
-When we add this variable to the `rrs` array, `xarray` creates the corresponding index.
+The Rrs variable has 172 values in the `wavelength`; the blue, red, and SWIR wavelengths have been combined.
+Without having to look too closely at the exact wavelength coordinates, we can plot the variable for a blue wavelength using `method="nearest"`.
 
 ```{code-cell} ipython3
-rrs["wavelength_3d"] = datatree["sensor_band_parameters"]["wavelength_3d"]
-rrs
-```
-
-Now that `wavelength_3d` shows up under "Coordinates" and "Indexes" we can reference wavelengths by value.
-
-```{code-cell} ipython3
-plot = rrs.sel({"wavelength_3d": 440}).plot(cmap="viridis", robust=True)
+plot = rrs.sel({"wavelength": 440}, method="nearest").plot(cmap="viridis", robust=True)
 ```
 
 The scene is being plotted using `number_of_lines` and `pixels_per_line` as "x" and "y", respectively.
@@ -216,7 +202,7 @@ rrs
 
 Although we now have coordinates, they won't immediately help because the data are not gridded by latitude and longitude.
 L2 data come in the original instrument swath and have not been resampled to a regular grid.
-That is why latitude and longitude are two-dimensional coordinates, and why the are not also "Indexes" like `wavelength_3d`.
+That is why latitude and longitude are two-dimensional coordinates, and why the are not indexes like `wavelength`.
 Latitude and longitude are present, but cannot be used immediately to look up values like you can with coordinates that are also indices.
 
 Let's make a scatter plot of some pixel locations so we can see the irregular spacing of latitude and longitude.
@@ -234,7 +220,7 @@ plot = datatree["navigation_data"].sel(
 Despite not having indices, let's plot `Rrs` the same way as before, except for the addition of latitude and longitude.
 
 ```{code-cell} ipython3
-rrs_sel = rrs.sel({"wavelength_3d": 440})
+rrs_sel = rrs.sel({"wavelength": 440}, method="nearest")
 plot = rrs_sel.plot(x="longitude", y="latitude", cmap="viridis", robust=True)
 ```
 
@@ -307,8 +293,7 @@ Notice some special parts in the granule name:
 1. Right after `L3m` you have a period indicator.
    The value `DAY` means a daily aggregate, `8D` means an 8-day aggregate, `MO` means a monthly aggregate,
    and `SN(SP|SU|AU|WI)` indicates one of four seasonal aggregates.
-1. Right after `chlor_a` you have a spatial resolution marker,
-   as horizontal cell size at the equator given either in `km` or `deg`. Read `p` as a decimal point.
+1. Right before the `.nc` suffix, you have a spatial resolution marker. The value gives the horizontal cell size at the equator either in `km` or `deg`. Read `p` as a decimal point.
 
 Within a specific collection, `earthaccess` can retrieve granules whose name matches a pattern given in the `granule_name` argument.
 Let's use that to narrow our search to values aggregated to a month and 0.1 degree resolutions.
