@@ -11,6 +11,3 @@ ARG OCSSWROOT_PUBLIC=/efs/ocssw
 
 # launch from home
 WORKDIR /home/${NB_USER}
-
-# TODO: is this essential?
-CMD ["jupyter", "lab", "--no-browser", "--ip", "0.0.0.0"]
