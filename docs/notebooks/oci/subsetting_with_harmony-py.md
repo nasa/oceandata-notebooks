@@ -6,7 +6,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -16,6 +16,8 @@ kernelspec:
 # Subsetting PACE OCI data using harmony-py
 
 **Authors:** Anna Windle (NASA, SSAI), First Last (NASA, ...)
+
+Last Updated: June 25, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -35,12 +37,24 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-[Harmony](https://harmony.earthdata.nasa.gov/) is a service that allows you to customize many NASA datasets, including the ability to subset, reproject and reformat files. Data can be subsetted for a geographic region, a temporal range and by variable. Data can be “reprojected” from its native coordinate reference system (CRS) to the coordinate reference system relevant to your analysis. Data can be reformatted from its native file format to a format that is more relevant for your application. These services are collectively called transformation services. However, not all services are available for all datasets. You will learn how to discover which services are available for a given dataset.
+[Harmony] is a service that allows you to customize many NASA datasets, including the ability to subset, reproject and reformat files. Data can be subsetted for a geographic region, a temporal range and by variable. Data can be “reprojected” from its native coordinate reference system (CRS) to the coordinate reference system relevant to your analysis. Data can be reformatted from its native file format to a format that is more relevant for your application. These services are collectively called transformation services. However, not all services are available for all datasets. You will learn how to discover which services are available for a given dataset.
 
-Harmony can be used via [`harmony-py`](https://github.com/nasa/harmony-py), a Python library alternative to  Harmony's RESTful API. You can find more information about `harmony-py` in the [readthedocs](https://harmony-py.readthedocs.io/en/main/) documentation. It handles NASA Earthdata Login (EDL) authentication and optionally integrates with the CMR Python Wrapper by accepting collection results as a request parameter. It's convenient for scientists who wish to use Harmony from Jupyter notebooks. 
+Harmony services can be used in multiple ways:
+1. through a graphical user interface (GUI) while downloading applicable granules from [Earthdata Search],
+2. by direct requests to [Harmony's RESTful API], or as in this tutorial,
+3. using the `harmony-py` Python package.
 
-This tutorial demonstrates how to subset and reformat PACE OCI data from the NASA Earthdata Cloud using `harmony-py`. It is modelled off of tutorials developed by [NSIDC](https://github.com/nsidc/NSIDC-Data-Tutorials/blob/main/notebooks/NASA_Earthdata_webinar_short/harmony-py-webinar-short.ipynb) and [Openscapes](https://nasa-openscapes.github.io/earthdata-cloud-cookbook/tutorials/Harmony.html). 
+The Python package handles NASA Earthdata Login (EDL) authentication and optionally integrates with the CMR Python Wrapper by accepting collection results as a request parameter. It's convenient for scientists who wish to use Harmony from Jupyter notebooks.
+After this tutorial, you can dive deeper into `harmony-py` on [ReadTheDocs](https://harmony-py.readthedocs.io/en/main/). 
 
+This tutorial demonstrates how to subset and reformat PACE OCI data from the NASA Earthdata Cloud using `harmony-py`. It is modelled off of tutorials developed by [NSIDC] and [NASA-Openscapes]. 
+
+[Harmony]: https://harmony.earthdata.nasa.gov/
+[Earthdata Search]: https://search.earthdata.nasa.gov/
+[Harmony's RESTful API]: https://harmony.earthdata.nasa.gov/docs
+[harmony-py]: https://github.com/nasa/harmony-py
+[NSIDC]: https://github.com/nsidc/NSIDC-Data-Tutorials/blob/main/notebooks/NASA_Earthdata_webinar_short/harmony-py-webinar-short.ipynb
+[NASA-Openscapes]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook/tutorials/Harmony.html
 
 ## Learning Objectives
 
@@ -60,14 +74,12 @@ At the end of this notebook you will know:
 Begin by importing all of the packages used in this notebook.
 
 ```{code-cell} ipython3
-pip install -U harmony-py
-```
-
-```{code-cell} ipython3
 import datetime as dt
 import getpass
 from pathlib import Path
+
 import earthaccess
+import matplotlib.pyplot as plt
 import s3fs
 import xarray as xr
 from harmony import BBox, CapabilitiesRequest, Client, Collection, LinkType, Request
@@ -76,16 +88,15 @@ from harmony import BBox, CapabilitiesRequest, Client, Collection, LinkType, Req
 ## 2. Earthdata authentication and Harmony client initalization
 
 ```{code-cell} ipython3
-EDL_username = input("EDL username?:")
-EDL_password = getpass.getpass("EDL password?:")
-harmony_client = Client(auth=(EDL_username, EDL_password))
+auth = earthaccess.login()
+harmony_client = Client(token=earthaccess.get_edl_token())
 ```
 
 ## 3. Discover subsetting capabilities for PACE OCI data
 
 +++
 
-Define which data set you’d like to access using either the dataset `short_name` or its collection `concept-id`. For this example, we’ll use PACE OCI Level-2 Regional Ocean Biogeochemical Properties Data (PACE_OCI_L2_BGC).
+Define which data set you’d like to access using either the dataset `short_name` or its collection `concept_id`. For this example, we’ll use PACE OCI Level-2 Regional Ocean Biogeochemical Properties Data (PACE_OCI_L2_BGC).
 
 ```{code-cell} ipython3
 capabilities_request = CapabilitiesRequest(short_name="PACE_OCI_L2_BGC")
@@ -93,7 +104,7 @@ capabilities = harmony_client.submit(capabilities_request)
 capabilities
 ```
 
-You can see here under 'services' > 'capabilities' that this dataset can be subsetted.
+You can see here under `["services"][0]["capabilities"]` that this dataset can be subsetted.
 
 +++
 
@@ -152,13 +163,14 @@ The subsetted files can be accessed by downloading the files to a local machine,
 +++
 
 ### Download a single file
-The download method takes a url to a single subsetted file. The `directory` keyword is used to specify a download path. The default is the current working directory (`.`). Setting `overwrite` to False avoids downloading the same file twice. If you need to download the file again, then set `overwrite=True`.
+
+The download method takes a url to a single subsetted file. There are two optional arguments; `directory` used to specify an *existing* folder for storing data (defaults to the current directory), and `overwrite` which defaults to `False` to avoid downloading the same file twice. If you need to download the file again, then set `overwrite=True`.
 
 Let's download the first granule:
 
 ```{code-cell} ipython3
 url = list(harmony_client.result_urls(job_id))[0]
-filepath = harmony_client.download(url, directory=".", overwrite=False).result()
+filepath = harmony_client.download(url).result()
 ```
 
 You should see this file saved in your local directory.
@@ -168,25 +180,25 @@ You should see this file saved in your local directory.
 You can also make a new folder in your local directory to save the subsetted data. Here, we are naming it "subsetted_data":
 
 ```{code-cell} ipython3
-Path("subsetted_data").mkdir(exist_ok=True)
+subsetted_data = Path("subsetted_data")
+subsetted_data.mkdir(exist_ok=True)
 
-filepath = harmony_client.download(
-    url, directory="subsetted_data", overwrite=False
-).result()
+filepath = harmony_client.download(url, directory=subsetted_data).result()
 ```
 
 ### Download all files
-The `download_all` method can use the `job-id` or the `result-json`, which contains result urls.
+The `download_all` method can use the `job_id` or the `result_json`, which contains result URLs.
 
-As with `download`, the download directory path on the local machine can be specified with the `directory` keyword. To save downloading the same file, the overwrite keyword can be set to False.
+As with `download`, the download directory path on the local machine can be specified with the `directory` keyword. To save downloading the same file, the `overwrite` keyword can be set to `False`.
 
 The paths fo the files are returned as a list.
 
 ```{code-cell} ipython3
-futures = harmony_client.download_all(
-    job_id, directory="subsetted_data", overwrite=False
-)
+futures = harmony_client.download_all(job_id, directory=subsetted_data)
 filelist = [f.result() for f in futures]
+```
+
+```{code-cell} ipython3
 len(filelist)
 ```
 
@@ -245,8 +257,8 @@ f
 We can then open one of the files using `xarray`.
 
 ```{code-cell} ipython3
-ds = xr.open_datatree(f[0])
-ds = xr.merge(ds.to_dict().values())
+dt = xr.open_datatree(f[0])
+ds = xr.merge(dt.to_dict().values())
 ds = ds.set_coords(("longitude", "latitude"))
 ds
 ```
@@ -262,26 +274,19 @@ ds.chlor_a.plot()
 Now let's plot multiple subsetted granules:
 
 ```{code-cell} ipython3
-import matplotlib.pyplot as plt
-
-files = f[:10]
-
 fig, axes = plt.subplots(2, 5, figsize=(10, 4), constrained_layout=True)
 axes = axes.ravel()
 
-for ax, file in zip(axes, files):
+for ax, file in zip(axes, f[:10]):
 
     dt = xr.open_datatree(file)
     ds = xr.merge(dt.to_dict().values())
-
+    ds = ds.set
     date = ds.attrs["time_coverage_start"]
-
     im = ds.chlor_a.plot(ax=ax, cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
-
     ax.set_title(date, fontsize=8)
 
 fig.colorbar(im, ax=axes, orientation="vertical", shrink=0.8, label="Chl a (mg m-3)")
-
 plt.show()
 ```
 
@@ -293,6 +298,7 @@ Only way I could figure out how to plot with lat/lon:
 
 ```{code-cell} ipython3
 import numpy as np
+
 files = f[:10]
 
 fig, axes = plt.subplots(2, 5, figsize=(10, 4), constrained_layout=True)
@@ -373,17 +379,9 @@ lat_all = np.concatenate(all_lat)
 chl_all = np.concatenate(all_chl)
 
 # plot mean field as scatter (composite)
-plt.figure(figsize=(6,5))
+plt.figure(figsize=(6, 5))
 
-sc = plt.scatter(
-    lon_all,
-    lat_all,
-    c=chl_all,
-    s=6,
-    cmap="viridis",
-    vmin=0,
-    vmax=20
-)
+sc = plt.scatter(lon_all, lat_all, c=chl_all, s=6, cmap="viridis", vmin=0, vmax=20)
 
 plt.colorbar(sc, label="chlor_a")
 plt.xlabel("Longitude")
