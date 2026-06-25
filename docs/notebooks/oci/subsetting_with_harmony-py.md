@@ -15,7 +15,7 @@ kernelspec:
 
 # Subsetting PACE OCI data using harmony-py
 
-**Authors:** Anna Windle (NASA, SSAI), First Last (NASA, ...)
+**Authors:** Anna Windle (NASA, SSAI), Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC) 
 
 Last Updated: June 25, 2026
 
@@ -65,6 +65,15 @@ At the end of this notebook you will know:
 - Stream the subsetted data
 - Open and plot subsetted L2 PACE OCI data
 
+## Contents
+1. [Setup](#1.-Setup)
+2. [Earthdata authentication and Harmony client initalization](#2.-Earthdata-authentication-and-Harmony-client-initalization)
+3. [Discover subsetting capabilities for Level-2 PACE OCI data](#3.-Discover-subsetting-capabilities-for-Level-2-PACE-OCI-data)
+4. [Build and submit a request](#4.-Build-and-submit-a-request)
+5. [Access the subsetted data](#5.-Access-the-subsetted-data)
+6. [Plot the subsetted data](#6.-Plot-the-subsetted-data)
+7. [Subsetting L3M data](#7.-Subsetting-L3M-data)
+
 +++
 
 ## 1. Setup
@@ -80,9 +89,11 @@ from pathlib import Path
 
 import earthaccess
 import matplotlib.pyplot as plt
-import s3fs
+import numpy as np
+import rasterio
 import xarray as xr
 from harmony import BBox, CapabilitiesRequest, Client, Collection, LinkType, Request
+from rasterio.enums import Resampling
 ```
 
 ## 2. Earthdata authentication and Harmony client initalization
@@ -92,7 +103,7 @@ auth = earthaccess.login()
 harmony_client = Client(token=earthaccess.get_edl_token())
 ```
 
-## 3. Discover subsetting capabilities for PACE OCI data
+## 3. Discover subsetting capabilities for Level-2 PACE OCI data
 
 +++
 
@@ -104,7 +115,7 @@ capabilities = harmony_client.submit(capabilities_request)
 capabilities
 ```
 
-You can see here under `["services"][0]["capabilities"]` that this dataset can be subsetted.
+You can see here under `['services']` that this dataset can be subsetted using the `'podacc/l2-subsetter'`
 
 +++
 
@@ -148,9 +159,9 @@ print("Output Data Size:", job_summary["outputDataSize"])
 print("Data Size % Change:", job_summary["dataSizePercentChange"])
 ```
 
-If you want to access a job that has already run, you can just simply put in the `job_id`:
+If you want to access a job that has already run, you can simply call:
 
-`job_id = '286dd8e2-38e0-4de7-a762-1437a543ec4a'`
+`job_id = '{put job_id here}'`
 
 Results are staged for 30 days in the Harmony s3 bucket.
 
@@ -226,38 +237,17 @@ urls = list(harmony_client.result_urls(job_id, link_type=LinkType.s3))
 urls
 ```
 
-We need AWS credentials to access the S3 bucket with the results. These are returned using the `aws_credentials` method.
+We need AWS credentials to access the S3 bucket with the results. These can be passed when using `xr.open_datatree`:
 
 ```{code-cell} ipython3
-creds = harmony_client.aws_credentials()
-```
+kwargs = {
+    "engine": "h5netcdf",
+    "storage_options": {
+        "client_kwargs": harmony_client.aws_credentials(),
+    },
+}
 
-We then create a virtual file system that allows us to access the S3 bucket. We pass the credentials to authenticate.
-
-```{code-cell} ipython3
-s3_fs = s3fs.S3FileSystem(
-    key=creds["aws_access_key_id"],
-    secret=creds["aws_secret_access_key"],
-    token=creds["aws_session_token"],
-    client_kwargs={"region_name": "us-west-2"},
-)
-```
-
-We then open the S3 url as a file-like object.
-
-A file-like object is just what it sounds like, an object - a collection of bytes in memory - that is recognized as a file by applications.
-
-```{code-cell} ipython3
-:scrolled: true
-
-f = [s3_fs.open(url, mode="rb") for url in urls]
-f
-```
-
-We can then open one of the files using `xarray`.
-
-```{code-cell} ipython3
-dt = xr.open_datatree(f[0])
+dt = xr.open_datatree(urls[0], **kwargs)
 ds = xr.merge(dt.to_dict().values())
 ds = ds.set_coords(("longitude", "latitude"))
 ds
@@ -277,11 +267,10 @@ Now let's plot multiple subsetted granules:
 fig, axes = plt.subplots(2, 5, figsize=(10, 4), constrained_layout=True)
 axes = axes.ravel()
 
-for ax, file in zip(axes, f[:10]):
+for ax, file in zip(axes, urls[:10]):
 
-    dt = xr.open_datatree(file)
+    dt = xr.open_datatree(file, **kwargs)
     ds = xr.merge(dt.to_dict().values())
-    ds = ds.set
     date = ds.attrs["time_coverage_start"]
     im = ds.chlor_a.plot(ax=ax, cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
     ax.set_title(date, fontsize=8)
@@ -290,50 +279,129 @@ fig.colorbar(im, ax=axes, orientation="vertical", shrink=0.8, label="Chl a (mg m
 plt.show()
 ```
 
-## Anna notes:
-
-+++
-
-Only way I could figure out how to plot with lat/lon:
+To plot using lat, lon coordinates, we need to project the data onto a defined grid with a given reslution. We will use code presented in the [Projecting PACE Data onto a Predefined Grid tutorial.](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_grid_match.html)
 
 ```{code-cell} ipython3
-import numpy as np
+def grid_data(src, resolution, dst_crs="epsg:4326", resampling=Resampling.nearest):
+    """
+    Reproject a L2 dataset to match an input grid. Makes sure 3D variables are
+        in (Z, Y, X) dimension order, and all variables have spatial dims/crs 
+        assigned.
+    Args:
+        src - an xarray dataset or dataarray to reproject
+        resolution - resolution of the output grid, in dst_crs units
+        dst_crs - CRS of the output data
+        resampling - resampling method (see rasterio.enums)
+    Returns:
+        dst - projected xr dataset
+    """
+    if (len(list(src.dims)) == 3) and (list(src.dims)[0] != "wavelength_3d"):
+        src = src.transpose("wavelength_3d", ...)
+    src = src.rio.set_spatial_dims("pixels_per_line", "number_of_lines")
+    src = src.rio.write_crs("epsg:4326")
 
-files = f[:10]
+    # Calculating the default affine transform
+    defaults = rasterio.warp.calculate_default_transform(
+        src.rio.crs,
+        dst_crs,
+        src.rio.width,
+        src.rio.height,
+        left=src.attrs["geospatial_lon_min"],
+        bottom=src.attrs["geospatial_lat_min"],
+        right=src.attrs["geospatial_lon_max"],
+        top=src.attrs["geospatial_lat_max"],
+    )
+    # Aligning that transform to our desired resolution
+    transform, width, height = rasterio.warp.aligned_target(*defaults, resolution)
+    
+    dst = src.rio.reproject(
+        dst_crs=dst_crs,
+        shape=(height, width),
+        transform=transform,
+        src_geoloc_array=(
+            src["longitude"],
+            src["latitude"],
+        ),
+        nodata=np.nan,
+        resample=resampling,
+    )
+    dst["x"] = dst["x"].round(9)
+    dst["y"] = dst["y"].round(9)
+    
+    return dst.rename({"x":"longitude", "y":"latitude"})
+
+resolution = (0.015, 0.015)
+
+ds_gridded = grid_data(ds, resolution)
+ds_gridded.rio.transform()
+
+ds_gridded.chlor_a.plot()
+```
+
+Plotting first 10 files as subplots:
+
+```{code-cell} ipython3
+files = urls[:10]
 
 fig, axes = plt.subplots(2, 5, figsize=(10, 4), constrained_layout=True)
 axes = axes.ravel()
 
-for i, (ax, file) in enumerate(zip(axes, files)):
+for ax, file in zip(axes, files):
 
-    # open datatree
-    dt = xr.open_datatree(file)
+    dt = xr.open_datatree(file, **kwargs)
     ds = xr.merge(dt.to_dict().values())
+    ds = ds.set_coords(("longitude", "latitude"))
 
-    date = ds.attrs["time_coverage_start"]
-
-    # extract arrays
-    lon = ds.longitude.values
-    lat = ds.latitude.values
-    chl = ds.chlor_a.values
-
-    # mask valid pixels
-    mask = np.isfinite(lon) & np.isfinite(lat) & np.isfinite(chl)
-
-    sc = ax.scatter(
-        lon[mask], lat[mask], c=chl[mask], s=2, cmap="viridis", vmin=0, vmax=20
-    )
-
+    ds_gridded = grid_data(ds, resolution)
+    date = ds_gridded.attrs["time_coverage_start"]
+    im = ds_gridded.chlor_a.plot(ax=ax, cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
     ax.set_title(date, fontsize=8)
 
-# shared colorbar
-cbar = fig.colorbar(sc, ax=axes, shrink=0.8)
-cbar.set_label("Chl a (mg m-3)")
+    ax.set_xlabel("")
+    ax.set_ylabel("")
 
+fig.colorbar(im, ax=axes, orientation="vertical", shrink=0.8, label="Chl a (mg m-3)")
 plt.show()
 ```
 
-I'd love to show an average chl with all granules, but not sure if possible since misaligned grids. Since plotting with L2 is tricky, I could show example with L3?
+Now, we can make a 10-day Chl a composite:
+
+```{code-cell} ipython3
+gridded_list = []
+
+for file in urls[:10]:
+
+    dt = xr.open_datatree(file, **kwargs)
+    ds = xr.merge(dt.to_dict().values())
+    ds = ds.set_coords(("longitude", "latitude"))
+
+    ds_gridded = grid_data(ds, resolution)
+
+    gridded_list.append(ds_gridded.chlor_a)
+
+stack = xr.concat(gridded_list, dim="scene")
+
+chl_mean = stack.mean(dim="scene", skipna=True)
+
+fig, ax = plt.subplots(figsize=(6, 4))
+
+chl_mean.plot(
+    ax=ax,
+    cmap="viridis",
+    vmin=0,
+    vmax=20
+)
+
+ax.set_xlabel("")
+ax.set_ylabel("")
+
+plt.tight_layout()
+plt.show()
+```
+
+## 7. Subsetting L3M data
+
+There are currently no `harmony-py` capabilities to subset PACE OCI L3M data:
 
 ```{code-cell} ipython3
 capabilities_request = CapabilitiesRequest(short_name="PACE_OCI_L3M_BGC")
@@ -341,54 +409,8 @@ capabilities = harmony_client.submit(capabilities_request)
 capabilities
 ```
 
-Looks like I can't with L3M....
-
-+++
-
-So, I think this tool is great to subset spatially/temporally/ by variable to download less data. This workflow cut the data size by  99.3% which is prety significant. But then it's kind of hard to work with the data because they are all on a common grid. So, if we could come up with a way to combine/concatenate them so they're all on same grid that could be useful. I also am not sure why it doesn't work with L3M data, but if it did that would be easier to work with.
-
-+++
-
-potential solution from chatgpt, but not the mean:
-
 ```{code-cell} ipython3
-files = f[:10]
-
-all_lon = []
-all_lat = []
-all_chl = []
-
-for file in files:
-
-    dt = xr.open_datatree(file)
-    ds = xr.merge(dt.to_dict().values())
-
-    lon = ds.longitude.values
-    lat = ds.latitude.values
-    chl = ds.chlor_a.values
-
-    mask = np.isfinite(lon) & np.isfinite(lat) & np.isfinite(chl)
-
-    all_lon.append(lon[mask])
-    all_lat.append(lat[mask])
-    all_chl.append(chl[mask])
-
-# concatenate ALL granules into one cloud of points
-lon_all = np.concatenate(all_lon)
-lat_all = np.concatenate(all_lat)
-chl_all = np.concatenate(all_chl)
-
-# plot mean field as scatter (composite)
-plt.figure(figsize=(6, 5))
-
-sc = plt.scatter(lon_all, lat_all, c=chl_all, s=6, cmap="viridis", vmin=0, vmax=20)
-
-plt.colorbar(sc, label="chlor_a")
-plt.xlabel("Longitude")
-plt.ylabel("Latitude")
-plt.title("Multi-granule Chlorophyll Composite (point-based)")
-
-plt.show()
+TODO: figure out xarray workaround
 ```
 
 <div class="alert alert-info" role="alert">
