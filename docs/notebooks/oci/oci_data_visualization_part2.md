@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -255,24 +255,47 @@ margin = 1
 We need to first create a grid.
 
 ```{code-cell} ipython3
-grid_pro = pyinterp.backends.xarray.Grid2D(dataset_phy["prococcus_moana"])
-grid_syn = pyinterp.backends.xarray.Grid2D(dataset_phy["syncoccus_moana"])
-grid_pic = pyinterp.backends.xarray.Grid2D(dataset_phy["picoeuk_moana"])
+def fill_gaps_limited_pure_numpy(data, margin_pixels=1):
+    """
+    Fill gaps using only numpy.
+    """
+    result = data.copy()
+    
+    # Get array dimensions
+    rows, cols = data.shape
+    
+    # Find all NaN positions
+    nan_rows, nan_cols = np.where(np.isnan(data))
+    
+    for i, j in zip(nan_rows, nan_cols):
+        # Define search window around the NaN pixel
+        row_min = max(0, i - margin_pixels)
+        row_max = min(rows, i + margin_pixels + 1)
+        col_min = max(0, j - margin_pixels)
+        col_max = min(cols, j + margin_pixels + 1)
+        
+        # Extract the local window
+        window = data[row_min:row_max, col_min:col_max]
+        
+        # If there are valid values in the window, use the mean
+        valid_values = window[~np.isnan(window)]
+        if len(valid_values) > 0:
+            result[i, j] = np.mean(valid_values)
+    
+    return result
 ```
 
-Then interpolate the gridded data and transpose it back into its shape.
-
 ```{code-cell} ipython3
-pro = pyinterp.fill.loess(grid_pro, nx=margin, ny=margin)
-syn = pyinterp.fill.loess(grid_syn, nx=margin, ny=margin)
-pic = pyinterp.fill.loess(grid_pic, nx=margin, ny=margin)
-
-dataset_phy["prococcus_moana"][...] = pro.transpose()
-dataset_phy["syncoccus_moana"][...] = syn.transpose()
-dataset_phy["picoeuk_moana"][...] = pic.transpose()
+dataset_phy["prococcus_moana"][...] = fill_gaps_limited_pure_numpy(dataset_phy["prococcus_moana"].values, margin)
+dataset_phy["syncoccus_moana"][...] = fill_gaps_limited_pure_numpy(dataset_phy["syncoccus_moana"].values, margin)
+dataset_phy["picoeuk_moana"][...] = fill_gaps_limited_pure_numpy(dataset_phy["picoeuk_moana"].values, margin)
 ```
 
 If we have a look at the transect again, we can see that some of the values have been filled in by the interpolation.
+
+```{code-cell} ipython3
+dataset_phy
+```
 
 ```{code-cell} ipython3
 plot = dataset_phy["syncoccus_moana"].plot.imshow(robust="true")
@@ -289,17 +312,13 @@ margin_v = 1
 ```
 
 ```{code-cell} ipython3
-grid_cire = pyinterp.backends.xarray.Grid2D(dataset_veg["cire"])
-grid_car = pyinterp.backends.xarray.Grid2D(dataset_veg["car"])
-grid_mari = pyinterp.backends.xarray.Grid2D(dataset_veg["mari"])
+dataset_veg["cire"][...] = fill_gaps_limited_pure_numpy(dataset_veg["cire"].values, margin_v)
+dataset_veg["car"][...] = fill_gaps_limited_pure_numpy(dataset_veg["car"].values, margin_v)
+dataset_veg["mari"][...] = fill_gaps_limited_pure_numpy(dataset_veg["mari"].values, margin_v)
+```
 
-cir = pyinterp.fill.loess(grid_cire, nx=margin_v, ny=margin_v)
-car = pyinterp.fill.loess(grid_car, nx=margin_v, ny=margin_v)
-mar = pyinterp.fill.loess(grid_mari, nx=margin_v, ny=margin_v)
-
-dataset_veg["cire"][...] = cir.transpose()
-dataset_veg["car"][...] = car.transpose()
-dataset_veg["mari"][...] = mar.transpose()
+```{code-cell} ipython3
+plot = dataset_veg["car"].plot.imshow(robust="true")
 ```
 
 ### Normalize data
@@ -317,6 +336,8 @@ dataset_norm = (
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+
 dataset_v_norm = dataset_veg.astype(np.float64)
 dataset_v_norm = (
     (dataset_veg - dataset_veg.min())
@@ -609,6 +630,8 @@ else:
 Then we plot a rectangle around our area of interest on our RGB map. We can try to choose an area that is at the edge of a population to see the changes in time.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 fig = plt.figure(figsize=(7, 7))
 ax1 = fig.add_subplot(projection=ccrs.PlateCarree(), facecolor="#080c17")
 ax2 = data_norm.plot.imshow(
