@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Carina Poulin (NASA, SSAI). Edited from the PACE Data Visualization tutorial prepared for the PACE Hackweek 2025.
 
-Last updated: October 9, 2025
+Last updated: June 25, 2026
 
 <div class="alert alert-info" role="alert">
 
@@ -60,8 +60,6 @@ import h5netcdf
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import pyinterp.backends.xarray  # Module that handles the filling of undefined values.
-import pyinterp.fill
 import seaborn as sns
 import xarray as xr
 from matplotlib.patches import Rectangle
@@ -80,7 +78,7 @@ auth = earthaccess.login()
 For this example. we will be looking at a the month of July 2024.
 
 ```{code-cell} ipython3
-tspan = ("2024-07-01", "2024-07-30")
+tspan = ("2024-07", "2024-07")
 ```
 
 We look for two different types of products. The Multiple Ordination ANAlysis, or [MOANA][moana_atbd], is a new hyperspectral algorithm that measures the abundance of three different types of phytoplankton in the Atlantic Ocean. Only daily MOANA products are availabla from `earthaccess` for the moment.
@@ -92,6 +90,7 @@ results_moana = earthaccess.search_data(
     short_name="PACE_OCI_L4M_MOANA",
     granule_name="*.DAY.*0p1deg*",  # Daily only for MOANA | Resolution: 0p1deg or 4 (for 4km)
     temporal=tspan,
+    version="3.1",
 )
 ```
 
@@ -102,8 +101,8 @@ The second type of product we look for here is one of the new land products. Thi
 ```{code-cell} ipython3
 results_land = earthaccess.search_data(
     short_name="PACE_OCI_L3M_LANDVI",
-    temporal=tspan,
     granule_name="*.MO.*0p1deg*",  # Daily, 8-day or monthly: Day, 8D or MO | Resolution: 0p1deg or 0.4km
+    temporal=tspan,
 )
 ```
 
@@ -113,10 +112,14 @@ Here we will open the datasets.
 path_moana = earthaccess.open(results_moana)
 ```
 
-Since we are combining multiple files, we are using the `open_mfdataset` function and indicating that we want to concatenate the data by date.
+Since we are combining multiple files, we are using the `open_mfdataset` function and indicating that we want to concatenate the data by a new dimension called "date".
 
 ```{code-cell} ipython3
-dataset_moana = xr.open_mfdataset(path_moana, combine="nested", concat_dim="date")
+dataset_moana = xr.open_mfdataset(
+    path_moana,
+    combine="nested",
+    concat_dim="date",
+)
 dataset_moana
 ```
 
@@ -200,7 +203,7 @@ We will also remove the variables we will not be using for this example with `dr
 ```{code-cell} ipython3
 dataset_phy = dataset_moana.drop_vars(["palette"])
 dataset_veg = dataset_land.drop_vars(
-    ["palette", "ndvi", "evi", "ndwi", "ndii", "cci", "ndsi", "pri"]
+    ["palette", "ndvi", "evi", "ndwi", "ndii", "cci", "ndsi", "pri"],
 )
 ```
 
@@ -240,39 +243,23 @@ We can see there are some values missing, we can interpolate the data if we want
 
 ### MOANA (Optional)
 
-Here we offer the option of interpolating the data. This can be useful for filling gaps in the dataset, which can make visualizations smoother. Consider how it affects your statistics before using.
+Here we offer the option of interpolating the data. This can be useful for filling gaps in the dataset, which can make visualizations smoother. Consider how it affects your statistics before using for analysis.
 
 ```{code-cell} ipython3
 plot = dataset_phy["syncoccus_moana"].plot.imshow(robust="true")
 ```
 
-The `margin` parameter is the number of pixels on the X and Y axes to be considered in the calculation.
+A rolling average value, with parameters for the number of neighboring pixels on the `lon` and `lat` dimensions to use in the calculation and the minimum number of non-missing values to require, can fill in a lot of missing values.
 
 ```{code-cell} ipython3
-margin = 1
+for name, dataarray in dataset_phy.items():
+    dataset_phy[name] = dataarray.where(
+        dataarray.notnull(),
+        dataarray.rolling({"lat": 3, "lon": 3}, min_periods=1, center=True).mean(),
+    )
 ```
 
-We need to first create a grid.
-
-```{code-cell} ipython3
-grid_pro = pyinterp.backends.xarray.Grid2D(dataset_phy["prococcus_moana"])
-grid_syn = pyinterp.backends.xarray.Grid2D(dataset_phy["syncoccus_moana"])
-grid_pic = pyinterp.backends.xarray.Grid2D(dataset_phy["picoeuk_moana"])
-```
-
-Then interpolate the gridded data and transpose it back into its shape.
-
-```{code-cell} ipython3
-pro = pyinterp.fill.loess(grid_pro, nx=margin, ny=margin)
-syn = pyinterp.fill.loess(grid_syn, nx=margin, ny=margin)
-pic = pyinterp.fill.loess(grid_pic, nx=margin, ny=margin)
-
-dataset_phy["prococcus_moana"][...] = pro.transpose()
-dataset_phy["syncoccus_moana"][...] = syn.transpose()
-dataset_phy["picoeuk_moana"][...] = pic.transpose()
-```
-
-If we have a look at the transect again, we can see that some of the values have been filled in by the interpolation.
+If we have a look at the map again, we can see that some of the values have been filled in by the interpolation.
 
 ```{code-cell} ipython3
 plot = dataset_phy["syncoccus_moana"].plot.imshow(robust="true")
@@ -285,21 +272,15 @@ plot = dataset_phy["syncoccus_moana"].plot.imshow(robust="true")
 We separated the land and MOANA interpolations to allow you to choose different interpolations for each.
 
 ```{code-cell} ipython3
-margin_v = 1
+for name, dataarray in dataset_veg.items():
+    dataset_veg[name] = dataarray.where(
+        dataarray.notnull(),
+        dataarray.rolling({"lat": 3, "lon": 3}, min_periods=1, center=True).mean(),
+    )
 ```
 
 ```{code-cell} ipython3
-grid_cire = pyinterp.backends.xarray.Grid2D(dataset_veg["cire"])
-grid_car = pyinterp.backends.xarray.Grid2D(dataset_veg["car"])
-grid_mari = pyinterp.backends.xarray.Grid2D(dataset_veg["mari"])
-
-cir = pyinterp.fill.loess(grid_cire, nx=margin_v, ny=margin_v)
-car = pyinterp.fill.loess(grid_car, nx=margin_v, ny=margin_v)
-mar = pyinterp.fill.loess(grid_mari, nx=margin_v, ny=margin_v)
-
-dataset_veg["cire"][...] = cir.transpose()
-dataset_veg["car"][...] = car.transpose()
-dataset_veg["mari"][...] = mar.transpose()
+plot = dataset_veg["car"].plot.imshow(robust="true")
 ```
 
 ### Normalize data
@@ -317,6 +298,8 @@ dataset_norm = (
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+
 dataset_v_norm = dataset_veg.astype(np.float64)
 dataset_v_norm = (
     (dataset_veg - dataset_veg.min())
@@ -346,8 +329,8 @@ This is an example of how to show multiple variables from two different datasets
 
 ```{code-cell} ipython3
 fig = plt.figure(figsize=(6, 6))
-ax1 = fig.add_subplot(projection=ccrs.Orthographic(-30, 0), facecolor="#080c17")
-ax1.add_feature(
+ax = fig.add_subplot(projection=ccrs.Orthographic(-30, 0), facecolor="#080c17")
+ax.add_feature(
     cfeature.NaturalEarthFeature(
         "physical",
         "ocean",
@@ -358,7 +341,7 @@ ax1.add_feature(
     alpha=1,
     zorder=1,
 )
-ax1.add_feature(
+ax.add_feature(
     cfeature.NaturalEarthFeature(
         "physical",
         "land",
@@ -370,11 +353,11 @@ ax1.add_feature(
     zorder=2,
 )
 
-ax2 = data_norm.plot.imshow(
-    transform=ccrs.PlateCarree(), interpolation="none", zorder=3
+data_norm.plot.imshow(
+    ax=ax, transform=ccrs.PlateCarree(), interpolation="none", zorder=3
 )
-ax3 = data_norm_v.plot.imshow(
-    transform=ccrs.PlateCarree(), interpolation="none", zorder=4
+data_norm_v.plot.imshow(
+    ax=ax, transform=ccrs.PlateCarree(), interpolation="none", zorder=4
 )
 
 fig.patch.set_alpha(0.0)
@@ -418,7 +401,6 @@ plt.text(-0.8, 0.75, "mari", ha="center", va="center", fontsize=9)
 plt.text(0.8, 0.9, "Picoeukaryotes/", ha="center", va="center", fontsize=9)
 plt.text(0.8, 0.75, "cire", ha="center", va="center", fontsize=9)
 
-
 plt.axis("off")
 plt.tight_layout()
 plt.show()
@@ -429,9 +411,10 @@ If we want more geographical information on our map, we can add grids, coastline
 ```{code-cell} ipython3
 fig = plt.figure(figsize=(5, 5))
 extent = [-84, -30, 10, 60]
-ax1 = fig.add_subplot(projection=ccrs.PlateCarree(), facecolor="#080c17")
-ax1.gridlines(
-    crs=ccrs.PlateCarree(),
+crs = ccrs.PlateCarree()
+ax = fig.add_subplot(projection=crs, facecolor="#080c17")
+ax.gridlines(
+    crs=crs,
     draw_labels=True,
     linewidth=0.5,
     color="gray",
@@ -439,9 +422,8 @@ ax1.gridlines(
     linestyle="--",
     zorder=4,
 )
-ax1.coastlines(linewidth=0.4, color="black", zorder=3)
-
-ax1.add_feature(
+ax.coastlines(linewidth=0.4, color="black", zorder=3)
+ax.add_feature(
     cfeature.NaturalEarthFeature(
         "physical",
         "ocean",
@@ -452,15 +434,11 @@ ax1.add_feature(
     alpha=1,
     zorder=0,
 )
-# ax1.add_feature(cfeature.NaturalEarthFeature('physical', 'land', '110m', edgecolor='face', facecolor='#131c36'), alpha=0.85, zorder=5)
-ax1.set_extent(extent, crs=ccrs.PlateCarree())
+# ax.add_feature(cfeature.NaturalEarthFeature('physical', 'land', '110m', edgecolor='face', facecolor='#131c36'), alpha=0.85, zorder=5)
+ax.set_extent(extent, crs=crs)
 
-ax2 = data_norm.plot.imshow(
-    transform=ccrs.PlateCarree(), interpolation="none", zorder=1.5
-)
-ax3 = data_norm_v.plot.imshow(
-    transform=ccrs.PlateCarree(), interpolation="none", zorder=1
-)
+data_norm.plot.imshow(ax=ax, interpolation="none", zorder=1.5)
+data_norm_v.plot.imshow(ax=ax, interpolation="none", zorder=1)
 
 plt.show()
 ```
@@ -476,7 +454,7 @@ We are going to use what we just learned to create a timeline for a chosen area.
 ### Get data
 
 ```{code-cell} ipython3
-tspan = ("2024-04-01", "2025-03-31")
+tspan = ("2024-04", "2025-03")
 ```
 
 ```{code-cell} ipython3
@@ -484,6 +462,7 @@ results_moana = earthaccess.search_data(
     short_name="PACE_OCI_L4M_MOANA",
     granule_name="*.Day.*0p1deg*",  # Daily: Day | Resolution: 0p1deg or 4 (for 4km)
     temporal=tspan,
+    version="3.1",
 )
 ```
 
@@ -610,13 +589,12 @@ Then we plot a rectangle around our area of interest on our RGB map. We can try 
 
 ```{code-cell} ipython3
 fig = plt.figure(figsize=(7, 7))
-ax1 = fig.add_subplot(projection=ccrs.PlateCarree(), facecolor="#080c17")
-ax2 = data_norm.plot.imshow(
-    transform=ccrs.PlateCarree(), interpolation="none", zorder=3
-)
+ax = fig.add_subplot(projection=ccrs.PlateCarree(), facecolor="#080c17")
+
+data_norm.plot.imshow(ax=ax, interpolation="none", zorder=3)
 
 # Add bounding box
-ax1.add_patch(
+ax.add_patch(
     Rectangle(
         (lon_min, lat_min),
         lon_max - lon_min,
@@ -624,7 +602,6 @@ ax1.add_patch(
         edgecolor="red",
         facecolor="none",
         linewidth=1.5,
-        transform=ccrs.PlateCarree(),
         zorder=4,
     )
 )
@@ -659,7 +636,8 @@ We can now plot our timeline. We are going to plot the standard deviations as a 
 In this case, we also are drawing a second y axis with `twinx` for prochlorococcus, which has much higher concentrations than synechococcus and picoeukaryotes.
 
 ```{code-cell} ipython3
-fig, ax1 = plt.subplots(figsize=(10, 5))
+fig, ax_left = plt.subplots(figsize=(10, 5))
+ax_right = ax_left.twinx()
 
 # Style
 linewidth = 1
@@ -668,67 +646,40 @@ marker = "o"
 sns.set_style("white")
 palette = sns.color_palette("husl", 3)
 
-# Left y-axis plots
-ax1.plot(
-    region_mean["syncoccus_moana"].date,
-    region_mean["syncoccus_moana"],
-    color=palette[0],
-    marker=marker,
-    label="Syn",
-    linewidth=linewidth,
-    markersize=markersize,
-)
-ax1.fill_between(
-    region_mean["syncoccus_moana"].date,
-    region_mean["syncoccus_moana"] - region_std["syncoccus_moana"],
-    region_mean["syncoccus_moana"] + region_std["syncoccus_moana"],
-    color=palette[0],
-    alpha=0.2,
-)
+for i, var in enumerate(("syncoccus_moana", "picoeuk_moana", "prococcus_moana")):
+    
+    if var == "prococcus_moana":
+        ax = ax_right
+        linestyle = "--"
+    else:
+        ax = ax_left
+        linestyle = "-"
 
-ax1.plot(
-    region_mean["picoeuk_moana"].date,
-    region_mean["picoeuk_moana"],
-    color=palette[1],
-    marker=marker,
-    label="Pico",
-    linewidth=linewidth,
-    markersize=markersize,
-)
-ax1.fill_between(
-    region_mean["picoeuk_moana"].date,
-    region_mean["picoeuk_moana"] - region_std["picoeuk_moana"],
-    region_mean["picoeuk_moana"] + region_std["picoeuk_moana"],
-    color=palette[1],
-    alpha=0.2,
-)
+    ax.plot(
+        region_mean[var]["date"],
+        region_mean[var],
+        color=palette[i],
+        label=var.split("_")[0],
+        marker=marker,
+        linestyle=linestyle,
+        linewidth=linewidth,
+        markersize=markersize,
+    )
+    ax.fill_between(
+        region_mean[var]["date"],
+        region_mean[var] - region_std[var],
+        region_mean[var] + region_std[var],
+        color=palette[i],
+        alpha=0.2,
+    )
 
-# Right y-axis plot
-ax2 = ax1.twinx()
-ax2.plot(
-    region_mean["prococcus_moana"].date,
-    region_mean["prococcus_moana"],
-    color=palette[2],
-    marker=marker,
-    linestyle="--",
-    label="Pro",
-    linewidth=linewidth,
-    markersize=markersize,
-)
-ax2.fill_between(
-    region_mean["prococcus_moana"].date,
-    region_mean["prococcus_moana"] - region_std["prococcus_moana"],
-    region_mean["prococcus_moana"] + region_std["prococcus_moana"],
-    color=palette[2],
-    alpha=0.2,
-)
+# Formatting
+ax_left.set_ylabel("Synechococcus and Picoeukaryotes (cells/ml)")
+ax_left.legend(loc="upper left")
+ax_left.set_xlabel("Date")
 
-ax1.legend(loc="upper left")
-ax2.legend(loc="upper right")
-
-ax1.set_ylabel("Synechococcus and Picoeukaryotes (cells/ml)")
-ax2.set_ylabel("Prochlorococcus (cells/ml)")
-ax1.set_xlabel("Date")
+ax_right.set_ylabel("Prochlorococcus (cells/ml)")
+ax_right.legend(loc="upper right")
 
 plt.title("MOANA Phytoplankton Timeline")
 plt.tight_layout()
@@ -747,87 +698,60 @@ monthly_stds = region_std.resample(date='MS').mean()
 ```
 
 ```{code-cell} ipython3
-monthly_stds.load()
 monthly_means.load()
+monthly_stds.load()
 ```
 
 We can now plot our monthly averages.
 
 ```{code-cell} ipython3
-fig, ax1 = plt.subplots(figsize=(12, 5))
+fig, ax_left = plt.subplots(figsize=(10, 5))
+ax_right = ax_left.twinx()
 
 # Style
 linewidth = 1
-markersize = 5
+markersize = 2
+marker = "o"
 sns.set_style("white")
 palette = sns.color_palette("husl", 3)
 
-dates = monthly_means['date']
+for i, var in enumerate(("syncoccus_moana", "picoeuk_moana", "prococcus_moana")):
+    
+    if var == "prococcus_moana":
+        ax = ax_right
+        linestyle = "--"
+    else:
+        ax = ax_left
+        linestyle = "-"
 
-# Left axis
-ax1.plot(
-    dates,
-    monthly_means["syncoccus_moana"].values,
-    "o-",
-    color=palette[0],
-    label="Synechococcus",
-    linewidth=linewidth,
-    markersize=markersize,
-)
-ax1.fill_between(
-    dates,
-    monthly_means["syncoccus_moana"] - monthly_stds["syncoccus_moana"],
-    monthly_means["syncoccus_moana"] + monthly_stds["syncoccus_moana"],
-    color=palette[0],
-    alpha=0.2,
-)
-
-ax1.plot(
-    dates,
-    monthly_means["picoeuk_moana"].values,
-    "s-",
-    color=palette[1],
-    label="Picoeukaryotes",
-    linewidth=linewidth,
-    markersize=markersize,
-)
-ax1.fill_between(
-    dates,
-    monthly_means["picoeuk_moana"] - monthly_stds["picoeuk_moana"],
-    monthly_means["picoeuk_moana"] + monthly_stds["picoeuk_moana"],
-    color=palette[1],
-    alpha=0.2,
-)
-
-# Second y-axis
-ax2 = ax1.twinx()
-ax2.plot(
-    dates,
-    monthly_means["prococcus_moana"].values,
-    "^--",
-    color=palette[2],
-    label="Prochlorococcus",
-    linewidth=linewidth,
-    markersize=markersize,
-)
-ax2.fill_between(
-    dates,
-    monthly_means["prococcus_moana"] - monthly_stds["prococcus_moana"],
-    monthly_means["prococcus_moana"] + monthly_stds["prococcus_moana"],
-    color=palette[2],
-    alpha=0.2,
-)
+    ax.plot(
+        monthly_means[var]["date"],
+        monthly_means[var],
+        color=palette[i],
+        label=var.split("_")[0],
+        marker=marker,
+        linestyle=linestyle,
+        linewidth=linewidth,
+        markersize=markersize,
+    )
+    ax.fill_between(
+        monthly_means[var]["date"],
+        monthly_means[var] - monthly_stds[var],
+        monthly_means[var] + monthly_stds[var],
+        color=palette[i],
+        alpha=0.2,
+    )
 
 # Formatting
-ax1.set_xlabel("Date", fontsize=12)
-ax1.set_ylabel("Synechococcus and Picoeukaryotes (cells/ml)", fontsize=12)
-ax2.set_ylabel("Prochlorococcus (cells/ml)", fontsize=12)
+ax_left.set_ylabel("Synechococcus and Picoeukaryotes (cells/ml)", fontsize=12)
+ax_left.legend(loc="upper left", frameon=True, framealpha=0.6)
+ax_left.set_xlabel("Date", fontsize=12)
+
+ax_right.set_ylabel("Prochlorococcus (cells/ml)", fontsize=12)
+ax_right.legend(loc="upper right", frameon=True, framealpha=0.6)
 
 # Rotate x-axis labels for better readability
-plt.setp(ax1.get_xticklabels(), rotation=45, ha="right")
-
-ax1.legend(loc="upper left", frameon=True, framealpha=0.6)
-ax2.legend(loc="upper right", frameon=True, framealpha=0.6)
+plt.setp(ax_left.get_xticklabels(), rotation=45, ha="right")
 
 plt.title("Monthly Averages for Region", fontsize=14)
 plt.tight_layout()
