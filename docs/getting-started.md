@@ -60,7 +60,8 @@ you can use either the `mamba` command that comes with {term}`Conda` (recommende
 With that file in a download folder (denoted by `<DIR>`) and a name you've chosen (denoted by `<NAME>`) for a new environment, run in a Terminal:
 
 ```shell
-mamba create --name <NAME> --file <DIR>/conda-lock.yml --category notebooks
+mamba create --name <NAME> --file <DIR>/conda-lock.yml
+mamba install --name <NAME> --file <DIR>/conda-lock.yml --category notebooks
 mamba install --name <NAME> --file <DIR>/conda-lock.yml --category jupyter
 ```
 

@@ -72,8 +72,9 @@ parts:
             title: Install SeaDAS Processors
           - file: notebooks/oci/oci_ocssw_processing_overview
             title: Basic Processing
-          - file: notebooks/oci/oci_ocssw_l2gen
-            title: Generate Level-2 Products
+          # see https://git.smce.nasa.gov/oel/ocssw/-/issues/1186
+          # - file: notebooks/oci/oci_ocssw_l2gen
+          #   title: Generate Level-2 Products
           - file: notebooks/oci/oci_ocssw_giop
             title: Run the GIOP Algorithm
 
@@ -81,7 +82,7 @@ parts:
     chapters:
       - file: sections/other-useful-tutorials
         sections:
-          - url: ttps://github.com/seanremy/pace-earthcare-matchups
+          - url: https://github.com/seanremy/pace-earthcare-matchups
             title: PACE - Earthcare Matchups
           - url: https://github.com/wekeo/learn-olci
             title: Wekeo - Learn OLCI

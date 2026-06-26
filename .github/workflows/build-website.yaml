@@ -19,9 +19,13 @@ jobs:
         with:
           environment-name: build
           environment-file: container/conda-lock.yml
-          create-args: --category jupyter --category tools
           cache-environment-key: environment-${{ runner.os }}-${{ hashFiles('container/conda-lock.yml') }}
           init-shell: none
+      - name: Finish micromamba setup
+        shell: micromamba-shell {0}
+        run: |
+          micromamba install --name build --file container/conda-lock.yml --category jupyter
+          micromamba install --name build --file container/conda-lock.yml --category tools
       - name: Fetch jcache
         id: jcache
         uses: actions/cache@v5
