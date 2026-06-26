@@ -81,7 +81,7 @@ parts:
     chapters:
       - file: sections/other-useful-tutorials
         sections:
-          - url: ttps://github.com/seanremy/pace-earthcare-matchups
+          - url: https://github.com/seanremy/pace-earthcare-matchups
             title: PACE - Earthcare Matchups
           - url: https://github.com/wekeo/learn-olci
             title: Wekeo - Learn OLCI

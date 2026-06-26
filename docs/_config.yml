@@ -25,6 +25,8 @@ sphinx:
     language: "en"
     nb_merge_streams: true
     nb_execution_raise_on_error: true
+    nb_execution_excludepatterns:
+      - "*oci_ocssw_l2gen*"
     suppress_warnings:
       - "myst.xref_missing"
       - "mystnb.unknown_mime_type"
