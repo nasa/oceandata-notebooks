@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA)
 
-Last updated: June 24, 2026
+Last updated: June 29, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -399,11 +399,18 @@ plot = ds["Rrs"].sel({"wavelength": 550}, method="nearest").plot(vmin=0, vmax=0.
 
 +++
 
-Remember the OB.DAAC L2 file we previously downloaded?  Let's see how it compares with the L2 file we generated ourselves.
+Remember the OB.DAAC L2 file we previously downloaded?  Let's see how it compares with the L2 file we generated ourselves. First, let's open that L2 file.
+
+```{code-cell}
+dt_whole = xr.open_datatree(l2_paths[-1])
+ds_whole = dt_whole["geophysical_data"].to_dataset() 
+for item in ("longitude", "latitude"):
+    ds_whole.coords[item] = dt_whole["navigation_data"][item]
+```
 
 Note, however, that the L2 file we downloaded includes the full granule, whereas our homegrown L2 file only includes the geographic bounding box of 35 to 39 N and -76 to -74.5 W. So, let's pause briefly to learn how to extract a geographic region from a L2 file. OCSSW provides the tools to do so and the process includes two steps.
 
-First, we'll use the program `lonlat2pixline` to identify the scan line and pixel boundaries that correspond to our latitude and longitude coordinates within the full L2 granule.  Recall that you can see all the options for OCSSW programs by calling them without any arguments.
+Because we can't subset in python using 2D latitude and latitude as inputs to the simple `slice()` method, we will instead use the row and column numbers as our bounding box. We can use the program `lonlat2pixline` to identify the scan line and pixel bounds that correspond to our latitude and longitude coordinates within the full L2 granule. Recall that you can see all the options for OCSSW programs by calling them without any arguments.
 
 We need the full path to the input file (this will become the `$1` argument).
 
@@ -423,32 +430,21 @@ pixline
 
 ```{code-cell}
 _, spix, epix, sline, eline = pixline[0].split()
+spix, epix, sline, eline = int(spix), int(epix), int(sline), int(eline)
 ```
 
-This output gets fed into `l2extract` to create a new, smaller file that only includes our defined geographic boundaries. The arguments are input file, start pixel, end pixel, start line, end line, sampling substep for pixels and lines (where 1 = every pixel), and output file.
+Now that we have our pixel and line boundaries, we can use them as inputs to slice the larger dataset up into one that only includes our defined geographic boundaries. Note that we have to ensure the output above is in `int` format to work with the slicing. We'll also use the `l2_sub_path` defined earlier to export the subsetted file. 
 
 ```{code-cell}
-:scrolled: true
-:tags: [scroll-output]
+ds_sub = ds_whole.sel({"number_of_lines":slice(sline-1, eline), 
+                       "pixels_per_line":slice(spix-1, epix)})
 
-!source {env}; l2extract
-```
-
-```{code-cell}
-!source {env}; l2extract {l2_path} {spix} {epix} {sline} {eline} 1 1 {l2_sub_path}
+ds_sub.to_netcdf(l2_sub_path)
 ```
 
 This should have created a new file including "L2_sub" in the data subdirectory.
 
-Let's open it and see how it compares with the L2 file we generated.
-
-```{code-cell}
-dt_sub = xr.open_datatree(l2_sub_path)
-ds_sub = dt_sub["geophysical_data"].to_dataset() 
-for item in ("longitude", "latitude"):
-    ds_sub.coords[item] = dt_sub["navigation_data"][item]
-ds_sub
-```
+Let's see how it compares with the L2 file we generated.
 
 ```{code-cell}
 plot = ds_sub["Rrs"].sel({"wavelength": 550}, method="nearest").plot(vmin=0, vmax=0.008)
@@ -583,6 +579,8 @@ A new L2 file should have appeared in your data folder.  Let's open it using XAr
 dat_brdf = xr.open_datatree(par["ofile"])
 dat_brdf = xr.merge(dat_brdf.to_dict().values())
 dat_brdf = dat_brdf.set_coords(("longitude", "latitude"))
+#TODO: Fix - wavelength_3d issue happening here too 
+#dat_brdf = dat_brdf.drop_vars("wavelength") - WILL HAVE TO OPEN A DIFFERENT WAY WITHOUT WAVELENGTH INVOLVED
 dat_brdf
 ```
 
