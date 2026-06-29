@@ -1,23 +1,23 @@
 ---
 jupytext:
-  notebook_metadata_filter: -all,kernelspec,jupytext
   cell_metadata_filter: all,-trusted
+  notebook_metadata_filter: -all,kernelspec,jupytext
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
     jupytext_version: 1.19.4
 kernelspec:
-  name: python3
   display_name: Python 3 (ipykernel)
   language: python
+  name: python3
 ---
 
-# Subsetting PACE OCI data using harmony-py
+# Subsetting PACE OCI data
 
 **Authors:** Anna Windle (NASA, SSAI), Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC) 
 
-Last Updated: June 25, 2026
+Last Updated: June 29, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -36,6 +36,8 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 [edl]: https://urs.earthdata.nasa.gov/
 
 ## Summary
+
+This tutorial demonstrates how to subset PACE OCI L2 and L3m data. L2 data is subsetted using `harmony-py` while L3m data is subsetted using `xarray`. 
 
 [Harmony] is a service that allows you to customize many NASA datasets, including the ability to subset, reproject and reformat files. Data can be subsetted for a geographic region, a temporal range and by variable. Data can be “reprojected” from its native coordinate reference system (CRS) to the coordinate reference system relevant to your analysis. Data can be reformatted from its native file format to a format that is more relevant for your application. These services are collectively called transformation services. However, not all services are available for all datasets. You will learn how to discover which services are available for a given dataset.
 
@@ -64,6 +66,7 @@ At the end of this notebook you will know:
 - Download the subsetted data to your local directory
 - Stream the subsetted data
 - Open and plot subsetted L2 PACE OCI data
+- Open and subset PACE OCI Level-3 mapped data using `xarray`
 
 ## Contents
 1. [Setup](#1.-Setup)
@@ -401,7 +404,7 @@ plt.show()
 
 ## 7. Subsetting L3M data
 
-There are currently no `harmony-py` capabilities to subset PACE OCI L3M data:
+Currently, `harmony-py` does not support spatial subsetting for PACE OCI L3M products. You can verify this by submitting a Harmony request and inspecting the available services, where the subset capabilities are listed as `False`.
 
 ```{code-cell} ipython3
 capabilities_request = CapabilitiesRequest(short_name="PACE_OCI_L3M_BGC")
@@ -409,12 +412,56 @@ capabilities = harmony_client.submit(capabilities_request)
 capabilities
 ```
 
+Because spatial subsetting is not currently supported for PACE OCI L3M products through Harmony, we will instead use `xarray` to subset the data locally. Since L3M products are already mapped to a regular spatial grid, this approach is both straightforward and computationally efficient.
+
+Let's begin by opening a monthly (MO) PACE_OCI_L3M_BGC composite at 4 km spatial resolution using `earthaccess`:
+
 ```{code-cell} ipython3
-TODO: figure out xarray workaround
+results = earthaccess.search_data(
+        short_name="PACE_OCI_L3M_BGC",
+        temporal=("2025-07-01", "2025-07-02"),
+        granule_name="*.MO.*.4km.*",)
+len(results)
+```
+
+```{code-cell} ipython3
+paths = earthaccess.open(results)
+```
+
+```{code-cell} ipython3
+ds = xr.open_dataset(paths[0])
+ds
+```
+
+```{code-cell} ipython3
+ds_sub = ds['chlor_a'].sel(
+    lat=slice(39.01, 36.97), lon=slice(-76.75, -75.74))
+ds_sub.plot()
+```
+
+Let's download the subsetted dataset:
+
+```{code-cell} ipython3
+filename = paths[0].full_name.split("/")[-1]
+filename = filename.replace(".nc", "_subsetted.nc")
+print(filename)
+```
+
+```{code-cell} ipython3
+out_path = Path("subsetted_data") / filename
+ds_sub.to_netcdf(out_path)
+```
+
+You should now see this file in your 'subsetted_data' folder. Let's compare the size to the original L3m file:
+
+```{code-cell} ipython3
+print('Original Data Size:', np.round(results[0].size(), 2), 'MB')
+print(f"Output Data Size: {out_path.stat().st_size / 1024**2:.2f} MB")
+print('Data Size % Change', np.round(100*(1-(out_path.stat().st_size / 1024**2) / results[0].size()), 2),'% reduction')
 ```
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on ... suggest what's next. And don't add an empty cell after this one.
+You have completed the notebook on Subsetting PACE OCI data!
 
 </div>
