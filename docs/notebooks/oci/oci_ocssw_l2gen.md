@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.4
+    jupytext_version: 1.16.7
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -69,7 +69,7 @@ At the end of this notebook you will know:
 
 Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting Started](/getting-started) page, then the imports will be successful.
 
-```{code-cell} ipython3
+```{code-cell}
 import csv
 import os
 from pathlib import Path
@@ -96,7 +96,7 @@ Every time we use `!` to invoke an OCSSW program, we must also evaluate the `OCS
 
 [ipython]: https://ipython.readthedocs.io/en/stable/interactive/reference.html#system-shell-access
 
-```{code-cell} ipython3
+```{code-cell}
 ocsswroot = os.environ.setdefault("OCSSWROOT", "/tmp/ocssw")
 env = Path(ocsswroot, "OCSSW_bash.env")
 env.exists()
@@ -104,7 +104,7 @@ env.exists()
 
 Our first OCSSW program is `install_ocssw`, which we use to print which version (tag) of OCSSW is installed. As just explained, we have to evaluate (or `source`) the environment configuration file first. To pass its location, we use `{}` variable expansion that is available with the `!` prefix.
 
-```{code-cell} ipython3
+```{code-cell}
 !source {env}; install_ocssw --installed_tag
 ```
 
@@ -117,14 +117,14 @@ The `installedTag` is our OCSSW version. Tags beginning with "V" are operational
 Accessing data from NASA's Earthdata Cloud, regardless of the tool, requires authentication.
 The `earthaccess` package works behind-the-scenes using the Earthdata Login credentials you provide to generate temporary AWS credentials for direct access to the Earthdata Cloud.
 
-```{code-cell} ipython3
+```{code-cell}
 auth = earthaccess.login()
 credentials = earthaccess.get_s3_credentials(provider="OB_CLOUD")
 ```
 
 The OCSSW software accepts AWS credentials in all the usual methods, including via environment variables that we set in the next cell.
 
-```{code-cell} ipython3
+```{code-cell}
 os.environ.update(
     {
         "AWS_ACCESS_KEY_ID": credentials["accessKeyId"],
@@ -148,7 +148,7 @@ Earthdata Cloud sets a one-hour lifespan on your temporary AWS credentials. If y
 
 Within the OCSSW directory, there are sub-directories that contain files that control OCSSW processing and set default parameterizations of the various codes. Let's look at the files in the `share/common` sub-directory, which includes the files available to all satellite instruments considered in the OCSSW ecosystem:
 
-```{code-cell} ipython3
+```{code-cell}
 :scrolled: true
 :tags: [scroll-output]
 
@@ -171,7 +171,7 @@ Fun fact: `l2gen` used to be named "Multi Sensor Level 1 to 2", or MSL12. That i
 
 Now, let's look at the PACE OCI-specific files within the `share/oci` directory:
 
-```{code-cell} ipython3
+```{code-cell}
 :scrolled: true
 :tags: [scroll-output]
 
@@ -180,7 +180,7 @@ Now, let's look at the PACE OCI-specific files within the `share/oci` directory:
 
 Let's print "msl12_defaults.par", where the `l2gen` default parameters for OCI are defined:
 
-```{code-cell} ipython3
+```{code-cell}
 :scrolled: true
 :tags: [scroll-output]
 
@@ -207,7 +207,7 @@ You can also see OCSSW parameter options by running 'l2gen --help'.
 
 </div>
 
-```{code-cell} ipython3
+```{code-cell}
 :scrolled: true
 :tags: [scroll-output]
 
@@ -241,7 +241,7 @@ You can imagine that the par file option becomes far more convenient when many c
 
 So let's define a function to help write OCSSW parameter files, which is needed several times in this tutorial. To write the results in the format understood by OCSSW, this function uses the `csv.writer` from the Python Standard Library. Instead of writing comma-separated values, however, we specify a non-default delimiter to get equals-separated values. Not something you usually see in a data file, but it's better than writing our own utility from scratch!
 
-```{code-cell} ipython3
+```{code-cell}
 def write_par(path, par):
     """Prepare a parameter file to be read by one of the OCSSW tools.
 
@@ -264,7 +264,7 @@ def write_par(path, par):
 
 Let's use the `earthaccess` Python package to access a L1B and a corresponding L2 file.
 
-```{code-cell} ipython3
+```{code-cell}
 tspan = ("2025-05-07", "2025-05-07")
 bbox = (-76.75, 36.97, -74.74, 39.01)
 results = earthaccess.search_data(
@@ -275,13 +275,13 @@ results = earthaccess.search_data(
 results[-1]
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 l1b_paths = earthaccess.open(results)
 ```
 
 Now let's do the same for the corresponding L2 file, which we'll use later.
 
-```{code-cell} ipython3
+```{code-cell}
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_AOP",
     temporal=tspan,
@@ -292,13 +292,13 @@ results[-1]
 
 Next, let's define variables with the path of the input file to process using `l2gen`and a corresponding L2 output file that we'll create.
 
-```{code-cell} ipython3
+```{code-cell}
 l2_paths = earthaccess.open(results)
 ```
 
 And let's plot a `rhot_red` wavelength to see what the data looks like:
 
-```{code-cell} ipython3
+```{code-cell}
 dataset = xr.open_datatree(l1b_paths[-1])
 dataset = xr.merge(dataset.to_dict().values())
 dataset = dataset.set_coords(("longitude", "latitude"))
@@ -315,7 +315,7 @@ Before we do this, however, there is one additional step required to <i>exactly<
 
 We can run `getanc -h` to see options for the program:
 
-```{code-cell} ipython3
+```{code-cell}
 :scrolled: true
 :tags: [scroll-output]
 
@@ -325,19 +325,19 @@ We can run `getanc -h` to see options for the program:
 Let's run it on our L1B file, using the `--use_filename` parameter to parse only the filename for datetime information.
 We can parse the filename from `l1b_paths` to use with `{}` variable expansion after the `!` prefix like have done with `{env}` above.
 
-```{code-cell} ipython3
+```{code-cell}
 l1b_path = l1b_paths[-1].full_name
 l1b_name = Path(l1b_path).name
 l1b_name
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 !source {env}; getanc --use_filename {l1b_name} --ofile l2gen.anc --noprint
 ```
 
 You'll notice that a file named "l2gen.anc" now appears in your working directory. Reading this file, you can see that ancillary files are saved in the `var/anc/` directory.  Note that this file also provides text in the correct format for use in a par file.
 
-```{code-cell} ipython3
+```{code-cell}
 !cat l2gen.anc
 ```
 
@@ -347,14 +347,14 @@ We will output the Rrs variable by listing l2prod to "Rrs". And we wil also set 
 
 Let's first make a folder called 'data' to store the outputs:
 
-```{code-cell} ipython3
+```{code-cell}
 data = Path("data")
 data.mkdir(exist_ok=True)
 ```
 
 Use the `write_par` function to create the following "l2gen.par" file in your current working directory.
 
-```{code-cell} ipython3
+```{code-cell}
 par = {
     "ifile": l1b_path,
     "ofile": data / l1b_name.replace("L1B", "L2"),
@@ -370,7 +370,7 @@ write_par("l2gen.par", par)
 
 Now, let's run l2gen using this new par file AND the ancillary information in the second par file generated by `getanc`. This can take several minutes.
 
-```{code-cell} ipython3
+```{code-cell}
 :scrolled: true
 :tags: [scroll-output]
 
@@ -381,7 +381,7 @@ You'll know `l2gen` processing is finished successfully when you see "Processing
 
 Let's open up this new L2 data using XArray's open_datatree function:
 
-```{code-cell} ipython3
+```{code-cell}
 dt = xr.open_datatree(par["ofile"])
 ds = dt["geophysical_data"]
 for item in ("longitude", "latitude"):
@@ -391,7 +391,7 @@ ds
 
 Let's do a quick plot of Rrs at 550 nm:
 
-```{code-cell} ipython3
+```{code-cell}
 plot = ds["Rrs"].sel({"wavelength": 550}, method="nearest").plot(vmin=0, vmax=0.008)
 ```
 
@@ -407,7 +407,7 @@ First, we'll use the program `lonlat2pixline` to identify the scan line and pixe
 
 We need the full path to the input file (this will become the `$1` argument).
 
-```{code-cell} ipython3
+```{code-cell}
 l2_path = l2_paths[-1].full_name
 l2_name = Path(l2_path).name
 l2_sub_path = str(data / l2_name.replace("L2", "L2_sub"))
@@ -416,25 +416,25 @@ l2_sub_path
 
 And we need to specify the bounding box in the standard order: west, south, east, north
 
-```{code-cell} ipython3
+```{code-cell}
 pixline = !source {env}; lonlat2pixline {l2_path} -76.0 35.0 -74.5 39.0
 pixline
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 _, spix, epix, sline, eline = pixline[0].split()
 ```
 
 This output gets fed into `l2extract` to create a new, smaller file that only includes our defined geographic boundaries. The arguments are input file, start pixel, end pixel, start line, end line, sampling substep for pixels and lines (where 1 = every pixel), and output file.
 
-```{code-cell} ipython3
+```{code-cell}
 :scrolled: true
 :tags: [scroll-output]
 
 !source {env}; l2extract
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 !source {env}; l2extract {l2_path} {spix} {epix} {sline} {eline} 1 1 {l2_sub_path}
 ```
 
@@ -442,7 +442,7 @@ This should have created a new file including "L2_sub" in the data subdirectory.
 
 Let's open it and see how it compares with the L2 file we generated.
 
-```{code-cell} ipython3
+```{code-cell}
 dt_sub = xr.open_datatree(l2_sub_path)
 ds_sub = dt_sub["geophysical_data"].to_dataset() 
 for item in ("longitude", "latitude"):
@@ -450,13 +450,13 @@ for item in ("longitude", "latitude"):
 ds_sub
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 plot = ds_sub["Rrs"].sel({"wavelength": 550}, method="nearest").plot(vmin=0, vmax=0.008)
 ```
 
 The two maps of Rrs(550) look extremely similar.  But, let's compare the data in a scatter plot to be sure.
 
-```{code-cell} ipython3
+```{code-cell}
 fig, ax = plt.subplots()
 
 x = ds["Rrs"].sel({"wavelength": 550}, method="nearest")
@@ -497,7 +497,7 @@ Let's write a new .par file named "l2gen_mod.par" to define the L2 products list
 
 [l2flags]: https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/
 
-```{code-cell} ipython3
+```{code-cell}
 par = {
     "ifile": l1b_path,
     "ofile": data / l1b_name.replace("L1B", "L2_mod"),
@@ -510,7 +510,7 @@ par = {
 write_par("l2gen_mod.par", par)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 :scrolled: true
 :tags: [scroll-output]
 
@@ -519,7 +519,7 @@ write_par("l2gen_mod.par", par)
 
 A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot the chlorophyll-a product:
 
-```{code-cell} ipython3
+```{code-cell}
 dat_mod = xr.open_datatree(par["ofile"])
 dat_mod = xr.merge(dat_mod.to_dict().values())
 dat_mod = dat_mod.set_coords(("longitude", "latitude"))
@@ -528,7 +528,7 @@ plot = dat_mod["chlor_a"].plot(norm=LogNorm(vmin=0.01, vmax=2))
 
 For fun, let's plot chlor_a again, but with some additional plotting functions.
 
-```{code-cell} ipython3
+```{code-cell}
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
 
 dat_mod["chlor_a"].plot(
@@ -556,7 +556,7 @@ As a final example of the far-reaching utility that `l2gen` provides an end user
 
 While a rather simple case-study, we hope it will introduce the practioner to an improved understanding of `l2gen` and the sensitivity of derived reflectances (and, therefore, biogeochemical variables) to choices made within the standard processing scheme.
 
-```{code-cell} ipython3
+```{code-cell}
 par = {
     "ifile": l1b_path,
     "ofile": data / l1b_name.replace("L1B", "L2_brdf"),
@@ -570,7 +570,7 @@ par = {
 write_par("l2gen_brdf.par", par)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 :scrolled: true
 :tags: [scroll-output]
 
@@ -579,20 +579,20 @@ write_par("l2gen_brdf.par", par)
 
 A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot Rrs(550):
 
-```{code-cell} ipython3
+```{code-cell}
 dat_brdf = xr.open_datatree(par["ofile"])
 dat_brdf = xr.merge(dat_brdf.to_dict().values())
 dat_brdf = dat_brdf.set_coords(("longitude", "latitude"))
 dat_brdf
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 dat_brdf["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
 ```
 
 This figure looks similar to what we produced in Section 3, but let's make a scatter plot to be sure ...
 
-```{code-cell} ipython3
+```{code-cell}
 fig, ax = plt.subplots()
 
 x = dat_mod["Rrs"].sel({"wavelength_3d": 550})
