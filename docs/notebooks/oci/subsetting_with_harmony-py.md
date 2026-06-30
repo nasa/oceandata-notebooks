@@ -37,13 +37,13 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-This tutorial demonstrates how to subset PACE OCI L2 and L3m data. L2 data is subsetted using `harmony-py` while L3m data is subsetted using `xarray`. 
+This tutorial demonstrates how to subset PACE OCI L2 and L3M data. L2 data is subsetted here using `harmony-py`, while L3M data is subsetted using `xarray`. 
 
-[Harmony] is a service that allows you to customize many NASA datasets, including the ability to subset, reproject and reformat files. Data can be subsetted for a geographic region, a temporal range and by variable. Data can be “reprojected” from its native coordinate reference system (CRS) to the coordinate reference system relevant to your analysis. Data can be reformatted from its native file format to a format that is more relevant for your application. These services are collectively called transformation services. However, not all services are available for all datasets. You will learn how to discover which services are available for a given dataset.
+[Harmony] is a web service that allows you to customize many NASA datasets, including the ability to subset, reproject and reformat files. Data can be subsetted for a geographic region, a temporal range and by variable. In some caess, data can be “reprojected” from its native coordinate reference system (CRS) to the coordinate reference system relevant to your analysis. Data can also be reformatted from its native file format to a format that is more relevant for your application. These services are collectively called transformation services. However, not all services and transformations are available for all datasets. You will learn how to discover which services are available for a given dataset.
 
 Harmony services can be used in multiple ways:
 1. through a graphical user interface (GUI) while downloading applicable granules from [Earthdata Search],
-2. by direct requests to [Harmony's RESTful API], or as in this tutorial,
+2. by direct requests to [Harmony's RESTful API], or, as in this tutorial,
 3. using the `harmony-py` Python package.
 
 The Python package handles NASA Earthdata Login (EDL) authentication and optionally integrates with the CMR Python Wrapper by accepting collection results as a request parameter. It's convenient for scientists who wish to use Harmony from Jupyter notebooks.
@@ -60,22 +60,13 @@ This tutorial demonstrates how to subset and reformat PACE OCI data from the NAS
 
 ## Learning Objectives
 
-At the end of this notebook you will know:
+At the end of this notebook you will know how to:
 
-- How to use the `harmony-py` Python library to spatially and temporally subset PACE OCI Level-2 data
+- Use the `harmony-py` Python library to spatially and temporally subset PACE OCI Level-2 data
 - Download the subsetted data to your local directory
 - Stream the subsetted data
 - Open and plot subsetted L2 PACE OCI data
 - Open and subset PACE OCI Level-3 mapped data using `xarray`
-
-## Contents
-1. [Setup](#1.-Setup)
-2. [Earthdata authentication and Harmony client initalization](#2.-Earthdata-authentication-and-Harmony-client-initalization)
-3. [Discover subsetting capabilities for Level-2 PACE OCI data](#3.-Discover-subsetting-capabilities-for-Level-2-PACE-OCI-data)
-4. [Build and submit a request](#4.-Build-and-submit-a-request)
-5. [Access the subsetted data](#5.-Access-the-subsetted-data)
-6. [Plot the subsetted data](#6.-Plot-the-subsetted-data)
-7. [Subsetting L3M data](#7.-Subsetting-L3M-data)
 
 +++
 
@@ -86,8 +77,7 @@ At the end of this notebook you will know:
 Begin by importing all of the packages used in this notebook.
 
 ```{code-cell} ipython3
-import datetime as dt
-import getpass
+from datetime import datetime
 from pathlib import Path
 
 import earthaccess
@@ -95,11 +85,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 import rasterio
 import xarray as xr
-from harmony import BBox, CapabilitiesRequest, Client, Collection, LinkType, Request
+from harmony import (
+    BBox,
+    CapabilitiesRequest,
+    Client,
+    Collection,
+    JobsRequest,
+    LinkType,
+    Request,
+)
+from IPython.display import JSON
 from rasterio.enums import Resampling
 ```
 
 ## 2. Earthdata authentication and Harmony client initalization
+
++++
+
+The `earthaccess` package lets us easily authenticate with NASA's Earthdata Login (EDL) and pass an EDL token to Harmony.
 
 ```{code-cell} ipython3
 auth = earthaccess.login()
@@ -124,21 +127,46 @@ You can see here under `['services']` that this dataset can be subsetted using t
 
 ## 4. Build and submit a request
 
-Based on what is returned in the subsetting capabilities above, we can ask for a paticular subsetting.
++++
+
+The Harmony service is based around user-submitted jobs. Using the service is a two-step process of (1) creating a specific type of request, and (2) passing the request to the `harmony_client` in exchange for some response from Harmony.
+
+One type of request, the `JobsRequest`, let's you check for any previously submitted jobs. You can filter these jobs using labels, which we will learn how to apply below.
+
+First step, create a request:
+
+```{code-cell} ipython3
+request = JobsRequest(labels=["help-hub-tutorial"])
+```
+
+Second, get a response from your request submission:
+
+```{code-cell} ipython3
+response = harmony_client.submit(request)
+JSON(response)
+```
+
+For your first time through this tutorial, you shouldn't see any existing jobs. If you've already submitted a job with this label (e.g. because you are re-running this tutorial), then the response includes information about that existing job.
+
+Let's continue to build a request for the subsetting job we want the service to run. Using the "labels" keyword tags jobs so that we can easily find and re-use results from this job later.
 
 ```{code-cell} ipython3
 request = Request(
     collection=Collection(id="PACE_OCI_L2_BGC"),
     spatial=BBox(-76.75, 36.97, -75.74, 39.01),
-    temporal={"start": dt.datetime(2025, 7, 1), "stop": dt.datetime(2025, 8, 1)},
+    temporal={"start": datetime(2025, 7, 1), "stop": datetime(2025, 8, 1)},
     variables=["geophysical_data/chlor_a"],
+    labels=request.labels,
 )
 ```
 
-Submit the request to the harmony client:
+Depending on whether we got a non-zero count from the `JobsRequest`, we can either submit the subsetting request or dig into the job info we retrieved. Either way, we come up with a `job_id` that uniquely identifies the subsetting job.
 
 ```{code-cell} ipython3
-job_id = harmony_client.submit(request)
+if response["count"]:
+    job_id = response["jobs"][0]["jobID"]
+else:
+    job_id = harmony_client.submit(request)
 job_id
 ```
 
@@ -162,21 +190,23 @@ print("Output Data Size:", job_summary["outputDataSize"])
 print("Data Size % Change:", job_summary["dataSizePercentChange"])
 ```
 
-If you want to access a job that has already run, you can simply call:
+If you want to access a specific job that has already run, you can simply assign a known id to `job_id` and continue below.
 
-`job_id = '{put job_id here}'`
-
-Results are staged for 30 days in the Harmony s3 bucket.
+Results are kept for 30 days in the Harmony S3 bucket.
 
 +++
 
 ## 5. Access the subsetted data
+
++++
 
 The subsetted files can be accessed by downloading the files to a local machine, or by streaming the data. We will use both access methods in the examples below.
 
 +++
 
 ### Download a single file
+
++++
 
 The download method takes a url to a single subsetted file. There are two optional arguments; `directory` used to specify an *existing* folder for storing data (defaults to the current directory), and `overwrite` which defaults to `False` to avoid downloading the same file twice. If you need to download the file again, then set `overwrite=True`.
 
@@ -201,6 +231,9 @@ filepath = harmony_client.download(url, directory=subsetted_data).result()
 ```
 
 ### Download all files
+
++++
+
 The `download_all` method can use the `job_id` or the `result_json`, which contains result URLs.
 
 As with `download`, the download directory path on the local machine can be specified with the `directory` keyword. To save downloading the same file, the `overwrite` keyword can be set to `False`.
@@ -208,6 +241,8 @@ As with `download`, the download directory path on the local machine can be spec
 The paths fo the files are returned as a list.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 futures = harmony_client.download_all(job_id, directory=subsetted_data)
 filelist = [f.result() for f in futures]
 ```
@@ -219,13 +254,22 @@ len(filelist)
 You can now open the files using `xarray`.
 
 ```{code-cell} ipython3
-ds = xr.open_datatree(filelist[0])
-ds = xr.merge(ds.to_dict().values())
+dt = xr.open_datatree(filelist[0])
+ds = xr.merge(dt.to_dict().values())
 ds = ds.set_coords(("longitude", "latitude"))
 ds
 ```
 
+There's no need to keep these files around if you plan to stream the data instead of downloading.
+
+```{code-cell} ipython3
+for item in subsetted_data.glob("*"):
+    item.unlink()
+```
+
 ### Stream the files
+
++++
 
 If you are working in the AWS `us-west-2` region (the same region as NASA Earthdata Cloud) you can *stream* the data using direct S3 access.
 
@@ -261,7 +305,7 @@ ds
 Let's do a quick plot of `chlor_a` from the first granule:
 
 ```{code-cell} ipython3
-ds.chlor_a.plot()
+plot = ds["chlor_a"].plot()
 ```
 
 Now let's plot multiple subsetted granules:
@@ -274,15 +318,16 @@ for ax, file in zip(axes, urls[:10]):
 
     dt = xr.open_datatree(file, **kwargs)
     ds = xr.merge(dt.to_dict().values())
+    ds = ds.set_coords(("longitude", "latitude"))
     date = ds.attrs["time_coverage_start"]
-    im = ds.chlor_a.plot(ax=ax, cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
+    im = ds["chlor_a"].plot(ax=ax, cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
     ax.set_title(date, fontsize=8)
 
 fig.colorbar(im, ax=axes, orientation="vertical", shrink=0.8, label="Chl a (mg m-3)")
 plt.show()
 ```
 
-To plot using lat, lon coordinates, we need to project the data onto a defined grid with a given reslution. We will use code presented in the [Projecting PACE Data onto a Predefined Grid tutorial.](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_grid_match.html)
+To plot using lat, lon coordinates, we need to project the data onto a defined grid with a given reslution. We will use code presented in the [Projecting PACE Data onto a Predefined Grid tutorial.](notebooks/oci/oci_grid_match)
 
 ```{code-cell} ipython3
 def grid_data(src, resolution, dst_crs="epsg:4326", resampling=Resampling.nearest):
@@ -317,6 +362,7 @@ def grid_data(src, resolution, dst_crs="epsg:4326", resampling=Resampling.neares
     # Aligning that transform to our desired resolution
     transform, width, height = rasterio.warp.aligned_target(*defaults, resolution)
     
+    # Run projection
     dst = src.rio.reproject(
         dst_crs=dst_crs,
         shape=(height, width),
@@ -331,33 +377,40 @@ def grid_data(src, resolution, dst_crs="epsg:4326", resampling=Resampling.neares
     dst["x"] = dst["x"].round(9)
     dst["y"] = dst["y"].round(9)
     
-    return dst.rename({"x":"longitude", "y":"latitude"})
-
-resolution = (0.015, 0.015)
-
-ds_gridded = grid_data(ds, resolution)
-ds_gridded.rio.transform()
-
-ds_gridded.chlor_a.plot()
+    return dst.rename({"x": "longitude", "y": "latitude"})
 ```
 
-Plotting first 10 files as subplots:
+We choose a 0.015 degree resolution, and the function above employs the plate carrée (lat, lon) projection.
 
 ```{code-cell} ipython3
-files = urls[:10]
+resolution = (0.015, 0.015)
+```
 
+```{code-cell} ipython3
+dt = xr.open_datatree(urls[0], **kwargs)
+ds = xr.merge(dt.to_dict().values())
+ds = ds.set_coords(("longitude", "latitude"))
+ds_gridded = grid_data(ds, resolution)
+plot = ds_gridded["chlor_a"].plot()
+```
+
+Plotting first 10 files as subplots, and keeping the gridded "chlor_a" data array for the next section:
+
+```{code-cell} ipython3
 fig, axes = plt.subplots(2, 5, figsize=(10, 4), constrained_layout=True)
 axes = axes.ravel()
+da = []
 
-for ax, file in zip(axes, files):
+for ax, file in zip(axes, urls[:10]):
 
     dt = xr.open_datatree(file, **kwargs)
     ds = xr.merge(dt.to_dict().values())
     ds = ds.set_coords(("longitude", "latitude"))
 
     ds_gridded = grid_data(ds, resolution)
+    da.append(ds_gridded["chlor_a"])
     date = ds_gridded.attrs["time_coverage_start"]
-    im = ds_gridded.chlor_a.plot(ax=ax, cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
+    im = ds_gridded["chlor_a"].plot(ax=ax, cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
     ax.set_title(date, fontsize=8)
 
     ax.set_xlabel("")
@@ -370,36 +423,9 @@ plt.show()
 Now, we can make a 10-day Chl a composite:
 
 ```{code-cell} ipython3
-gridded_list = []
-
-for file in urls[:10]:
-
-    dt = xr.open_datatree(file, **kwargs)
-    ds = xr.merge(dt.to_dict().values())
-    ds = ds.set_coords(("longitude", "latitude"))
-
-    ds_gridded = grid_data(ds, resolution)
-
-    gridded_list.append(ds_gridded.chlor_a)
-
-stack = xr.concat(gridded_list, dim="scene")
-
-chl_mean = stack.mean(dim="scene", skipna=True)
-
-fig, ax = plt.subplots(figsize=(6, 4))
-
-chl_mean.plot(
-    ax=ax,
-    cmap="viridis",
-    vmin=0,
-    vmax=20
-)
-
-ax.set_xlabel("")
-ax.set_ylabel("")
-
-plt.tight_layout()
-plt.show()
+da = xr.concat(da, dim="scene")
+chlor_a_mean = da.mean(dim="scene")
+plot = chlor_a_mean.plot(cmap="viridis", vmin=0, vmax=20)
 ```
 
 ## 7. Subsetting L3M data
@@ -419,12 +445,9 @@ Let's begin by opening a monthly (MO) PACE_OCI_L3M_BGC composite at 4 km spatial
 ```{code-cell} ipython3
 results = earthaccess.search_data(
         short_name="PACE_OCI_L3M_BGC",
-        temporal=("2025-07-01", "2025-07-02"),
-        granule_name="*.MO.*.4km.*",)
-len(results)
-```
-
-```{code-cell} ipython3
+        temporal=("2025-07", "2025-07"),
+        granule_name="*.MO.*.4km.*",
+)
 paths = earthaccess.open(results)
 ```
 
@@ -434,30 +457,30 @@ ds
 ```
 
 ```{code-cell} ipython3
-ds_sub = ds['chlor_a'].sel(
-    lat=slice(39.01, 36.97), lon=slice(-76.75, -75.74))
-ds_sub.plot()
+ds_sub = ds['chlor_a'].sel({"lat": slice(39.01, 36.97), "lon": slice(-76.75, -75.74)})
+plot = ds_sub.plot.imshow()
 ```
 
-Let's download the subsetted dataset:
+If we now save this sliced dataset to a netCDF file, we have effectively "downloaded" a subsetted dataset:
 
 ```{code-cell} ipython3
-filename = paths[0].full_name.split("/")[-1]
-filename = filename.replace(".nc", "_subsetted.nc")
-print(filename)
+path = subsetted_data / ds.attrs["product_name"]
+path = path.with_suffix(".subsetted.nc")
+print(path)
 ```
 
 ```{code-cell} ipython3
-out_path = Path("subsetted_data") / filename
-ds_sub.to_netcdf(out_path)
+ds_sub.to_netcdf(path)
 ```
 
-You should now see this file in your 'subsetted_data' folder. Let's compare the size to the original L3m file:
+You should now see this file in your "subsetted_data" folder. Let's compare the size to the original L3M file:
 
 ```{code-cell} ipython3
-print('Original Data Size:', np.round(results[0].size(), 2), 'MB')
-print(f"Output Data Size: {out_path.stat().st_size / 1024**2:.2f} MB")
-print('Data Size % Change', np.round(100*(1-(out_path.stat().st_size / 1024**2) / results[0].size()), 2),'% reduction')
+og_size = results[0].size()
+sub_size = path.stat().st_size / 2**20
+print(f"Original Data Size: {og_size:.2f} MB")
+print(f"Output Data Size: {sub_size:.2f} MB")
+print(f"Data Size % Change: {100 * (1 - sub_size / og_size):.2f} % reduction")
 ```
 
 <div class="alert alert-info" role="alert">
