@@ -456,6 +456,8 @@ ds = xr.open_dataset(paths[0])
 ds
 ```
 
+Now we are going to subset in two ways, first, by selecting a variable with `.sel`, and secondly by selecting a spatial subset with `slice`. We can do this all in one line:
+
 ```{code-cell} ipython3
 ds_sub = ds['chlor_a'].sel({"lat": slice(39.01, 36.97), "lon": slice(-76.75, -75.74)})
 plot = ds_sub.plot.imshow()
@@ -464,6 +466,8 @@ plot = ds_sub.plot.imshow()
 If we now save this sliced dataset to a netCDF file, we have effectively "downloaded" a subsetted dataset:
 
 ```{code-cell} ipython3
+subsetted_data = Path("./subsetted_data")  
+subsetted_data.mkdir(exist_ok=True)
 path = subsetted_data / ds.attrs["product_name"]
 path = path.with_suffix(".subsetted.nc")
 print(path)
