@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.7
+    jupytext_version: 1.19.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -516,10 +516,12 @@ write_par("l2gen_mod.par", par)
 A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot the chlorophyll-a product:
 
 ```{code-cell}
-dat_mod = xr.open_datatree(par["ofile"])
-dat_mod = xr.merge(dat_mod.to_dict().values())
-dat_mod = dat_mod.set_coords(("longitude", "latitude"))
-plot = dat_mod["chlor_a"].plot(norm=LogNorm(vmin=0.01, vmax=2))
+dt_mod = xr.open_datatree(par["ofile"])
+ds_mod = dt_mod["geophysical_data"].to_dataset() 
+for item in ("longitude", "latitude"):
+    ds_mod.coords[item] = dt_mod["navigation_data"][item]
+
+plot = ds_mod["chlor_a"].plot(norm=LogNorm(vmin=0.01, vmax=2))
 ```
 
 For fun, let's plot chlor_a again, but with some additional plotting functions.
@@ -527,7 +529,7 @@ For fun, let's plot chlor_a again, but with some additional plotting functions.
 ```{code-cell}
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": ccrs.PlateCarree()})
 
-dat_mod["chlor_a"].plot(
+ds_mod["chlor_a"].plot(
     ax=ax,
     x="longitude",
     y="latitude",
@@ -576,16 +578,15 @@ write_par("l2gen_brdf.par", par)
 A new L2 file should have appeared in your data folder.  Let's open it using XArray again and plot Rrs(550):
 
 ```{code-cell}
-dat_brdf = xr.open_datatree(par["ofile"])
-dat_brdf = xr.merge(dat_brdf.to_dict().values())
-dat_brdf = dat_brdf.set_coords(("longitude", "latitude"))
-#TODO: Fix - wavelength_3d issue happening here too 
-#dat_brdf = dat_brdf.drop_vars("wavelength") - WILL HAVE TO OPEN A DIFFERENT WAY WITHOUT WAVELENGTH INVOLVED
-dat_brdf
+dt_brdf = xr.open_datatree(par["ofile"])
+ds_brdf = dt_brdf["geophysical_data"].to_dataset() 
+for item in ("longitude", "latitude"):
+    ds_brdf.coords[item] = dt_brdf["navigation_data"][item]
+ds_brdf
 ```
 
 ```{code-cell}
-dat_brdf["Rrs"].sel({"wavelength_3d": 550}).plot(vmin=0, vmax=0.008)
+ds_brdf["Rrs"].sel({"wavelength": 550}, method="nearest").plot(vmin=0, vmax=0.008)
 ```
 
 This figure looks similar to what we produced in Section 3, but let's make a scatter plot to be sure ...
@@ -593,8 +594,8 @@ This figure looks similar to what we produced in Section 3, but let's make a sca
 ```{code-cell}
 fig, ax = plt.subplots()
 
-x = dat_mod["Rrs"].sel({"wavelength_3d": 550})
-y = dat_brdf["Rrs"].sel({"wavelength_3d": 550})
+x = ds_mod["Rrs"].sel({"wavelength": 550}, method="nearest")
+y = ds_brdf["Rrs"].sel({"wavelength": 550}, method="nearest")
 
 
 ax.scatter(x, y, s=20)
