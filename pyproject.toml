@@ -54,7 +54,7 @@ container = [
   "isort>=5.13.2",
   "jupyter-vscode-proxy>=0.6",
   "jupyterlab-code-formatter>=3.0.2",
-  "jupyterlab-git>=0.50.1",
+  "jupyterlab-git>=0.50.1,<0.54",  # https://github.com/jupyterlab/jupyterlab-git/issues/1492
   "jupyterlab-h5web>=12.3.0",
 ]
 # packages that provide command-line tools for maintainers
