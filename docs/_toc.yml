@@ -72,9 +72,8 @@ parts:
             title: Install SeaDAS Processors
           - file: notebooks/oci/oci_ocssw_processing_overview
             title: Basic Processing
-          # see https://git.smce.nasa.gov/oel/ocssw/-/issues/1186
-          # - file: notebooks/oci/oci_ocssw_l2gen
-          #   title: Generate Level-2 Products
+          - file: notebooks/oci/oci_ocssw_l2gen
+            title: Generate Level-2 Products
           - file: notebooks/oci/oci_ocssw_giop
             title: Run the GIOP Algorithm
 
