@@ -62,7 +62,7 @@ If you are running this guide from the image, to get the additional tools used b
 ```{code-cell} ipython3
 :scrolled: true
 
-mamba install --yes --log-level error --category tools --file container/conda-lock.yml
+mamba install --yes --log-level error --category tools --file /srv/container/conda-lock.yml
 ```
 
 If any dependency list is updated in `pyproject.toml` or any `environment-*.yml` file,
@@ -122,6 +122,8 @@ The `dvc pull` command retrieves the notebook cache.
 [DVC]: https://dvc.org/
 
 ```{code-cell} ipython3
+:scrolled: true
+
 dvc pull --force
 ```
 
@@ -136,17 +138,13 @@ Clear the notebook cache if you want to re-execute all notebooks.
 ```{code-cell} ipython3
 :scrolled: true
 
-jcache cache -p docs/_cache clear --force
+yes | jcache notebook -p docs/_cache invalidate --all
 ```
 
 Update the notebook cache as needed by executing notebooks.
 We use the isolated virtual environment to make sure the environment configuration is correct.
 We use `jcache` directly to achieve parallel execution.
 For a full but slow test of the environment configuration, delete `docs/_cache` before executing.
-
-```{code-cell} ipython3
-jcache notebook -p docs/_cache list
-```
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -192,10 +190,10 @@ Follow the next steps to share the updates using DVC, starting with checking whe
 dvc status
 ```
 
-If the status is *not* "Data and pipelines are up to date." then commit the updated cache with `dvc commit`. (The purpose of `--force` is only to skip the confirmation prompt that you can't interact with from within a notebook).
+If the status is *not* "Data and pipelines are up to date." then commit the updated cache with `dvc commit`.
 
 ```{code-cell} ipython3
-dvc commit --force
+yes | dvc commit
 ```
 
 Now use `dvc` to push your cache to the remote location accessible to the website build.
