@@ -72,6 +72,7 @@ Begin by importing all of the packages used in this notebook. If you followed th
 ```{code-cell} ipython3
 import csv
 import os
+import tomllib
 from pathlib import Path
 
 import cartopy.crs as ccrs
@@ -113,6 +114,8 @@ The `installedTag` is our OCSSW version. Tags beginning with "V" are operational
 +++
 
 ### Setting up AWS S3 credentials
+
++++
 
 Accessing data from NASA's Earthdata Cloud, regardless of the tool, requires authentication.
 The `earthaccess` package works behind-the-scenes using the Earthdata Login credentials you provide to generate temporary AWS credentials for direct access to the Earthdata Cloud.
@@ -383,7 +386,7 @@ Let's open up this new L2 data using XArray's open_datatree function:
 
 ```{code-cell} ipython3
 dt = xr.open_datatree(par["ofile"])
-ds = dt["geophysical_data"]
+ds = dt["geophysical_data"].to_dataset()
 for item in ("longitude", "latitude"):
     ds.coords[item] = dt["navigation_data"][item]
 ds
@@ -403,7 +406,7 @@ Remember the OB.DAAC L2 file we previously downloaded?  Let's see how it compare
 
 ```{code-cell} ipython3
 dt_whole = xr.open_datatree(l2_paths[-1])
-ds_whole = dt_whole["geophysical_data"].to_dataset() 
+ds_whole = dt_whole["geophysical_data"].to_dataset()
 for item in ("longitude", "latitude"):
     ds_whole.coords[item] = dt_whole["navigation_data"][item]
 ```
@@ -412,39 +415,32 @@ Note, however, that the L2 file we downloaded includes the full granule, whereas
 
 Because we can't subset in python using 2D latitude and latitude as inputs to the simple `slice()` method, we will instead use the row and column numbers as our bounding box. We can use the program `lonlat2pixline` to identify the scan line and pixel bounds that correspond to our latitude and longitude coordinates within the full L2 granule. Recall that you can see all the options for OCSSW programs by calling them without any arguments.
 
-We need the full path to the input file (this will become the `$1` argument).
+We need the full path to the input file to pass to the OCCSSW program.
 
 ```{code-cell} ipython3
-l2_path = l2_paths[-1].full_name
-l2_name = Path(l2_path).name
-l2_sub_path = str(data / l2_name.replace("L2", "L2_sub"))
-l2_sub_path
+l2_full_name = l2_paths[-1].full_name
 ```
 
 And we need to specify the bounding box in the standard order: west, south, east, north
 
 ```{code-cell} ipython3
-pixline = !source {env}; lonlat2pixline {l2_path} -76.0 35.0 -74.5 39.0
+pixline = !source {env}; lonlat2pixline {l2_full_name} -76.0 35.0 -74.5 39.0
+pixline = tomllib.loads("\n".join(pixline))
 pixline
 ```
 
-```{code-cell} ipython3
-_, spix, epix, sline, eline = pixline[0].split()
-spix, epix, sline, eline = int(spix), int(epix), int(sline), int(eline)
-```
-
-Now that we have our pixel and line boundaries, we can use them as inputs to slice the larger dataset up into one that only includes our defined geographic boundaries. Note that we have to ensure the output above is in `int` format to work with the slicing. We'll also use the `l2_sub_path` defined earlier to export the subsetted file.
+Now that we have our pixel and line boundaries, we can use them as inputs to slice the larger dataset up into one that only includes our defined geographic boundaries.
 
 ```{code-cell} ipython3
-ds_sub = ds_whole.sel({"number_of_lines":slice(sline-1, eline), 
-                       "pixels_per_line":slice(spix-1, epix)})
-
-ds_sub.to_netcdf(l2_sub_path)
+ds_sub = ds_whole.sel(
+    {
+        "number_of_lines": slice(pixline["sline"] - 1, pixline["eline"]),
+        "pixels_per_line": slice(pixline["spixl"] - 1, pixline["epixl"]),
+    }
+)
 ```
 
-This should have created a new file including "L2_sub" in the data subdirectory.
-
-Let's see how it compares with the L2 file we generated.
+Let's see how this subset of the OB.DAAC L2 granule compares with the L2 file we generated.
 
 ```{code-cell} ipython3
 plot = ds_sub["Rrs"].sel({"wavelength": 550}, method="nearest").plot(vmin=0, vmax=0.008)
@@ -468,7 +464,7 @@ ax.set_xlim(left=0)
 plt.show()
 ```
 
-Other than a negligible number of oddball points, the data are identical. This shows that an end-user can exactly reproduce the data distributed by the OB.DAAC!
+Other than a negligible number of oddball points, the data are identical. This shows that an end-user can reproduce the data distributed by the OB.DAAC!
 
 +++
 
@@ -517,7 +513,7 @@ A new L2 file should have appeared in your data folder.  Let's open it using XAr
 
 ```{code-cell} ipython3
 dt_mod = xr.open_datatree(par["ofile"])
-ds_mod = dt_mod["geophysical_data"].to_dataset() 
+ds_mod = dt_mod["geophysical_data"].to_dataset()
 for item in ("longitude", "latitude"):
     ds_mod.coords[item] = dt_mod["navigation_data"][item]
 
@@ -579,7 +575,7 @@ A new L2 file should have appeared in your data folder.  Let's open it using XAr
 
 ```{code-cell} ipython3
 dt_brdf = xr.open_datatree(par["ofile"])
-ds_brdf = dt_brdf["geophysical_data"].to_dataset() 
+ds_brdf = dt_brdf["geophysical_data"].to_dataset()
 for item in ("longitude", "latitude"):
     ds_brdf.coords[item] = dt_brdf["navigation_data"][item]
 ds_brdf
