@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   name: bash
   display_name: Bash
@@ -73,7 +73,7 @@ but it really must be done before updating the `latest` tag on the GitHub Contai
 ```{code-cell} ipython3
 :scrolled: true
 
-conda-lock lock --log-level ERROR --check-input-hash --without-cuda --lockfile container/conda-lock.yml \
+conda-lock lock --without-cuda --lockfile container/conda-lock.yml \
   --file pyproject.toml \
   --file environment-container.yml \
   --file environment-jupyter.yml \
