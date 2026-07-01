@@ -15,10 +15,10 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: 3adc46c2ed8c1065a24c3188d68187a0800a81d405ed27c4c937d6daa0388ae3
-    osx-64: ee86e03034143a9a84c175805d1071538c8586efb19ee5690cf057ddfbaf6e8f
-    linux-aarch64: 309204cad8f71f49822446af1321084d29f8cbe571df8abe571d4f46dafde959
-    osx-arm64: 00faa5bea7991acda16cc5097d479d0187c089f16663d11e160f905907740581
+    linux-64: 984992b0e6a8168983f7f8d726018a209b3752728bf6d77a0beda0d2857de4eb
+    osx-64: e5621662182f4b00e300a0304316accd09d0262b7cc41827589b061c808341a0
+    linux-aarch64: df697ddf386cff0cc48841c98ad49ba3e40df930c5f9f1e2655fc9db26aa162d
+    osx-arm64: ef2be05b26f036393f53a4c11b058a6bca86720a5b85f79d3c03e872c75c1011
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -16181,14 +16181,15 @@ package:
     krb5: '>=1.22.2,<1.23.0a0'
     libgcc: '>=14'
     libnghttp2: '>=1.68.1,<2.0a0'
+    libpsl: '>=0.22.0,<0.23.0a0'
     libssh2: '>=1.11.1,<2.0a0'
     libzlib: '>=1.3.2,<2.0a0'
     openssl: '>=3.5.7,<4.0a0'
     zstd: '>=1.5.7,<1.6.0a0'
-  url: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.21.0-hcf29cc6_1.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.21.0-hae6b9f4_2.conda
   hash:
-    md5: 2c1e55d695b11525c760b486ac0be517
-    sha256: 7d243f45a48f62cb8e3b871dd336137fe0fb90094a191756fb553508837f6338
+    md5: f9c59d277a16ec8f272b2d5dd2ec3335
+    sha256: ba8354084b34fce56d5697982fce4a384c148e972e15c0ab891187617fe7ec29
   category: notebooks
   optional: true
 - name: libcurl
@@ -16199,14 +16200,15 @@ package:
     krb5: '>=1.22.2,<1.23.0a0'
     libgcc: '>=14'
     libnghttp2: '>=1.68.1,<2.0a0'
+    libpsl: '>=0.22.0,<0.23.0a0'
     libssh2: '>=1.11.1,<2.0a0'
     libzlib: '>=1.3.2,<2.0a0'
     openssl: '>=3.5.7,<4.0a0'
     zstd: '>=1.5.7,<1.6.0a0'
-  url: https://conda.anaconda.org/conda-forge/linux-aarch64/libcurl-8.21.0-hc57f145_1.conda
+  url: https://conda.anaconda.org/conda-forge/linux-aarch64/libcurl-8.21.0-h7c59cd8_2.conda
   hash:
-    md5: 24f82179a8c74c644c01df15f158bc1b
-    sha256: 277a4c0277ae4cd31307d50332aa7f975bd5df3bb6b9710a388ac4bab255c824
+    md5: 0a187db240c503afc7eb5bd865c7ff04
+    sha256: 5846fa724f4b8eb23751e347fc8b31775c0a28a7a34d1e44f081651613470512
   category: notebooks
   optional: true
 - name: libcurl
@@ -16217,14 +16219,15 @@ package:
     __osx: '>=11.0'
     krb5: '>=1.22.2,<1.23.0a0'
     libnghttp2: '>=1.68.1,<2.0a0'
+    libpsl: '>=0.22.0,<0.23.0a0'
     libssh2: '>=1.11.1,<2.0a0'
     libzlib: '>=1.3.2,<2.0a0'
     openssl: '>=3.5.7,<4.0a0'
     zstd: '>=1.5.7,<1.6.0a0'
-  url: https://conda.anaconda.org/conda-forge/osx-64/libcurl-8.21.0-h8f0b9e4_1.conda
+  url: https://conda.anaconda.org/conda-forge/osx-64/libcurl-8.21.0-h06afde3_2.conda
   hash:
-    md5: 83fdd27f6406225d15e4f44b5b45aa96
-    sha256: 33ba88482d9607db195d2b5920e29f4d2744a4780fbbfc47f2e58e4b59a5530c
+    md5: 38c8e5eae6090e0be9e2ed40e3fc4553
+    sha256: 1bebccfae840b14022b7f65e6fbc467bf7ab0ef82bbd34f52b19eb0996c1dde4
   category: notebooks
   optional: true
 - name: libcurl
@@ -16235,14 +16238,15 @@ package:
     __osx: '>=11.0'
     krb5: '>=1.22.2,<1.23.0a0'
     libnghttp2: '>=1.68.1,<2.0a0'
+    libpsl: '>=0.22.0,<0.23.0a0'
     libssh2: '>=1.11.1,<2.0a0'
     libzlib: '>=1.3.2,<2.0a0'
     openssl: '>=3.5.7,<4.0a0'
     zstd: '>=1.5.7,<1.6.0a0'
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/libcurl-8.21.0-hd5a2499_1.conda
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/libcurl-8.21.0-h1359186_2.conda
   hash:
-    md5: 27c5b464c5fbee7411aab3bc0195f9c2
-    sha256: ba74311dc4805af2ba1365d85814199a563cb09950f68b97fcd4e939dc090855
+    md5: dfe89fb0539ad4611998a5c6905692ff
+    sha256: b21aec36796a7d9b3c8b634f2d466c1d0a2658b2e57aa4686285cf4c10d5c227
   category: notebooks
   optional: true
 - name: libcxx
@@ -18130,6 +18134,63 @@ package:
   hash:
     md5: 300fdae9d7ad150a90755f55b0a8a7a8
     sha256: 416c2244999d678dc9a4d8c3472336f8f754676125605399cf6e43956fa3d18b
+  category: notebooks
+  optional: true
+- name: libpsl
+  version: 0.22.0
+  manager: conda
+  platform: linux-64
+  dependencies:
+    __glibc: '>=2.17,<3.0.a0'
+    icu: '>=78.3,<79.0a0'
+    libgcc: '>=14'
+    libstdcxx: '>=14'
+  url: https://conda.anaconda.org/conda-forge/linux-64/libpsl-0.22.0-hd9031aa_0.conda
+  hash:
+    md5: e2834a423b3967e7b3b1e901c4a5f42f
+    sha256: cd11890a2c1f14d0342bfcbd81f97152d61dc71c27c7085efc13705a8f64f7c9
+  category: notebooks
+  optional: true
+- name: libpsl
+  version: 0.22.0
+  manager: conda
+  platform: linux-aarch64
+  dependencies:
+    icu: '>=78.3,<79.0a0'
+    libgcc: '>=14'
+    libstdcxx: '>=14'
+  url: https://conda.anaconda.org/conda-forge/linux-aarch64/libpsl-0.22.0-h504d594_0.conda
+  hash:
+    md5: 93b1727d5d61b9d70163dfcf5d9aafb9
+    sha256: 8871c428d0c97a75806dec9aee508fe93ce137a3a081866d9c752e5c0f83b091
+  category: notebooks
+  optional: true
+- name: libpsl
+  version: 0.22.0
+  manager: conda
+  platform: osx-64
+  dependencies:
+    __osx: '>=11.0'
+    icu: '>=78.3,<79.0a0'
+    libcxx: '>=19'
+  url: https://conda.anaconda.org/conda-forge/osx-64/libpsl-0.22.0-h87879e4_0.conda
+  hash:
+    md5: 9489ea401fda6dd725ac0416aa7880bf
+    sha256: bd7cd501fc01213b6280dac67c47c05be27564d5ad435b25a8e7b8db97bcfb28
+  category: notebooks
+  optional: true
+- name: libpsl
+  version: 0.22.0
+  manager: conda
+  platform: osx-arm64
+  dependencies:
+    __osx: '>=11.0'
+    icu: '>=78.3,<79.0a0'
+    libcxx: '>=19'
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/libpsl-0.22.0-hb427e8f_0.conda
+  hash:
+    md5: 39234f5550649043b04b3d73a2017f81
+    sha256: c14b5b584dc349df5ff5f6fa114d522090a0488fcb1599df0881fd53af45010c
   category: notebooks
   optional: true
 - name: librttopo
@@ -39606,7 +39667,7 @@ package:
   category: container
   optional: true
 - name: jupyterlab-git-core
-  version: 0.54.0
+  version: 0.53.0
   manager: pip
   platform: linux-64
   dependencies:
@@ -39616,13 +39677,13 @@ package:
     packaging: '*'
     pexpect: '*'
     traitlets: '>=5.0,<6.0'
-  url: https://files.pythonhosted.org/packages/3f/fd/70246be863a774d48146877541055ddd495cfadfa0bad76b0c8b33f3dcbf/jupyterlab_git_core-0.54.0-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/b5/4d/9c5081cffe24fb71bbfa205edce9c91cb5ba6cd6f8872b160174aac113a9/jupyterlab_git_core-0.53.0-py3-none-any.whl
   hash:
-    sha256: a163c7b3748292a7e83f514ae9cd838aa4c538ceb6224530626b56771a55053e
+    sha256: bfe29a487e9491140e9c51fdb66683b7dcd709024f3538edefce6f6ac1b3c737
   category: container
   optional: true
 - name: jupyterlab-git-core
-  version: 0.54.0
+  version: 0.53.0
   manager: pip
   platform: linux-aarch64
   dependencies:
@@ -39632,13 +39693,13 @@ package:
     packaging: '*'
     pexpect: '*'
     traitlets: '>=5.0,<6.0'
-  url: https://files.pythonhosted.org/packages/3f/fd/70246be863a774d48146877541055ddd495cfadfa0bad76b0c8b33f3dcbf/jupyterlab_git_core-0.54.0-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/b5/4d/9c5081cffe24fb71bbfa205edce9c91cb5ba6cd6f8872b160174aac113a9/jupyterlab_git_core-0.53.0-py3-none-any.whl
   hash:
-    sha256: a163c7b3748292a7e83f514ae9cd838aa4c538ceb6224530626b56771a55053e
+    sha256: bfe29a487e9491140e9c51fdb66683b7dcd709024f3538edefce6f6ac1b3c737
   category: container
   optional: true
 - name: jupyterlab-git-core
-  version: 0.54.0
+  version: 0.53.0
   manager: pip
   platform: osx-64
   dependencies:
@@ -39648,13 +39709,13 @@ package:
     packaging: '*'
     pexpect: '*'
     traitlets: '>=5.0,<6.0'
-  url: https://files.pythonhosted.org/packages/3f/fd/70246be863a774d48146877541055ddd495cfadfa0bad76b0c8b33f3dcbf/jupyterlab_git_core-0.54.0-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/b5/4d/9c5081cffe24fb71bbfa205edce9c91cb5ba6cd6f8872b160174aac113a9/jupyterlab_git_core-0.53.0-py3-none-any.whl
   hash:
-    sha256: a163c7b3748292a7e83f514ae9cd838aa4c538ceb6224530626b56771a55053e
+    sha256: bfe29a487e9491140e9c51fdb66683b7dcd709024f3538edefce6f6ac1b3c737
   category: container
   optional: true
 - name: jupyterlab-git-core
-  version: 0.54.0
+  version: 0.53.0
   manager: pip
   platform: osx-arm64
   dependencies:
@@ -39664,9 +39725,9 @@ package:
     packaging: '*'
     pexpect: '*'
     traitlets: '>=5.0,<6.0'
-  url: https://files.pythonhosted.org/packages/3f/fd/70246be863a774d48146877541055ddd495cfadfa0bad76b0c8b33f3dcbf/jupyterlab_git_core-0.54.0-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/b5/4d/9c5081cffe24fb71bbfa205edce9c91cb5ba6cd6f8872b160174aac113a9/jupyterlab_git_core-0.53.0-py3-none-any.whl
   hash:
-    sha256: a163c7b3748292a7e83f514ae9cd838aa4c538ceb6224530626b56771a55053e
+    sha256: bfe29a487e9491140e9c51fdb66683b7dcd709024f3538edefce6f6ac1b3c737
   category: container
   optional: true
 - name: jupyterlab-h5web
