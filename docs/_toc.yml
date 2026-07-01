@@ -18,6 +18,8 @@ parts:
             title: Access Data Products
           - file: notebooks/oci/oci_file_structure
             title: Intro to Product Levels
+          - file: notebooks/oci/subsetting_with_harmony-py.md
+            title: Dataset subsetting
           - file: notebooks/modis/modis_explore_l2
             title: Orientation to Level-2
           - file: notebooks/modis/modis_explore_l3
