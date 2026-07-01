@@ -17,7 +17,7 @@ kernelspec:
 
 **Authors:** Anna Windle (NASA, SSAI), Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC) 
 
-Last Updated: June 29, 2026
+Last Updated: July 1, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -39,7 +39,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 This tutorial demonstrates how to subset PACE OCI L2 and L3M data. L2 data is subsetted here using `harmony-py`, while L3M data is subsetted using `xarray`. 
 
-[Harmony] is a web service that allows you to customize many NASA datasets, including the ability to subset, reproject and reformat files. Data can be subsetted for a geographic region, a temporal range and by variable. In some cases, data can be “reprojected” from its native coordinate reference system (CRS) to the coordinate reference system relevant to your analysis. Data can also be reformatted from its native file format to a format that is more relevant for your application. These services are collectively called transformation services. However, not all services and transformations are available for all datasets. You will learn how to discover which services are available for a given dataset.
+[Harmony] is a web service that allows you to customize many NASA datasets, including the ability to subset, reproject, and reformat files. Data can be subsetted for a geographic region, a temporal range and by variable. In some cases, data can be “reprojected” from its native coordinate reference system (CRS) to the coordinate reference system relevant to your analysis. Data can also be reformatted from its native file format to a format that is more relevant for your application. These services are collectively called transformation services. However, not all services and transformations are available for all datasets. You will learn how to discover which services are available for a given dataset.
 
 Harmony services can be used in multiple ways:
 1. through a graphical user interface (GUI) while downloading applicable granules from [Earthdata Search],
@@ -260,7 +260,7 @@ ds = ds.set_coords(("longitude", "latitude"))
 ds
 ```
 
-There's no need to keep these files around if you plan to stream the data instead of downloading.
+There's no need to keep these files around if you plan to stream the data instead of downloading. You can run this to delete all of the locally downloaded files.
 
 ```{code-cell} ipython3
 for item in subsetted_data.glob("*"):
@@ -275,7 +275,7 @@ If you are working in the AWS `us-west-2` region (the same region as NASA Earthd
 
 You must be running this notebook in the AWS us-west-2 region to run the following code cells.
 
-We need to get the url for the data in the S3 bucket. We can do this using `result_urls`, as we did for `download` but we set link_type=LinkType.s3 to specify we want the S3 url.
+We need to get the url for the data in the S3 bucket. We can do this using `result_urls`, as we did for `download` but we set `link_type=LinkType.s3` to specify we want the S3 url.
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -327,7 +327,7 @@ fig.colorbar(im, ax=axes, orientation="vertical", shrink=0.8, label="Chl a (mg m
 plt.show()
 ```
 
-To plot using lat, lon coordinates, we need to project the data onto a defined grid with a given reslution. We will use code presented in the [Projecting PACE Data onto a Predefined Grid tutorial.](notebooks/oci/oci_grid_match)
+To plot using lat, lon coordinates, we need to project the data onto a defined grid with a given resolution. We will use code presented in the [Projecting PACE Data onto a Predefined Grid tutorial.](notebooks/oci/oci_grid_match)
 
 ```{code-cell} ipython3
 def grid_data(src, resolution, dst_crs="epsg:4326", resampling=Resampling.nearest):
@@ -394,7 +394,7 @@ ds_gridded = grid_data(ds, resolution)
 plot = ds_gridded["chlor_a"].plot()
 ```
 
-Plotting first 10 files as subplots, and keeping the gridded "chlor_a" data array for the next section:
+Plotting the first 10 files as subplots, and keeping the gridded "chlor_a" data array for the next section:
 
 ```{code-cell} ipython3
 fig, axes = plt.subplots(2, 5, figsize=(10, 4), constrained_layout=True)
