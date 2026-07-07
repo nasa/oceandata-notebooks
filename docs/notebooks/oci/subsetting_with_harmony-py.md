@@ -17,7 +17,7 @@ kernelspec:
 
 **Authors:** Anna Windle (NASA, SSAI), Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC) 
 
-Last Updated: July 1, 2026
+Last Updated: July 7, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -43,8 +43,9 @@ This tutorial demonstrates how to subset PACE OCI L2 and L3M data. L2 data is su
 
 Harmony services can be used in multiple ways:
 1. through a graphical user interface (GUI) while downloading applicable granules from [Earthdata Search],
-2. by direct requests to [Harmony's RESTful API], or, as in this tutorial,
-3. using the `harmony-py` Python package.
+2. by direct requests to [Harmony's RESTful API],
+3. through SeaDAS ≥ 11.0.0 or, as in this tutorial,
+4. using the `harmony-py` Python package.
 
 The Python package handles NASA Earthdata Login (EDL) authentication and optionally integrates with the CMR Python Wrapper by accepting collection results as a request parameter. It's convenient for scientists who wish to use Harmony from Jupyter notebooks.
 After this tutorial, you can dive deeper into `harmony-py` on [ReadTheDocs](https://harmony-py.readthedocs.io/en/main/). 
@@ -156,6 +157,7 @@ request = Request(
     spatial=BBox(-76.75, 36.97, -75.74, 39.01),
     temporal={"start": datetime(2025, 7, 1), "stop": datetime(2025, 8, 1)},
     variables=["geophysical_data/chlor_a"],
+    pixel_subset=True,
     labels=request.labels,
 )
 ```
@@ -263,7 +265,7 @@ ds
 There's no need to keep these files around if you plan to stream the data instead of downloading. You can run this to delete all of the locally downloaded files.
 
 ```{code-cell} ipython3
-for item in subsetted_data.glob("*"):
+for item in subsetted_data.glob("*.nc*"):
     item.unlink()
 ```
 
@@ -305,96 +307,10 @@ ds
 Let's do a quick plot of `chlor_a` from the first granule:
 
 ```{code-cell} ipython3
-plot = ds["chlor_a"].plot()
+plot = ds["chlor_a"].plot(x="longitude", y="latitude")
 ```
 
 Now let's plot multiple subsetted granules:
-
-```{code-cell} ipython3
-fig, axes = plt.subplots(2, 5, figsize=(10, 4), constrained_layout=True)
-axes = axes.ravel()
-
-for ax, file in zip(axes, urls[:10]):
-
-    dt = xr.open_datatree(file, **kwargs)
-    ds = xr.merge(dt.to_dict().values())
-    ds = ds.set_coords(("longitude", "latitude"))
-    date = ds.attrs["time_coverage_start"]
-    im = ds["chlor_a"].plot(ax=ax, cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
-    ax.set_title(date, fontsize=8)
-
-fig.colorbar(im, ax=axes, orientation="vertical", shrink=0.8, label="Chl a (mg m-3)")
-plt.show()
-```
-
-To plot using lat, lon coordinates, we need to project the data onto a defined grid with a given resolution. We will use code presented in the [Projecting PACE Data onto a Predefined Grid tutorial.](notebooks/oci/oci_grid_match)
-
-```{code-cell} ipython3
-def grid_data(src, resolution, dst_crs="epsg:4326", resampling=Resampling.nearest):
-    """
-    Reproject a L2 dataset to match an input grid. Makes sure 3D variables are
-        in (Z, Y, X) dimension order, and all variables have spatial dims/crs 
-        assigned.
-    Args:
-        src - an xarray dataset or dataarray to reproject
-        resolution - resolution of the output grid, in dst_crs units
-        dst_crs - CRS of the output data
-        resampling - resampling method (see rasterio.enums)
-    Returns:
-        dst - projected xr dataset
-    """
-    if (len(list(src.dims)) == 3) and (list(src.dims)[0] != "wavelength_3d"):
-        src = src.transpose("wavelength_3d", ...)
-    src = src.rio.set_spatial_dims("pixels_per_line", "number_of_lines")
-    src = src.rio.write_crs("epsg:4326")
-
-    # Calculating the default affine transform
-    defaults = rasterio.warp.calculate_default_transform(
-        src.rio.crs,
-        dst_crs,
-        src.rio.width,
-        src.rio.height,
-        left=src.attrs["geospatial_lon_min"],
-        bottom=src.attrs["geospatial_lat_min"],
-        right=src.attrs["geospatial_lon_max"],
-        top=src.attrs["geospatial_lat_max"],
-    )
-    # Aligning that transform to our desired resolution
-    transform, width, height = rasterio.warp.aligned_target(*defaults, resolution)
-    
-    # Run projection
-    dst = src.rio.reproject(
-        dst_crs=dst_crs,
-        shape=(height, width),
-        transform=transform,
-        src_geoloc_array=(
-            src["longitude"],
-            src["latitude"],
-        ),
-        nodata=np.nan,
-        resample=resampling,
-    )
-    dst["x"] = dst["x"].round(9)
-    dst["y"] = dst["y"].round(9)
-    
-    return dst.rename({"x": "longitude", "y": "latitude"})
-```
-
-We choose a 0.015 degree resolution, and the function above employs the plate carrée (lat, lon) projection.
-
-```{code-cell} ipython3
-resolution = (0.015, 0.015)
-```
-
-```{code-cell} ipython3
-dt = xr.open_datatree(urls[0], **kwargs)
-ds = xr.merge(dt.to_dict().values())
-ds = ds.set_coords(("longitude", "latitude"))
-ds_gridded = grid_data(ds, resolution)
-plot = ds_gridded["chlor_a"].plot()
-```
-
-Plotting the first 10 files as subplots, and keeping the gridded "chlor_a" data array for the next section:
 
 ```{code-cell} ipython3
 fig, axes = plt.subplots(2, 5, figsize=(10, 4), constrained_layout=True)
@@ -407,10 +323,10 @@ for ax, file in zip(axes, urls[:10]):
     ds = xr.merge(dt.to_dict().values())
     ds = ds.set_coords(("longitude", "latitude"))
 
-    ds_gridded = grid_data(ds, resolution)
-    da.append(ds_gridded["chlor_a"])
-    date = ds_gridded.attrs["time_coverage_start"]
-    im = ds_gridded["chlor_a"].plot(ax=ax, cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
+    da.append(ds["chlor_a"])
+    
+    date = ds.attrs["time_coverage_start"]
+    im = ds["chlor_a"].plot(ax=ax, x="longitude", y="latitude", cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
     ax.set_title(date, fontsize=8)
 
     ax.set_xlabel("")
@@ -423,9 +339,90 @@ plt.show()
 Now, we can make a 10-day Chl a composite:
 
 ```{code-cell} ipython3
-da = xr.concat(da, dim="scene")
-chlor_a_mean = da.mean(dim="scene")
-plot = chlor_a_mean.plot(cmap="viridis", vmin=0, vmax=20)
+from scipy.stats import binned_statistic_2d
+
+def composite_swaths(dataarrays, resolution=0.01):
+    """
+    Create a mean composite from a list of PACE L2 swath DataArrays.
+
+    Parameters
+    ----------
+    dataarrays : list of xr.DataArray
+        Each DataArray must have 2D latitude and longitude coordinates.
+    resolution : float
+        Grid resolution in degrees.
+
+    Returns
+    -------
+    xr.DataArray
+        Mean composite on a regular lat/lon grid.
+    """
+
+    # Determine overall bounds
+    lon_min = min(float(da.longitude.min()) for da in dataarrays)
+    lon_max = max(float(da.longitude.max()) for da in dataarrays)
+    lat_min = min(float(da.latitude.min()) for da in dataarrays)
+    lat_max = max(float(da.latitude.max()) for da in dataarrays)
+
+    # Create grid edges
+    lon_edges = np.arange(lon_min, lon_max + resolution, resolution)
+    lat_edges = np.arange(lat_min, lat_max + resolution, resolution)
+
+    # Collect all observations
+    lon = []
+    lat = []
+    value = []
+
+    for da in dataarrays:
+
+        mask = (
+            np.isfinite(da.values)
+            & np.isfinite(da.longitude.values)
+            & np.isfinite(da.latitude.values)
+        )
+
+        lon.append(da.longitude.values[mask])
+        lat.append(da.latitude.values[mask])
+        value.append(da.values[mask])
+
+    lon = np.concatenate(lon)
+    lat = np.concatenate(lat)
+    value = np.concatenate(value)
+
+    # Mean in each grid cell
+    grid, _, _, _ = binned_statistic_2d(
+        lon,
+        lat,
+        value,
+        statistic="mean",
+        bins=[lon_edges, lat_edges],
+    )
+
+    # Cell centers
+    lon_centers = (lon_edges[:-1] + lon_edges[1:]) / 2
+    lat_centers = (lat_edges[:-1] + lat_edges[1:]) / 2
+
+    return xr.DataArray(
+        grid.T,
+        coords={
+            "Latitude": lat_centers,
+            "Longitude": lon_centers,
+        },
+        dims=("Latitude", "Longitude"),
+        name="chlor_a",
+        attrs=dataarrays[0].attrs,
+    )
+```
+
+```{code-cell} ipython3
+chlor_a_mean = composite_swaths(da, resolution=0.02)
+
+chlor_a_mean.plot(
+    cmap="viridis",
+    vmin=0,
+    vmax=20,
+    figsize=(8,6)
+)
 ```
 
 ## 7. Subsetting L3M data
