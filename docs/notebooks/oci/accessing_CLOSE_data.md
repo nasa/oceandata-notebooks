@@ -4,18 +4,18 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.4
+    jupytext_version: 1.16.0
 kernelspec:
-  name: python3
-  display_name: Python 3 (ipykernel)
+  display_name: custom
   language: python
+  name: custom
 ---
 
 # Accessing the CLOSE dataset
 
 **Author:** Anna Windle (NASA GSFC, SSAI)
 
-Last updated: July 2, 2026
+Last updated: July 10, 2026
 
 ## Summary
 
@@ -72,7 +72,11 @@ from tqdm.notebook import tqdm
 
 +++
 
-We can query the OB.DAAC File Search using the API, which has [documentation](https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/?tab=using-the-api-tab) for all available parameters. Let's start by counting how many files exist for several CLOSE product types on our target date of 2025-03-15.
+We can query the OB.DAAC File Search using the API, which has [documentation](https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/?tab=using-the-api-tab) for all available parameters. Let's start by counting how many files exist for several CLOSE product types on our target date of 2025-03-15. You can change this date to any of the other dates for which CLOSE data are available:
+* 2025-01-15
+* 2025-03-15
+* 2025-06-15
+* 2024-09-15
 
 The URL for the API is the same as the OB.DAAC File Search form:
 
@@ -106,7 +110,7 @@ datasets = {
 }
 ```
 
-We can now make `POST` requests for each dataset, and build up a list of files to download.
+We can now make `POST` requests for each dataset, and build up a list of files to download. Depending on the current load on the File Search database, this step may take anywhere from a few seconds to several minutes.
 
 ```{code-cell} ipython3
 files = {}
@@ -122,9 +126,7 @@ for name, dtid in datasets.items():
 
 +++
 
-In this example, we grab one file for each data product type. We are downloading files corresponding to a date and granule discussed in the manuscript: Granule B in Figure 1.
-
-Now we can download each file from lists in the `files` dictionary, and save it to a local directory called `CLOSE_data`. You can change this directory name to any location or folder name that best fits your workflow.
+In this example, we grab one file for each data product type. We are downloading files corresponding to a date and granule discussed in the manuscript: Granule B in Figure 1. We can download each file from lists in the `files` dictionary, and save it to a local directory called `CLOSE_data`. You can change this directory name to any location or folder name that best fits your workflow.
 
 ```{code-cell} ipython3
 url = "https://oceandata.sci.gsfc.nasa.gov/getfile/"
@@ -132,9 +134,13 @@ data = Path("CLOSE_data")
 data.mkdir(parents=True, exist_ok=True)
 session = requests.Session()
 
+target_time = "20250315T152616"
+target_date = "20250315"
+
 paths = {}
 for name in tqdm(files):
-    example_file = files[name][0]
+    example_files = [f for f in files[name] if target_time in str(f) or (name== "L3M" and target_date in str(f))]
+    example_file = Path(example_files[0])
     with session.get(f"{url}/{example_file}", stream=True) as r:
         r.raise_for_status()
         with (data / example_file).open("wb") as f:
@@ -253,9 +259,7 @@ plot = model_inputs["chlor_a"].plot.hist(
     label="MODEL_INPUTS Chl a",
     color="blue",
 )
-```
 
-```{code-cell} ipython3
 plot = l2["chlor_a"].plot.hist(
     bins=50,
     range=[0.007, 0.4],
@@ -263,15 +267,11 @@ plot = l2["chlor_a"].plot.hist(
     label="L2 Chl a",
     color="red",
 )
-```
 
-```{code-cell} ipython3
 median_model_inputs_chl = np.nanmedian(model_inputs["chlor_a"].values)
 median_l2_chl = np.nanmedian(l2["chlor_a"].values)
 print(median_model_inputs_chl, median_l2_chl)
-```
 
-```{code-cell} ipython3
 plt.axvline(
     median_model_inputs_chl,
     color="blue",
