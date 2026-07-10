@@ -1,10 +1,11 @@
 ---
 jupytext:
+  formats: md:myst,ipynb:myst
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.17.2
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -76,14 +77,15 @@ for item in results:
         print(summary["short-name"])
 ```
 
-Search for the available granules within a time range and geospatial area of interest. The order of values in a "bounding_box" is always West (longitude), South (latitude), East (longitude), North (latitude). The tight bounds below give a single Level-2 granule for the given day.
+Search for available granules within a time range and geospatial area of interest. The order of values in a "bounding_box" is always West (longitude), South (latitude), East (longitude), North (latitude). If you know the actual granule name, you can use "granule_name" explicitly.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_HARP2_L2_CLOUD_GPC",
-    temporal=("2025-07-02", "2025-07-02"),
-    bounding_box=(-90, -15, -89, -14),
-    count=1,
+    #temporal=("2026-07-01", "2026-07-01"),
+    #bounding_box=(-130.1, 29.9, -107.9, 44.1),
+    granule_name='PACE_HARP2.20240904T205635.L2.CLOUD_GPC.V3_0.nc',
+    #granule_name='PACE_HARP2.20260701T192832.L2.CLOUD_GPC.V4_0.NRT.nc',
 )
 for item in results:
     display(item)
@@ -257,6 +259,28 @@ geo_axis_tags(ax)
 plt.show()
 ```
 
+Cloud effective radius and variance in combination provide the full droplet size distribution in the form of modified gamma distribution
+
+```{code-cell} ipython3
+def mod_gamma_norm(re,ve,r=np.arange(0,30,0.2)):
+    '''
+    re in microns
+    Out put normalized modified gamma distributon for re,ve (Hansen and Travis, 1974)
+    '''
+    f=r**((1.0-3.0*ve)/ve)*np.exp(-r/(re*ve))
+    C=np.trapezoid(f,r)
+    #self.re=re;self.ve=ve
+    return f/C
+
+radius = np.arange(0, 30, 0.2) # droplet radius in um
+n_d = mod_gamma_norm(dataset['cloud_bow_droplet_effective_radius'][180,250].values, \
+                     dataset['cloud_bow_droplet_effective_variance'][180,250].values, \
+                     r=radius)
+plt.plot(radius,n_d)
+plt.xlabel(r'r [$\mu m$]')
+plt.ylabel(r'dN/dr [/$cm^3$/$\mu m$]')
+```
+
 When the cloud effective radius is known, the cloud liquid water path can be derived by combining it with OCI’s cloud optical thickness retrievals. The GPC products include such derived cloud liquid water path fields based on the cloud-bow effective radius.
 
 ```{code-cell} ipython3
@@ -284,3 +308,7 @@ plt.show()
 - Alexandrov, M. D., Cairns, B., Emde, C., Ackerman, A. S., & Van Diedenhoven, B. (2012). Accuracy assessments of cloud droplet size retrievals from polarized reflectance measurements by the research scanning polarimeter. Remote Sensing of Environment, 125, 92–111. https://doi.org/10.1016/j.rse.2012.07.012
 - Van Diedenhoven, B., Fridlind, A. M., Ackerman, A. S., & Cairns, B. (2012). Evaluation of Hydrometeor Phase and Ice Properties in Cloud-Resolving Model Simulations of Tropical Deep Convection Using Radiance and Polarization Measurements. Journal of the Atmospheric Sciences, 69(11), 3290–3314. https://doi.org/10.1175/JAS-D-11-0314.1
 - Alexandrov, M. D., Cairns, B., & Mishchenko, M. I. (2012). Rainbow Fourier transform. Journal of Quantitative Spectroscopy and Radiative Transfer, 113(18), 2521–2535. https://doi.org/10.1016/j.jqsrt.2012.03.025
+
+```{code-cell} ipython3
+
+```
