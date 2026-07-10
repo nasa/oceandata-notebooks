@@ -259,26 +259,43 @@ geo_axis_tags(ax)
 plt.show()
 ```
 
-Cloud effective radius and variance in combination provide the full droplet size distribution in the form of modified gamma distribution
+Cloud effective radius and variance in combination provide the full droplet size distribution in the form of a modified gamma distribution
 
 ```{code-cell} ipython3
-def mod_gamma_norm(re,ve,r=np.arange(0,30,0.2)):
+def mod_gamma_norm(re, ve, r=np.arange(0, 30, 0.2)):
     '''
-    re in microns
-    Out put normalized modified gamma distributon for re,ve (Hansen and Travis, 1974)
+    Normalized modified gamma distribution for effective radius and variance.
+    
+    Parameters
+    ----------
+    re : float
+        Effective radius in microns
+    ve : float
+        Effective variance
+    r : ndarray, optional
+        Radius array in microns (default: 0 to 30 μm in 0.2 μm steps)
+    
+    Returns
+    -------
+    ndarray
+        Normalized distribution (Hansen and Travis, 1974)
     '''
-    f=r**((1.0-3.0*ve)/ve)*np.exp(-r/(re*ve))
-    C=np.trapezoid(f,r)
-    #self.re=re;self.ve=ve
-    return f/C
+    f = r**((1.0 - 3.0*ve)/ve) * np.exp(-r/(re*ve))
+    C = np.trapezoid(f, r)
+    return f / C
 
-radius = np.arange(0, 30, 0.2) # droplet radius in um
-n_d = mod_gamma_norm(dataset['cloud_bow_droplet_effective_radius'][180,250].values, \
-                     dataset['cloud_bow_droplet_effective_variance'][180,250].values, \
-                     r=radius)
-plt.plot(radius,n_d)
-plt.xlabel(r'r [$\mu m$]')
-plt.ylabel(r'dN/dr [/$cm^3$/$\mu m$]')
+# Compute normalized modified gamma distribution
+radius = np.arange(0, 30, 0.2)  # droplet radius in μm
+n_d = mod_gamma_norm(
+    dataset['cloud_bow_droplet_effective_radius'][180, 250].values,
+    dataset['cloud_bow_droplet_effective_variance'][180, 250].values,
+    r=radius
+)
+
+# Plot distribution
+plt.plot(radius, n_d)
+plt.xlabel(r'$r$ [$\mu$m]')
+plt.ylabel(r'$dN/dr$ [$\mathrm{cm}^{-3}$ $\mu\mathrm{m}^{-1}$]')
 ```
 
 When the cloud effective radius is known, the cloud liquid water path can be derived by combining it with OCI’s cloud optical thickness retrievals. The GPC products include such derived cloud liquid water path fields based on the cloud-bow effective radius.
