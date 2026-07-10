@@ -46,7 +46,9 @@ parts:
         sections:
           - file: notebooks/hackweek/oci_gpig.md
             title: GPig Phytoplankton Community Composition
-
+          - file: notebooks/oci/accessing_CLOSE_data.md
+            title: Accessing the CLOSE Dataset
+            
       - file: sections/cloud-atmosphere
         sections:
           - file: notebooks/harp2/harp2_l2_aerosol_product
