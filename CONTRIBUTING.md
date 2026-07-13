@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.1
+    jupytext_version: 1.19.4
 kernelspec:
   name: bash
   display_name: Bash
@@ -124,7 +124,7 @@ The `dvc pull` command retrieves the notebook cache.
 ```{code-cell} ipython3
 :scrolled: true
 
-dvc pull --force
+dvc pull
 ```
 
 The notebooks now available in the cache can be displayed with `jcache`.
@@ -132,6 +132,15 @@ The notebooks now available in the cache can be displayed with `jcache`.
 ```{code-cell} ipython3
 jcache notebook -p docs/_cache list
 ```
+
+In case the repository moved recently, you may need to update any added absolute URIs with something like:
+```shell
+$ sqlite3 docs/_cache/global.db
+sqlite3> update nbcache set uri = replace(uri, "/absolute/path/to/docs/", "");
+sqlite3> .quit
+```
+
++++
 
 Clear the notebook cache if you want to re-execute all notebooks.
 
@@ -157,7 +166,7 @@ The next cell builds a static website in `docs/_build/html` using `jupyter-book`
 ```{code-cell} ipython3
 :scrolled: true
 
-jupyter-book build --all docs
+jupyter-book build docs
 ```
 
 Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
@@ -184,7 +193,16 @@ python -m http.server -d docs/_build/html
 +++
 
 If any notebooks have been executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
-Follow the next steps to share the updates using DVC, starting with checking whether the cache has actually changed.
+Follow the next steps to share the updates using DVC.
+First "reset" the database to erase spurious changes that would appear to DVC as updates.
+
+```{code-cell} ipython3
+sqlite3 docs/_cache/global.db "update nbcache set accessed = created"
+sqlite3 docs/_cache/global.db .dump | sqlite3 /tmp/global.db
+mv /tmp/global.db docs/_cache/global.db
+```
+
+Now check whether the cache has actually changed.
 
 ```{code-cell} ipython3
 dvc status
