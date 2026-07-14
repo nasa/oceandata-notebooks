@@ -44,8 +44,8 @@ This tutorial demonstrates how to subset PACE OCI L2 and L3M data. L2 data is su
 Harmony services can be used in multiple ways:
 1. through a graphical user interface (GUI) while downloading applicable granules from [Earthdata Search],
 2. by direct requests to [Harmony's RESTful API],
-3. through SeaDAS ≥ 11.0.0 or, as in this tutorial,
-4. using the `harmony-py` Python package.
+3. through [SeaDAS] ≥ 11.0.0,
+4. or, as in this tutorial, using the `harmony-py` Python package.
 
 The Python package handles NASA Earthdata Login (EDL) authentication and optionally integrates with the CMR Python Wrapper by accepting collection results as a request parameter. It's convenient for scientists who wish to use Harmony from Jupyter notebooks.
 After this tutorial, you can dive deeper into `harmony-py` on [ReadTheDocs](https://harmony-py.readthedocs.io/en/main/). 
@@ -58,6 +58,7 @@ This tutorial demonstrates how to subset and reformat PACE OCI data from the NAS
 [harmony-py]: https://github.com/nasa/harmony-py
 [NSIDC]: https://github.com/nsidc/NSIDC-Data-Tutorials/blob/main/notebooks/NASA_Earthdata_webinar_short/harmony-py-webinar-short.ipynb
 [NASA-Openscapes]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook/tutorials/Harmony.html
+[SeaDAS]: https://www.earthdata.nasa.gov/data/tools/seadas
 
 ## Learning Objectives
 
@@ -95,7 +96,6 @@ from harmony import (
     LinkType,
     Request,
 )
-from IPython.display import JSON
 from rasterio.enums import Resampling
 ```
 
@@ -144,7 +144,7 @@ Second, get a response from your request submission:
 
 ```{code-cell} ipython3
 response = harmony_client.submit(request)
-JSON(response)
+response["count"]
 ```
 
 For your first time through this tutorial, you shouldn't see any existing jobs. If you've already submitted a job with this label (e.g. because you are re-running this tutorial), then the response includes information about that existing job.
@@ -156,7 +156,7 @@ request = Request(
     collection=Collection(id="PACE_OCI_L2_BGC"),
     spatial=BBox(-76.75, 36.97, -75.74, 39.01),
     temporal={"start": datetime(2025, 7, 1), "stop": datetime(2025, 8, 1)},
-    variables=["geophysical_data/chlor_a"],
+    variables=["geophysical_data/chlor_a", "geophysical_data/l2_flags"],
     pixel_subset=True,
     labels=request.labels,
 )
@@ -304,6 +304,8 @@ ds
 
 ## 6. Plot the subsetted data
 
++++
+
 Let's do a quick plot of `chlor_a` from the first granule:
 
 ```{code-cell} ipython3
@@ -324,9 +326,17 @@ for ax, file in zip(axes, urls[:10]):
     ds = ds.set_coords(("longitude", "latitude"))
 
     da.append(ds["chlor_a"])
-    
+
     date = ds.attrs["time_coverage_start"]
-    im = ds["chlor_a"].plot(ax=ax, x="longitude", y="latitude", cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
+    im = ds["chlor_a"].plot(
+        ax=ax,
+        x="longitude",
+        y="latitude",
+        cmap="viridis",
+        add_colorbar=False,
+        vmin=0,
+        vmax=20,
+    )
     ax.set_title(date, fontsize=8)
 
     ax.set_xlabel("")
@@ -340,6 +350,7 @@ Now, we can make a 10-day Chl a composite:
 
 ```{code-cell} ipython3
 from scipy.stats import binned_statistic_2d
+
 
 def composite_swaths(dataarrays, resolution=0.01):
     """
@@ -421,11 +432,13 @@ chlor_a_mean.plot(
     cmap="viridis",
     vmin=0,
     vmax=20,
-    figsize=(8,6)
+    figsize=(8, 6),
 )
 ```
 
 ## 7. Subsetting L3M data
+
++++
 
 Currently, `harmony-py` does not support spatial subsetting for PACE OCI L3M products. You can verify this by submitting a Harmony request and inspecting the available services, where the subset capabilities are listed as `False`.
 
@@ -441,9 +454,9 @@ Let's begin by opening a monthly (MO) PACE_OCI_L3M_BGC composite at 4 km spatial
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-        short_name="PACE_OCI_L3M_BGC",
-        temporal=("2025-07", "2025-07"),
-        granule_name="*.MO.*.4km.*",
+    short_name="PACE_OCI_L3M_BGC",
+    temporal=("2025-07", "2025-07"),
+    granule_name="*.MO.*.4km.*",
 )
 paths = earthaccess.open(results)
 ```
@@ -456,14 +469,14 @@ ds
 Now we are going to subset in two ways, first, by selecting a variable with `.sel`, and secondly by selecting a spatial subset with `slice`. We can do this all in one line:
 
 ```{code-cell} ipython3
-ds_sub = ds['chlor_a'].sel({"lat": slice(39.01, 36.97), "lon": slice(-76.75, -75.74)})
+ds_sub = ds["chlor_a"].sel({"lat": slice(39.01, 36.97), "lon": slice(-76.75, -75.74)})
 plot = ds_sub.plot.imshow()
 ```
 
 If we now save this sliced dataset to a netCDF file, we have effectively "downloaded" a subsetted dataset:
 
 ```{code-cell} ipython3
-subsetted_data = Path("./subsetted_data")  
+subsetted_data = Path("./subsetted_data")
 subsetted_data.mkdir(exist_ok=True)
 path = subsetted_data / ds.attrs["product_name"]
 path = path.with_suffix(".subsetted.nc")
