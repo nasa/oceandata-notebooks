@@ -62,7 +62,7 @@ If you are running this guide from the image, to get the additional tools used b
 ```{code-cell} ipython3
 :scrolled: true
 
-mamba install --yes --log-level error --category tools --file /srv/container/conda-lock.yml
+mamba install --yes --log-level error --category tools --file container/conda-lock.yml
 ```
 
 If any dependency list is updated in `pyproject.toml` or any `environment-*.yml` file,
