@@ -197,9 +197,7 @@ If you want to access a specific job that has already run, you can simply assign
 
 Results are kept for 30 days in the Harmony S3 bucket.
 
-```{code-cell} ipython3
-job_id = '07d760e7-448a-434b-9195-f27c95122f97'
-```
++++
 
 ## 5. Access the subsetted data
 
@@ -401,7 +399,7 @@ def grid_data(src, resolution, dst_crs="epsg:4326", resampling=Resampling.neares
     return dst.rename({"x":"longitude", "y":"latitude"})
 ```
 
-Now, we can make a 10-day Chl a composite:
+Now, we can make a 10-day Chl a composite. The `l2_flags` variable cannot be gridded using this function; if you need to use the `l2_flags` to mask out additional data, you can do that on the subetted granules before gridding.
 
 ```{code-cell} ipython3
 gridded_list = []
@@ -412,6 +410,7 @@ for file in urls[:10]:
     dt = xr.open_datatree(file, **kwargs)
     ds = xr.merge(dt.to_dict().values())
     ds = ds.set_coords(("longitude", "latitude"))
+    ds = ds.drop_vars("l2_flags")
 
     ds_gridded = grid_data(ds, resolution)
 
