@@ -34,6 +34,7 @@ notebooks = [
   "pyproj>=3.6.1",
   "rasterio>=1.4.1",
   "rioxarray>=0.19.0",
+  "sdp[ray] @ git+https://github.com/max-danenhower/rrs-SDP-pigments.git@refs/pull/1/merge ; platform_machine != 'osx-64'",
   "scipy>=1.13.1",
   "seaborn>=0.13.2",
   "tqdm>=4.66.5",
