@@ -85,6 +85,8 @@ parts:
     chapters:
       - file: sections/other-useful-tutorials
         sections:
+          - url: https://nasa.github.io/VITALS/python/emit_pace/01_Colocate_PACE_EMIT_Data.html
+            title: PACE & EMIT
           - url: https://github.com/seanremy/pace-earthcare-matchups
             title: PACE - Earthcare Matchups
           - url: https://github.com/wekeo/learn-olci
