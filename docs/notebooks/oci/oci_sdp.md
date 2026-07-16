@@ -6,11 +6,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.0
+    jupytext_version: 1.19.4
 kernelspec:
-  display_name: custom
+  name: python3
+  display_name: Python 3 (ipykernel)
   language: python
-  name: custom
 ---
 
 # Applying Spectral Derivative Pigment (SDP) Phytoplankton Community Composition Algorithm to OCI data
@@ -53,6 +53,8 @@ At the end of this notebook you will know:
 
 ## 1. Setup
 
++++
+
 The SDP Python code has been packaged to allow it to be easily installed, imported, and reused.
 While the package is not on PyPI or conda-forge, it can be installed directly from the [source repository][sdp] on GitHub.
 If you have followed the setup instructions, then SDP is available to import along with the other packages needed for this notebook.
@@ -66,21 +68,7 @@ import earthaccess
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-
-crs = ccrs.PlateCarree()
-```
-
-```{code-cell} ipython3
-pip install ray openpyxl #scikit-learn 
-```
-
-```{code-cell} ipython3
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path("src").resolve()))
-import sdp
-from sdp.core import sdp_from_pace
+from sdp import sdp_from_pace
 ```
 
 Set (and persist to your home directory on the host, if needed) your Earthdata Login credentials.
@@ -99,25 +87,19 @@ We need the following data to run SDP:
 We can use `earthaccess` to find PACE OCI l2 data. We will use a specific granule using the `granule_name` argument:
 
 ```{code-cell} ipython3
+tspan = ("2026-05-05 17:35", "2026-05-05 17:35")
 results = earthaccess.search_data(
-    short_name=["PACE_OCI_L2_AOP_NRT"],
-    granule_name='*20260505T173406*')  
-results
-```
-
-```{code-cell} ipython3
+    short_name=["PACE_OCI_L2_AOP", "PACE_OCI_L2_AOP_NRT"],
+    temporal=tspan,
+    count=1,
+)  
 paths = earthaccess.open(results)
-paths
-```
-
-```{code-cell} ipython3
-paths[1]
 ```
 
 Let's take a quick look at Rrs at 500nm:
 
 ```{code-cell} ipython3
-datatree = xr.open_datatree(paths[1])
+datatree = xr.open_datatree(paths[-1])
 rrs = datatree["geophysical_data"]["Rrs"]
 for item in ("longitude", "latitude"):
     rrs[item] = datatree["navigation_data"][item]
@@ -125,10 +107,11 @@ rrs
 ```
 
 ```{code-cell} ipython3
+crs = ccrs.PlateCarree()
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": crs})
 
-data = rrs.sel({"wavelength": 500}, method="nearest")
-data.plot(
+da = rrs.sel({"wavelength": 500}, method="nearest")
+da.plot(
     x="longitude",
     y="latitude",
     vmin=0,
@@ -137,7 +120,6 @@ data.plot(
     cbar_kwargs={"label": "Rrs ($sr^{-1}$)"},
 )
 
-#ax.set_extent([-135, -115, 35, 55], crs=crs)
 ax.coastlines(resolution="10m")
 ax.add_feature(cfeature.BORDERS, linestyle=":")
 ax.gridlines(
@@ -150,69 +132,24 @@ ax.gridlines(
 plt.show()
 ```
 
-We can use the `load_data()` function to download sss and sst:
-
-TODO: could move this to core.py?
+We need to find corresponding sea-surface salinity and temperature data for the SDP algorithm.
 
 ```{code-cell} ipython3
-def load_data(tspan):
-    '''
-    Downloads one L2 PACE apparent optical properties (AOP) file that intersects the coordinate box passed in, as well as 
-    temperature and salinity files. Data files are saved to local folders named 'L2_rrs_data', 'sal_data', and 'temp_data'.
+results = earthaccess.search_data(
+    short_name='SMAP_JPL_L3_SSS_CAP_8DAY-RUNNINGMEAN_V5',
+    temporal=tspan,
+    count=1,
+)
+sss_paths = earthaccess.open(results)
+```
 
-    Parameters:
-    -----------
-    tspan : tuple of str
-        A tuple containing two strings both with format 'YYYY-MM-DD'. The first date in the tuple must predate the second date in the tuple.
-    bbox : tuple of floats or ints
-        A tuple representing spatial bounds in the form (lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat).
-
-    Returns:
-    --------
-    list
-        A list of file paths to a PACE L2 AOP files intersecting the passed in bounding box.
-    string
-        A single file path to a salinity file.
-    string
-        A single file path to a temperature file.
-    '''
-
-    #L2_results = earthaccess.search_data(
-    #    short_name='PACE_OCI_L2_AOP',
-    #    bounding_box=bbox,
-    #    temporal=tspan
-    #)
-    #if (len(L2_results) > 0):
-    #    L2_paths = earthaccess.download(L2_results, 'L2_rrs_data')
-    #else:
-    #    L2_paths = []
-     #   print('No L2 AOP data found')
-
-    sal_results = earthaccess.search_data(
-        short_name='SMAP_JPL_L3_SSS_CAP_8DAY-RUNNINGMEAN_V5',
-        temporal=tspan,
-        count=1
-    )
-    if (len(sal_results) > 0):
-        sal_paths = earthaccess.download(sal_results, 'sal_data')
-    else:
-        sal_paths = []
-        print('No salinity data found')
-
-    temp_results = earthaccess.search_data(
-        short_name='MUR-JPL-L4-GLOB-v4.1',
-        temporal=tspan,
-        count=1
-    )
-    if (len(temp_results) > 0):
-        temp_paths = earthaccess.download(temp_results, 'temp_data')
-    else:
-        temp_paths = []
-        print('No temperature data found')
-
-    return sal_paths[0], temp_paths[0]
-
-load_data(tspan = ("2026-05-05", "2026-05-05"))  #2026-03-03", "2026-03-03
+```{code-cell} ipython3
+results = earthaccess.search_data(
+    short_name='MUR-JPL-L4-GLOB-v4.1',
+    temporal=tspan,
+    count=1
+)
+sst_paths = earthaccess.open(results)
 ```
 
 ## 2. Run SDP on L2 Data
@@ -220,7 +157,7 @@ load_data(tspan = ("2026-05-05", "2026-05-05"))  #2026-03-03", "2026-03-03
 Now we're ready to run SDP. Let's name what we want the outfile to be:
 
 ```{code-cell} ipython3
-output_file = paths[1].full_name.split("/")[-1]
+output_file = paths[-1].full_name.split("/")[-1]
 output_file = output_file.replace(".nc", "_SDP_pigments.nc")
 output_file
 ```
@@ -230,9 +167,12 @@ And then run it! Note that it will run up memory and blow up in the cloud......
 ```{code-cell} ipython3
 %%time
 
-sdp_from_pace(paths[1], output_file, 
-             sss_file='/glusteruser/awindled/rrs-SDP-pigments/sal_data/SMAP_L3_SSS_20260501_8DAYS_V5.0.nc',
-             sst_file='/glusteruser/awindled/rrs-SDP-pigments/temp_data/20260505090000-JPL-L4_GHRSST-SSTfnd-MUR-GLOB-v02.0-fv04.1.nc')
+sdp_from_pace(
+    paths[-1],
+    output_file,
+    sss_file=sss_paths[-1],
+    sst_file=sst_paths[-1],
+)
 ```
 
 TODO: should we get rid of warnings? should we use ray?
