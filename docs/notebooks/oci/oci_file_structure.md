@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 
-Last updated: June 23, 2026
+Last updated: July 14, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -273,7 +273,7 @@ We'll use the same `earthaccess` method to find the data.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_RRS",
+    short_name="PACE_OCI_L3M_AOP",
     temporal=tspan,
 )
 len(results)
@@ -291,16 +291,16 @@ for item in results:
 
 Notice some special parts in the granule name:
 1. Right after `L3m` you have a period indicator.
-   The value `DAY` means a daily aggregate, `8D` means an 8-day aggregate, `MO` means a monthly aggregate,
-   and `SN(SP|SU|AU|WI)` indicates one of four seasonal aggregates.
-1. Right before the `.nc` suffix, you have a spatial resolution marker. The value gives the horizontal cell size at the equator either in `km` or `deg`. Read `p` as a decimal point.
+   The value `DAY` means a daily aggregate, `8D` means an 8-day aggregate, `MO` means a monthly aggregate.
+   
+1. Right before the `.nc` suffix, you have a spatial resolution marker. The value gives the horizontal cell size at the equator either in `4km` or `0p1deg`. Read `p` as a decimal point.
 
 Within a specific collection, `earthaccess` can retrieve granules whose name matches a pattern given in the `granule_name` argument.
 Let's use that to narrow our search to values aggregated to a month and 0.1 degree resolutions.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_RRS",
+    short_name="PACE_OCI_L3M_AOP",
     granule_name="*.MO.*.4km.*",
     temporal=tspan,
 )
@@ -332,11 +332,11 @@ out a bounding box and map the "Rrs" variable at a given wavelength.
 
 ```{code-cell} ipython3
 rrs = dataset["Rrs"]
-rrs_440_bbox = rrs.sel({
-    "wavelength": 440,
-    "lat": slice(bbox[3], bbox[1]),
-    "lon": slice(bbox[0], bbox[2]),
-})
+rrs_440_bbox = rrs.sel(
+    wavelength=440, method="nearest").sel(
+    lat=slice(bbox[3], bbox[1]),
+    lon=slice(bbox[0], bbox[2]),
+)
 rrs_440_bbox
 ```
 
@@ -353,10 +353,12 @@ Using the `granule_name` filter, let's get low spatial-resolution chlorophyll-a 
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_CHL",
+    short_name="PACE_OCI_L3M_BGC",
     temporal=tspan,
     granule_name="*.DAY.*.0p1deg.*",
 )
+print(len(results))
+
 paths = earthaccess.open(results)
 ```
 
