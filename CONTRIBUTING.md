@@ -239,20 +239,19 @@ git push
 
 The temporary credentials shown after running the next block in a Python console must be recorded at [GitHub Secrets](https://github.com/nasa/oceandata-notebooks/settings/secrets/actions).
 
-+++
-
-```python
+```{code-cell} ipython3
+python -c '
 import os
 import boto3
 
-client = boto3.client('sts')
+client = boto3.client("sts")
 
-with open(os.environ['AWS_WEB_IDENTITY_TOKEN_FILE']) as f:
+with open(os.environ["AWS_WEB_IDENTITY_TOKEN_FILE"]) as f:
     TOKEN = f.read()
 
 response = client.assume_role_with_web_identity(
-    RoleArn=os.environ['AWS_ROLE_ARN'],
-    RoleSessionName=os.environ['JUPYTERHUB_CLIENT_ID'],
+    RoleArn=os.environ["AWS_ROLE_ARN"],
+    RoleSessionName=os.environ["JUPYTERHUB_CLIENT_ID"],
     WebIdentityToken=TOKEN,
     DurationSeconds=3600
 )
@@ -260,9 +259,8 @@ secrets = response["Credentials"]
 print("AWS_ACCESS_KEY_ID:", secrets["AccessKeyId"], sep="\n", end="\n\n")
 print("AWS_SECRET_ACCESS_KEY:", secrets["SecretAccessKey"], sep="\n", end="\n\n")
 print("AWS_SESSION_TOKEN:", secrets["SessionToken"], sep="\n", end="\n\n")
+'
 ```
-
-+++
 
 ### Publish (a.k.a. Release)
 
