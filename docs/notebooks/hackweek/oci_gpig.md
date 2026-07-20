@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Max Danenhower (Bowdoin College), Ali Chase (University of Washington)
 
-Last updated: August 20, 2025
+Last updated: June 24, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -72,7 +72,7 @@ crs = ccrs.PlateCarree()
 Set (and persist to your home directory on the host, if needed) your Earthdata Login credentials.
 
 ```{code-cell} ipython3
-auth = earthaccess.login(persist=True)
+auth = earthaccess.login()
 ```
 
 ## 2. Run GPig on L2 Data

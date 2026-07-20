@@ -6,7 +6,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -15,7 +15,7 @@ kernelspec:
 
 # Satellite Data Visualization
 
-Updated Nov 12, 2025
+Updated June 24, 2026
 
 **Tutorial Leads:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC) and Sean Foley (NASA, MSU)
 
@@ -62,6 +62,10 @@ from matplotlib import animation
 from matplotlib.colors import ListedColormap
 from PIL import Image, ImageEnhance
 from scipy.ndimage import gaussian_filter1d
+```
+
+```{code-cell} ipython3
+auth = earthaccess.login()
 ```
 
 ```{code-cell} ipython3

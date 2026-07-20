@@ -31,10 +31,10 @@ The [Data Access](notebooks/oci/oci_data_access) notebook steps through differen
 ## Jupyter Setup
 
 An advantage that comes with community-maintained JupyterHubs is having a complete Jupyter ecosystem at your fingertips.
-Even so, the default configuration will not be capable of running all the Help Hub tutorials.
+Even so, the default ecosystem will probably not be capable of running all the Help Hub tutorials.
 Here are two ways to get a Jupyter ecosystem that's ready to run them all:
 
-  1. **On a bring-your-own-image capable JupyterHub**: run a {term}`container` built for CryoCloud
+  1. **On a bring-your-own-image capable JupyterHub**: run a {term}`container` from the image built for CryoCloud
   1. **Without a JupyterHub**: run JupyterLab from a {term}`Conda` environment
 
 ### Using a Container
@@ -60,7 +60,8 @@ you can use either the `mamba` command that comes with {term}`Conda` (recommende
 With that file in a download folder (denoted by `<DIR>`) and a name you've chosen (denoted by `<NAME>`) for a new environment, run in a Terminal:
 
 ```shell
-mamba create --name <NAME> --file <DIR>/conda-lock.yml --category notebooks
+mamba create --name <NAME> --file <DIR>/conda-lock.yml
+mamba install --name <NAME> --file <DIR>/conda-lock.yml --category notebooks
 mamba install --name <NAME> --file <DIR>/conda-lock.yml --category jupyter
 ```
 

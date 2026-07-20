@@ -1,4 +1,4 @@
-# Help Hub - Satellite data processing can be difficult.
+# Satellite data processing can be difficult.
 
 ## We're here to help you climb out of that hole!
 

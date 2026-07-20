@@ -18,6 +18,8 @@ parts:
             title: Access Data Products
           - file: notebooks/oci/oci_file_structure
             title: Intro to Product Levels
+          - file: notebooks/oci/subsetting_with_harmony-py.md
+            title: Dataset subsetting
           - file: notebooks/modis/modis_explore_l2
             title: Orientation to Level-2
           - file: notebooks/modis/modis_explore_l3
@@ -44,7 +46,9 @@ parts:
         sections:
           - file: notebooks/hackweek/oci_gpig.md
             title: GPig Phytoplankton Community Composition
-
+          - file: notebooks/oci/accessing_CLOSE_data.md
+            title: Accessing the CLOSE Dataset
+            
       - file: sections/cloud-atmosphere
         sections:
           - file: notebooks/harp2/harp2_l2_aerosol_product
@@ -77,9 +81,17 @@ parts:
           - file: notebooks/oci/oci_ocssw_giop
             title: Run the GIOP Algorithm
 
-  - caption: Trainings and Events
+  - caption: Useful resources
     chapters:
-
+      - file: sections/other-useful-tutorials
+        sections:
+          - url: https://nasa.github.io/VITALS/python/emit_pace/01_Colocate_PACE_EMIT_Data.html
+            title: PACE & EMIT
+          - url: https://github.com/seanremy/pace-earthcare-matchups
+            title: PACE - Earthcare Matchups
+          - url: https://github.com/wekeo/learn-olci
+            title: Wekeo - Learn OLCI
+      
       - file: sections/past-trainings
         sections:
           - url: https://fish-pace.github.io/hackweek-2025/intro.html
@@ -98,6 +110,7 @@ parts:
             title: PACE Training Lectures 2022
           - url: https://seadas.gsfc.nasa.gov/tutorials/seadas101/
             title: OCSSW & SeaDAS 101
+
 
   - caption: Reference
     chapters:
