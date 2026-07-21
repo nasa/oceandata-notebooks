@@ -13,7 +13,9 @@ kernelspec:
 
 # Science Data Reprocessing and Product Versions
 
-**Authors:** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC)
+**Authors:** Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
+
+Last updated: July 21, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -142,9 +144,11 @@ level2_pace.sort_index(axis=0).sort_index(axis=1)
 
 +++
 
-Note that all product suites are not necessarily at the same version. This is because a reprocessing will only be performed on the products actually impacted by improvements to processing algorithms.
+Note that not all product suites are necessarily at the same version. This is because reprocessing is only performed for products affected by updates to processing algorithms or other relevant changes. 
 
-For instance, the surface reflectance (SRFEFL) and land surface indices (LANDVI) products remained at version 3.1 while the ocean color suites were upgraded to version 3.2
+For example, the surface reflectance (SRFEFL) and land surface indices (LANDVI) products remained at version 3.1 while the ocean color product suites were upgraded to version 3.2 
+
+See below for updates to code required to open different data products from either v3.1 or 3.2 using `xarray`: 
 
 +++
 
@@ -173,23 +177,11 @@ The NASA Earthdata CMR `short_names` changed for Level-3 products. The new `shor
 - `PACE_OCI_L3M_KD`
 - `PACE_OCI_L3M_PAR`
 
-You can use the following dictionary to replace non-existent short names with the consolidated products:
-
-```{code-cell} ipython3
-# FIXME: get all of these if useful?
-rename = {
-    "PACE_OCI_L3M_CHL": "PACE_OCI_L3M_BGC",
-    "PACE_OCI_L3M_RRS": "PACE_OCI_L3M_AOP",
-    "PACE_OCI_L3M_AVW": "PACE_OCI_L3M_AOP",
-    "PACE_OCI_L3M_FLH": "PACE_OCI_L3M_AOP",
-    "PACE_OCI_L3M_CARBON": "PACE_OCI_L3M_BGC",
-}
-rename["PACE_OCI_L3M_RRS"]
-```
++++
 
 <div class="alert alert-warning" role="alert">
 
-The wavelength coordinate variables have been adjusted to better distinguish between the nominal wavelengths that use integer values and the actual wavelengths used for the geophysical variables. However, running some code that works for previous versions may generate erros or even crash your notebook kernel.
+The wavelength coordinate variables have been adjusted to better distinguish between the nominal wavelengths that use integer values and the actual wavelengths used for the geophysical variables. However, running some code that works for previous versions may generate errors or even crash your notebook kernel.
 
 </div>
 
@@ -242,6 +234,9 @@ Group: /
 └── Group: /processing_control
 ```
 
+
+<br>
+
 The `geophysical_data` group includes `wavelength` as a coordinate. The addition of `wavelength` as a coordinate within the same group makes it easier to select and work with spectrally resolved variables. Although the same length, the array of values in `/geophysical_data/wavelength` differs from that in `/sensor_band_parameters/wavelength_3d`. The latter, integer valued, variable gives the nominal wavelengths associated with each band pre-launch.
 
 To work with a variable from the `geophysical_data` group, since it already contains a `wavelength` coordinate, we only need to add the "latitude" and longitude variables from the `navigation_data` group.
@@ -267,6 +262,17 @@ Coordinates:
     latitude    (number_of_lines, pixels_per_line) float32 9MB ...
   * wavelength  (wavelength) float32 688B 346.0 348.5 350.9 ... 716.8 719.3
 ```
+<br>
+
+
+Also note that since `wavelength` are now stored as integers, selecting a specific wavelength requires using `method=nearest` in the `DataArray.sel()` call. For example:
+
+```python
+dataarray.sel(wavelength=500, method='nearest')
+```
+This ensures that `xarray` selects the closest available wavelength value when an exact match is not present.
+
+<br>
 
 Alternatively, you can "revert" to something that may work with code writted for a version 3.1 dataset.
 You can drop the `wavelength` dimension from the `sensor_band_parameters` group on a `datatree` created
@@ -360,4 +366,8 @@ dataset = dataset.set_coords(("longitude", "latitude"))
 
 +++
 
-TODO: anything about V2? can we find release notes?
+Read the [full release notes](https://oceancolor.gsfc.nasa.gov/data/reprocessing/V2.0/pace/), and check out these highlights.
+
+```{code-cell} ipython3
+
+```
