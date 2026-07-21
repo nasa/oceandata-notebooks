@@ -75,7 +75,7 @@ import pandas
 import xarray as xr
 ```
 
-To gather information about available collections from NASA Earthdata CMR, define a handy container that's a self-nesting version of Python's built-in `defaultdict`.
+To organize the collection information we'll retrieve from NASA Earthdata CMR, we need a dictionary that can automatically create nested levels as needed. We'll create a `recursivedict` that extends Python's `defaultdict` to support unlimited nesting.
 
 ```{code-cell} ipython3
 recursivedict = lambda: defaultdict(recursivedict)
@@ -160,7 +160,7 @@ Read the [April 2026 release notes for Version 3][3.2], and note the following h
 
 <div class="alert alert-warning" role="alert">
 
-All Level-2 products from the OC_AOP suite are now consolidated in version 3.2 to a single Level-3 mapped product called AOP. Previously RRS, nFLH, AVW, etc. were distributed as separate Level-3 mapped products.
+Starting with version 3.2, NASA now packages all ocean color measurements (like RRS, nFLH, and AVW) together in a single Level-3 data product called AOP, instead of distributing each measurement type as a separate download.
 
 </div>
 
@@ -178,11 +178,11 @@ You can use the following dictionary to replace non-existent short names with th
 ```{code-cell} ipython3
 # FIXME: get all of these if useful?
 rename = {
-    "PACE_OCI_L3M_CHL": "PACE_OCI_L3M_AOP",
-    "PACE_OCI_L3M_RRS":,
-    "PACE_OCI_L3M_AVW":,
-    "PACE_OCI_L3M_FLH":,
-    "PACE_OCI_L3M_CARBON",
+    "PACE_OCI_L3M_CHL": "PACE_OCI_L3M_BGC",
+    "PACE_OCI_L3M_RRS": "PACE_OCI_L3M_AOP",
+    "PACE_OCI_L3M_AVW": "PACE_OCI_L3M_AOP",
+    "PACE_OCI_L3M_FLH": "PACE_OCI_L3M_AOP",
+    "PACE_OCI_L3M_CARBON": "PACE_OCI_L3M_BGC",
 }
 rename["PACE_OCI_L3M_RRS"]
 ```
