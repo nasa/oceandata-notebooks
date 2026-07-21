@@ -13,9 +13,10 @@ kernelspec:
 
 # Applying Gaussian Pigment (GPig) Phytoplankton Community Composition Algorithm to OCI data
 
-**Author(s):** Anna Windle (NASA, SSAI), Max Danenhower (Bowdoin College), Ali Chase (University of Washington)
+**Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC) <br>
+Adapted from code developed by: Max Danenhower (Bowdoin College), Ali Chase (University of Washington)
 
-Last updated: June 24, 2026
+Last updated: July 21, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -58,6 +59,8 @@ If you have followed the setup instructions, then GPig is available to import al
 [gpig]: https://github.com/max-danenhower/pace-rrs-inversions-pigments
 
 ```{code-cell} ipython3
+:scrolled: true
+
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import earthaccess
@@ -75,37 +78,61 @@ Set (and persist to your home directory on the host, if needed) your Earthdata L
 auth = earthaccess.login()
 ```
 
-## 2. Run GPig on L2 Data
+# 2. Access and open data
 
-+++
+We need the following data to run GPig:
 
-Let's first download the data using the `L2_utils.load()` function. Let's take a look at the docstring:
-
-```{code-cell} ipython3
-?L2_utils.load_data
-```
-
-Running `L2_utils.load_data()` downloads several data files from NASA EarthData:
-
-* Rrs: PACE OCI Level-2 AOP data products
+* Rrs: PACE OCI L2 or L3M AOP data products
 * Sea surface salinity: JPL SMAP-SSS V5.0 CAP, 8-day running mean, level 3 mapped, sea surface salinity (SSS) product from the NASA Soil Moisture Active Passive (SMAP) observatory
 * Sea surface temperature: Group for High Resolution Sea Surface Temperature (GHRSST) Level 4 sea surface temperature
 
-Let's run `L2_utils.load_data()` to download data collected on May 5, 2025 corresponding to a bounding box off the coast of Washington, U.S.
+We can use `earthaccess` to find this data.
 
 ```{code-cell} ipython3
-rrs, sss, sst = L2_utils.load_data(("2025-05-01", "2025-05-01"), (-127, 40, -126, 41))
-datatree = xr.open_datatree(rrs[0])
-dataset = xr.merge(datatree.to_dict().values())
-l2_dataset = dataset.set_coords(("longitude", "latitude"))
+tspan = ("2025-05-01 20:13", "2025-05-01 20:13")
+bbox = (-127, 40, -126, 41)
+
+results = earthaccess.search_data(
+    short_name=["PACE_OCI_L2_AOP", "PACE_OCI_L2_AOP_NRT"],
+    temporal=tspan,
+    bounding_box=bbox,
+    count=1,
+)  
+l2_paths = earthaccess.open(results)
 ```
 
-You should see 3 new folders in your working directory called `L2_rrs_data`, `sal_data`, and `temp_data`. Let's take a quick look at Rrs at 500 nm:
+```{code-cell} ipython3
+results = earthaccess.search_data(
+    short_name='SMAP_JPL_L3_SSS_CAP_8DAY-RUNNINGMEAN_V5',
+    temporal=tspan,
+    count=1,
+)
+sss_paths = earthaccess.open(results)
+```
+
+```{code-cell} ipython3
+results = earthaccess.search_data(
+    short_name='MUR-JPL-L4-GLOB-v4.1',
+    temporal=tspan,
+    count=1
+)
+sst_paths = earthaccess.open(results)
+```
+
+Let's take a look at our L2 granule:
+
+```{code-cell} ipython3
+datatree = xr.open_datatree(l2_paths[-1])
+rrs = datatree["geophysical_data"]["Rrs"]
+for variable in ("longitude", "latitude"):
+    rrs[variable] = datatree["navigation_data"][variable]
+rrs
+```
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": crs})
 
-data = l2_dataset["Rrs"].sel({"wavelength_3d": 500})
+data = rrs.sel({"wavelength": 500}, method='nearest')
 data.plot(
     x="longitude",
     y="latitude",
@@ -128,6 +155,10 @@ ax.gridlines(
 plt.show()
 ```
 
+## 2. Run GPig on L2 Data
+
++++
+
 Now, we can use `L2_utils.estimate_inv_pigments` to calculate phytoplankton pigment concentrations for this data. Let's take a look at the docstring for this function:
 
 ```{code-cell} ipython3
@@ -135,7 +166,7 @@ Now, we can use `L2_utils.estimate_inv_pigments` to calculate phytoplankton pigm
 ```
 
 You can see that this function accepts a bounding box (bbox) as a parameter. The default is `None` which means it will run the algorithm on every single pixel in the L2 file, which can take a long time. We will supply the `bbox` parameter with the following coordinates:
-45 N, 44 S, -125 E, -126 W.
+48 N, 47 S, -125 E, -126 W.
 
 Let's first see what this bounding box covers:
 
@@ -156,16 +187,10 @@ Let's run it. This can take some time depending on bounding box size.
 :scrolled: true
 :tags: [scroll-output]
 
-l2_pigments = L2_utils.estimate_inv_pigments(rrs[0], sss, sst, bbox)
+l2_pigments = L2_utils.estimate_inv_pigments(l2_paths[-1], sss_paths[-1], sst_paths[-1], bbox)
 ```
 
-The inversion provides four pigment variables.
-
-```{code-cell} ipython3
-l2_pigments
-```
-
-Let's plot the phytoplankton pigment concentrations:
+The inversion provides four phytoplankton pigment concenrations. Let's plot them:
 
 ```{code-cell} ipython3
 fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": crs})
@@ -193,7 +218,7 @@ for ax, var, title in zip(axs.flat, variables, titles):
     ax.set_ylim(bbox[1], bbox[3])
 
     cbar = fig.colorbar(im, ax=ax, orientation="vertical")
-    cbar.set_label(f"$log_{{10}}({var})$")
+    cbar.set_label(r"$\log_{10}(\mathrm{mg\ m^{-3}})$")
 
 plt.tight_layout()
 plt.show()
@@ -203,25 +228,49 @@ plt.show()
 
 +++
 
-We can also run GPig on L3M data. Let's look at the `L3_utils.load_data()` docstring:
+We can also run GPig on L3M data. Let's open a PACE OCI L3m (4km), SSS and SST data for June 12, 2024:
 
 ```{code-cell} ipython3
-?L3_utils.load_data
+tspan = ("2024-06-12", "2024-06-12")
+
+results = earthaccess.search_data(
+    short_name=["PACE_OCI_L3M_AOP", "PACE_OCI_L3M_AOP_NRT"],
+    temporal=tspan,
+    granule_name="*DAY*4km*",
+    count=1)
+
+l3m_paths = earthaccess.open(results)
 ```
 
-We'll use this to download 4km L3M Rrs data, global SSS, and global SST data for June 12, 2024:
+```{code-cell} ipython3
+results = earthaccess.search_data(
+    short_name='SMAP_JPL_L3_SSS_CAP_8DAY-RUNNINGMEAN_V5',
+    temporal=tspan,
+    count=1,
+)
+sss_paths = earthaccess.open(results)
+```
 
 ```{code-cell} ipython3
-rrs, sss, sst = L3_utils.load_data(("2024-06-12", "2024-06-12"), "4km")
-l3_dataset = xr.open_dataset(rrs[0])
+results = earthaccess.search_data(
+    short_name='MUR-JPL-L4-GLOB-v4.1',
+    temporal=tspan,
+    count=1
+)
+sst_paths = earthaccess.open(results)
 ```
 
 Let's quickly look at L3M Rrs at 500 nm:
 
 ```{code-cell} ipython3
+l3_dataset = xr.open_dataset(l3m_paths[-1])
+l3_dataset
+```
+
+```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": crs})
 
-data = l3_dataset["Rrs"].sel({"wavelength": 500})
+data = l3_dataset["Rrs"].sel({"wavelength": 500}, method='nearest')
 data.plot.imshow(
     x="lon",
     y="lat",
@@ -270,16 +319,11 @@ fig
 :scrolled: true
 :tags: [scroll-output]
 
-l3_pigments = L3_utils.estimate_inv_pigments(rrs, sss, sst, bbox)
-```
-
-The inversion provides four pigment variables.
-
-```{code-cell} ipython3
+l3_pigments = L3_utils.estimate_inv_pigments(l3m_paths, sss_paths, sst_paths, bbox)
 l3_pigments
 ```
 
-Let's plot all phytoplankton pigment concentrations:
+The inversion provides four phytoplankton pigment concentrations. Let's plot them:
 
 ```{code-cell} ipython3
 fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": crs})
