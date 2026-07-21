@@ -15,9 +15,10 @@ kernelspec:
 
 # Applying Spectral Derivative Pigment (SDP) Phytoplankton Community Composition Algorithm to OCI data
 
-**Author(s):** Anna Windle (NASA, SSAI), Max Danenhower (Bowdoin College), Sasha Kramer (Boston University)
+**Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC) <br>
+Adatped from code developed by: Max Danenhower (Bowdoin College), Sasha Kramer (Boston University)
 
-Last updated: July 7, 2026
+Last updated: July 21, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -80,11 +81,11 @@ auth = earthaccess.login()
 # 2. Access and open data
 
 We need the following data to run SDP:
-* Rrs: PACE OCI Level-2 AOP data products
+* Rrs: PACE OCI L2 AOP data products
 * Sea surface salinity: JPL SMAP-SSS V5.0 CAP, 8-day running mean, level 3 mapped, sea surface salinity (SSS) product from the NASA Soil Moisture Active Passive (SMAP) observatory
 * Sea surface temperature: Group for High Resolution Sea Surface Temperature (GHRSST) Level 4 sea surface temperature
 
-We can use `earthaccess` to find PACE OCI l2 data. We will use a specific granule using the `granule_name` argument:
+We can use `earthaccess` to find PACE OCI L2 data. 
 
 ```{code-cell} ipython3
 tspan = ("2026-05-05 17:35", "2026-05-05 17:35")
@@ -132,6 +133,25 @@ ax.gridlines(
 plt.show()
 ```
 
+Now, we can use `sdp_from_pace` to calculate phytoplankton pigment concentrations for this data. Let's take a look at the docstring for this function:
+
+```{code-cell} ipython3
+?sdp_from_pace
+```
+
+You can see that this function accepts a bounding box (`bbox`) as a parameter. The default is `bbox=None`, meaning the algorithm is applied to every single pixel in the L2 granule, which can take a significnat amount of time and may exceed available system memory. We will supply the bbox parameter with the following coordinates: 38 N, 35 S, -70 E, -67 W.
+
+```{code-cell} ipython3
+bbox = (-69.3, 35.2, -67.5, 37)
+
+lon_min, lat_min, lon_max, lat_max = bbox
+rect_lon = [lon_min, lon_max, lon_max, lon_min, lon_min]
+rect_lat = [lat_min, lat_min, lat_max, lat_max, lat_min]
+ax.plot(rect_lon, rect_lat, color="red", linewidth=2)
+
+fig
+```
+
 We need to find corresponding sea-surface salinity and temperature data for the SDP algorithm.
 
 ```{code-cell} ipython3
@@ -162,93 +182,97 @@ output_file = output_file.replace(".nc", "_SDP_pigments.nc")
 output_file
 ```
 
-And then run it! Note that it will run up memory and blow up in the cloud......
+And let's run it!
 
 ```{code-cell} ipython3
-%%time
-
 sdp_from_pace(
     paths[-1],
     output_file,
     sss_file=sss_paths[-1],
     sst_file=sst_paths[-1],
+    bbox=bbox
 )
 ```
 
-TODO: should we get rid of warnings? should we use ray?
-
-+++
-
 # 3. Open and plot SDP output
 
+Let's open the new file:
+
 ```{code-cell} ipython3
-dat = xr.open_dataset('PACE_OCI.20260505T173406.L2.OC_AOP.V3_2.NRT_SDP_pigments.nc')
+dat = xr.open_dataset(output_file)
 dat
 ```
 
 You can see all the different pigment concentrations derived for our L2 granule. Let's plot them:
 
 ```{code-cell} ipython3
-bbox = (-77, 30, -60, 42)
 variables = [
-    "chla", "chlb", "chlc", "zea", "dvchla", "butfuco", 
-    "hexfuco", "allo", "neo", "viola", "fuco", "chlc3", "perid"
+    "chla",
+    "chlb",
+    "chlc",
+    "zea",
+    "dvchla",
+    "butfuco",
+    "hexfuco",
+    "allo",
+    "neo",
+    "viola",
+    "fuco",
+    "chlc3",
+    "perid",
 ]
- 
- 
-fig, axs = plt.subplots(4, 4, figsize=(20, 16), subplot_kw={"projection": crs})
- 
-# Iterate over all 16 subplots
-for i, ax in enumerate(axs.flat):
-    if i < len(variables):
-        var = variables[i]
 
-        data = dat[var]
-        lon = dat["longitude"]
-        lat = dat["latitude"]
- 
-        vmin = np.nanpercentile(data, 0)
-        vmax = np.nanpercentile(data, 98)
- 
-        # Add land features
-        ax.add_feature(cfeature.LAND, facecolor='lightgray', edgecolor='black', linewidth=0.5)
-        ax.add_feature(cfeature.COASTLINE, linewidth=1)
-        ax.add_feature(cfeature.BORDERS, linewidth=0.5, linestyle='--', alpha=0.5)
-        ax.add_feature(cfeature.LAKES, facecolor='lightgray', alpha=0.7)
- 
-        im = ax.pcolormesh(
-            lon, lat, data, 
-            cmap="viridis", 
-            shading="auto", 
-            zorder=10,
-            vmin=vmin,    
-            vmax=vmax,
-            transform=ccrs.PlateCarree() # Ensures coordinates map correctly
-        )
- 
-        ax.gridlines(
-            draw_labels=["left", "bottom"],
-            linewidth=0.5,
-            color="gray",
-            alpha=0.5,
-            linestyle="--",
-        )
-        # Set title as the variable name
-        ax.set_title(var.upper())
-        # Set map extent based on bbox bounds
-        ax.set_xlim(bbox[0], bbox[2])
-        ax.set_ylim(bbox[1], bbox[3])
- 
-        cbar = fig.colorbar(im, ax=ax, orientation="vertical", shrink=0.50, pad=0.04)
-        cbar.set_label(f"{var} (mg m$^{{-3}}$)")  
-    else:
-        # Hide any unused subplots
+nrows, ncols = 5, 3
+
+fig, axs = plt.subplots(
+    nrows,
+    ncols,
+    figsize=(8, 8),
+)
+
+axs = axs.ravel()
+
+for i, ax in enumerate(axs):
+
+    if i >= len(variables):
         ax.set_visible(False)
- 
-plt.tight_layout() 
+        continue
 
-# Save the figure - optional
-plt.savefig('SDP_all_pigments_map_linear.png', dpi=300, bbox_inches='tight')
+    var = variables[i]
 
+    data = dat[var]
+    lon = dat.longitude
+    lat = dat.latitude
+
+    data_log = np.log10(data.where(data > 0))
+
+    vmin = np.nanpercentile(data, 1)
+    vmax = np.nanpercentile(data, 99)
+
+    im = ax.pcolormesh(lon, lat, data, cmap="viridis", shading="auto", vmin=vmin, vmax=vmax)
+
+
+    gl.top_labels = False
+    gl.right_labels = False
+    gl.left_labels = i % ncols == 0
+    gl.bottom_labels = i >= (nrows - 1) * ncols
+
+    ax.set_xlim(bbox[0], bbox[2])
+    ax.set_ylim(bbox[1], bbox[3])
+    ax.set_title(var)
+
+    cbar = fig.colorbar(
+        im,
+        ax=ax,
+        #shrink=0.75,
+        pad=0.02,
+    )
+    cbar.set_label("mg m$^{-3}$")
+
+plt.tight_layout()
 plt.show()
+```
+
+```{code-cell} ipython3
+
 ```
