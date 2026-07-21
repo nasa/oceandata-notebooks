@@ -85,7 +85,7 @@ We need the following data to run SDP:
 * Sea surface salinity: JPL SMAP-SSS V5.0 CAP, 8-day running mean, level 3 mapped, sea surface salinity (SSS) product from the NASA Soil Moisture Active Passive (SMAP) observatory
 * Sea surface temperature: Group for High Resolution Sea Surface Temperature (GHRSST) Level 4 sea surface temperature
 
-We can use `earthaccess` to find PACE OCI L2 data. 
+We can use `earthaccess` to find PACE OCI L2 data.
 
 ```{code-cell} ipython3
 tspan = ("2026-05-05 17:35", "2026-05-05 17:35")
@@ -142,7 +142,7 @@ Now, we can use `sdp_from_pace` to calculate phytoplankton pigment concentration
 You can see that this function accepts a bounding box (`bbox`) as a parameter. The default is `bbox=None`, meaning the algorithm is applied to every single pixel in the L2 granule, which can take a significnat amount of time and may exceed available system memory. We will supply the bbox parameter with the following coordinates: 38 N, 35 S, -70 E, -67 W.
 
 ```{code-cell} ipython3
-bbox = (-69.3, 35.2, -67.5, 37)
+bbox = (-73.5, 37.5, -67, 40.5)
 
 lon_min, lat_min, lon_max, lat_max = bbox
 rect_lon = [lon_min, lon_max, lon_max, lon_min, lon_min]
@@ -227,7 +227,8 @@ nrows, ncols = 5, 3
 fig, axs = plt.subplots(
     nrows,
     ncols,
-    figsize=(8, 8),
+    figsize=(12, 8),
+    constrained_layout=False,
 )
 
 axs = axs.ravel()
@@ -241,38 +242,44 @@ for i, ax in enumerate(axs):
     var = variables[i]
 
     data = dat[var]
-    lon = dat.longitude
-    lat = dat.latitude
-
-    data_log = np.log10(data.where(data > 0))
 
     vmin = np.nanpercentile(data, 1)
     vmax = np.nanpercentile(data, 99)
 
-    im = ax.pcolormesh(lon, lat, data, cmap="viridis", shading="auto", vmin=vmin, vmax=vmax)
-
-
-    gl.top_labels = False
-    gl.right_labels = False
-    gl.left_labels = i % ncols == 0
-    gl.bottom_labels = i >= (nrows - 1) * ncols
+    im = ax.pcolormesh(
+        dat.longitude,
+        dat.latitude,
+        data,
+        cmap="viridis",
+        shading="auto",
+        vmin=vmin,
+        vmax=vmax,
+    )
 
     ax.set_xlim(bbox[0], bbox[2])
     ax.set_ylim(bbox[1], bbox[3])
+
     ax.set_title(var)
+
+    ax.set_aspect("auto")
+
+    ax.set_xlabel("")
+    ax.set_ylabel("")
 
     cbar = fig.colorbar(
         im,
         ax=ax,
-        #shrink=0.75,
         pad=0.02,
     )
+
     cbar.set_label("mg m$^{-3}$")
 
 plt.tight_layout()
 plt.show()
 ```
 
-```{code-cell} ipython3
+<div class="alert alert-info" role="alert">
 
-```
+You have completed the notebook on the SDP Python algorithm!
+
+</div>
