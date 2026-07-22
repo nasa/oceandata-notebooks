@@ -17,49 +17,24 @@ kernelspec:
 
 Last updated: July 21, 2026
 
-<div class="alert alert-success" role="alert">
-
-The following notebooks are **prerequisites** for this tutorial.
-
-- Learn with OCI: [Data Access](oci-data-access)
-
-</div>
-
-<div class="alert alert-info" role="alert">
-
-An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
-
-</div>
-
-[edl]: https://urs.earthdata.nasa.gov/
-
 ## Summary
 
 Satellite data are periodically [reprocessed](https://oceancolor.gsfc.nasa.gov/data/reprocessing/) to incorporate improvements in sensor calibration, atmospheric correction, retrieval algorithms, and ancillary datasets, as well as to correct known processing issues. Reprocessing produces a more accurate and internally consistent data record, ensuring that changes over time reflect real environmental variability rather than differences in processing methods.
 
-The initial public release of PACE science data products (**Version 1**) began on 11 April 2024,
-and provided the science and applications user community with access to the Level-1 data
-and a limited suite of derived products from the OCI, HARP2, and SPEXone instruments,
-with the caveat that the data were in a highly preliminary state and should be used with
-caution. Reprocessing **Version 2** was the first full mission reprocessing, and primarily
-served to incorporate improved calibration knowledge from on-orbit measurements
-collected by the three PACE instruments. Reprocessing **Version 3** included a further
-refinement of the calibration for the three instruments, as well as various algorithm
-refinements, bug fixes, data format improvements, and expanded product suites. 
+<div class="alert alert-warning" role="alert">
 
-In April 2026, PACE OCI **Version 3.2** was released. This reprocessing primarily corrected an implementation error in the bidirectional reflectance distribution function (BRDF) correction applied to spectral remote-sensing reflectance (Rrs), and also included updated vicarious calibration and several minor processing improvements. The NetCDF file structure was also updated as part of this release.
+This page highlights the key file structure changes introduced in version 3.2 and demonstrates how to update existing workflows developed for version 3.1. As version 3.1 data are phased out, these approaches will become the standard for accessing and analyzing PACE OCI data. Future reprocessing campaigns, including Version 4, are expected to introduce additional file structure changes, which will be communicated to the PACE user community.
 
-**This tutorial highlights the key file structure changes introduced in Version 3.2 and demonstrates how to update existing workflows developed for Version 3.1. As Version 3.1 data are phased out, these approaches will become the standard for accessing and analyzing PACE OCI data. Future reprocessing campaigns, including Version 4, are expected to introduce additional file structure changes, which will be communicated to the PACE user community.**
-
+</div>
 
 ## Learning Objectives
 
 At the end of this notebook you will know:
 
-- The differences in OCI L2 file structure between Version 3.1 and 3.2
-- How to open v3.1 and v3.2 data with `xarray`
-- Updates to OCI v3.2 L3M file names
-- Status of PACE OCI land data products
+- The version of every PACE collection available on Earthdata Cloud
+- The differences in OCI Level-2 file structure between version 3.1 and 3.2
+- How to open version 3.1 and 3.2 data with `xarray`
+- New version 3.2 L3M collection and granule names
 
 +++
 
@@ -74,7 +49,6 @@ from collections import defaultdict
 
 import earthaccess
 import pandas
-import xarray as xr
 ```
 
 To organize the collection information we'll retrieve from NASA Earthdata CMR, we need a dictionary that can automatically create nested levels as needed. We'll create a `recursivedict` that extends Python's `defaultdict` to support unlimited nesting.
@@ -83,7 +57,7 @@ To organize the collection information we'll retrieve from NASA Earthdata CMR, w
 recursivedict = lambda: defaultdict(recursivedict)
 ```
 
-## 2. Checking Data Versions
+## 2. Reprocessing Versions
 
 +++
 
@@ -109,10 +83,18 @@ for item in results:
     short_name = metadata["ShortName"]
     platform = metadata["Platforms"][0]["ShortName"]
     collections[level][version][(platform, short_name)] = "✅"
-
-level1 = pandas.DataFrame.from_dict(collections["1"])
-level2 = pandas.DataFrame.from_dict(collections["2"])
+collections.keys()
 ```
+
+```{code-cell} ipython3
+level = {}
+for i in range(1, 4):
+    level[i] = pandas.DataFrame.from_dict(collections[str(i)])
+```
+
+We'll look at the versions available at levels 1 and 2. Note that not all product suites are necessarily at the same version. This is because reprocessing is only performed for products affected by updates to processing algorithms or other relevant changes. Additionally, the OB.DAAC may be in the midst of a reprocessing that can take time to create and deliver to the Earthdata Cloud.
+
++++
 
 ### Level-1
 
@@ -122,70 +104,75 @@ The Level-1 collections, the least processed data observed at the top-of-atmosph
 Reprocessings that increase a version number at Level-1 will lead to reprocessings for higher processing levels.
 
 ```{code-cell} ipython3
-level1.fillna("").sort_index(axis=0).sort_index(axis=1)
+level[1].fillna("").sort_index(axis=0).sort_index(axis=1)
 ```
 
 ### Level-2
 
 +++
 
-Subset the `level2` data frame to display level-2 data collections for a single platform, e.g. PACE.
+Subset the Level-2 dataframe to display collections for a single platform, e.g. PACE.
+The dataframes at `level[3]` and `level[4]` can be subset and displayed in the same way.
 
 ```{code-cell} ipython3
-level2_pace = level2.loc[("PACE", ...)].dropna(axis=1, how="all").fillna("")
+level2_pace = level[2].loc[("PACE", ...)].dropna(axis=1, how="all").fillna("")
 level2_pace.sort_index(axis=0).sort_index(axis=1)
 ```
 
-## 3. Release Note Highlights
+## 3. Notes on Data Reprocessings
 
 +++
 
-### Version 3
+The OB.DAAC provides [documentation](https://oceancolor.gsfc.nasa.gov/data/reprocessing/) on the history, changes, and impact of each reprocessing, for all supported missions. The sections below provide additional information, including code fixes, particular to working with the data products appearing within these tutorials.
 
 +++
 
-Note that not all product suites are necessarily at the same version. This is because reprocessing is only performed for products affected by updates to processing algorithms or other relevant changes. 
-
-For example, the surface reflectance (SRFEFL) and land surface indices (LANDVI) products remained at version 3.1 while the ocean color product suites were upgraded to version 3.2 
-
-See below for updates to code required to open different data products from either v3.1 or 3.2 using `xarray`: 
+### Version 4
 
 +++
 
-#### Version 3.2
+- [PACE HARP2 V4 Processing Notes][HARP-4]
+- [PACE SPEXone V4 Processing Notes][SPEXone-4]
+
+The latest reprocessing for PACE-OCI remains at [version 3.2](#version-3.2).
+
+[HARP-4]: https://oceandata.sci.gsfc.nasa.gov/files/data/reprocessing/V4/pace-harp2/PACE_HARP2_V4_Release_Notes.pdf
+[SPEXone-4]: https://oceandata.sci.gsfc.nasa.gov/files/data/reprocessing/V4/pace-spexone/PACE_SPEXone_V4_Release_Notes.pdf
 
 +++
 
-Read the [April 2026 release notes for Version 3][3.2], and note the following highlights.
+### Version 3.2
 
-[3.2]: https://oceancolor.gsfc.nasa.gov/files/data/reprocessing/V3/PACE_OCI_V3_Release_Notes.pdf
++++
+
+- [PACE OCI V3 Processing Notes][OCI-3.2]
+
+PACE OCI version 3.2 was released in April 2026. This reprocessing primarily corrected an implementation error in the bidirectional reflectance distribution function (BRDF) correction applied to spectral remote-sensing reflectance (Rrs), and also included updated vicarious calibration and several minor processing improvements. The NetCDF file structure was also updated as part of this release. Reprocessing was essential for the PACE-OCI ocean color product suites (AOP, IOP, BGC, PAR), but the land surface (SRFEFL, LANDVI), atmosphere (AER_UAA, UVAI_UAA), and cloud (CLOUD, CLOUD_MASK) products remain at version 3.1.
+
+[OCI-3.2]: https://oceancolor.gsfc.nasa.gov/files/data/reprocessing/V3/PACE_OCI_V3_Release_Notes.pdf
 
 +++
 
 <div class="alert alert-warning" role="alert">
 
-Starting with version 3.2, NASA now packages all ocean color measurements (like RRS, nFLH, and AVW) together in a single Level-3 data product called AOP, instead of distributing each measurement type as a separate download.
+Starting with version 3.2, the OB.DAAC now distributes all ocean color measurements (like RRS, nFLH, and AVW) together in a single Level-3 data product suite named AOP, instead of distributing each measurement type as a separate download.
 
 </div>
-
-+++
 
 The NASA Earthdata CMR `short_names` changed for Level-3 products. The new `short_names` for PACE OCI Level-3 mapped products are:
-- `PACE_OCI_L3M_AOP`
-- `PACE_OCI_L3M_IOP`
-- `PACE_OCI_L3M_BGC`
-- `PACE_OCI_L3M_KD`
-- `PACE_OCI_L3M_PAR`
-
-+++
+- [PACE_OCI_L3M_AOP](https://doi.org/10.5067/PACE/OCI/L3M/OC_AOP/3.2): Rrs, nflh, avw
+- [PACE_OCI_L3M_IOP](https://cmr.earthdata.nasa.gov/search/concepts/C4124889546-OB_CLOUD.html): a, adg, aph, bb, bbp
+- [PACE_OCI_L3M_BGC](https://dx.doi.org/10.5067/PACE/OCI/L3M/OC_BGC/3.2): chlor_a, pic, poc, carbon_phyto
+- [PACE_OCI_L3M_KD](https://cmr.earthdata.nasa.gov/search/concepts/C4124889802-OB_CLOUD.html): Kd 
+- [PACE_OCI_L3M_PAR](https://cmr.earthdata.nasa.gov/search/concepts/C4124890413-OB_CLOUD.html): par, ipar
 
 <div class="alert alert-warning" role="alert">
 
-The wavelength coordinate variables have been adjusted to better distinguish between the nominal wavelengths that use integer values and the actual wavelengths used for the geophysical variables. However, running some code that works for previous versions may generate errors or even crash your notebook kernel.
+The wavelength coordinate variables have been adjusted to better distinguish between the nominal wavelengths that use integer values and the actual wavelengths used for geophysical variables.
 
 </div>
 
-+++
+This reprocessing improves the organization of the netCDF groups; however, running some code that works for previous versions may generate errors or even crash your notebook kernel. If you have a `datatree` returned by `xarray.open_datatree` applied to a level-2 collection at version 3.2, then an (abridged) output from `print(datatree)` would look like:
 
 <!---
 earthaccess.login()
@@ -198,8 +185,6 @@ path = earthaccess.open(results).pop()
 datatree = xr.open_datatree(path)
 print(datatree)
 -->
-
-If you have a `datatree` returned by `xarray.open_datatree` applied to a level-2 collection at version 3.2, then an (abridged) output from `print(datatree)` would look like:
 ```python
 <xarray.DataTree>
 Group: /
@@ -234,12 +219,17 @@ Group: /
 └── Group: /processing_control
 ```
 
+The `geophysical_data` group includes `wavelength` as a coordinate. The addition of `wavelength` as a coordinate within the same group makes it easier to select and work with spectrally resolved variables. This `wavelength` coordinate, the one in `geophysical_data` is the same length as the `wavelength_3d` coordinate `sensor_band_parameters`, but `wavelength_3d` gives nominal, integer wavelengths associated with each band pre-launch.
 
-<br>
+To work with data from the `geophysical_data` group, since it already contains a `wavelength` coordinate, we only need to add the latitude and longitude variables from the `navigation_data` group.
 
-The `geophysical_data` group includes `wavelength` as a coordinate. The addition of `wavelength` as a coordinate within the same group makes it easier to select and work with spectrally resolved variables. Although the same length, the array of values in `/geophysical_data/wavelength` differs from that in `/sensor_band_parameters/wavelength_3d`. The latter, integer valued, variable gives the nominal wavelengths associated with each band pre-launch.
+```python
+dataarray = datatree["geophysical_data"]["Rrs"]
+for variable in ("longitude", "latitude"):
+    dataarray[variable] = datatree["navigation_data"][variable]
+```
 
-To work with a variable from the `geophysical_data` group, since it already contains a `wavelength` coordinate, we only need to add the "latitude" and longitude variables from the `navigation_data` group.
+Now `print(dataarray)` will show the "Rrs" variable has coordinates associated with all three dimensions, although only `wavelength` is an indexed dimension.
 
 <!--
 dataarray = datatree["geophysical_data"]["Rrs"]
@@ -248,13 +238,6 @@ for variable in ("longitude", "latitude"):
 print(dataarray)
 -->
 ```python
-dataarray = datatree["geophysical_data"]["Rrs"]
-for variable in ("longitude", "latitude"):
-    dataarray[variable] = datatree["navigation_data"][variable]
-```
-
-Now `print(dataarray)` will show the "Rrs" variable has coordinates associated with all three dimensions, although only "wavelength" is an indexed dimension.
-```
 <xarray.DataArray 'Rrs' (number_of_lines: 1709, pixels_per_line: 1272, wavelength: 172)>
 [373901856 values with dtype=float32]
 Coordinates:
@@ -262,21 +245,17 @@ Coordinates:
     latitude    (number_of_lines, pixels_per_line) float32 9MB ...
   * wavelength  (wavelength) float32 688B 346.0 348.5 350.9 ... 716.8 719.3
 ```
-<br>
 
-
-Also note that since `wavelength` are now stored as integers, selecting a specific wavelength requires using `method=nearest` in the `DataArray.sel()` call. For example:
+Also note that since `wavelength` now includes non-integers, filtering on the coordinate will usually require `method=nearest` in the `DataArray.sel()` call. For example:
 
 ```python
-dataarray.sel(wavelength=500, method='nearest')
+dataarray.sel({"wavelength": 500}, method='nearest')
 ```
+
 This ensures that `xarray` selects the closest available wavelength value when an exact match is not present.
 
-<br>
-
 Alternatively, you can "revert" to something that may work with code writted for a version 3.1 dataset.
-You can drop the `wavelength` dimension from the `sensor_band_parameters` group on a `datatree` created
-from a version 3.2 products:
+To "revert" a result of `xarray.open_datatree` created from a version 3.2 product, drop the `wavelength` dimension from the `sensor_band_parameters` group:
 
 ```python
 datatree["sensor_band_parameters"] = datatree["sensor_band_parameters"].ds.drop_dims("wavelength")
@@ -286,13 +265,17 @@ Code previously developed for the version 3.1 structure, such as `xr.merge(datat
 
 +++
 
-#### Version 3.1
+### Version 3.1
 
 +++
 
-Read the [full release notes](https://oceancolor.gsfc.nasa.gov/files/data/reprocessing/V3/PACE_Reprocessing_V3.x_notes.pdf), and check out these highlights.
+- [PACE OCI V3 Processing Notes][OCI-3.1]
+
+[OCI-3.1]: https://oceandata.sci.gsfc.nasa.gov/files/data/reprocessing/V3/PACE_OCI_V3_Release_Notes.pdf
 
 +++
+
+If you have a `datatree` returned by `xarray.open_datatree` applied to a level-2 collection at version 3.1, then an (abridged) output from `print(datatree)` would look like:
 
 <!---
 results = earthaccess.search_data(
@@ -304,9 +287,7 @@ path = earthaccess.open(results).pop()
 datatree = xr.open_datatree(path)
 print(datatree)
 -->
-
-If you have a `datatree` returned by `xarray.open_datatree` applied to a level-2 collection at version 3.1, then an (abridged) output from `print(datatree)` would look like:
-```
+```python
 <xarray.DataTree>
 Group: /
 │   Attributes: (12/47)
@@ -347,18 +328,32 @@ Group: /
 └── Group: /processing_control
 ```
 
-+++
-
-The `sensor_band_parameters` group contains a `wavelegnth_3d` coordinate with the same length as the `wavelength_3d` dimension in the `geophysical_data` group. The groups within the whole `datatree` can be merged, so that this variable becomes the coordinate for everything in the `geophysical_data` group.
+The `sensor_band_parameters` group contains a `wavelegnth_3d` coordinate with the same length as the `wavelength_3d` dimension in the `geophysical_data` group. All groups within the whole `datatree` can be merged, so that this variable becomes the coordinate for everything in the `geophysical_data` group.
 
 ```python
 dataset = xr.merge(datatree.to_dict().values())
 ```
 
 We can also then set the latitude and longitude variables as coordinates for mapping.
+
 ```python
 dataset = dataset.set_coords(("longitude", "latitude"))
 ```
+
++++
+
+### Version 3
+
++++
+
+- [PACE Science Data Reprocessing Version 3][3.0]
+
+[3.0]: https://oceancolor.gsfc.nasa.gov/data/reprocessing/V3.0/pace-oci/
+
++++
+
+Reprocessing to version 3 included a further refinement of the calibration for the three instruments, as well as various algorithm
+refinements, bug fixes, data format improvements, and expanded product suites. The development of these tutorials coincided with the Version 3 reprocessing, so no information from these and earlier release notes need to be highlighted here.
 
 +++
 
@@ -366,8 +361,30 @@ dataset = dataset.set_coords(("longitude", "latitude"))
 
 +++
 
-Read the [full release notes](https://oceancolor.gsfc.nasa.gov/data/reprocessing/V2.0/pace/), and check out these highlights.
+- [PACE Science Data Reprocessing Version 3][2.0]
 
-```{code-cell} ipython3
+[2.0]: https://oceancolor.gsfc.nasa.gov/data/reprocessing/V2.0/pace-oci/
 
-```
++++
+
+Reprocessing to version 2 was the first full mission reprocessing, and primarily
+served to incorporate improved calibration knowledge from on-orbit measurements
+collected by the three PACE instruments.
+
++++
+
+### Version 1
+
++++
+
+- [Initial Release Notes][1.0]
+
+[1.0]: https://oceancolor.gsfc.nasa.gov/data/reprocessing/V1.0/pace-oci/
+
++++
+
+The initial public release of PACE science data products began on 11 April 2024,
+and provided the science and applications user community with access to the Level-1 data
+and a limited suite of derived products from the OCI, HARP2, and SPEXone instruments,
+with the caveat that the data were in a highly preliminary state and should be used with
+caution.
