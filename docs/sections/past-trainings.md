@@ -1,9 +1,26 @@
+---
+jupyter:
+  jupytext:
+    cell_metadata_filter: all,-trusted
+    notebook_metadata_filter: -all,kernelspec,jupytext
+    text_representation:
+      extension: .md
+      format_name: markdown
+      format_version: '1.3'
+      jupytext_version: 1.19.4
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
+---
+
 # Past Trainings and Events
 
 Access recordings, materials, and resources from past NASA ocean color training events, workshops, and webinars. These comprehensive training resources provide coverage of ocean color science, PACE mission data products, data processing techniques, and analysis methods. The events range from intensive hackweeks and hands-on workshops to lecture series and specialized training programs, offering learning opportunities for users at all levels - from beginners getting started with ocean color data to experienced researchers looking to expand their knowledge of specific instruments, algorithms, and applications.
 
 **Latest events and trainings:**
 
+- [Fish-PACE Hackweek 2026](https://fish-pace.github.io/hackweek-2025/intro.html) - Use PACE in ocean ecosystem and fisheries contexts
 - [PACE Hackweek 2025](https://pacehackweek.github.io/pace-2025/presentations/notebooks.html) - Latest hackweek with presentations, notebooks, and hands-on PACE data tutorials
 - [Ocean Optics Class 2025](https://misclab.umeoce.maine.edu/OceanOpticsClass2025/) - Calibration & Validation for Ocean Color Remote Sensing
 - [NOAA EDMW 2025 - PACE](https://nmfs-opensci.github.io/EDMW-EarthData-Workshop-2025/) - NOAA Earth Data Management Workshop focused on PACE applications
