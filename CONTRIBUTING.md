@@ -65,6 +65,12 @@ If you are running this guide from the image, to get the additional tools used b
 mamba install --yes --log-level error --category tools --file /srv/container/conda-lock.yml
 ```
 
+If any package needs to be updated, e.g. `earthaccess`, then edit the following cell as needed and run it.
+
+```{code-cell} ipython3
+conda-lock lock --lockfile container/conda-lock.yml --update earthaccess
+```
+
 If any dependency list is updated in `pyproject.toml` or any `environment-*.yml` file,
 then a new lock file should be generated, a new image built, and the new image used to execute all the notebooks (see below).
 Realistically, that's unlikely to be done manually for every change,

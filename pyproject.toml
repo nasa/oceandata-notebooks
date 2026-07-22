@@ -34,6 +34,8 @@ notebooks = [
   "pyproj>=3.6.1",
   "rasterio>=1.4.1",
   "rioxarray>=0.19.0",
+  "ray[default]>=2.55.1 ; sys_platform == 'linux'",  # https://github.com/conda/conda-lock/issues/925
+  "sdp[ray] @ git+https://github.com/max-danenhower/rrs-SDP-pigments.git ; sys_platform == 'linux'",
   "scipy>=1.13.1",
   "seaborn>=0.13.2",
   "tqdm>=4.66.5",
