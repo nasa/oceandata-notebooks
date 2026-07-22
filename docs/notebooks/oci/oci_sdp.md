@@ -1,7 +1,5 @@
 ---
 jupytext:
-  cell_metadata_filter: all,-trusted
-  notebook_metadata_filter: -all,kernelspec,jupytext
   text_representation:
     extension: .md
     format_name: myst
@@ -15,7 +13,8 @@ kernelspec:
 
 # Applying Spectral Derivative Pigment (SDP) Phytoplankton Community Composition Algorithm to OCI data
 
-**Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Max Danenhower (Bowdoin College), Sasha Kramer (Boston University)
+**Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC)<br>
+Adapted from code developed by: Max Danenhower (Bowdoin College), Sasha Kramer (Boston University)
 
 Last updated: July 21, 2026
 
