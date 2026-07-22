@@ -15,8 +15,7 @@ kernelspec:
 
 # Applying Spectral Derivative Pigment (SDP) Phytoplankton Community Composition Algorithm to OCI data
 
-**Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC) <br>
-Adatped from code developed by: Max Danenhower (Bowdoin College), Sasha Kramer (Boston University)
+**Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Max Danenhower (Bowdoin College), Sasha Kramer (Boston University)
 
 Last updated: July 21, 2026
 
@@ -47,7 +46,7 @@ This notebook applies the inversion algorithm described in [Kramer et al., 2022]
 
 At the end of this notebook you will know:
 
-- How to use a packaged Python project
+- About searching for auxiliary data for the SDP algorithm
 - How to run the SDP algorithm on PACE OCI L2 data
 
 +++
@@ -56,9 +55,9 @@ At the end of this notebook you will know:
 
 +++
 
-The SDP Python code has been packaged to allow it to be easily installed, imported, and reused.
+The SDP algorithm has been implemented as a Python package, so it can be easily installed, imported, and reused.
 While the package is not on PyPI or conda-forge, it can be installed directly from the [source repository][sdp] on GitHub.
-If you have followed the setup instructions, then SDP is available to import along with the other packages needed for this notebook.
+If you have followed the setup instructions, then `sdp` is available to import along with the other packages needed for this notebook.
 
 [sdp]: https://github.com/max-danenhower/rrs-SDP-pigments/
 
@@ -78,22 +77,24 @@ Set (and persist to your home directory on the host, if needed) your Earthdata L
 auth = earthaccess.login()
 ```
 
-# 2. Access and open data
+## 2. Access and open data
+
++++
 
 We need the following data to run SDP:
-* Rrs: PACE OCI L2 AOP data products
-* Sea surface salinity: JPL SMAP-SSS V5.0 CAP, 8-day running mean, level 3 mapped, sea surface salinity (SSS) product from the NASA Soil Moisture Active Passive (SMAP) observatory
-* Sea surface temperature: Group for High Resolution Sea Surface Temperature (GHRSST) Level 4 sea surface temperature
+* Remote sensing reflectance (Rrs): PACE OCI L2 AOP data products
+* Sea surface salinity (SSS): JPL SMAP-SSS V5.0 CAP, 8-day running mean, level 3 mapped product from the NASA Soil Moisture Active Passive (SMAP) observatory
+* Sea surface temperature (SST): Group for High Resolution Sea Surface Temperature (GHRSST) Level 4 sea surface temperature
 
-We can use `earthaccess` to find PACE OCI L2 data.
+We can use `earthaccess` to find PACE OCI L2 data, checking in both the near-real-time and refined collections.
 
 ```{code-cell} ipython3
 tspan = ("2026-05-05 17:35", "2026-05-05 17:35")
 results = earthaccess.search_data(
-    short_name=["PACE_OCI_L2_AOP", "PACE_OCI_L2_AOP_NRT"],
+    short_name=["PACE_OCI_L2_AOP_NRT", "PACE_OCI_L2_AOP"],
     temporal=tspan,
     count=1,
-)  
+)
 paths = earthaccess.open(results)
 ```
 
@@ -139,7 +140,7 @@ Now, we can use `sdp_from_pace` to calculate phytoplankton pigment concentration
 ?sdp_from_pace
 ```
 
-You can see that this function accepts a bounding box (`bbox`) as a parameter. The default is `bbox=None`, meaning the algorithm is applied to every single pixel in the L2 granule, which can take a significnat amount of time and may exceed available system memory. We will supply the bbox parameter with the following coordinates: 38 N, 35 S, -70 E, -67 W.
+You can see that this function accepts a `bbox` parameter for limiting calculations to a bounding box. The default is `bbox=None`, meaning the algorithm is applied to every single pixel in the L2 granule, which can take a significnat amount of time and may exceed available system memory. We will supply the `bbox` parameter with the following coordinates: 38 N, 35 S, -70 E, -67 W.
 
 ```{code-cell} ipython3
 bbox = (-73.5, 37.5, -67, 40.5)
@@ -172,7 +173,9 @@ results = earthaccess.search_data(
 sst_paths = earthaccess.open(results)
 ```
 
-## 2. Run SDP on L2 Data
+## 3. Run SDP on L2 Data
+
++++
 
 Now we're ready to run SDP. Let's name what we want the outfile to be:
 
@@ -194,85 +197,48 @@ sdp_from_pace(
 )
 ```
 
-# 3. Open and plot SDP output
+## 4. Open and Plot SDP output
+
++++
 
 Let's open the new file:
 
 ```{code-cell} ipython3
-dat = xr.open_dataset(output_file)
-dat
+ds = xr.open_dataset(output_file)
+ds
 ```
 
 You can see all the different pigment concentrations derived for our L2 granule. Let's plot them:
 
 ```{code-cell} ipython3
-variables = [
-    "chla",
-    "chlb",
-    "chlc",
-    "zea",
-    "dvchla",
-    "butfuco",
-    "hexfuco",
-    "allo",
-    "neo",
-    "viola",
-    "fuco",
-    "chlc3",
-    "perid",
-]
-
-nrows, ncols = 5, 3
-
 fig, axs = plt.subplots(
-    nrows,
-    ncols,
-    figsize=(12, 8),
+    nrows=7,
+    ncols=2,
+    figsize=(10, 12),
+    sharex=True,
+    sharey=True,
     constrained_layout=False,
 )
 
-axs = axs.ravel()
+variables = tuple(ds)
+axs = axs.ravel().tolist()
+ax = axs.pop(1)
+ax.set_visible(False)
 
 for i, ax in enumerate(axs):
-
-    if i >= len(variables):
-        ax.set_visible(False)
-        continue
-
-    var = variables[i]
-
-    data = dat[var]
-
-    vmin = np.nanpercentile(data, 1)
-    vmax = np.nanpercentile(data, 99)
-
-    im = ax.pcolormesh(
-        dat.longitude,
-        dat.latitude,
-        data,
+    da = ds[variables[i]]
+    da.attrs["units"] = "mg m$^{-3}$"
+    da.plot(
+        x="longitude",
+        y="latitude",
         cmap="viridis",
-        shading="auto",
-        vmin=vmin,
-        vmax=vmax,
+        vmax=da.quantile(0.99),
+        ax=ax,
     )
-
     ax.set_xlim(bbox[0], bbox[2])
     ax.set_ylim(bbox[1], bbox[3])
-
-    ax.set_title(var)
-
-    ax.set_aspect("auto")
-
     ax.set_xlabel("")
     ax.set_ylabel("")
-
-    cbar = fig.colorbar(
-        im,
-        ax=ax,
-        pad=0.02,
-    )
-
-    cbar.set_label("mg m$^{-3}$")
 
 plt.tight_layout()
 plt.show()
