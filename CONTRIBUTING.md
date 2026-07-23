@@ -67,7 +67,8 @@ mamba install --yes --log-level error --category tools --file /srv/container/con
 
 If any package needs to be updated, e.g. `earthaccess`, then edit the following cell as needed and run it.
 
-```{code-cell} ipython3
+```{raw-cell}
+# cell type is "Raw" for optional use
 conda-lock lock --lockfile container/conda-lock.yml --update earthaccess
 ```
 
@@ -76,9 +77,10 @@ then a new lock file should be generated, a new image built, and the new image u
 Realistically, that's unlikely to be done manually for every change,
 but it really must be done before updating the `latest` tag on the GitHub Container Registry.
 
-```{code-cell} ipython3
+```{raw-cell}
 :scrolled: true
 
+# cell type is "Raw" for optional use
 conda-lock lock --without-cuda --lockfile container/conda-lock.yml \
   --file pyproject.toml \
   --file environment-container.yml \
@@ -139,20 +141,23 @@ The notebooks now available in the cache can be displayed with `jcache`.
 jcache notebook -p docs/_cache list
 ```
 
-In case the repository moved recently, you may need to update any added absolute URIs with something like:
-```shell
+```{code-cell} ipython3
+
+```
+
 $ sqlite3 docs/_cache/global.db
-sqlite3> update nbcache set uri = replace(uri, "/absolute/path/to/docs/", "");
+sqlite3> update nbproject set uri = replace(uri, "/absolute/path/to/docs/", "");
 sqlite3> .quit
 ```
 
 +++
 
-Clear the notebook cache if you want to re-execute all notebooks.
+If you want to re-execute all notebooks in parallel, clear the notebook cache.
 
-```{code-cell} ipython3
+```{raw-cell}
 :scrolled: true
 
+# cell type is "Raw" for optional use
 yes | jcache notebook -p docs/_cache invalidate --all
 ```
 
@@ -172,7 +177,7 @@ The next cell builds a static website in `docs/_build/html` using `jupyter-book`
 ```{code-cell} ipython3
 :scrolled: true
 
-jupyter-book build docs
+jupyter-book build --all docs
 ```
 
 Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
@@ -200,7 +205,15 @@ python -m http.server -d docs/_build/html
 
 If any notebooks have been executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
 Follow the next steps to share the updates using DVC.
-First "reset" the database to erase spurious changes that would appear to DVC as updates.
+
+First, remove the absolute paths that Jupyter Book may have added for any new notebooks.
+
+```{code-cell} ipython3
+sqlite3 docs/_cache/global.db "update nbproject set uri = replace(uri, \"$PWD/\", \"\")"
+sqlite3 docs/_cache/global.db "update nbcache set uri = replace(uri, \"$PWD/\", \"\")"
+```
+
+Next "reset" the database to erase spurious changes that would appear to DVC as updates.
 
 ```{code-cell} ipython3
 sqlite3 docs/_cache/global.db "update nbcache set accessed = created"
@@ -231,11 +244,7 @@ dvc push
 Finally, if changes are committed by DVC, then there will be changes you also need to commit with Git.
 Use your preferred method of working with Git to stage the `docs/_cache.dvc` changes, commit, and push them.
 
-```{code-cell} ipython3
-git add docs/_cache.dvc
-git commit -m "jupyter-book build"
-git push
-```
++++
 
 ### Temporary
 
@@ -305,12 +314,12 @@ You may create hooks to run these automations, as needed, before making any comm
 
 [pre-commit]: https://pre-commit.com/
 
-```{code-cell} ipython3
+```{raw-cell}
 pre-commit install
 ```
 
 You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
 
-```{code-cell} ipython3
+```{raw-cell}
 pre-commit run --from-ref main --to-ref HEAD
 ```
