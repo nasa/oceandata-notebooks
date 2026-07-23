@@ -44,8 +44,10 @@ parts:
 
       - file: sections/ocean
         sections:
-          - file: notebooks/hackweek/oci_gpig.md
-            title: GPig Phytoplankton Community Composition
+          - file: notebooks/oci/oci_gpig.md
+            title: Gaussian Pigments
+          - file: notebooks/oci/oci_sdp.md
+            title: Spectral Derivative Pigments
           - file: notebooks/oci/accessing_CLOSE_data.md
             title: Accessing the CLOSE Dataset
             
