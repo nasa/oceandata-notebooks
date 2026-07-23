@@ -1,4 +1,4 @@
-# Tutorials from Our Friends
+# Tutorials from our Friends
 
 Explore these great resources to keep learning.
 

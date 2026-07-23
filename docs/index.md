@@ -1,6 +1,6 @@
 # Satellite data processing can be difficult.
 
-## We're here to help you climb out of that hole!
+<h2>We're here to help you climb out of that hole!</h2>
 
 This constantly updated collection of Jupyter notebooks is meant to help you get started accessing, visualizing,
 and analyzing OB.DAAC (Ocean Biology Distributed Active Archive Center) data products with Python.
@@ -14,7 +14,7 @@ If you plan to run any of these notebooks but don't know how to start,
 please continue to the next section for information about the Earthdata Cloud and environments in Python.
 If you are familiar with running our notebooks, feel free to explore the Help Hub's different sections:
 
-### Help Hub Core
+## Help Hub Core
 
 Explore these themes to get essential skills to access, process and visualize data.
 
@@ -81,7 +81,7 @@ Learn More →
 
 ::::
 
-### SeaDAS - OCSSW Toolbox
+## SeaDAS - OCSSW Toolbox
 
 ::::{grid} 1 2 2 2
 :gutter: 2
@@ -111,7 +111,7 @@ Learn More →
 :::
 ::::
 
-### Past Trainings & Events
+## Past Trainings & Events
 
 :::{card}
 :link: sections/past-trainings
