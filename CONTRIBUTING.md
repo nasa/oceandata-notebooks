@@ -155,6 +155,12 @@ The notebooks now available in the cache can be displayed with `jcache`.
 jcache notebook -p docs/_cache list
 ```
 
+We should always keep the tables in release_note_highlights as current as possible, so invalidate the cache for that notebook.
+
+```{code-cell} ipython3
+yes | jcache notebook -p docs/_cache invalidate docs/notebooks/release_note_highlights.md
+```
+
 If you want to re-execute all notebooks in parallel, clear the notebook cache.
 
 ```{raw-cell}
@@ -180,7 +186,7 @@ The next cell builds a static website in `docs/_build/html` using `jupyter-book`
 ```{code-cell} ipython3
 :scrolled: true
 
-jupyter-book build --all docs
+jupyter-book build docs
 ```
 
 Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
