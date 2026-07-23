@@ -6,16 +6,16 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.19.4
 kernelspec:
-  display_name: hhenv
-  language: python
   name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
 ---
 
 # Science Data Reprocessing and Product Versions
 
 **Authors:** Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
 
-Last updated: July 21, 2026
+Last updated: July 23, 2026
 
 ## Summary
 
