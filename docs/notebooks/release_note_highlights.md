@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.19.4
 kernelspec:
-  name: python3
-  display_name: Python 3 (ipykernel)
+  display_name: hhenv
   language: python
+  name: python3
 ---
 
 # Science Data Reprocessing and Product Versions
@@ -23,7 +23,7 @@ Satellite data are periodically [reprocessed](https://oceancolor.gsfc.nasa.gov/d
 
 <div class="alert alert-warning" role="alert">
 
-This page highlights the key file structure changes introduced in version 3.2 and demonstrates how to update existing workflows developed for version 3.1. As version 3.1 data are phased out, these approaches will become the standard for accessing and analyzing PACE OCI data. Future reprocessing campaigns, including Version 4, are expected to introduce additional file structure changes, which will be communicated to the PACE user community.
+This page will be updated as reprocessings occur. Currently, it highlights the key file structure changes introduced in PACE version 3.2 and demonstrates how to update existing workflows developed for version 3.1. As version 3.1 data are phased out, these approaches will become the standard for accessing and analyzing PACE OCI data. Future reprocessing campaigns, including Version 4, are expected to introduce additional file structure changes, which will be communicated to the PACE user community.
 
 </div>
 
