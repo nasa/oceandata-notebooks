@@ -1,4 +1,4 @@
-# Data Access and Processing Basics
+# Access and Processing Basics
 
 This section covers fundamental concepts and tutorials for accessing and processing data products from various instruments and platforms. Learn essential skills for working with satellite ocean color data, from initial data access through advanced processing techniques and analysis workflows.
 

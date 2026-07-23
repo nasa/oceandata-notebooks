@@ -111,7 +111,7 @@ Learn More →
 :::
 ::::
 
-### Past trainings & events
+### Past Trainings & Events
 
 :::{card}
 :link: sections/past-trainings

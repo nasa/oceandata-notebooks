@@ -73,7 +73,7 @@ parts:
       - file: sections/seadas-toolbox
         sections:
           - file: sections/seadas-desktop
-            title: SeaDAS Desktop Application Resources
+            title: SeaDAS Desktop Application
           - file: notebooks/oci/oci_ocssw_install
             title: Install SeaDAS Processors
           - file: notebooks/oci/oci_ocssw_processing_overview
@@ -83,8 +83,10 @@ parts:
           - file: notebooks/oci/oci_ocssw_giop
             title: Run the GIOP Algorithm
 
-  - caption: Useful resources
+  - caption: Resources
     chapters:
+      # - file: notebooks/release_note_highlights
+      #   title: Reprocessing Notes
       - file: sections/other-useful-tutorials
         sections:
           - url: https://nasa.github.io/VITALS/python/emit_pace/01_Colocate_PACE_EMIT_Data.html
