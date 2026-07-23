@@ -76,6 +76,12 @@ Set (and persist to your home directory on the host, if needed) your Earthdata L
 auth = earthaccess.login()
 ```
 
+Assign "global" variables, which could be anything you want to define once and use consistently.
+
+```{code-cell} ipython3
+crs = ccrs.PlateCarree()
+```
+
 ## 2. Access and open data
 
 +++
@@ -108,7 +114,6 @@ rrs
 ```
 
 ```{code-cell} ipython3
-crs = ccrs.PlateCarree()
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": crs})
 
 da = rrs.sel({"wavelength": 500}, method="nearest")
@@ -156,7 +161,7 @@ We need to find corresponding sea-surface salinity and temperature data for the 
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name='SMAP_JPL_L3_SSS_CAP_8DAY-RUNNINGMEAN_V5',
+    short_name="SMAP_JPL_L3_SSS_CAP_8DAY-RUNNINGMEAN_V5",
     temporal=tspan,
     count=1,
 )
@@ -165,9 +170,9 @@ sss_paths = earthaccess.open(results)
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name='MUR-JPL-L4-GLOB-v4.1',
+    short_name="MUR-JPL-L4-GLOB-v4.1",
     temporal=tspan,
-    count=1
+    count=1,
 )
 sst_paths = earthaccess.open(results)
 ```
@@ -184,7 +189,7 @@ output_file = output_file.replace(".nc", "_SDP_pigments.nc")
 output_file
 ```
 
-And let's run it!
+And let's run it! There will be some `RuntimeWarnings` that need to be considered.
 
 ```{code-cell} ipython3
 sdp_from_pace(
@@ -192,7 +197,7 @@ sdp_from_pace(
     output_file,
     sss_file=sss_paths[-1],
     sst_file=sst_paths[-1],
-    bbox=bbox
+    bbox=bbox,
 )
 ```
 
@@ -226,13 +231,14 @@ ax.set_visible(False)
 
 for i, ax in enumerate(axs):
     da = ds[variables[i]]
-    da.attrs["units"] = "mg m$^{-3}$"
     da.plot(
         x="longitude",
         y="latitude",
         cmap="viridis",
+        shading="auto",
         vmax=da.quantile(0.99),
         ax=ax,
+        cbar_kwargs={"label": r"$\mathrm{%s\ [mg\ m^{-3}]}$" % variables[i]},
     )
     ax.set_xlim(bbox[0], bbox[2])
     ax.set_ylim(bbox[1], bbox[3])

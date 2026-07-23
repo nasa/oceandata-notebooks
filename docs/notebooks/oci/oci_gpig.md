@@ -68,8 +68,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 from gpig import L2_utils, L3_utils
-
-crs = ccrs.PlateCarree()
 ```
 
 Set (and persist to your home directory on the host, if needed) your Earthdata Login credentials.
@@ -78,7 +76,13 @@ Set (and persist to your home directory on the host, if needed) your Earthdata L
 auth = earthaccess.login()
 ```
 
-# 2. Access and open data
+Assign "global" variables, which could be anything you want to define once and use consistently.
+
+```{code-cell} ipython3
+crs = ccrs.PlateCarree()
+```
+
+## 2. Search and Access Data
 
 We need the following data to run GPig:
 
@@ -93,17 +97,17 @@ tspan = ("2025-05-01 20:13", "2025-05-01 20:13")
 bbox = (-127, 40, -126, 41)
 
 results = earthaccess.search_data(
-    short_name=["PACE_OCI_L2_AOP", "PACE_OCI_L2_AOP_NRT"],
+    short_name=["PACE_OCI_L2_AOP_NRT", "PACE_OCI_L2_AOP"],
     temporal=tspan,
     bounding_box=bbox,
     count=1,
-)  
+)
 l2_paths = earthaccess.open(results)
 ```
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name='SMAP_JPL_L3_SSS_CAP_8DAY-RUNNINGMEAN_V5',
+    short_name="SMAP_JPL_L3_SSS_CAP_8DAY-RUNNINGMEAN_V5",
     temporal=tspan,
     count=1,
 )
@@ -112,9 +116,9 @@ sss_paths = earthaccess.open(results)
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name='MUR-JPL-L4-GLOB-v4.1',
+    short_name="MUR-JPL-L4-GLOB-v4.1",
     temporal=tspan,
-    count=1
+    count=1,
 )
 sst_paths = earthaccess.open(results)
 ```
@@ -132,14 +136,14 @@ rrs
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": crs})
 
-data = rrs.sel({"wavelength": 500}, method='nearest')
-data.plot(
+da = rrs.sel({"wavelength": 500}, method="nearest")
+da.plot(
     x="longitude",
     y="latitude",
     vmin=0,
     vmax=0.008,
     ax=ax,
-    cbar_kwargs={"label": "Rrs ($sr^{-1}$)"},
+    cbar_kwargs={"label": r"$\mathrm{Rrs\ [sr^{-1}]}$"},
 )
 
 ax.set_extent([-135, -115, 35, 55], crs=crs)
@@ -155,7 +159,7 @@ ax.gridlines(
 plt.show()
 ```
 
-## 2. Run GPig on L2 Data
+## 3. Run GPig on L2 Data
 
 +++
 
@@ -184,47 +188,40 @@ fig
 Let's run it. This can take some time depending on bounding box size.
 
 ```{code-cell} ipython3
-:scrolled: true
-:tags: [scroll-output]
-
-l2_pigments = L2_utils.estimate_inv_pigments(l2_paths[-1], sss_paths[-1], sst_paths[-1], bbox)
+l2_pigments = L2_utils.estimate_inv_pigments(
+    l2_paths[-1],
+    sss_paths[-1],
+    sst_paths[-1],
+    bbox,
+)
 ```
 
 The inversion provides four phytoplankton pigment concenrations. Let's plot them:
 
 ```{code-cell} ipython3
-fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": crs})
+fig, axs = plt.subplots(2, 2, figsize=(10, 8), sharex=True, sharey=True)
 
-variables = ["chla", "chlb", "chlc", "ppc"]
 titles = ["Chlorophyll-a", "Chlorophyll-b", "Chlorophyll-c", "PPC"]
-for ax, var, title in zip(axs.flat, variables, titles):
-    data = l2_pigments[var]
-    lon = l2_pigments["longitude"]
-    lat = l2_pigments["latitude"]
-
-    data_log = np.log10(data.where(data > 0))
-
-    im = ax.pcolormesh(lon, lat, data_log, cmap="viridis", shading="auto")
-
-    ax.gridlines(
-        draw_labels=["left", "bottom"],
-        linewidth=0.5,
-        color="gray",
-        alpha=0.5,
-        linestyle="--",
+for ax, var, title in zip(axs.flat, l2_pigments, titles):
+    da = l2_pigments[var]
+    da = np.log10(da.where(da > 0))
+    im = da.plot(
+        x="longitude",
+        y="latitude",
+        cmap="viridis",
+        shading="auto",
+        ax=ax,
+        cbar_kwargs={"label": r"$\mathrm{%s\ [log_{10}(mg\ m^{-3})]}$" % var},
     )
     ax.set_title(title)
     ax.set_xlim(bbox[0], bbox[2])
     ax.set_ylim(bbox[1], bbox[3])
 
-    cbar = fig.colorbar(im, ax=ax, orientation="vertical")
-    cbar.set_label(r"$\log_{10}(\mathrm{mg\ m^{-3}})$")
-
 plt.tight_layout()
 plt.show()
 ```
 
-## 3. Run GPig on L3M Data
+## 4. Run GPig on L3M Data
 
 +++
 
@@ -234,17 +231,18 @@ We can also run GPig on L3M data. Let's open a PACE OCI L3m (4km), SSS and SST d
 tspan = ("2024-06-12", "2024-06-12")
 
 results = earthaccess.search_data(
-    short_name=["PACE_OCI_L3M_AOP", "PACE_OCI_L3M_AOP_NRT"],
+    short_name=["PACE_OCI_L3M_AOP_NRT", "PACE_OCI_L3M_AOP"],
     temporal=tspan,
     granule_name="*DAY*4km*",
-    count=1)
+    count=1,
+)
 
 l3m_paths = earthaccess.open(results)
 ```
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name='SMAP_JPL_L3_SSS_CAP_8DAY-RUNNINGMEAN_V5',
+    short_name="SMAP_JPL_L3_SSS_CAP_8DAY-RUNNINGMEAN_V5",
     temporal=tspan,
     count=1,
 )
@@ -253,9 +251,9 @@ sss_paths = earthaccess.open(results)
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name='MUR-JPL-L4-GLOB-v4.1',
+    short_name="MUR-JPL-L4-GLOB-v4.1",
     temporal=tspan,
-    count=1
+    count=1,
 )
 sst_paths = earthaccess.open(results)
 ```
@@ -270,14 +268,14 @@ l3_dataset
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": crs})
 
-data = l3_dataset["Rrs"].sel({"wavelength": 500}, method='nearest')
-data.plot.imshow(
+da = l3_dataset["Rrs"].sel({"wavelength": 500}, method="nearest")
+da.plot.imshow(
     x="lon",
     y="lat",
     vmin=0,
     vmax=0.008,
     ax=ax,
-    cbar_kwargs={"label": r"Rrs ($sr^{-1}$)", "fraction": 0.046},
+    cbar_kwargs={"label": r"$\mathrm{Rrs [sr^{-1}]}$", "fraction": 0.025},
 )
 
 ax.coastlines(resolution="10m")
@@ -316,11 +314,7 @@ fig
 ```
 
 ```{code-cell} ipython3
-:scrolled: true
-:tags: [scroll-output]
-
 l3_pigments = L3_utils.estimate_inv_pigments(l3m_paths, sss_paths, sst_paths, bbox)
-l3_pigments
 ```
 
 The inversion provides four phytoplankton pigment concentrations. Let's plot them:
@@ -328,21 +322,17 @@ The inversion provides four phytoplankton pigment concentrations. Let's plot the
 ```{code-cell} ipython3
 fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": crs})
 
-variables = ["chla", "chlb", "chlc", "ppc"]
 titles = ["Chlorophyll-a", "Chlorophyll-b", "Chlorophyll-c", "PPC"]
-for ax, var, title in zip(axs.flat, variables, titles):
-
-    data = l3_pigments[var]
-    data_log = np.log10(data.where(data > 0))
-
-    im = data_log.plot.imshow(
-        ax=ax,
+for ax, var, title in zip(axs.flat, l3_pigments, titles):
+    da = l3_pigments[var]
+    da = np.log10(da.where(da > 0))
+    da.plot.imshow(
         cmap="viridis",
-        add_colorbar=False,
+        ax=ax,
+        cbar_kwargs={"label": r"$\mathrm{%s\ [log_{10}(mg\ m^{-3})]}$" % var},
     )
-
-    ax.coastlines(resolution="10m")
     ax.set_title(title)
+    ax.coastlines(resolution="10m")
     ax.gridlines(
         draw_labels=["left", "bottom"],
         linewidth=0.5,
@@ -350,8 +340,6 @@ for ax, var, title in zip(axs.flat, variables, titles):
         alpha=0.5,
         linestyle="--",
     )
-
-    fig.colorbar(im, ax=ax, orientation="vertical", label=f"$log_{{10}}({var})$")
 
 plt.tight_layout()
 plt.show()
