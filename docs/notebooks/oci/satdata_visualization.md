@@ -15,9 +15,9 @@ kernelspec:
 
 # Satellite Data Visualization
 
-Updated June 24, 2026
+Updated July 23, 2026
 
-**Tutorial Leads:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC) and Sean Foley (NASA, MSU)
+**Authors:** Carina Poulin (NASA, SSAI), Ian Carroll (NASA, UMBC), and Sean Foley (NASA, MSU)
 
 <div class="alert alert-success" role="alert">
 
@@ -183,8 +183,9 @@ Let's start with the most basic visualization. First, get level-3 chlorophyll ma
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_CHL",
+    short_name="PACE_OCI_L3M_BGC",
     granule_name="*.MO.*.0p1deg.*",
+    count=1,
 )
 paths = earthaccess.open(results)
 ```
@@ -205,12 +206,13 @@ plt.gca().set_aspect("equal")
 
 +++
 
-True color images use three bands to create a RGB image. Let's still use a level-3 mapped product, this time we use the remote-sensing reflectance (Rrs) product.
+True color images use three bands to create a RGB image. Let's still use a level-3 mapped product, this time we use the remote-sensing reflectance (Rrs) product in the AOP suite.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_RRS",
+    short_name="PACE_OCI_L3M_AOP",
     granule_name="*.MO.*.0p1deg.*",
+    count=1,
 )
 paths = earthaccess.open(results)
 ```
@@ -225,17 +227,16 @@ dataset = xr.open_dataset(paths[-1])
 Look at all the wavelentghs available!
 
 ```{code-cell} ipython3
-:scrolled: true
 :tags: [scroll-output]
 
-dataset["wavelength"].data
+dataset["wavelength"]
 ```
 
 For a true color image, choose three wavelengths to represent the "Red", "Green", and "Blue"
 channels used to make true color images.
 
 ```{code-cell} ipython3
-rrs_rgb = dataset["Rrs"].sel({"wavelength": [645, 555, 368]})
+rrs_rgb = dataset["Rrs"].sel({"wavelength": [645, 555, 368]}, method="nearest")
 rrs_rgb
 ```
 
@@ -481,11 +482,11 @@ Let's open a level 3 Rrs map.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_RRS",
+    short_name="PACE_OCI_L3M_AOP",
     granule_name="*.MO.*0p1deg.*",
+    count=1,
 )
 paths = earthaccess.open(results)
-paths
 ```
 
 We can create a map from a single band in the dataset and see the Rrs value by hovering over the map.
@@ -497,7 +498,7 @@ dataset
 
 ```{code-cell} ipython3
 def single_band(w):
-    array = dataset.sel({"wavelength": w})
+    array = dataset.sel({"wavelength": w}, method="nearest")
     return hv.Image(array, kdims=["lon", "lat"], vdims=["Rrs"]).opts(
         aspect="equal", frame_width=450, frame_height=250, tools=["hover"]
     )
@@ -516,7 +517,7 @@ In order to explore the hyperspectral datasets from PACE, we can have a look at 
 ```{code-cell} ipython3
 def spectrum(x, y):
     array = dataset.sel({"lon": x, "lat": y}, method="nearest")
-    return hv.Curve(array, kdims=["wavelength"]).redim.range(Rrs=(-0.01, 0.04))
+    return hv.Curve(array, kdims=["wavelength"], vdims=["Rrs"]).redim.range(Rrs=(-0.01, 0.04))
 ```
 
 ```{code-cell} ipython3
@@ -549,6 +550,8 @@ slider
 ```
 
 ## 7. Animation from Multiple Angles
+
++++
 
 Let's look at the multi-angular datasets from HARP2. First, download some HARP2 Level-1C data using the short_name value "PACE_HARP2_L1C_SCI" in earthaccess.search_data. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface.
 
@@ -583,6 +586,8 @@ dataset
 
 ### Understanding Multi-Angle Data
 
++++
+
 HARP2 is a multi-spectral sensor, like OCI, with 4 spectral bands. These roughly correspond to green, red, near infrared (NIR), and blue (in that order). HARP2 is also multi-angle. These angles are with respect to the satellite track. Essentially, HARP2 is always looking ahead, looking behind, and everywhere in between. The number of angles varies per sensor. The red band has 60 angles, while the green, blue, and NIR bands each have 10.
 
 In the HARP2 data, the angles and the spectral bands are combined into one axis. I'll refer to this combined axis as HARP2's "channels." Below, we'll make a quick plot both the viewing angles and the wavelengths of HARP2's channels. In both plots, the x-axis is simply the channel index.
@@ -599,6 +604,8 @@ wavelengths = view["intensity_wavelength"]
 +++ {"lines_to_next_cell": 2}
 
 ### Radiance to Reflectance
+
++++
 
 We can convert radiance into reflectance. For a more in-depth explanation, see [here](https://seadas.gsfc.nasa.gov/help-9.0.0/rad2refl/Rad2ReflAlgorithmSpecification.html#:~:text=Radiance%20is%20the%20variable%20directly,it%2C%20and%20it%20is%20dimensionless). This conversion compensates for the differences in appearance due to the viewing angle and sun angle. Write the conversion as a function, because you may need to repeat it.
 

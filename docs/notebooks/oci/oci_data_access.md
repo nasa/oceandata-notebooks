@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 
-Last updated: March 17, 2026
+Last updated: July 23, 2026
 
 <div class="alert alert-info" role="alert">
 
@@ -199,14 +199,14 @@ on the `results` list.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_CHL",
+    short_name="PACE_OCI_L3M_BGC",
     temporal=("2024-06-01", "2024-06-01"),
 )
 paths = earthaccess.open(results)
 ```
 
 The list of outputs, which we called `paths`, contains references to files on a remote filesystem. They're not
-paths to a local file, but many utilities that expect a file path can also use these "file-like" paths.
+paths to a local file, but many utilities that expect a file path can also use these "path-like" values.
 
 +++
 
