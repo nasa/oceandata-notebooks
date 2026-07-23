@@ -45,6 +45,20 @@ The following sections relate to the content of this repository as follows:
 
 +++
 
+## Jupytext Sync
+
++++
+
+As noted in the README, working with ".ipynb" files in the "notebooks" folder is the supported approach.
+Running some of the ".md" files in the "docs/notebooks" folder creates output, which we don't want to accidentally
+commit.
+
+```{code-cell} ipython3
+:scrolled: true
+
+jupytext --sync $(git ls-files docs/notebooks)
+```
+
 ## Reproducible Environment
 
 +++
@@ -140,17 +154,6 @@ The notebooks now available in the cache can be displayed with `jcache`.
 ```{code-cell} ipython3
 jcache notebook -p docs/_cache list
 ```
-
-```{code-cell} ipython3
-
-```
-
-$ sqlite3 docs/_cache/global.db
-sqlite3> update nbproject set uri = replace(uri, "/absolute/path/to/docs/", "");
-sqlite3> .quit
-```
-
-+++
 
 If you want to re-execute all notebooks in parallel, clear the notebook cache.
 
