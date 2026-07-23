@@ -19,7 +19,7 @@ parts:
           - file: notebooks/oci/oci_file_structure
             title: Intro to Product Levels
           - file: notebooks/oci/subsetting_with_harmony-py.md
-            title: Dataset subsetting
+            title: Dataset Subsetting
           - file: notebooks/modis/modis_explore_l2
             title: Orientation to Level-2
           - file: notebooks/modis/modis_explore_l3
@@ -27,7 +27,7 @@ parts:
           - file: notebooks/oci/oci_grid_match
             title: Projecting & GeoTIFFs
           - file: notebooks/hackweek/satellite_insitu_matchups.md
-            title: In situ Matchups
+            title: In Situ Matchups
           - file: notebooks/oci/ml_cloud_mask
             title: Machine Learning Tutorial
 
@@ -85,8 +85,8 @@ parts:
 
   - caption: Resources
     chapters:
-      # - file: notebooks/release_note_highlights
-      #   title: Reprocessing Notes
+      - file: notebooks/release_note_highlights
+        title: Reprocessing Notes
       - file: sections/other-useful-tutorials
         sections:
           - url: https://nasa.github.io/VITALS/python/emit_pace/01_Colocate_PACE_EMIT_Data.html

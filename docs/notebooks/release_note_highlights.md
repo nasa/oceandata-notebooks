@@ -185,7 +185,7 @@ path = earthaccess.open(results).pop()
 datatree = xr.open_datatree(path)
 print(datatree)
 -->
-```python
+```
 <xarray.DataTree>
 Group: /
 │   Attributes: (12/47)
@@ -237,7 +237,7 @@ for variable in ("longitude", "latitude"):
     dataarray[variable] = datatree["navigation_data"][variable]
 print(dataarray)
 -->
-```python
+```
 <xarray.DataArray 'Rrs' (number_of_lines: 1709, pixels_per_line: 1272, wavelength: 172)>
 [373901856 values with dtype=float32]
 Coordinates:
@@ -287,7 +287,7 @@ path = earthaccess.open(results).pop()
 datatree = xr.open_datatree(path)
 print(datatree)
 -->
-```python
+```
 <xarray.DataTree>
 Group: /
 │   Attributes: (12/47)
