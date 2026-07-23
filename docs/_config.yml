@@ -45,6 +45,7 @@ sphinx:
       collapse_navigation: false
       navigation_depth: 4
       show_toc_level: 2
+      show_prev_next: false
     templates_path: "_templates"
   local_extensions:
     source_button: "_ext"
