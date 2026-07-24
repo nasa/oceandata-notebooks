@@ -161,10 +161,10 @@ Starting with version 3.2, the OB.DAAC now distributes all ocean color measureme
 
 The NASA Earthdata CMR `short_names` changed for Level-3 products. The new `short_names` for PACE OCI Level-3 mapped products are:
 - [PACE_OCI_L3M_AOP](https://doi.org/10.5067/PACE/OCI/L3M/OC_AOP/3.2): Rrs, nflh, avw
-- [PACE_OCI_L3M_IOP](https://cmr.earthdata.nasa.gov/search/concepts/C4124889546-OB_CLOUD.html): a, adg, aph, bb, bbp
+- [PACE_OCI_L3M_IOP](https://doi.org/10.5067/PACE/OCI/L3M/IOP/3.2): a, adg, aph, bb, bbp
 - [PACE_OCI_L3M_BGC](https://dx.doi.org/10.5067/PACE/OCI/L3M/OC_BGC/3.2): chlor_a, pic, poc, carbon_phyto
-- [PACE_OCI_L3M_KD](https://cmr.earthdata.nasa.gov/search/concepts/C4124889802-OB_CLOUD.html): Kd 
-- [PACE_OCI_L3M_PAR](https://cmr.earthdata.nasa.gov/search/concepts/C4124890413-OB_CLOUD.html): par, ipar
+- [PACE_OCI_L3M_KD](https://doi.org/10.5067/PACE/OCI/L3M/KD/3.2): Kd 
+- [PACE_OCI_L3M_PAR](https://doi.org/10.5067/PACE/OCI/L3M/PAR/3.2): par, ipar
 
 <div class="alert alert-warning" role="alert">
 
