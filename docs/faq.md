@@ -88,9 +88,8 @@ Harmony is a NASA web service that lets you customize datasets before downloadin
 - **Using the Harmony-Py Python package** – Handles Earthdata login authentication and integrates with the CMR Python wrapper, ideal for Jupyter notebook workflows.
 - **Through SeaDAS** – Recent releases (v10/v11) include a built-in cloud data browser that uses Harmony under the hood, with a graphical interface.
 
-A dedicated "Dataset Subsetting" tutorial covering the Harmony-Py workflow is available on the Help Hub.
+A dedicated [dataset subsetting tutorial](https://nasa.github.io/ocean-data-notebooks) covering the Harmony-Py workflow is available on the Help Hub.
 
-Learn more: [Help Hub – Dataset Subsetting Tutorial](https://nasa.github.io/ocean-data-notebooks)
 
 </details>
 
@@ -125,7 +124,7 @@ Other current SeaDAS subsetting limitations: it only works on Level 2 data, and 
 </details>
 
 <details>
-<summary><strong>I'm trying to clip/extract a smaller region from PACE data using the Level 3/Level 4 browser's "extract" tool, but I'm not getting all the bands I expect. Is this a known issue?</strong></summary>
+<summary><strong>I'm trying to clip a smaller region from PACE data using the Level 3/Level 4 browser's "extract" tool, but I'm not getting all the bands I expect. Is this a known issue?</strong></summary>
 
 Yes, this has been reported as a known issue: using the "extract" function to clip PACE data to a custom region in the Level 3/Level 4 browser has, in some cases, returned only a subset of the expected bands rather than the full set requested. This issue has been raised with the team.
 
@@ -136,7 +135,7 @@ Yes, this has been reported as a known issue: using the "extract" function to cl
 ## Data Formats and Availability
 
 <details>
-<summary><strong>What is the difference between PACE Level 1B and Level 1C files, and how does this affect Level 2 products?</strong></summary>
+<summary><strong>What is the difference between PACE Level 1B and Level 1C files?</strong></summary>
 
 **Level 1 data** refers to calibrated, geolocated observations at the top of the atmosphere. **Level 2** products are geophysical retrievals derived from Level 1 (e.g., aerosol optical depth), and **Level 3** involves binning data into maps.
 
@@ -205,7 +204,7 @@ Cloud computing with Earth Data Cloud has two components:
 1. **Storage** – NASA's Earth science data (including PACE data) is stored at a commercial data center, specifically in the Amazon Web Services (AWS) US West 2 region.
 2. **Processing** – Rather than downloading data to your local machine, you can run your code directly in that same data center using virtualization technologies, bringing your analysis to the data instead of bringing the data to you.
 
-This represents a shift from the "old school" model, where each NASA DAAC operated as a separate archive requiring long download times to your local computer, to a "new school" model where all the data lives in one place and you can process it there directly with much shorter data transfer needs. For more background, see the [Earth Data Cloud Cookbook](#) and the [Help Hub](https://nasa.github.io/ocean-data-notebooks).
+This represents a shift from the "old school" model, where each NASA DAAC operated as a separate archive requiring long download times to your local computer, to a "new school" model where all the data lives in one place and you can process it there directly with much shorter data transfer needs. For more background, see the [Earth Data Cloud Cookbook](https://nasa-openscapes.github.io/earthdata-cloud-cookbook/) and the [Help Hub](https://nasa.github.io/ocean-data-notebooks).
 
 </details>
 
@@ -214,10 +213,10 @@ This represents a shift from the "old school" model, where each NASA DAAC operat
 
 Two key resources are recommended:
 
-- The [**Earth Data Cloud Cookbook**](#) – A general orientation to Earth Data Cloud created collaboratively by NASA OpenScapes mentors across all NASA DAACs, covering key concepts, tutorials, and how-to guides.
+- The [**Earth Data Cloud Cookbook**](https://nasa-openscapes.github.io/earthdata-cloud-cookbook/) – A general orientation to Earth Data Cloud created collaboratively by NASA OpenScapes mentors across all NASA DAACs, covering key concepts, tutorials, and how-to guides.
 - The [**Help Hub**](https://nasa.github.io/ocean-data-notebooks) – Maintained by the Ocean Ecology Lab, this includes regularly updated tutorials specific to PACE and OB.DAAC datasets (and beyond), all written to run both locally and in the cloud. A recent example is a tutorial on subsetting PACE OCI data, useful since OCI produces very large files and users often only need a portion of the data.
 
-Once you're ready to start working with data directly, the [**Earth Access**](#) Python library is the essential tool for authentication and streaming. It's open-source and has become the standard point of access for Python-based (and some shell-based) workflows with Earth Data Cloud, handling two critical tasks:
+Once you're ready to start working with data directly, the [**earthaccess**](https://earthaccess.readthedocs.io/) Python library is the essential tool for authentication and streaming. It's open-source and has become the standard point of access for Python-based (and some shell-based) workflows with Earth Data Cloud, handling two critical tasks:
 
 1. **Authentication** – Confirms who you are before granting access to data.
 2. **Streaming setup** – Establishes the connection needed to stream portions of a file directly, rather than requiring a full download.
@@ -230,12 +229,12 @@ Once you're ready to start working with data directly, the [**Earth Access**](#)
 There are two general categories of options:
 
 **1. Externally funded, ready-to-use community hubs** (no cost to you, managed by the nonprofit 2i2c):
-- The [**NASA OpenScapes JupyterHub**](#) – A "cloud playground" primarily intended for workshops and NASA OpenScapes Champions, ideal for exploring what cloud-based Jupyter work is like. PACE researchers interested in access can reach out directly.
-- [**CryoCloud JupyterHub**](#) – A research-oriented platform, currently free to use, open to the entire geosciences community (not just cryosphere research). Access requires filling out a sign-up form and emailing the CryoCloud leadership team about your research interests.
+- The [**NASA OpenScapes JupyterHub**](https://openscapes.cloud/) – A "cloud playground" primarily intended for workshops and NASA OpenScapes Champions, ideal for exploring what cloud-based Jupyter work is like. PACE researchers interested in access can reach out directly.
+- [**CryoCloud JupyterHub**](https://cryointhecloud.com/) – A research-oriented platform, currently free to use, open to the entire geosciences community (not just cryosphere research). Access requires filling out a sign-up form and emailing the CryoCloud leadership team about your research interests.
 
 **2. More customizable platforms** (require more setup, but offer greater flexibility):
-- [**NASA Science Cloud**](#) – Available to anyone with ROSES funding. Provides a similar JupyterHub-style environment with direct AWS access, plus a support team that can help with technical customization and cost/budget planning for grant proposals. (Note: As of this discussion, ROSES 2026 guidance on cloud computing costs in proposals was still pending, though ROSES 2025 did not address this explicitly.)
-- [**Cloud Bank**](#) – Open to any US-based researcher (not limited to NSF-funded researchers). Provides credits usable on AWS, Google Cloud, or Microsoft Azure. For Earth Data Cloud work, you'd typically convert these credits to AWS credits, giving you full control over your own custom compute environment.
+- [**NASA Science Cloud**](https://science.data.nasa.gov/science-cloud) – Available to anyone with ROSES funding. Provides a similar JupyterHub-style environment with direct AWS access, plus a support team that can help with technical customization and cost/budget planning for grant proposals. (Note: As of this discussion, ROSES 2026 guidance on cloud computing costs in proposals was still pending, though ROSES 2025 did not address this explicitly.)
+- [**Cloud Bank**](https://www.cloudbank.org/) – Open to any US-based researcher (not limited to NSF-funded researchers). Provides credits usable on AWS, Google Cloud, or Microsoft Azure. For Earth Data Cloud work, you'd typically convert these credits to AWS credits, giving you full control over your own custom compute environment.
 
 </details>
 
@@ -246,7 +245,7 @@ There are two general categories of options:
 
 **Analysis/processing time is what may cost money.** As soon as you read data using a virtual computer running in the cloud (e.g., to add two images together, run calculations, etc.), that qualifies as "compute," and you're billed for the time that virtual machine is running — typically by the minute or even microsecond, depending on the type of processor used (e.g., standard CPU vs. GPU).
 
-That said, if you're using an externally funded platform like [CryoCloud](#) or [NASA OpenScapes JupyterHub](#), those costs are already covered by their existing grants, so you likely won't pay anything out of pocket. Costs become more relevant if you set up your own custom environment (e.g., via [NASA Science Cloud](#) or [Cloud Bank](#) credits) for a specific research budget or grant proposal.
+That said, if you're using an externally funded platform like [CryoCloud](https://cryointhecloud.com/) or [NASA OpenScapes JupyterHub](https://openscapes.cloud/), those costs are already covered by their existing grants, so you likely won't pay anything out of pocket. Costs become more relevant if you set up your own custom environment (e.g., via [NASA Science Cloud](https://science.data.nasa.gov/science-cloud) or [Cloud Bank](https://www.cloudbank.org/) credits) for a specific research budget or grant proposal.
 
 </details>
 
@@ -440,7 +439,7 @@ The second notebook covers **processing** these matched datasets: merging EMIT g
 
 These notebooks are published on NASA's Earthdata VITALS website, with links also available via the Help Hub.
 
-Learn more: [Earthdata VITALS Website](#) | [Help Hub](#)
+Learn more: [Earthdata VITALS Website](https://nasa.github.io/VITALS/) | [Help Hub](https://nasa.github.io/oceandata-notebooks/)
 
 </details>
 
@@ -467,8 +466,6 @@ EarthCare is a joint ESA/JAXA mission with four sensors that complement PACE wel
 
 PACE and EarthCare aren't co-orbital, but their ascending/descending daytime orbits cross paths multiple times per day, creating regular observation overlaps.
 
-Learn more: [EarthCare Mission Overview](#) | [PACE Mission Overview](#)
-
 </details>
 
 <details>
@@ -478,7 +475,7 @@ Yes. **PACE EarthCare Matchups** is an open-source Python library that finds, do
 
 EarthCare data (HDF5) is organized similarly to PACE data, making it fairly easy to work with using standard tools. For product details, see the EarthCare Handbook.
 
-Learn more: [PACE EarthCare Matchups GitHub Repo](#) | [Tutorial Notebook](#) | [EarthCare Handbook](#)
+Learn more: [PACE EarthCare Matchups GitHub Repo](https://github.com/seanremy/pace-earthcare-matchups)
 
 </details>
 
