@@ -20,7 +20,7 @@ jupyter:
 ## Data Access
 
 <details>
-<summary><strong>How can I access PACE data (e.g., Level 1B, Level 2, Level 3, Level 4)?</strong></summary>
+<summary><strong>How can I access PACE data?</strong></summary>
 
 All PACE data (including Level 0 and Level 1 products) is open access and distributed by OB.DAAC (the Ocean Biology Distributed Active Archive Center). There are several ways to access it, depending on your needs:
 
@@ -36,7 +36,7 @@ Choose the method that best fits your specific workflow and data needs. All PACE
 </details>
 
 <details>
-<summary><strong>What's the best way to browse and download PACE images at different processing levels using SeaDAS?</strong></summary>
+<summary><strong>What's the best way to browse and download PACE images using SeaDAS?</strong></summary>
 
 - Open the **Earth Data Cloud / OB Cloud Data Browser** within **[SeaDAS](https://www.earthdata.nasa.gov/data/tools/seadas)**.
 - Select your sensor (e.g., PACE OCI) and processing level. Available product suites depend on the level chosen.
@@ -79,7 +79,7 @@ It's worth noting that there is an inherent trade-off here: while one-product-pe
 </details>
 
 <details>
-<summary><strong>I keep hearing about Harmony for subsetting PACE data, what exactly does it do, and how do I access it?</strong></summary>
+<summary><strong>I keep hearing about Harmony for subsetting PACE data, what does it do, and how do I access it?</strong></summary>
 
 Harmony is a NASA web service that lets you customize datasets before downloading — subsetting by geographic region, time range, or variable, as well as reprojecting and reformatting files. You can access it several ways:
 
@@ -101,7 +101,7 @@ Subsetting can save an enormous amount of storage and download time. In one exam
 </details>
 
 <details>
-<summary><strong>Harmony-Py doesn't seem to support spatial subsetting for Level 3 data, is there another way to do this?</strong></summary>
+<summary><strong>Harmony-Py doesn't seem to support subsetting for Level 3 data, is there another way to do this?</strong></summary>
 
 Correct, Harmony-Py currently doesn't support spatial subsetting for Level 3 mapped data. Fortunately, this isn't a big obstacle, since Level 3 products are already gridded to a regular spatial grid, making them easy to subset directly using **Xarray** (e.g., with `.sel()` and slicing). The **[Data Subsetting Help Hub tutorial](https://nasa.github.io/oceandata-notebooks/notebooks/oci/subsetting_with_harmony-py.html)** walks through this: searching for Level 3 monthly composites (e.g., 4 km BGC data) via *earthaccess*, then subsetting and plotting with Xarray.
 
@@ -197,7 +197,7 @@ This is under consideration, though it involves some trade-offs. Near-real-time 
 ## Cloud Computing for PACE Data Access and Analysis
 
 <details>
-<summary><strong>What does "cloud computing" actually mean in the context of NASA's Earth Data Cloud?</strong></summary>
+<summary><strong>What does "cloud computing" mean in the context of NASA's Earth Data Cloud?</strong></summary>
 
 Cloud computing with Earth Data Cloud has two components:
 
@@ -224,7 +224,7 @@ Once you're ready to start working with data directly, the [**earthaccess**](htt
 </details>
 
 <details>
-<summary><strong>What are my options if I want to actually get into a cloud computing environment to work with PACE data?</strong></summary>
+<summary><strong>What are my options if I want to get into a cloud computing environment to work with PACE data?</strong></summary>
 
 There are two general categories of options:
 
