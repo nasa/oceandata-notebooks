@@ -25,7 +25,7 @@ jupyter:
 All PACE data (including Level 0 and Level 1 products) is open access and distributed by OB.DAAC (the Ocean Biology Distributed Active Archive Center). There are several ways to access it, depending on your needs:
 
 - **[OB.DAAC file search and direct data access](https://oceandata.sci.gsfc.nasa.gov/api/file_search/)** – Best when you already know exactly which file you want to download; the most efficient method once identified. Excludes data from other DAACs.
-- **[Earth Data Search](https://search.earthdata.nasa.gov)** – Discover data using filters such as date range, platform, instrument, and other metadata. Use the **Harmony** subsetting tool to subset and download data directly.
+- **[Earth Data Search](https://search.earthdata.nasa.gov)** – Discover data using filters such as date range, platform, instrument, and other metadata. Use the **[Harmony](https://harmony.earthdata.nasa.gov/docs)** subsetting tool to subset and download data directly.
 - **[Level 3/Level 4 Browser](https://oceandata.sci.gsfc.nasa.gov/l3/)** – Preview mapped/binned imagery before downloading, with some subsetting capability. Note: "Provisional" here refers to *science* provisional status, not data availability.
 - **[Worldview](https://worldview.earthdata.nasa.gov)** – Browse data by layer (e.g., chlorophyll) with a timeline feature; links back to the dataset landing page for download.
 - **[SeaDAS](https://www.earthdata.nasa.gov/data/tools/seadas)** – The newest release (SeaDAS 11) includes an Earth Data Cloud/OB Cloud Data Browser that lets you search, view, subset, and download PACE data directly from the cloud (see below for details).
@@ -166,7 +166,7 @@ Certain information available in HARP2 Level 1C data—such as viewing angle inf
 <details>
 <summary><strong>Is there a workflow for bringing PACE OCI data into Google Earth Engine?</strong></summary>
 
-Yes. One common workflow involves retrieving PACE OCI surface reflectance, vegetation indices, remote sensing reflectance (aquatic reflectance), and chlorophyll data as NetCDF files, then converting that data to GeoTIFF format using tools such as SeaDAS or SNAP. The resulting GeoTIFFs can then be uploaded into Earth Engine, where no-data values can be removed and the data rescaled as needed to generate usable image collections. Toolkits built on this workflow help make PACE data more broadly accessible to the large existing community of Earth Engine users.
+Yes. One common workflow involves retrieving PACE OCI surface reflectance, vegetation indices, remote sensing reflectance (aquatic reflectance), and chlorophyll data as NetCDF files, then converting that data to GeoTIFF format using tools such as SeaDAS or SNAP. The resulting GeoTIFFs can then be uploaded into Earth Engine, where no-data values can be removed and the data rescaled as needed to generate usable image collections. **[Toolkits](https://github.com/BzGEO/PACE_OCI_toolkit)** built on this workflow help make PACE data more broadly accessible to the large existing community of Earth Engine users.
 
 </details>
 
@@ -256,7 +256,7 @@ In a standard local Python workflow — without deliberately provisioning cloud-
 However, whether data actually gets downloaded depends on how you access it:
 
 - If you use earthaccess.open(), no data is downloaded until you explicitly save something to your local disk. Up until that point, you're simply streaming and interacting with data that remains in the cloud.
-- If you use a standard download function instead, the data will be pulled directly to your local machine.
+- If you use earthaccess.download() instead, the data will be pulled directly to your local machine.
 
 This means users with only Earthdata login credentials (and no separate cloud computing account) can still access and work with PACE data locally through Python — either by streaming portions of a file via earthaccess.open(), or by downloading files outright — without needing a dedicated JupyterHub account.
 
