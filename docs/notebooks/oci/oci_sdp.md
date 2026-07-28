@@ -11,12 +11,12 @@ kernelspec:
   language: python
 ---
 
-# Applying Spectral Derivative Pigment (SDP) Phytoplankton Community Composition Algorithm to OCI data
+# Applying Spectral Derivative Pigments (SDP) Phytoplankton Community Composition Algorithm to OCI data
 
 **Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC)<br>
 Adapted from code developed by: Max Danenhower (Bowdoin College), Sasha Kramer (Boston University)
 
-Last updated: July 21, 2026
+Last updated: July 24, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -37,7 +37,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-This notebook applies the inversion algorithm described in [Kramer et al., 2022][Kramer-et-al] to estimate phytoplankton pigment concentrations from PACE OCI Rrs data. This algorithm, called Spectral Derivative Pigment (SDP), is currently being implemented in OBPG's OCSSW software. This work was originally [developed in MatLab](https://github.com/sashajane19/Rrs_pigments) by Sasha Kramer and subsequently [translated to Python](https://github.com/max-danenhower/rrs-SDP-pigments/) by Max Danenhower. This tutorial demonstrates how to apply the Python SDP algorithm to Level-2 (L2) PACE OCI data.
+This notebook applies the coefficients generated from a principal components regression model trained on in situ data described in [Kramer et al., 2022][Kramer-et-al] to estimate phytoplankton pigment concentrations from the second derivative of a spectral Rrs residual generated from PACE OCI Rrs data. This algorithm, called Spectral Derivative Pigments (SDP), is currently being implemented in OBPG's OCSSW software. This work was originally [developed in MATLAB](https://github.com/sashajane19/Rrs_pigments) by Sasha Kramer and subsequently [translated to Python](https://github.com/max-danenhower/rrs-SDP-pigments/) by Max Danenhower. This tutorial demonstrates how to apply the Python SDP algorithm to Level-2 (L2) PACE OCI data.
 
 [Kramer-et-al]: https://doi.org/10.1016/j.rse.2021.112879
 
