@@ -6,12 +6,16 @@ This constantly updated collection of Jupyter notebooks is meant to help you get
 and analyzing OB.DAAC (Ocean Biology Distributed Active Archive Center) data products with Python.
 You can learn from these notebooks either by viewing the code and results on this webpage,
 or by downloading a notebook file, using the {fas}`download` menu in the upper right to get the {fas}`file` .ipynb file,
-and running it with [JupyterLab][jupyterlab].  **We welcome your input! If you have suggestions
+and running it with [JupyterLab][jupyterlab]. If you plan to run any of these notebooks but don't know how to start,
+please continue to the Getting Started section for information about the Earthdata Cloud and environments in Python. <br>
+
+We welcome your input! If you have suggestions
 for new notebooks or ideas to improve existing ones, please share them by creating an
 [issue](https://github.com/nasa/oceandata-notebooks/issues) or sending an email
-to [carina.poulin@nasa.gov](mailto:carina.poulin@nasa.gov).**
-If you plan to run any of these notebooks but don't know how to start,
-please continue to the next section for information about the Earthdata Cloud and environments in Python.
+to [carina.poulin@nasa.gov](mailto:carina.poulin@nasa.gov).
+
+⚠️ Recent data reprocessings have introduced updates to file structures, variable names, and data organization that may impact existing workflows and notebooks. If previously working code no longer runs as expected, please review the [Reprocessing Notes](https://nasa.github.io/oceandata-notebooks/notebooks/release_note_highlights.html) tutorial. This resource highlights key changes, explains their impacts on common workflows, and provides examples for updating code to ensure compatibility with the latest data products.
+
 If you are familiar with running our notebooks, feel free to explore the Help Hub's different sections:
 
 ## Help Hub Core
