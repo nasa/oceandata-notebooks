@@ -90,7 +90,6 @@ results_moana = earthaccess.search_data(
     short_name="PACE_OCI_L4M_MOANA",
     granule_name="*.DAY.*0p1deg*",  # Daily only for MOANA | Resolution: 0p1deg or 4 (for 4km)
     temporal=tspan,
-    version="3.1",
 )
 ```
 
@@ -462,7 +461,6 @@ results_moana = earthaccess.search_data(
     short_name="PACE_OCI_L4M_MOANA",
     granule_name="*.Day.*0p1deg*",  # Daily: Day | Resolution: 0p1deg or 4 (for 4km)
     temporal=tspan,
-    version="3.1",
 )
 ```
 
@@ -588,6 +586,8 @@ else:
 Then we plot a rectangle around our area of interest on our RGB map. We can try to choose an area that is at the edge of a population to see the changes in time.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(projection=ccrs.PlateCarree(), facecolor="#080c17")
 
@@ -647,7 +647,7 @@ sns.set_style("white")
 palette = sns.color_palette("husl", 3)
 
 for i, var in enumerate(("syncoccus_moana", "picoeuk_moana", "prococcus_moana")):
-    
+
     if var == "prococcus_moana":
         ax = ax_right
         linestyle = "--"
@@ -716,7 +716,7 @@ sns.set_style("white")
 palette = sns.color_palette("husl", 3)
 
 for i, var in enumerate(("syncoccus_moana", "picoeuk_moana", "prococcus_moana")):
-    
+
     if var == "prococcus_moana":
         ax = ax_right
         linestyle = "--"
