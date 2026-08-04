@@ -1,4 +1,3 @@
 # set information for OCSSW install and shared data
-ARG OCSSWTAG=V2026.2
 ARG OCSSWROOT=/opt/ocssw
 ARG OCSSWROOT_PUBLIC=/home/${NB_USER}/shared-public/pace-hackweek/ocssw
