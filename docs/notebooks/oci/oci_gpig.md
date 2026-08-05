@@ -190,6 +190,9 @@ fig
 Let's run it. This can take some time depending on bounding box size.
 
 ```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
 l2_pigments = L2_utils.estimate_inv_pigments(
     l2_paths[-1],
     sss_paths[-1],
@@ -318,6 +321,9 @@ fig
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
 l3_pigments = L3_utils.estimate_inv_pigments(l3m_paths, sss_paths, sst_paths, bbox)
 ```
 
