@@ -163,7 +163,7 @@ We should always keep the tables in release_note_highlights as current as possib
 yes | jcache notebook -p docs/_cache invalidate 27
 ```
 
-If you want to re-execute all notebooks in parallel, clear the notebook cache.
+If you want to re-execute all notebooks in parallel, for example if you are testing a new container image with updated packages, invalidate the whole notebook cache.
 
 ```{raw-cell}
 :scrolled: true
@@ -172,7 +172,7 @@ If you want to re-execute all notebooks in parallel, clear the notebook cache.
 yes | jcache notebook -p docs/_cache invalidate --all
 ```
 
-If you need to add a notebook to the project:
+If you need to add a notebook, modify the next cell to specify its path under "docs/":
 
 ```{raw-cell}
 # cell type is "Raw" for optional use
@@ -183,7 +183,6 @@ sqlite3 docs/_cache/global.db "update nbproject set uri = replace(uri, \"$PWD/\"
 Update the notebook cache as needed by executing notebooks.
 We use the isolated virtual environment to make sure the environment configuration is correct.
 We use `jcache` directly to achieve parallel execution.
-For a full but slow test of the environment configuration, delete `docs/_cache` before executing.
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -191,7 +190,7 @@ For a full but slow test of the environment configuration, delete `docs/_cache` 
 jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
 ```
 
-If any notebooks have been successfully executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
+If notebooks have been successfully executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
 Follow the next steps to share any cache updates using DVC and a git commit with changes to `docs/_cache.dvc`.
 
 First "reset" the database to erase spurious changes that would appear to DVC as updates.
