@@ -7,7 +7,7 @@ kernelspec:
 
 # Visualize SPEXone L2 V4.0 aerosol product (FastMAPOL)
 
-**Authors:** Meng Gao (NASA, SSAI), Guangliang Fu (SRON)
+**Authors:** Meng Gao (NASA/SSAI), Sean Foley (NASA/MSU), Kamal Aryal (NASA/UMBC)
 
 <div class="alert alert-info" role="alert">
 
@@ -399,7 +399,7 @@ To support L3 data processing, a quality flag is also defined, which is usually 
 - quality_flag = 3: when $\chi^2<2$ and $N_{ref}>100$ and $N_{DoLP}>100$
 - quality_flag > 4: for higher value $\chi^2$ and lower values of $N_{ref}$ and $N_{DoLP}$
 
-The quality flag definition remained the same with V3_0 data. 
+The quality flag definition remained the same with V3_0 data.
 
 ```{code-cell} ipython3
 chi2 = dataset["chi2"].values

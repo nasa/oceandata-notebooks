@@ -7,7 +7,7 @@ kernelspec:
 
 # Visualize SPEXone L2 V4.0 aerosol product (RemoTAP)
 
-**Authors:** Meng Gao (NASA, SSAI), Guangliang Fu (SRON)
+**Authors:** Meng Gao (NASA/SSAI), Guangliang Fu (SRON)
 
 <div class="alert alert-info" role="alert">
 

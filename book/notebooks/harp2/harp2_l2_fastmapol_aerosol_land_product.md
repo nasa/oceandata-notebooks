@@ -7,7 +7,7 @@ kernelspec:
 
 # Merged HARP2 L2 V4.0 aerosol over ocean and land product (FastMAPOL)
 
-**Authors:** Meng Gao (NASA, SSAI)
+**Authors:** Meng Gao (NASA/SSAI), Sean Foley (NASA/MSU), Kamal Aryal (NASA/UMBC)
 
 [edl]: https://urs.earthdata.nasa.gov/
 [oci-data-access]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/notebooks/oci_data_access/
