@@ -5,7 +5,7 @@ kernelspec:
   name: python3
 ---
 
-# Visualize HARP2 L2 aerosol product (FastMAPOL)
+# Visualize HARP2 L2 V4.0 aerosol over ocean product (FastMAPOL)
 
 **Authors:** Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU), Kamal Aryal (UMBC)
 
@@ -15,9 +15,20 @@ kernelspec:
 ## Summary
 This notebook explores the HARP2 Level 2 (L2) aerosol product derived from the joint aerosol and surface retrieval algorithm: FastMAPOL (Fast Multi-Angle Polarimetric Ocean and Land algorithm). For more detailed information about the algorithm, please refer to the relevant documentation.
 
-Similar to the SPEXone notebook, we will analyze a scene from the Los Angeles wildfire, which includes both smoke and dust events. The analysis will focus on aerosol optical depth, absorption, and size information.
+Similar to the SPEXone notebook, we will analyze a scene from the Los Angeles wildfire, which includes both smoke and dust events. The analysis will focus on aerosol optical depth, absorption, and size information over ocean surface (**MAPOL_OCEAN**).
 
-Note that the HARP2 Level 1 (L1) data is still undergoing calibration improvements, which may affect the quality of the L2 data. Data quality is evaluated using several metrics, which are reviewed at the end of this tutorial.
+This notebook updates the previous V3.0 example to use the new V4.0 data. Note that the HARP2 Level-1 (L1) data is still undergoing calibration improvements, which may affect the quality of the Level-2 (L2) products. Several quality metrics are provided to help assess the reliability of the L2 data, and these are reviewed at the end of this tutorial.
+
+## How to Cite
+
+If you use the PACE HARP2 MAPOL_OCEAN Version 4.0 data, please refer to the dataset information page for the latest citation and DOI:
+
+https://www.earthdata.nasa.gov/data/catalog/ob-cloud-pace-harp2-l2-mapol-ocean-4.0
+
+The dataset may be cited as:
+
+> NASA Ocean Biology Processing Group. (2026). *PACE HARP2 Level-2 Regional Aerosol Over Ocean Optical Properties, FastMAPOL Algorithm, Version 4.0*. NASA Ocean Biology Distributed Active Archive Center (OB.DAAC). DOI: 10.5067/PACE/HARP2/L2/MAPOL_OCEAN/4.0. Accessed on: YYYY-MM-DD.
+
 
 ## Learning Objectives
 By the end of this notebook, you will understand:
@@ -48,14 +59,16 @@ Begin by importing all of the packages used in this notebook. If your kernel use
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 ```{code-cell} ipython3
+import requests
+import earthaccess
+import numpy as np
+import xarray as xr
 from pathlib import Path
 
-import cartopy.crs as ccrs
-import earthaccess
 import matplotlib.pyplot as plt
-import numpy as np
-import requests
-import xarray as xr
+from matplotlib.colors import LogNorm
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 ```
 
 ```{code-cell} ipython3
@@ -69,21 +82,24 @@ fs = earthaccess.get_fsspec_https_session()
 
 ## 2. Get Level-2 Data
 
-HARP2 L2 data is currently in the test phase with data only available on OB.DAAC, not on earth data cloud yet. We can use the requests library to download data directly from OB.DAAC. The following command line tool downloads one HARP2 FastMAPOL L2 granule at the time stamp 2025/01/09 20:00:19 UTC.
+HARP2 L2 data is available on both OB.DAAC and earth data cloud. Please refer L1C notebook on the access of cloud. The following block retrieves a single HARP2 L2 granule at the time stamp 2025/01/09 20:00:19 UTC. V4.0 data is specified in the search.
 
 ```{code-cell} ipython3
-OB_DAAC_PROVISIONAL = "https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/"
-HARP2_L2_MAPOL_FILENAME = "PACE_HARP2.20250109T200019.L2.MAPOL_OCEAN.V3_0.nc"
-fs.get(f"{OB_DAAC_PROVISIONAL}/{HARP2_L2_MAPOL_FILENAME}", "data/")
-paths = list(Path("data").glob("*.nc"))
-paths
+results = earthaccess.search_data(
+    short_name="PACE_HARP2_L2_MAPOL_OCEAN",
+    temporal=("2025-01-09T20:00:20", "2025-01-09T20:00:21"),
+    granule_name='*V4_0*',
+    count=1,
+)
+paths = earthaccess.open(results)
 ```
 
-<div class="alert alert-danger" role="alert">
-
-When HARP2 L2 data in provisional level, it will be available through the earth data cloud tools as for the L1C data.
-
-</div>
+```{code-cell} ipython3
+# this cell is tagged to be removed from HTML renders,
+# but we currently want to download when we don't have direct access
+if not earthaccess.__store__.in_region:
+    paths = earthaccess.download(results, "./")
+```
 
 PACE polarimeter L2 products for both HARP2 and SPEXone include four data groups
 - geolocation_data
@@ -132,9 +148,11 @@ And a set of other products:
 
 The remote sensing reflectance characterizes ocean-leaving reflectance. It is derived via atmospheric correction based on the retrieved aerosol properties at all HARP2 viewing angles. Therefore, it includes an angle dimension, as in the L1C data.
 
-There are two versions of remote sensing reflectance: Rrs1 (before BRDF correction) and Rrs2 (after BRDF correction). Due to the large size of Rrs1 and Rrs2, they are optional outputs in the standard L2 file. Instead, their angular means and standard deviations are typically included as Rrs1_mean/std and Rrs2_mean/std.
+There are two versions of remote sensing reflectance: Rrs_angular (before BRDF correction, renamed from Rrs1 in V3 data) and Rrs_nadir (after BRDF correction, renamed from Rrs2 in V3 data). Rrs_angular and Rrs_nadir are both standard output in L2 file. Meanwhile, their angular means and standard deviations are also included as Rrs_nadir_mean/std and Rrs_angular_mean/std.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 datatree["geophysical_data"]
 ```
 
@@ -159,51 +177,118 @@ We also need the spatial and angle dimensions as below:
 lat = dataset["latitude"].values
 lon = dataset["longitude"].values
 plot_range = [lon.min(), lon.max(), lat.min(), lat.max()]
-wavelength = dataset["wavelength_3d"].values
+wavelength = dataset["wavelength"].values
 print(wavelength)
 ```
 
-<div class="alert alert-danger" role="alert">
-
-For future L2 product, the wavelength variable will be called simple `wavelength`, rather than `wavelength_3d`
-
-</div>
-
 ```{code-cell} ipython3
 def plot_l2_product(
-    data, plot_range, label, title, vmin, vmax, figsize=(12, 4), cmap="viridis"
+    lon, lat, data,
+    plot_range, label, title,
+    vmin=None, vmax=None,
+    figsize=(12, 4),
+    cmap="viridis",
+    log_scale=False,
+    land_color="#f2efe9",
+    ocean_color="#dbe9f6",
 ):
-    """Make map and histogram (default)."""
+    """Make map + histogram with optional log color scaling and land/ocean background.
 
-    # Create a figure with two subplots: 1 for map, 1 for histogram
+    Notes:
+      - Assumes lon/lat are 2D or 1D arrays available in the outer scope
+        (or change signature to pass them in).
+      - For log_scale=True, only positive values are used for autoscaling and histogram.
+    """
+
+    # ------------------
+    # Determine vmin / vmax if not given
+    # ------------------
+    valid = data[np.isfinite(data)]
+    if valid.size == 0:
+        raise ValueError("No finite values in `data`.")
+
+    if log_scale:
+        valid = valid[valid > 0]
+        if valid.size == 0:
+            raise ValueError("log_scale=True but `data` has no positive finite values.")
+
+        if vmin is None:
+            vmin = np.percentile(valid, 2)
+        if vmax is None:
+            vmax = np.percentile(valid, 98)
+
+        # Safety: avoid invalid/degenerate bounds
+        if (vmin is None) or (vmax is None) or (vmin <= 0) or (vmin >= vmax):
+            vmin = float(np.min(valid))
+            vmax = float(np.max(valid))
+
+    else:
+        if vmin is None:
+            vmin = np.percentile(valid, 2)
+        if vmax is None:
+            vmax = np.percentile(valid, 98)
+
+        if (vmin is None) or (vmax is None) or (vmin >= vmax):
+            vmin = float(np.min(valid))
+            vmax = float(np.max(valid))
+
+    # ------------------
+    # Figure layout
+    # ------------------
     fig = plt.figure(figsize=figsize)
     gs = fig.add_gridspec(1, 2, width_ratios=[3, 1], wspace=0.3)
 
+    # ------------------
     # Map subplot
+    # ------------------
     ax_map = fig.add_subplot(gs[0], projection=ccrs.PlateCarree())
     ax_map.set_extent(plot_range, crs=ccrs.PlateCarree())
+
+    # Land / ocean background (behind data)
+    ax_map.add_feature(cfeature.OCEAN, facecolor=ocean_color, zorder=0)
+    ax_map.add_feature(cfeature.LAND, facecolor=land_color, zorder=1)
+
     ax_map.coastlines(resolution="110m", color="black", linewidth=0.8)
     ax_map.gridlines(draw_labels=True)
 
-    # Assume lon and lat are defined globally or passed in
+    norm = LogNorm(vmin=vmin, vmax=vmax) if log_scale else None
+
     pm = ax_map.pcolormesh(
-        lon, lat, data, vmin=vmin, vmax=vmax, transform=ccrs.PlateCarree(), cmap=cmap
+        lon, lat, data,
+        norm=norm,
+        vmin=None if log_scale else vmin,
+        vmax=None if log_scale else vmax,
+        transform=ccrs.PlateCarree(),
+        cmap=cmap,
+        zorder=2
     )
-    plt.colorbar(pm, ax=ax_map, orientation="vertical", pad=0.1, label=label)
+
+    cbar = plt.colorbar(pm, ax=ax_map, orientation="vertical", pad=0.1)
+    cbar.set_label(label)
+
     ax_map.set_title(title, fontsize=12)
 
+    # ------------------
     # Histogram subplot
+    # ------------------
     ax_hist = fig.add_subplot(gs[1])
-    flattened_data = data[~np.isnan(data)]  # Remove NaNs for histogram
-    valid_count = np.sum(~np.isnan(flattened_data))
-    ax_hist.hist(
-        flattened_data, bins=40, color="gray", range=[vmin, vmax], edgecolor="black"
-    )
+
+    hist_data = data[np.isfinite(data)]
+    if log_scale:
+        hist_data = hist_data[hist_data > 0]
+        bins = np.logspace(np.log10(vmin), np.log10(vmax), 40)
+        ax_hist.hist(hist_data, bins=bins, color="gray", edgecolor="black")
+        ax_hist.set_xscale("log")
+    else:
+        ax_hist.hist(
+            hist_data, bins=40, range=[vmin, vmax],
+            color="gray", edgecolor="black"
+        )
+
     ax_hist.set_xlabel(label)
     ax_hist.set_ylabel("Count")
-    ax_hist.set_title("Histogram: N=" + str(valid_count))
+    ax_hist.set_title(f"Histogram: N={hist_data.size}")
 
-    # plt.tight_layout()
     plt.show()
 ```
 
@@ -213,7 +298,7 @@ title = "Aerosol Optical Depth (AOD): " + str(wavelength[wavelength_index]) + " 
 label = "AOD"
 data = aot[:, :, wavelength_index]
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.5, cmap="jet"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.5, cmap="jet"
 )
 ```
 
@@ -223,7 +308,7 @@ title = "Single scattering albedo (SSA): " + str(wavelength[wavelength_index]) +
 label = "SSA"
 data = ssa[:, :, wavelength_index]
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
 )
 ```
 
@@ -233,7 +318,7 @@ title = "Fine mode fraction"
 label = "FVF"
 data = fvf
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
 )
 ```
 
@@ -262,7 +347,7 @@ data = filtered_ssa = np.where(
     aot[:, :, wavelength_index] >= aot_min, ssa[:, :, wavelength_index], np.nan
 )
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
+    lon, lat,data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
 )
 ```
 
@@ -275,7 +360,7 @@ title = "Fine mode fraction (AOD 550>" + str(aot_min) + ")"
 label = "FVF"
 data = filtered_ssa = np.where(aot[:, :, wavelength_index] >= aot_min, fvf, np.nan)
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
+    lon, lat,data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
 )
 ```
 
@@ -292,10 +377,13 @@ $\chi^2 = \frac{1}{N} \sum (f - m)^2/\sigma^2$
 Here N is the total number of measureents used in retreival. The algorithm also adaptively evalue fitting performance, if the fitting perform poor, it will be removed from the retreival process. Therefore, the $\chi^2$ and $N$ can be used to evaluate retrieval performance, the pixels with small $\chi^2$ (good fitting) and large $N$ (more pixels can be fitted) will better quality. A more quantitatively approach based on error propogation can be also used to compute retrieval uncertainty, which will be include in future product.
 
 To support L3 data processing, a quality flag is also defined, which is usually based on $\chi^2$ and $N$. For the HARP2 test data, we choose 
-- quality_flag = 0: when $\chi^2<1.5$ and $N_{ref}>60$ and $N_{DoLP}>60$
-- quality_flag = 1: when $\chi^2<1.5$ and $N_{ref}>40$ and $N_{DoLP}>40$
-- quality_flag > 1: for higher value $\chi^2$ and lower values of $N_{ref}$ and $N_{DoLP}$
-Quality flag will be updated with future L1 data calibration improvement.
+- quality_flag = 0: when $\chi^2<1.5$ and $N_{ref}>70$ and $N_{DoLP}>70$
+- quality_flag = 1: when $\chi^2<1.5$ and $N_{ref}>60$ and $N_{DoLP}>60$
+- quality_flag = 2: when $\chi^2<1.5$ and $N_{ref}>40$ and $N_{DoLP}>40$
+- quality_flag = 3: when $\chi^2<2$ and $N_{ref}>30$ and $N_{DoLP}>30$
+- quality_flag > 4: for higher value $\chi^2$ and lower values of $N_{ref}$ and $N_{DoLP}$
+
+The quality flag definition has been revised compared with V3_0 by adding a new quality_flag = 0 criterion. As a result, all existing quality flag values have been renumbered (e.g., 0→1, 1→2, 2→3). The quality flag criteria may be updated further as Level-1 calibration improves.
 
 ```{code-cell} ipython3
 chi2 = dataset["chi2"].values
@@ -309,7 +397,7 @@ title = r"Retrieval cost function: $\chi^2$"
 label = r"$\chi^2$"
 data = chi2
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap="jet"
+    lon, lat,data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap="jet"
 )
 ```
 
@@ -318,7 +406,7 @@ title = r"Total number of reflectance measurements"
 label = r"$N_{ref}$"
 data = nv_ref
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=90, cmap="jet"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=90, cmap="jet"
 )
 ```
 
@@ -327,7 +415,7 @@ title = r"Total number of reflectance measurements"
 label = r"$N_{dolp}$"
 data = nv_dolp
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=90, cmap="jet"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=90, cmap="jet"
 )
 ```
 
@@ -342,7 +430,7 @@ title = "Retrieval quality flag"
 label = "quality_flag"
 data = quality_flag
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=4, cmap="cool"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=4, cmap="viridis" 
 )
 ```
 
@@ -354,7 +442,7 @@ We can evaluate quality flag based on the $\chi^2$ and $N$, and only a small por
 
 +++
 
-## 7. Optional: Multi-angle data mask for cloud and data screening
+## 7. Multi-angle data mask for cloud and data screening
 
 +++
 
@@ -372,7 +460,7 @@ title = "Adaptive data mask on reflectance: angle index " + str(angle_index)
 label = "mask_ref"
 data = mask_ref[:, :, angle_index, 0]
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="cool"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="viridis"
 )
 ```
 
@@ -382,7 +470,7 @@ title = "Adaptive data mask on DoLP: angle index" + str(angle_index)
 label = "mask_DOLP"
 data = mask_dolp[:, :, angle_index, 0]
 plot_l2_product(
-    data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="cool"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="viridis"
 )
 ```
 
@@ -404,11 +492,8 @@ As mentioned previously, pixel level uncertainty can be evalated through error p
 
 ## 9. Reference
 
-- Gao, M., Franz, B. A., Knobelspiesse, K., Zhai, P.-W., Martins, V., Burton, S., Cairns, B., Ferrare, R., Gales, J., Hasekamp, O., Hu, Y., Ibrahim, A., McBride, B., Puthukkudy, A., Werdell, P. J., and Xu, X.: Efficient multi-angle polarimetric inversion of aerosols and ocean color powered by a deep neural network forward model, Atmos. Meas. Tech., 14, 4083–4110, https://doi.org/10.5194/amt-14-4083-2021, 2021.
-
-- Gao, M., Knobelspiesse, K., Franz, B. A., Zhai, P.-W., Sayer, A. M., Ibrahim, A., Cairns, B., Hasekamp, O., Hu, Y., Martins, V., Werdell, P. J., and Xu, X.: Effective uncertainty quantification for multi-angle polarimetric aerosol remote sensing over ocean, Atmos. Meas. Tech., 15, 4859–4879, https://doi.org/10.5194/amt-15-4859-2022, 2022.
-
-- Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, Atmos. Meas. Tech., 16, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023.
+- [**Validation**] Gao, M., Aryal, K., Zhai, P.-W., Knobelspiesse, K., Franz, B. A., Cairns, B., Cetinić, I., Fu, G., Hasekamp, O., Ibrahim, A., Sayer, A. M., and Werdell, P. J.: Where sky meets sea: Integrated aerosol and ocean color retrieval from PACE SPEXone multi-angle polarimetry, Remote Sens. Environ., 345, 115603, https://doi.org/10.1016/j.rse.2026.115603, 2026.
+- [**Algorithm**] Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, Atmos. Meas. Tech., 16, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023.
 
 +++
 
