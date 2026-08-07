@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.4
+    jupytext_version: 1.19.5
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -15,7 +15,15 @@ kernelspec:
 
 **Author:** Anna Windle (NASA GSFC, SSAI)
 
-Last updated: July 10, 2026
+Last updated: August 7, 2026
+
+<div class="alert alert-info" role="alert">
+
+An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+
+</div>
+
+[edl]: https://urs.earthdata.nasa.gov/
 
 ## Summary
 
@@ -27,28 +35,14 @@ These data are used as input to the Python Top-Of-Atmosphere Simulation Tool (Py
 
 This openly available dataset represents the first fully closed, spatially explicit simulation of PACE-like measurements, establishing a foundation for evaluation of atmospheric correction and bio-optical (empirical and semi-analytical) methods. It is designed to accelerate algorithm development, enhance confidence in satellite-derived products, and ultimately advance global ocean biogeochemical observing capabilities. More information on the CLOSE dataset can be found in this manuscript. (link to be added)
 
-The entire CLOSE dataset is hosted and provided free of charge through the NASA Ocean Biology Distribution Active Archive Center (OB.DAAC). Data are available as NetCDF (.nc) files. The primary links for referencing these data are:
-- https://doi.org/10.5067/PACE/OCISIM/MODELINPUTS/CLOSE
-- https://doi.org/10.5067/PACE/OCISIM/L1B/CLOSE
-- https://doi.org/10.5067/PACE/OCISIM/L2/CLOSE
-- https://doi.org/10.5067/PACE/OCISIM/L3M/CLOSE
-
-Data can be accessed via the [OB.DAAC File Search](https://oceandata.sci.gsfc.nasa.gov/file_search). Click "Advanced" at the top, filter "Instrument" to "PACE-OCI" and filter through "Data Type". The following are the Data Types for the CLOSE dataset:
-- PACE-OCI SIM PyTOAST Model Inputs for CLOSE
-- PACE-OCI SIM PyTOAST Level-1B Observations for CLOSE
-- PACE-OCI SIM PyTOAST Level-2 Observations for CLOSE
-- PACE-OCI SIM PyTOAST Level-3 Binned Observations for CLOSE
-- PACE-OCI SIM PyTOAST Level-3 Mapped Observations for CLOSE
-
-You can leave all other selections the default, and press "Submit". This will take you to a page where you can download the files directly. You can also use the command line retireval methods, examples are shown on the File Search website.
-
-**This tutorial demonstrates how to access CLOSE data using command line methods within a Jupyter notebook.**
+The entire CLOSE dataset is hosted and provided free of charge through NASA Earthdata. The dataset can be accessed via the [DOI landing page](https://doi.org/10.5067/PACE/OCISIM/CLOSE) which provides links to the corresponding NASA Earthdata dataset landing pages. This tutorial will demonstrate how to access the CLOSE dataset using `earthaccess`.
 
 ## Learning Objectives
 
 At the end of this notebook, you will know how to:
-- Find and download CLOSE data from OB.DAAC
-- Use Python `requests` to query the OB.DAAC File Search using the API
+- Discover and access the CLOSE dataset using `earthaccess`
+- Open CLOSE data as an `xarray` dataset
+- Explore and visualize CLOSE dataset variables through plots
 
 +++
 
@@ -59,117 +53,112 @@ At the end of this notebook, you will know how to:
 Begin by importing all of the packages used in this notebook.
 
 ```{code-cell} ipython3
-from pathlib import Path
-
+import earthaccess
 import matplotlib.pyplot as plt
-import numpy as np
-import requests
 import xarray as xr
-from tqdm.notebook import tqdm
 ```
 
-# 2. Query OB.DAAC File Search
+Set your Earthdata Login credentials. You can add `persist=True` to save your credentials in a `.netrc` file, allowing you to authenticate automatically in the future sessions without re-entering your Earthdata credentials.
+
+```{code-cell} ipython3
+auth = earthaccess.login()
+```
+
+# 2. Query CLOSE Dataset
 
 +++
 
-We can query the OB.DAAC File Search using the API, which has [documentation](https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/?tab=using-the-api-tab) for all available parameters. Let's start by counting how many files exist for several CLOSE product types on our target date of 2025-03-15. You can change this date to any of the other dates for which CLOSE data are available:
-* 2025-01-15
-* 2025-03-15
-* 2025-06-15
-* 2024-09-15
-
-The URL for the API is the same as the OB.DAAC File Search form:
+The CLOSE dataset is available for four months: Jan 2025, Mar 2025, Jun 2025, Sep 2024. Let's start by counting how many files exist for each month.
 
 ```{code-cell} ipython3
-url = "https://oceandata.sci.gsfc.nasa.gov/file_search"
-```
-
-These parameters are going to be sent with each of our queries:
-- `sensor="PACE-OCI"` → the name of the sensor
-- `sdate` → search start date
-- `edate` → search end date
-- `results_as_file=1` → return a plain text list of matching filenames
-
-```{code-cell} ipython3
-common_params = {
-    "sensor": "PACE-OCI",
-    "sdate": "2025-03-15T00:00:00",
-    "edate": "2025-03-15T23:59:59",
-    "results_as_file": 1,
+months = {
+    "Jan 2025": ("2025-01-01", "2025-01-30"),
+    "Mar 2025": ("2025-03-01", "2025-03-30"),
+    "Jun 2025": ("2025-06-01", "2025-06-30"),
+    "Sep 2024": ("2024-09-01", "2024-09-30"),
 }
-```
 
-Each dataset we need has an OB.DAAC-specific identifier, which can be found in the [documentation](https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/?tab=using-the-api-tab#file-search-help) for `dtid`.
-
-```{code-cell} ipython3
 datasets = {
-    "Model Input": 165,
-    "L1B": 164,
-    "L2": 161,
-    "L3M": 163,
+    "Model Inputs": "PACE_OCI_MI_CLOSE",
+    "L1B": "PACE_OCI_L1B_CLOSE",
+    "L2": "PACE_OCI_L2_CLOSE",
+    "L3M": "PACE_OCI_L3M_CLOSE",
 }
+
+for month, temporal in months.items():
+    print(month)
+    for label, short_name in datasets.items():
+        results = earthaccess.search_data(
+            short_name=short_name,
+            temporal=temporal,
+        )
+        print(f"  {label}: {len(results)} files")
+    print()
 ```
 
-We can now make `POST` requests for each dataset, and build up a list of files to download. Depending on the current load on the File Search database, this step may take anywhere from a few seconds to several minutes.
-
-```{code-cell} ipython3
-files = {}
-for name, dtid in datasets.items():
-    response = requests.post(url, data={**common_params, "dtid": dtid})
-    response.raise_for_status()
-    lines = list(response.iter_lines(decode_unicode=True))
-    files[name] = lines
-    print(f"Total number of {name} files: {len(lines)}")
-```
-
-# 3. Download data
+# 3. Search and access the data
 
 +++
 
-In this example, we grab one file for each data product type. We are downloading files corresponding to a date and granule discussed in the manuscript: Granule B in Figure 1. We can download each file from lists in the `files` dictionary, and save it to a local directory called `CLOSE_data`. You can change this directory name to any location or folder name that best fits your workflow.
+Let's search for files corresponding to a date and granule discussed in the manuscript: Granule B in Figure 1. 
 
 ```{code-cell} ipython3
-url = "https://oceandata.sci.gsfc.nasa.gov/getfile/"
-data = Path("CLOSE_data")
-data.mkdir(parents=True, exist_ok=True)
-session = requests.Session()
-
 target_time = "20250315T152616"
 target_date = "20250315"
 
-paths = {}
-for name in tqdm(files):
-    example_files = [f for f in files[name] if target_time in str(f) or (name== "L3M" and target_date in str(f))]
-    example_file = Path(example_files[0])
-    with session.get(f"{url}/{example_file}", stream=True) as r:
-        r.raise_for_status()
-        with (data / example_file).open("wb") as f:
-            f.writelines(r.iter_content(chunk_size=2**20))
-    paths[name] = data / example_file
+datasets = {
+    "Model Inputs": "PACE_OCI_MI_CLOSE",
+    "L1B": "PACE_OCI_L1B_CLOSE",
+    "L2": "PACE_OCI_L2_CLOSE",
+    "L3M": "PACE_OCI_L3M_CLOSE",
+}
+
+files = {}
+
+for label, short_name in datasets.items():
+
+    results = earthaccess.search_data(
+        short_name=short_name,
+        temporal=("2025-03-15", "2025-03-15"),
+    )
+
+    target = target_date if label == "L3M" else target_time
+
+    files[label] = next(
+        (r for r in results if target in r.data_links()[0]),
+        None,
+    )
+
+    print(f"{label}: {files[label].data_links()[0] if files[label] else 'Not found'}")
+```
+
+```{code-cell} ipython3
+paths = earthaccess.open(list(files.values()))
+paths
 ```
 
 # 4. Open and plot the data
 
 +++
 
-Now that the data have been downloaded locally, we can open it as an `xarray` dataset and prepare it for subsequent analysis.
+Let's open the data using `xarray` and prepare it for subsequent analysis.
 
 ```{code-cell} ipython3
-model_inputs = xr.open_dataset(paths["Model Input"])
+model_inputs = xr.open_dataset(paths[0])
 model_inputs = model_inputs.set_coords(("longitude", "latitude"))
 
-l1b = xr.open_datatree(paths["L1B"])
+l1b = xr.open_datatree(paths[1])
 l1b = xr.merge(l1b.to_dict().values())
 l1b = l1b.set_coords(("longitude", "latitude"))
 
-l2 = xr.open_datatree(paths["L2"], decode_timedelta=False)
+l2 = xr.open_datatree(paths[2])
 l2 = xr.merge(l2.to_dict().values())
 l2 = l2.set_coords(("longitude", "latitude"))
 
-l3m = xr.open_dataset(paths["L3M"])
+l3m = xr.open_dataset(paths[3])
 ```
 
-Let's plot either remote sensing reflectance (Rrs) or top-of-atmopshere reflectance (rhot) from each file:
+We can plot either remote sensing reflectance (Rrs) or top-of-atmopshere reflectance (rhot) from each file:
 
 ```{code-cell} ipython3
 fig = plt.figure(figsize=(10, 4), constrained_layout=True)
@@ -208,7 +197,6 @@ m4 = (
 )
 ax4.set_title("L3M")
 
-# --- Two-line colorbar labels ---
 m1.colorbar.set_label("Rrs(442) (sr⁻¹)")
 m2.colorbar.set_label("Rhot(442)")
 m3.colorbar.set_label("Rrs(442) (sr⁻¹)")
@@ -221,7 +209,6 @@ for ax in [ax1, ax2, ax3, ax4]:
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-# shift bottom row to the right and down
 pos = ax4.get_position()
 ax4.set_position([pos.x0 + 0.05, pos.y0 - 0.07, pos.width, pos.height])
 
@@ -239,17 +226,13 @@ cbar.ax.set_position(
 plt.show()
 ```
 
-This code can be easily adapted to download multiple granules. By downloading the complete set of associated files, you can examine each stage of the processing chain and explore how the data evolve from one product level to the next.
-
-+++
-
 # 5. Example of comparing input and output geophysical data products
 
 +++
 
 By providing known “truth” fields in native satellite geometry, CLOSE offers a powerful testbed for atmospheric correction, bio-optical inversion, and emerging machine learning approaches.
 
-Here is an example of comparing input Chl a (derived mechanistically from NOBM) to output Chl a derived from NASA OB.DAAC (see [Chl a ATBD](https://oceancolor.gsfc.nasa.gov/files/atbd/atbd-obdaac-chlorophyll-a.pdf)).
+Here is an example of comparing input Chl a (derived mechanistically from NOBM) to output Chl a derived from NASA OB.DAAC ([Chl a ATBD](https://oceancolor.gsfc.nasa.gov/files/atbd/atbd-obdaac-chlorophyll-a.pdf)).
 
 ```{code-cell} ipython3
 plot = model_inputs["chlor_a"].plot.hist(
