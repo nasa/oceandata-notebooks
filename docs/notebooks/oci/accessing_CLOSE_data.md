@@ -64,20 +64,14 @@ Set your Earthdata Login credentials. You can add `persist=True` to save your cr
 auth = earthaccess.login()
 ```
 
-# 2. Query CLOSE Dataset
+# 2. Availability
 
 +++
 
-The CLOSE dataset is available for four months: Jan 2025, Mar 2025, Jun 2025, Sep 2024. Let's start by counting how many files exist for each month.
+The CLOSE dataset is available for four months: Sep 2024, Jan 2025, Mar 2025, and Jun 2025. Let's start by counting how many files exist for each month.
 
 ```{code-cell} ipython3
-months = {
-    "Jan 2025": ("2025-01-01", "2025-01-30"),
-    "Mar 2025": ("2025-03-01", "2025-03-30"),
-    "Jun 2025": ("2025-06-01", "2025-06-30"),
-    "Sep 2024": ("2024-09-01", "2024-09-30"),
-}
-
+months = ("2024-09", "2025-01", "2025-03", "2025-06")
 datasets = {
     "Model Inputs": "PACE_OCI_MI_CLOSE",
     "L1B": "PACE_OCI_L1B_CLOSE",
@@ -85,36 +79,28 @@ datasets = {
     "L3M": "PACE_OCI_L3M_CLOSE",
 }
 
-for month, temporal in months.items():
-    print(month)
+for m in months:
+    print(m)
     for label, short_name in datasets.items():
         results = earthaccess.search_data(
             short_name=short_name,
-            temporal=temporal,
+            temporal=(m, m),
         )
         print(f"  {label}: {len(results)} files")
     print()
 ```
 
-# 3. Search and access the data
+# 3. Search and access
 
 +++
 
-Let's search for files corresponding to a date and granule discussed in the manuscript: Granule B in Figure 1. 
+Let's search for files corresponding to a date and granule discussed in the manuscript: Granule B in Figure 1.
 
 ```{code-cell} ipython3
 target_time = "20250315T152616"
 target_date = "20250315"
 
-datasets = {
-    "Model Inputs": "PACE_OCI_MI_CLOSE",
-    "L1B": "PACE_OCI_L1B_CLOSE",
-    "L2": "PACE_OCI_L2_CLOSE",
-    "L3M": "PACE_OCI_L3M_CLOSE",
-}
-
 files = {}
-
 for label, short_name in datasets.items():
 
     results = earthaccess.search_data(
@@ -134,10 +120,9 @@ for label, short_name in datasets.items():
 
 ```{code-cell} ipython3
 paths = earthaccess.open(list(files.values()))
-paths
 ```
 
-# 4. Open and plot the data
+# 4. Open and plot
 
 +++
 
@@ -226,20 +211,20 @@ cbar.ax.set_position(
 plt.show()
 ```
 
-# 5. Example of comparing input and output geophysical data products
+# 5. Closing the loop on chlorophyll a
 
 +++
 
 By providing known “truth” fields in native satellite geometry, CLOSE offers a powerful testbed for atmospheric correction, bio-optical inversion, and emerging machine learning approaches.
 
-Here is an example of comparing input Chl a (derived mechanistically from NOBM) to output Chl a derived from NASA OB.DAAC ([Chl a ATBD](https://oceancolor.gsfc.nasa.gov/files/atbd/atbd-obdaac-chlorophyll-a.pdf)).
+Here is an example of comparing input `chlor_a` (derived mechanistically from NOBM) to output `chlor_a` derived from NASA OB.DAAC ([Chl a ATBD](https://oceancolor.gsfc.nasa.gov/files/atbd/atbd-obdaac-chlorophyll-a.pdf)).
 
 ```{code-cell} ipython3
 plot = model_inputs["chlor_a"].plot.hist(
     bins=50,
     range=[0.007, 0.4],
     alpha=0.4,
-    label="MODEL_INPUTS Chl a",
+    label="MODEL_INPUTS",
     color="blue",
 )
 
@@ -247,29 +232,28 @@ plot = l2["chlor_a"].plot.hist(
     bins=50,
     range=[0.007, 0.4],
     alpha=0.4,
-    label="L2 Chl a",
+    label="L2",
     color="red",
 )
 
-median_model_inputs_chl = np.nanmedian(model_inputs["chlor_a"].values)
-median_l2_chl = np.nanmedian(l2["chlor_a"].values)
-print(median_model_inputs_chl, median_l2_chl)
+median_model_inputs_chl = model_inputs["chlor_a"].median()
+median_l2_chl = l2["chlor_a"].median()
 
 plt.axvline(
     median_model_inputs_chl,
     color="blue",
     linewidth=2,
-    label=f"MODEL_INPUTS Chl median= {median_model_inputs_chl:.2f}",
+    label=f"MODEL_INPUTS median = {median_model_inputs_chl:.2f}",
 )
 plt.axvline(
     median_l2_chl,
     color="red",
     linestyle="--",
     linewidth=2,
-    label=f"L2 Chl median= {median_l2_chl:.2f}",
+    label=f"L2 median = {median_l2_chl:.2f}",
 )
 
-plt.xlabel("Chl a (mg m$^{-3}$)", fontsize=10)
+plt.xlabel("chlorophyll a (mg m$^{-3}$)", fontsize=10)
 plt.ylabel("Frequency", fontsize=10)
 
 plt.legend(frameon=False)
