@@ -1,7 +1,5 @@
 ---
 jupytext:
-  notebook_metadata_filter: -all,kernelspec,jupytext
-  cell_metadata_filter: all,-trusted
   text_representation:
     extension: .md
     format_name: myst
