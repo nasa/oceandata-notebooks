@@ -62,6 +62,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+import matplotlib.gridspec as gridspec
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 ```
@@ -179,7 +180,7 @@ For future L2 product, the wavelength variable will be called simple `wavelength
 ```{code-cell} ipython3
 def plot_l2_product(
     lon, lat, data,
-    plot_range, label, title,
+    label, title,
     vmin=None, vmax=None,
     figsize=(12, 4),
     cmap="viridis",
@@ -198,7 +199,10 @@ def plot_l2_product(
     # ------------------
     # Determine vmin / vmax if not given
     # ------------------
-    valid = data[np.isfinite(data)]
+    mask_valid = np.isfinite(data)
+    valid = data[mask_valid]
+    lat_valid, lon_valid = lat[mask_valid], lon[mask_valid]
+    plot_range = [lon_valid.min(), lon_valid.max(), lat_valid.min(), lat_valid.max()]
     if valid.size == 0:
         raise ValueError("No finite values in `data`.")
 
@@ -231,12 +235,14 @@ def plot_l2_product(
     # Figure layout
     # ------------------
     fig = plt.figure(figsize=figsize)
-    gs = fig.add_gridspec(1, 2, width_ratios=[3, 1], wspace=0.3)
+    gs = gridspec.GridSpec(16, 48, figure=fig)
+    ax_map = fig.add_subplot(gs[:, :22], projection=ccrs.PlateCarree())
+    ax_cbar = fig.add_subplot(gs[:, 14:15])
+    ax_hist = fig.add_subplot(gs[:, 22:])
 
     # ------------------
     # Map subplot
     # ------------------
-    ax_map = fig.add_subplot(gs[0], projection=ccrs.PlateCarree())
     ax_map.set_extent(plot_range, crs=ccrs.PlateCarree())
 
     # Land / ocean background (behind data)
@@ -244,7 +250,10 @@ def plot_l2_product(
     ax_map.add_feature(cfeature.LAND, facecolor=land_color, zorder=1)
 
     ax_map.coastlines(resolution="110m", color="black", linewidth=0.8)
-    ax_map.gridlines(draw_labels=True)
+    gl = ax_map.gridlines(draw_labels={"bottom": "x", "left": "y"})
+    gl.auto_inline = False
+    gl.top_labels = False
+    gl.right_labels = False
 
     norm = LogNorm(vmin=vmin, vmax=vmax) if log_scale else None
 
@@ -258,7 +267,7 @@ def plot_l2_product(
         zorder=2
     )
 
-    cbar = plt.colorbar(pm, ax=ax_map, orientation="vertical", pad=0.1)
+    cbar = plt.colorbar(pm, cax=ax_cbar, orientation="vertical", pad=0.2)
     cbar.set_label(label)
 
     ax_map.set_title(title, fontsize=12)
@@ -266,8 +275,6 @@ def plot_l2_product(
     # ------------------
     # Histogram subplot
     # ------------------
-    ax_hist = fig.add_subplot(gs[1])
-
     hist_data = data[np.isfinite(data)]
     if log_scale:
         hist_data = hist_data[hist_data > 0]
@@ -283,7 +290,6 @@ def plot_l2_product(
     ax_hist.set_xlabel(label)
     ax_hist.set_ylabel("Count")
     ax_hist.set_title(f"Histogram: N={hist_data.size}")
-
     plt.show()
 ```
 
@@ -293,7 +299,7 @@ title = "Aerosol Optical Depth (AOD): " + str(wavelength[wavelength_index]) + " 
 label = "AOD"
 data = aot[:, :, wavelength_index]
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.3, cmap="jet"
+    lon, lat, data, label=label, title=title, vmin=0, vmax=0.3, cmap="jet"
 )
 ```
 
@@ -306,7 +312,7 @@ data = filtered_ssa = np.where(
 )
 data = ssa[:, :, wavelength_index]
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
+    lon, lat, data, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
 )
 ```
 
@@ -316,7 +322,7 @@ title = "Fine mode fraction"
 label = "FVF"
 data = fvf
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
+    lon, lat, data, label=label, title=title, vmin=0, vmax=1, cmap="jet"
 )
 ```
 
@@ -349,7 +355,7 @@ data = filtered_ssa = np.where(
     aot[:, :, wavelength_index] >= aot_min, ssa[:, :, wavelength_index], np.nan
 )
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
+    lon, lat, data, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
 )
 ```
 
@@ -362,7 +368,7 @@ title = "Fine mode fraction (AOD 550>" + str(aot_min) + ")"
 label = "FVF"
 data = filtered_ssa = np.where(aot[:, :, wavelength_index] >= aot_min, fvf, np.nan)
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
+    lon, lat, data, label=label, title=title, vmin=0, vmax=1, cmap="jet"
 )
 ```
 
@@ -402,7 +408,7 @@ title = r"Retrieval cost function: $\chi^2$"
 label = r"$\chi^2$"
 data = chi2
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap="jet"
+    lon, lat, data, label=label, title=title, vmin=0, vmax=3, cmap="jet"
 )
 ```
 
@@ -417,7 +423,7 @@ title = "Retrieval quality flag"
 label = "quality_flag"
 data = quality_flag
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap="viridis"
+    lon, lat, data, label=label, title=title, vmin=0, vmax=3, cmap="viridis"
 )
 ```
 
@@ -445,7 +451,7 @@ title = "Cloud fraction"
 label = "cloud_fraction"
 data = cloud_fraction
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="viridis"
+    lon, lat, data, label=label, title=title, vmin=0, vmax=1, cmap="viridis"
 )
 ```
 
@@ -474,7 +480,7 @@ title = (
 label = "AOD"
 data = aot_unc[:, :, wavelength_index]
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.02, cmap="jet"
+    lon, lat, data, label=label, title=title, vmin=0, vmax=0.02, cmap="jet"
 )
 ```
 
