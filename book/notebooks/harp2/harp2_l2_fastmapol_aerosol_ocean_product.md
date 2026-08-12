@@ -67,6 +67,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+from matplotlib.patches import Ellipse
+import matplotlib.patheffects as path_effects
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 ```
@@ -187,6 +189,7 @@ def plot_l2_product(
     plot_range, label, title,
     vmin=None, vmax=None,
     figsize=(12, 4),
+    ellipses=[],
     cmap="viridis",
     log_scale=False,
     land_color="#f2efe9",
@@ -288,6 +291,10 @@ def plot_l2_product(
     ax_hist.set_xlabel(label)
     ax_hist.set_ylabel("Count")
     ax_hist.set_title(f"Histogram: N={hist_data.size}")
+    for ellipse in ellipses:
+        ell = ax_map.add_patch(Ellipse(facecolor=(0, 0, 0, 0), lw=2, zorder=3, linestyle="dashed", **ellipse))
+        ell.set_path_effects([path_effects.Stroke(linewidth=4, foreground='white'), path_effects.Normal()])
+    ax_map.legend(loc="upper right")
 
     plt.show()
 ```
@@ -297,8 +304,12 @@ wavelength_index = 1
 title = "Aerosol Optical Depth (AOD): " + str(wavelength[wavelength_index]) + " nm"
 label = "AOD"
 data = aot[:, :, wavelength_index]
+ellipses = [
+    {"label": "Smoke?", "xy": (-118.5, 31), "width": 3, "height": 8, "angle": 0, "edgecolor": (0.004, 0.451, 0.698)},
+    {"label": "Dust?", "xy": (-113.5, 24), "width": 10, "height": 11, "angle": 15, "edgecolor": (0.871, 0.561, 0.02)},
+]
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.5, cmap="jet"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.5, ellipses=ellipses, cmap="jet"
 )
 ```
 
@@ -308,7 +319,7 @@ title = "Single scattering albedo (SSA): " + str(wavelength[wavelength_index]) +
 label = "SSA"
 data = ssa[:, :, wavelength_index]
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, ellipses=ellipses, cmap="jet"
 )
 ```
 
@@ -318,7 +329,7 @@ title = "Fine mode fraction"
 label = "FVF"
 data = fvf
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
+    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, ellipses=ellipses, cmap="jet"
 )
 ```
 
@@ -346,8 +357,8 @@ label = "SSA"
 data = filtered_ssa = np.where(
     aot[:, :, wavelength_index] >= aot_min, ssa[:, :, wavelength_index], np.nan
 )
-plot_l2_product(
-    lon, lat,data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, cmap="jet"
+ax_map, _ = plot_l2_product(
+    lon, lat,data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, ellipses=ellipses, cmap="jet"
 )
 ```
 
@@ -360,7 +371,7 @@ title = "Fine mode fraction (AOD 550>" + str(aot_min) + ")"
 label = "FVF"
 data = filtered_ssa = np.where(aot[:, :, wavelength_index] >= aot_min, fvf, np.nan)
 plot_l2_product(
-    lon, lat,data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, cmap="jet"
+    lon, lat,data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, ellipses=ellipses, cmap="jet"
 )
 ```
 
