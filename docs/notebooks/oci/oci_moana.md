@@ -19,7 +19,7 @@ kernelspec:
 
 Code adapted from the [PACE Data Visualization-Part 2 tutorial](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_visualization_part2.html), developed by Carina Poulin (NASA, SSAI) and the [MOANA tutorial](https://fish-pace.github.io/hackweek-2025/presentations/notebooks/vizualization_moana.html) presented by Ryan Vandermuelen (NOAA Fisheries) during the NOAA FishPACE Hackweek.
 
-Last updated: August 11, 2026
+Last updated: August 12, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -39,7 +39,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-MOANA is the first phytoplankton community composition algorithm released for the PACE mission. The product provides near-surface concentrations (cells mL⁻¹) of three groups of picophytoplankton (i.e., phytoplankton <2 μm in size): *Prochlorococcus*, *Synechococcus*, and autotrophic picoeukaryotes. The algorithm is based on empirical relationships between measured phytoplankton cell concentrations, in situ hyperspectral remote sensing reflectances, and sea surface temperature. Further details on the algorithm and its development are provided by [Lange et al. (2020)](https://doi.org/10.1364/OE.398127). At present, the MOANA product is available only for the Atlantic Ocean, where it has been validated in-situ.
+MOANA is the first phytoplankton community composition algorithm released for the PACE mission. The product provides near-surface concentrations (cells mL⁻¹) of three groups of picophytoplankton (i.e., phytoplankton <2 μm in size): *Prochlorococcus*, *Synechococcus*, and autotrophic picoeukaryotes. The algorithm is based on empirical relationships between measured phytoplankton cell concentrations, in situ hyperspectral remote sensing reflectances, and sea surface temperature. Further details on the algorithm and its development are provided by [Lange et al. (2020)](https://doi.org/10.1364/OE.398127). At present, the MOANA product is available only for the Atlantic Ocean, where it has been validated with in situ data.
 
 ## Learning Objectives
 
@@ -52,7 +52,7 @@ At the end of this notebook you will know:
 
 +++
 
-## 1. Setup
+# 1. Setup
 
 +++
 
@@ -83,7 +83,7 @@ Set (and persist to your home directory on the host, if needed) your Earthdata L
 auth = earthaccess.login()
 ```
 
-## 2. Access MOANA data
+# 2. Access MOANA data
 
 +++
 
@@ -118,7 +118,6 @@ ds
 We have three different phytoplankton classes in this dataset. Let's plot them!
 
 ```{code-cell} ipython3
-# Define metadata for plots
 phyto_info = {
     "Prochlorococcus": {
         "data": ds["prococcus_moana"],
@@ -141,7 +140,6 @@ fig, axs = plt.subplots(
     1, 3, figsize=(10, 6), subplot_kw={"projection": ccrs.PlateCarree()}
 )
 
-# Plot each phytoplankton group
 for ax, (title, info) in zip(axs, phyto_info.items()):
     da = info["data"]
     da = da.where(da > 0)
@@ -227,12 +225,12 @@ Here you can see that *Prochlorococcus* is more abundant in offshore waters wher
 
 +++
 
-# 2. Visualize MOANA data as an RGB triplet
+# 3. Visualize MOANA data as an RGB triplet
 
-The phytoplankton size classes can be combined into a single “false true-color” image, where each pixel is represented by an RGB triplet. The red, green, and blue channels correspond to Pro, Syn, and pico fractions, respectively. Because the three fractions at each pixel sum to 1, the resulting color directly represents their relative contributions. This visualization provides an intuitive, spatially explicit view of phytoplankton dominance, while blended colors reveal regions where multiple phytoplankton contribute substantially.
+The phytoplankton types can be combined into a single “false true-color” image, where each pixel is represented by an RGB triplet. The red, green, and blue channels correspond to Pro, Syn, and pico fractions, respectively. Because the three fractions at each pixel sum to 1, the resulting color directly represents their relative contributions. This visualization provides an intuitive, spatially explicit view of phytoplankton dominance, while blended colors reveal regions where multiple phytoplankton contribute substantially.
 
 ```{code-cell} ipython3
-def robust_normalize(arr, vmin=None, vmax=None): # We need to normalize the concentrations to make them comparable
+def robust_normalize(arr, vmin=None, vmax=None):
     if vmin is None or vmax is None:
         vmin, vmax = np.nanpercentile(arr, [2, 98])
 
@@ -387,8 +385,6 @@ legend_ax.set_xlim(-0.15, 1.15)
 legend_ax.set_ylim(-0.1, 1.0)
 
 plt.subplots_adjust(right=0.80)
-# ============================================================
-
 plt.show()
 ```
 
@@ -396,7 +392,7 @@ Ahh interesting! We can see a clear distinction between all three phytoplankton 
 
 +++
 
-## 3. Observing PCC changes over time
+# 4. Observing PCC changes over time
 
 +++
 
@@ -406,7 +402,7 @@ Let's examine how MOANA phytoplankton community composition changes over time wi
 tspan = ("2025-01", "2025-12")
 results_moana = earthaccess.search_data(
     short_name="PACE_OCI_L4M_MOANA",
-    granule_name="*.MO.*0p1deg*",  # Daily: Day | Resolution: 0p1deg or 4 (for 4km)
+    granule_name="*.MO.*0p1deg*",
     temporal=tspan,
 )
 ```
@@ -486,13 +482,10 @@ axs = axs.flatten()
 
 for i, ax in enumerate(axs):
 
-    # Select date
     rgb = dataset_crop["rgb_image"].isel(date=i)
 
-    # Rearrange to (lat, lon, rgb) for imshow
     rgb = rgb.transpose("lat", "lon", "rgb")
 
-    # Plot RGB image
     ax.imshow(rgb, origin="upper", extent=bbox, transform=ccrs.PlateCarree())
 
     ax.coastlines(linewidth=0.4, color="grey", zorder=3)
@@ -509,7 +502,6 @@ for i, ax in enumerate(axs):
         linestyle="--",
     )
 
-    # Date
     date = dataset_crop.date.isel(date=i).dt.strftime("%Y-%m-%d").item()
     ax.set_title(date, fontsize=10)
 
@@ -574,18 +566,16 @@ legend_ax.set_ylim(-0.15, 1.05)
 legend_ax.set_aspect("equal")
 legend_ax.axis("off")
 
-
 plt.subplots_adjust(hspace=-0.2, wspace=0.03)
-
 plt.show()
 ```
 
-According to this monthly time series, *Synechococcus* and picoeukaryotes appear to be more dominant during the winter and spring, while *Prochlorococcus* is more dominant during the summer.
+This monthly time series illustrates pronounced seasonal and spatial changes in picophytoplankton composition, including increased *Prochlorococcus* contributions offshore during summer and increased *Synechococcus* and picoeukaryote contributions during winter and spring.
 
-Let's see how phytoplankton is changing over a specified region of interest. Let's extract a 3 degree x 3 degree box in the North Atlantic. To visualize our region, we will plot it on a selected month's image:
+Let's see how picophytoplankton is changing over a specified region of interest. Let's extract a 3 degree x 3 degree box in the North Atlantic. To visualize our region, we will plot it on a selected month's image:
 
 ```{code-cell} ipython3
-rgb = dataset_crop["rgb_image"].isel(date=5).transpose("lat", "lon", "rgb") # select single month
+rgb = dataset_crop["rgb_image"].isel(date=5).transpose("lat", "lon", "rgb")
 
 fig, ax = plt.subplots(figsize=(8, 5), subplot_kw={"projection": ccrs.PlateCarree()})
 
@@ -604,7 +594,7 @@ lon_min, lon_max = -68, -66
 lat_min, lat_max = 38, 40
 
 
-ax.add_patch( # add red rectangle to view selected region
+ax.add_patch(
     Rectangle(
         (lon_min, lat_min),
         lon_max - lon_min,
@@ -625,7 +615,6 @@ Let's crop the data to this bounding box and calculate the median phytoplankton 
 ```{code-cell} ipython3
 da = dataset_crop.sel(lat=slice(40, 38), lon=slice(-68, -66))
 
-# Get the median over the box
 syn_ts = da["syncoccus_moana"].median(dim=["lat", "lon"])
 pico_ts = da["picoeuk_moana"].median(dim=["lat", "lon"])
 pro_ts = da["prococcus_moana"].median(dim=["lat", "lon"])
@@ -644,7 +633,6 @@ custom_colors = {
     "Picoeukaryotes": plt.cm.Greens(0.6),
 }
 
-# Plot syn and pico on the left y-axis
 ax1.plot(
     syn_ts["date"],
     syn_ts,
@@ -663,7 +651,6 @@ ax1.set_xlabel("Date")
 ax1.set_ylabel("Median Abundance (Syn & Pico)", color="black")
 ax1.tick_params(axis="y", labelcolor="black")
 
-# Create a secondary y-axis for prococcus_moana abundance, which is typically on a different scale than the other types
 ax2 = ax1.twinx()
 ax2.plot(
     pro_ts["date"],
@@ -677,12 +664,10 @@ ax2.set_ylabel(
 )
 ax2.tick_params(axis="y", labelcolor=custom_colors["Prochlorococcus"])
 
-# Combine all legends
 lines_1, labels_1 = ax1.get_legend_handles_labels()
 lines_2, labels_2 = ax2.get_legend_handles_labels()
 ax1.legend(lines_1 + lines_2, labels_1 + labels_2, loc="upper left", frameon=False)
 
-# Add title and grid
 plt.title("Monthly Phytoplankton Abundance in Bounding Box")
 plt.grid(True)
 plt.xticks(rotation=45)
