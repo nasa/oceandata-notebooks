@@ -39,7 +39,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-MOANA is the first phytoplankton community composition algorithm released for the PACE mission. The product provides near-surface concentrations (cells mL⁻¹) of three groups of picophytoplankton (i.e., phytoplankton <2 μm in size): *Prochlorococcus*, *Synechococcus*, and autotrophic picoeukaryotes. The algorithm is based on empirical relationships between measured phytoplankton cell concentrations, in situ hyperspectral remote sensing reflectances, and sea surface temperature. Further details on the algorithm and its development are provided by [Lange et al. (2020)](https://doi.org/10.1364/OE.398127). At present, the MOANA product is available only for the Atlantic Ocean.
+MOANA is the first phytoplankton community composition algorithm released for the PACE mission. The product provides near-surface concentrations (cells mL⁻¹) of three groups of picophytoplankton (i.e., phytoplankton <2 μm in size): *Prochlorococcus*, *Synechococcus*, and autotrophic picoeukaryotes. The algorithm is based on empirical relationships between measured phytoplankton cell concentrations, in situ hyperspectral remote sensing reflectances, and sea surface temperature. Further details on the algorithm and its development are provided by [Lange et al. (2020)](https://doi.org/10.1364/OE.398127). At present, the MOANA product is available only for the Atlantic Ocean, where it has been validated in-situ.
 
 ## Learning Objectives
 
@@ -71,7 +71,7 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib.patches import Rectangle
 ```
 
-Assign “global” variables, which could be anything you want to define once and use consistently.
+Assign “global” variables, which could be anything you want to define once and use consistently. For example your cartopy projection:
 
 ```{code-cell} ipython3
 crs = ccrs.PlateCarree()
@@ -164,7 +164,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-Let's zoom into the East Coast of the U.S.:
+Let's zoom into the East Coast of the U.S. using a bounding box with our chosen geographical coordinates:
 
 ```{code-cell} ipython3
 bbox = [-80, -52, 30, 47]
@@ -232,7 +232,7 @@ Here you can see that *Prochlorococcus* is more abundant in offshore waters wher
 The phytoplankton size classes can be combined into a single “false true-color” image, where each pixel is represented by an RGB triplet. The red, green, and blue channels correspond to Pro, Syn, and pico fractions, respectively. Because the three fractions at each pixel sum to 1, the resulting color directly represents their relative contributions. This visualization provides an intuitive, spatially explicit view of phytoplankton dominance, while blended colors reveal regions where multiple phytoplankton contribute substantially.
 
 ```{code-cell} ipython3
-def robust_normalize(arr, vmin=None, vmax=None):
+def robust_normalize(arr, vmin=None, vmax=None): # We need to normalize the concentrations to make them comparable
     if vmin is None or vmax is None:
         vmin, vmax = np.nanpercentile(arr, [2, 98])
 
@@ -297,6 +297,8 @@ ax.imshow(
     transform=ccrs.PlateCarree(),
 )
 
+# ============================================================
+# RGB triangle legend
 
 triangle = np.array(
     [
@@ -385,6 +387,8 @@ legend_ax.set_xlim(-0.15, 1.15)
 legend_ax.set_ylim(-0.1, 1.0)
 
 plt.subplots_adjust(right=0.80)
+# ============================================================
+
 plt.show()
 ```
 
@@ -396,7 +400,7 @@ Ahh interesting! We can see a clear distinction between all three phytoplankton 
 
 +++
 
-Let's examine how MOANA phytoplankton community composition changes over time within a specified region. We will start by searching for and opening the 2025 monthly MOANA composites.
+Let's examine how MOANA phytoplankton community composition changes over time within a specified region. We will start by searching for and opening the 2025 monthly MOANA composites for the year.
 
 ```{code-cell} ipython3
 tspan = ("2025-01", "2025-12")
@@ -464,14 +468,14 @@ syn_norm = robust_normalize(syn, syn_min, syn_max)
 pico_norm = robust_normalize(pico, pico_min, pico_max)
 
 rgb_image = xr.concat(
-    [syn_norm, pico_norm, pro_norm], dim="rgb"  # R  # G  # B
+    [syn_norm, pico_norm, pro_norm], dim="rgb"  # Red  # Green  # Blue
 ).assign_coords(rgb=["R", "G", "B"])
 
 dataset_crop["rgb_image"] = rgb_image
 dataset_crop
 ```
 
-And plot monthly changes over time:
+And plot monthly changes of the species distribution over time:
 
 ```{code-cell} ipython3
 fig, axs = plt.subplots(
@@ -511,7 +515,6 @@ for i, ax in enumerate(axs):
 
 # ============================================================
 # RGB triangle legend
-# ============================================================
 
 triangle = np.array(
     [
@@ -564,6 +567,8 @@ legend_ax.text(-0.04, -0.05, "Syn", ha="right", va="top", fontsize=9)
 
 legend_ax.text(1.04, -0.05, "Pro", ha="left", va="top", fontsize=9)
 
+# ============================================================
+
 legend_ax.set_xlim(-0.15, 1.15)
 legend_ax.set_ylim(-0.15, 1.05)
 legend_ax.set_aspect("equal")
@@ -575,12 +580,12 @@ plt.subplots_adjust(hspace=-0.2, wspace=0.03)
 plt.show()
 ```
 
-According to this monthly time series, *Synechococcus* and picoeukaryotes appear to be more abundant during the winter and spring, while *Prochlorococcus* is more abundant during the summer.
+According to this monthly time series, *Synechococcus* and picoeukaryotes appear to be more dominant during the winter and spring, while *Prochlorococcus* is more dominant during the summer.
 
-Let's see how phytoplankton is changing over a specified region of interest. Let's extract a 3 degree x 3 degree box in the North Atlantic:
+Let's see how phytoplankton is changing over a specified region of interest. Let's extract a 3 degree x 3 degree box in the North Atlantic. To visualize our region, we will plot it on a selected month's image:
 
 ```{code-cell} ipython3
-rgb = dataset_crop["rgb_image"].isel(date=5).transpose("lat", "lon", "rgb")
+rgb = dataset_crop["rgb_image"].isel(date=5).transpose("lat", "lon", "rgb") # select single month
 
 fig, ax = plt.subplots(figsize=(8, 5), subplot_kw={"projection": ccrs.PlateCarree()})
 
@@ -598,7 +603,8 @@ gl = ax.gridlines(
 lon_min, lon_max = -68, -66
 lat_min, lat_max = 38, 40
 
-ax.add_patch(
+
+ax.add_patch( # add red rectangle to view selected region
     Rectangle(
         (lon_min, lat_min),
         lon_max - lon_min,
@@ -619,7 +625,7 @@ Let's crop the data to this bounding box and calculate the median phytoplankton 
 ```{code-cell} ipython3
 da = dataset_crop.sel(lat=slice(40, 38), lon=slice(-68, -66))
 
-# Get the mean over the box
+# Get the median over the box
 syn_ts = da["syncoccus_moana"].median(dim=["lat", "lon"])
 pico_ts = da["picoeuk_moana"].median(dim=["lat", "lon"])
 pro_ts = da["prococcus_moana"].median(dim=["lat", "lon"])
@@ -627,7 +633,7 @@ pro_ts = da["prococcus_moana"].median(dim=["lat", "lon"])
 
 +++ {"jp-MarkdownHeadingCollapsed": true}
 
-And plot it!
+And plot the timeline of monthly median abundances!
 
 ```{code-cell} ipython3
 fig, ax1 = plt.subplots(figsize=(12, 5))
@@ -657,7 +663,7 @@ ax1.set_xlabel("Date")
 ax1.set_ylabel("Median Abundance (Syn & Pico)", color="black")
 ax1.tick_params(axis="y", labelcolor="black")
 
-# Create a secondary y-axis for prococcus_moana
+# Create a secondary y-axis for prococcus_moana abundance, which is typically on a different scale than the other types
 ax2 = ax1.twinx()
 ax2.plot(
     pro_ts["date"],
@@ -686,6 +692,6 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on ... suggest what's next. And don't add an empty cell after this one.
+You have completed the notebook on the MOANA algorithm!
 
 </div>
