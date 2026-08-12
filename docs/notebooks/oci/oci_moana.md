@@ -221,7 +221,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-Here you can see that *Prochlorococcus* is more abundant in offshore waters whereas Picoeukaryotes tend to be more dominant along the coast. And there seems to be a high abundance of *Synechococcus* in a feature near the Gulf Stream.
+Here you can see that *Prochlorococcus* is more abundant in offshore waters whereas picoeukaryotes tend to be more dominant along the coast. And there seems to be a high abundance of *Synechococcus* in a feature near the Gulf Stream.
 
 +++
 
