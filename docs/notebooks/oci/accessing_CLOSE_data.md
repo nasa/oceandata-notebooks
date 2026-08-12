@@ -15,7 +15,7 @@ kernelspec:
 
 **Author:** Anna Windle (NASA GSFC, SSAI)
 
-Last updated: August 7, 2026
+Last updated: August 12, 2026
 
 <div class="alert alert-info" role="alert">
 
@@ -97,24 +97,15 @@ for m in months:
 Let's search for files corresponding to a date and granule discussed in the manuscript: Granule B in Figure 1.
 
 ```{code-cell} ipython3
-target_time = "20250315T152616"
-target_date = "20250315"
-
+target = "2025-03-15 15:26:16"
 files = {}
 for label, short_name in datasets.items():
-
     results = earthaccess.search_data(
         short_name=short_name,
-        temporal=("2025-03-15", "2025-03-15"),
+        temporal=(target, target),
+        count=1,
     )
-
-    target = target_date if label == "L3M" else target_time
-
-    files[label] = next(
-        (r for r in results if target in r.data_links()[0]),
-        None,
-    )
-
+    files[label] = results[0]
     print(f"{label}: {files[label].data_links()[0] if files[label] else 'Not found'}")
 ```
 
