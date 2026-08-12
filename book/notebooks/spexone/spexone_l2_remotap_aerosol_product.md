@@ -251,9 +251,6 @@ def plot_l2_product(
 
     ax_map.coastlines(resolution="110m", color="black", linewidth=0.8)
     gl = ax_map.gridlines(draw_labels={"bottom": "x", "left": "y"})
-    gl.auto_inline = False
-    gl.top_labels = False
-    gl.right_labels = False
 
     norm = LogNorm(vmin=vmin, vmax=vmax) if log_scale else None
 
