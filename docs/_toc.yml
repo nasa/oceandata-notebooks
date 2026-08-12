@@ -47,11 +47,13 @@ parts:
       - file: sections/ocean
         sections:
           - file: notebooks/oci/oci_gpig.md
-            title: Gaussian Pigments
+            title: Gaussian Pigments (GPig)
           - file: notebooks/oci/oci_sdp.md
-            title: Spectral Derivative Pigments
+            title: Spectral Derivative Pigments (SPD)
+          - file: notebooks/oci/oci_moana.md
+            title: Multi Ordination Aanlysis (MOANA)
           - file: notebooks/oci/accessing_CLOSE_data.md
-            title: Accessing the CLOSE Dataset
+            title: Access the CLOSE Dataset
 
       - file: sections/cloud-atmosphere
         sections:
