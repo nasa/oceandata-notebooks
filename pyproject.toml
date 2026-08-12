@@ -30,6 +30,7 @@ notebooks = [
   "matplotlib>=3.8.4",
   "pandas>=2.2.1",
   "pillow>=10.4.0",
+  "point-collocation>=0.8.0",
   "pvlib>=0.11.1",
   "pyproj>=3.6.1",
   "rasterio>=1.4.1",
