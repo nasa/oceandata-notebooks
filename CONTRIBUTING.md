@@ -126,22 +126,24 @@ repo2docker \
 
 +++
 
-### Build and Preview
-
-+++
-
 The `docs` folder contains configuration and content for the [Jupyter Book] we host on GitHub Pages.
-The tutorials are written in executable MyST Markdown, and publishing the website requires pulling execution results from a notebook cache.
+The tutorials are written in executable MyST Markdown, and publishing the website requires pulling execution results from a cache.
 We use [DVC] to share that cache among maintainers as well as to the deployment workflow on GitHub.
 
 > [!IMPORTANT]
 >
 > Only notebooks listed in `docs/_toc.yml` are built, so adding a new notebook requires updating `docs/_toc.yml`.
 
-The `dvc pull` command retrieves the notebook cache.
-
 [Jupyter Book]: https://jupyterbook.org/
 [DVC]: https://dvc.org/
+
++++
+
+### Execute & Cache Notebooks
+
++++
+
+The `dvc pull` command retrieves the current notebook cache. Add `--force` to overwrite any conflicting local files.
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -152,16 +154,16 @@ dvc pull
 The notebooks now available in the cache can be displayed with `jcache`.
 
 ```{code-cell} ipython3
-jcache notebook -p docs/_cache list
+jcache notebook --cache-path docs/_cache list --path-length 0
 ```
 
 We should always keep the tables in release_note_highlights as current as possible, so invalidate the cache for that notebook.
 
 ```{code-cell} ipython3
-yes | jcache notebook -p docs/_cache invalidate docs/notebooks/release_note_highlights.md
+yes | jcache notebook -p docs/_cache invalidate 27
 ```
 
-If you want to re-execute all notebooks in parallel, clear the notebook cache.
+If you want to re-execute all notebooks in parallel, for example if you are testing a new container image with updated packages, invalidate the whole notebook cache.
 
 ```{raw-cell}
 :scrolled: true
@@ -170,10 +172,17 @@ If you want to re-execute all notebooks in parallel, clear the notebook cache.
 yes | jcache notebook -p docs/_cache invalidate --all
 ```
 
+If you need to add a notebook, modify the next cell to specify its path under "docs/":
+
+```{raw-cell}
+# cell type is "Raw" for optional use
+jcache notebook -p docs/_cache add --reader myst_nb_md docs/notebooks/oci/oci_data_access.md
+sqlite3 docs/_cache/global.db "update nbproject set uri = replace(uri, \"$PWD/\", \"\")"
+```
+
 Update the notebook cache as needed by executing notebooks.
 We use the isolated virtual environment to make sure the environment configuration is correct.
 We use `jcache` directly to achieve parallel execution.
-For a full but slow test of the environment configuration, delete `docs/_cache` before executing.
 
 ```{code-cell} ipython3
 :scrolled: true
@@ -181,48 +190,10 @@ For a full but slow test of the environment configuration, delete `docs/_cache` 
 jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
 ```
 
-The next cell builds a static website in `docs/_build/html` using `jupyter-book`.
+If notebooks have been successfully executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
+Follow the next steps to share any cache updates using DVC and a git commit with changes to `docs/_cache.dvc`.
 
-```{code-cell} ipython3
-:scrolled: true
-
-jupyter-book build docs
-```
-
-Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
-
-```{code-cell} ipython3
-find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
-```
-
-Run the next cell to preview the website.
-Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
-
-> [!NOTE]
->
-> On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
-
-```{code-cell} ipython3
-:scrolled: true
-
-python -m http.server -d docs/_build/html
-```
-
-### Notebook Cache
-
-+++
-
-If any notebooks have been executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
-Follow the next steps to share the updates using DVC.
-
-First, remove the absolute paths that Jupyter Book may have added for any new notebooks.
-
-```{code-cell} ipython3
-sqlite3 docs/_cache/global.db "update nbproject set uri = replace(uri, \"$PWD/\", \"\")"
-sqlite3 docs/_cache/global.db "update nbcache set uri = replace(uri, \"$PWD/\", \"\")"
-```
-
-Next "reset" the database to erase spurious changes that would appear to DVC as updates.
+First "reset" the database to erase spurious changes that would appear to DVC as updates.
 
 ```{code-cell} ipython3
 sqlite3 docs/_cache/global.db "update nbcache set accessed = created"
@@ -252,6 +223,39 @@ dvc push
 
 Finally, if changes are committed by DVC, then there will be changes you also need to commit with Git.
 Use your preferred method of working with Git to stage the `docs/_cache.dvc` changes, commit, and push them.
+
++++
+
+### Jupyter Book Preview
+
++++
+
+The next cell builds a static website in `docs/_build/html` using `jupyter-book`.
+
+```{code-cell} ipython3
+:scrolled: true
+
+jupyter-book build docs
+```
+
+Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
+
+```{code-cell} ipython3
+find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
+```
+
+Run the next cell to preview the website.
+Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
+
+```{code-cell} ipython3
+:scrolled: true
+
+python -m http.server -d docs/_build/html
+```
+
+> [!NOTE]
+>
+> On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
 
 +++
 

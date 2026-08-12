@@ -276,7 +276,6 @@ results[0]
 
 ```{code-cell} ipython3
 l1b_paths = earthaccess.open(results)
-l1b_paths
 ```
 
 And let's do a quick plot of a `rhot_red` wavelength to see what the data looks like:

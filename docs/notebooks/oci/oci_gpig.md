@@ -1,5 +1,7 @@
 ---
 jupytext:
+  notebook_metadata_filter: -all,kernelspec,jupytext
+  cell_metadata_filter: all,-trusted
   text_representation:
     extension: .md
     format_name: myst
@@ -16,7 +18,7 @@ kernelspec:
 **Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC) <br>
 Adapted from code developed by: Max Danenhower (Bowdoin College), Ali Chase (University of Washington)
 
-Last updated: July 21, 2026
+Last updated: July 29, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -37,7 +39,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-This notebook applies the inversion algorithm described in [Chase et al., 2017][Chase-et-al] to estimate phytoplankton pigment concentrations from PACE OCI Rrs data. This algorithm, called Gaussian Pigment (GPig), is currently being implemented in OBPG's OCSSW software. This work was originally [developed in MatLab](https://github.com/alisonpchase/Rrs_inversion_pigments) by Ali Chase and subsequently [translated to Python](https://github.com/max-danenhower/pace-rrs-inversions-pigments) by Max Danenhower, Charles Stern, and Ali Chase. This tutorial demonstrates how to apply the Python GPig algorithm to Level-2 (L2) and Level-3 Mapped (L3M) PACE OCI data.
+This notebook applies the inversion algorithm described in [Chase et al., 2017][Chase-et-al] to estimate phytoplankton pigment concentrations from PACE OCI Rrs data. This algorithm, called Gaussian Pigment (GPig), is currently being implemented in OBPG's OCSSW software. This work was originally [developed in MATLAB](https://github.com/alisonpchase/Rrs_inversion_pigments) by Ali Chase and subsequently [translated to Python](https://github.com/max-danenhower/pace-rrs-inversions-pigments) by Max Danenhower, Charles Stern, and Ali Chase. This tutorial demonstrates how to apply the Python GPig algorithm to Level-2 (L2) and Level-3 Mapped (L3M) PACE OCI data.
 
 [Chase-et-al]: https://doi.org/10.1002/2017JC012859
 
@@ -188,21 +190,24 @@ fig
 Let's run it. This can take some time depending on bounding box size.
 
 ```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
 l2_pigments = L2_utils.estimate_inv_pigments(
     l2_paths[-1],
     sss_paths[-1],
     sst_paths[-1],
     bbox,
 )
+l2_pigments
 ```
 
-The inversion provides four phytoplankton pigment concenrations. Let's plot them:
+The inversion provides four phytoplankton pigment concentrations: chlorophylls a, b, c1+c2, and the photoprotective carotenoids (PPC). Let's plot them:
 
 ```{code-cell} ipython3
-fig, axs = plt.subplots(2, 2, figsize=(10, 8), sharex=True, sharey=True)
+fig, axs = plt.subplots(2, 2, figsize=(8, 6), sharex=True, sharey=True)
 
-titles = ["Chlorophyll-a", "Chlorophyll-b", "Chlorophyll-c", "PPC"]
-for ax, var, title in zip(axs.flat, l2_pigments, titles):
+for ax, var in zip(axs.flat, l2_pigments):
     da = l2_pigments[var]
     da = np.log10(da.where(da > 0))
     im = da.plot(
@@ -211,12 +216,14 @@ for ax, var, title in zip(axs.flat, l2_pigments, titles):
         cmap="viridis",
         shading="auto",
         ax=ax,
-        cbar_kwargs={"label": r"$\mathrm{%s\ [log_{10}(mg\ m^{-3})]}$" % var},
+        cbar_kwargs={"label": r"$\mathrm{%s\ log_{10}(mg\ m^{-3})}$" % var},
     )
-    ax.set_title(title)
     ax.set_xlim(bbox[0], bbox[2])
     ax.set_ylim(bbox[1], bbox[3])
 
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+    
 plt.tight_layout()
 plt.show()
 ```
@@ -314,24 +321,26 @@ fig
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+:tags: [scroll-output]
+
 l3_pigments = L3_utils.estimate_inv_pigments(l3m_paths, sss_paths, sst_paths, bbox)
 ```
 
-The inversion provides four phytoplankton pigment concentrations. Let's plot them:
+Let's plot the four pigment concentrations:
 
 ```{code-cell} ipython3
-fig, axs = plt.subplots(2, 2, figsize=(10, 8), subplot_kw={"projection": crs})
+fig, axs = plt.subplots(2, 2, figsize=(8, 6), subplot_kw={"projection": crs})
 
-titles = ["Chlorophyll-a", "Chlorophyll-b", "Chlorophyll-c", "PPC"]
-for ax, var, title in zip(axs.flat, l3_pigments, titles):
+for ax, var in zip(axs.flat, l3_pigments):
     da = l3_pigments[var]
     da = np.log10(da.where(da > 0))
     da.plot.imshow(
         cmap="viridis",
         ax=ax,
-        cbar_kwargs={"label": r"$\mathrm{%s\ [log_{10}(mg\ m^{-3})]}$" % var},
+        cbar_kwargs={"label": r"$\mathrm{%s\ log_{10}(mg\ m^{-3})}$" % var},
     )
-    ax.set_title(title)
+    
     ax.coastlines(resolution="10m")
     ax.gridlines(
         draw_labels=["left", "bottom"],
@@ -340,6 +349,8 @@ for ax, var, title in zip(axs.flat, l3_pigments, titles):
         alpha=0.5,
         linestyle="--",
     )
+    
+fig.subplots_adjust(wspace=0.35, hspace=0.20)
 
 plt.tight_layout()
 plt.show()
