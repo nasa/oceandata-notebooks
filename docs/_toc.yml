@@ -20,7 +20,7 @@ parts:
             title: Access Data Products
           - file: notebooks/oci/oci_file_structure
             title: Intro to Product Levels
-          - file: notebooks/oci/subsetting_with_harmony-py.md
+          - file: notebooks/oci/subsetting_with_harmony-py
             title: Dataset Subsetting
           - file: notebooks/modis/modis_explore_l2
             title: Orientation to Level-2
@@ -28,7 +28,7 @@ parts:
             title: Orientation to Level-3
           - file: notebooks/oci/oci_grid_match
             title: Projecting & GeoTIFFs
-          - file: notebooks/hackweek/satellite_insitu_matchups.md
+          - file: notebooks/hackweek/satellite_insitu_matchups
             title: In Situ Matchups
           - file: notebooks/oci/ml_cloud_mask
             title: Machine Learning Tutorial
@@ -39,20 +39,20 @@ parts:
             title: PACE-HARP2
           - file: notebooks/spexone/spexone_basic_visualizations
             title: PACE-SPEXone
-          - file: notebooks/oci/satdata_visualization.md
+          - file: notebooks/oci/satdata_visualization
             title: PACE-OCI Part I
-          - file: notebooks/oci/oci_data_visualization_part2.md
+          - file: notebooks/oci/oci_data_visualization_part2
             title: PACE-OCI Part II
 
       - file: sections/ocean
         sections:
-          - file: notebooks/oci/oci_gpig.md
+          - file: notebooks/oci/oci_gpig
             title: Gaussian Pigments (GPig)
-          - file: notebooks/oci/oci_sdp.md
-            title: Spectral Derivative Pigments (SPD)
-          - file: notebooks/oci/oci_moana.md
-            title: Multi Ordination Aanlysis (MOANA)
-          - file: notebooks/oci/accessing_CLOSE_data.md
+          - file: notebooks/oci/oci_sdp
+            title: Spectral Derivative Pigments (SDP)
+          - file: notebooks/oci/oci_moana
+            title: Multi Ordination ANAlysis (MOANA)
+          - file: notebooks/oci/accessing_CLOSE_data
             title: Access the CLOSE Dataset
 
       - file: sections/cloud-atmosphere
@@ -118,7 +118,6 @@ parts:
             title: PACE Training Lectures 2022
           - url: https://seadas.gsfc.nasa.gov/tutorials/seadas101/
             title: OCSSW & SeaDAS 101
-
 
   - caption: Reference
     chapters:
