@@ -39,8 +39,8 @@ This notebook was desgined to use cloud-enabled OCSSW programs, which are availa
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: /notebooks/oci_data_access/
-[ocssw_install]: /notebooks/oci_ocssw_install/
+[oci-data-access]: /notebooks/oci/oci_data_access
+[ocssw_install]: /notebooks/oci/oci_ocssw_install
 
 ## Summary
 

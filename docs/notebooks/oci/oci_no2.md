@@ -21,7 +21,7 @@ Last updated: March 5, 2026
 
 The following notebooks are **prerequisites** for this tutorial.
 
-- [File Structure (OCI Example)](/notebooks/oci-file-structure/)
+- [File Structure (OCI Example)](oci_file_structure)
 
 </div>
 
@@ -302,4 +302,4 @@ You have completed the notebook introducing NO<sub>2</sub> data products from OC
 
 </div>
 
-[terrestrial]: /notebooks/oci-terrestrial-data/
+[terrestrial]: /notebooks/oci/oci_terrestrial_data

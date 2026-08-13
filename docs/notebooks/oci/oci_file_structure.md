@@ -96,7 +96,7 @@ paths = earthaccess.open(results)
 We want to know whether we are running code on a remote host with direct access to the NASA Earthdata Cloud.
 If without direct access, consider the substitution explained in the [Data Access][data-access] notebook to download granules.
 
-[data-access]: /notebooks/oci-data-access/
+[data-access]: /notebooks/oci/oci_data_access
 
 +++
 

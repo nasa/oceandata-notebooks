@@ -26,7 +26,6 @@ sphinx:
     nb_merge_streams: true
     nb_execution_raise_on_error: true
     suppress_warnings:
-      - "myst.xref_missing"
       - "mystnb.unknown_mime_type"
     html_extra_path:
       - "assets"

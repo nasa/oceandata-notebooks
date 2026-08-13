@@ -41,7 +41,7 @@ Note: While SeaDAS has traditionally been an ocean-focused tool, it is increasin
 <details>
 <summary><strong>Where can I learn more about the PACE mission and its instruments?</strong></summary>
 
-- **[PACE Ocean Science website](pace.gsfc.nasa.gov/)** – Provides in-depth science background for each instrument.
+- **[PACE Ocean Science website](https://pace.gsfc.nasa.gov/)** – Provides in-depth science background for each instrument.
 - **[Earth Data Search](https://search.earthdata.nasa.gov)** – Use the search bar on the top-left to type "PACE" and find data collections. Collection information button leads mission resources, instrument details, data sets, and tools (including SeaDAS).
 - **[Earth Data Forum](https://forum.earthdata.nasa.gov/viewforum.php?f=7&&DAAC=86&Discipline=&Projects=&ServicesUsage=&keywords=&author=&startDate=&endDate=&bestAnswer=&noReplies=&tagMatch=all&searchWithin=&modClaim=)** – A place to post questions about any mission or dataset. PACE team members actively monitor and respond to questions here, even outside of live events.
 - **[Mission overview papers](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C21&q=nasa+pace+mission&btnG=&oq=pace+mis)** – Available for those who prefer in-depth reading.

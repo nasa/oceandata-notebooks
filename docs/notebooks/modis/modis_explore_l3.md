@@ -32,7 +32,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[modis_explore_l2]: /notebooks/modis_explore_l2/
+[modis_explore_l2]: /notebooks/modis/modis_explore_l2
 
 ## Summary
 

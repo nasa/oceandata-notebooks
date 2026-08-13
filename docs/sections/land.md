@@ -4,6 +4,6 @@ This section focuses on terrestrial data products and land surface observations 
 
 **What you'll learn:**
 
-- [Land Surface from PACE/OCI](../notebooks/oci/oci_terrestrial_data.md) - Working with land surface reflectance and vegetation data from PACE/OCI
+- [Land Surface from PACE/OCI](../notebooks/oci/oci_terrestrial_data) - Working with land surface reflectance and vegetation data from PACE/OCI
 
 Browse the tutorial above to get started with analyzing land surface data from PACE.

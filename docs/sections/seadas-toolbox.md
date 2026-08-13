@@ -4,10 +4,10 @@ Learn to use the SeaDAS (Sea, earth and atmosphere Data Analysis System) process
 
 **What you'll learn:**
 
-- [SeaDAS Desktop Application Resources](seadas-desktop.md) - Resources and tutorials for using the SeaDAS graphical interface
-- [Install SeaDAS Processors](../notebooks/oci/oci_ocssw_install.md) - Setting up OCSSW command-line processing tools
-- [Basic Processing](../notebooks/oci/oci_ocssw_processing_overview.md) - Getting started with OCSSW processing workflows
-- [Generate Level-2 Products](../notebooks/oci/oci_ocssw_l2gen.md) - Creating Level-2 data products from raw satellite data
-- [Run the GIOP Algorithm](../notebooks/oci/oci_ocssw_giop.md) - Implementing the Generalized Inherent Optical Property algorithm
+- [SeaDAS Desktop Application Resources](seadas-desktop) - Resources and tutorials for using the SeaDAS graphical interface
+- [Install SeaDAS Processors](../notebooks/oci/oci_ocssw_install) - Setting up OCSSW command-line processing tools
+- [Basic Processing](../notebooks/oci/oci_ocssw_processing_overview) - Getting started with OCSSW processing workflows
+- [Generate Level-2 Products](../notebooks/oci/oci_ocssw_l2gen) - Creating Level-2 data products from raw satellite data
+- [Run the GIOP Algorithm](../notebooks/oci/oci_ocssw_giop) - Implementing the Generalized Inherent Optical Property algorithm
 
 Browse the tutorials above to master SeaDAS and OCSSW tools for ocean color data processing.

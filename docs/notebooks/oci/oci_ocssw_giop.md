@@ -21,9 +21,9 @@ Last updated: June 24, 2026
 
 The following notebooks are **prerequisites** for this tutorial.
 
-- Learn with OCI: [Data Access][oci-data-access]
-- Learn with OCI: [Installing and Running OCSSW Command-line Tools][ocssw_install]
-- Learn with OCI: [Run Level-2 Generator (l2gen) OCSSW program on OCI data](./oci_ocssw_l2gen)
+- Learn with OCI: [Data Access](oci_data_access)
+- Learn with OCI: [Installing and Running OCSSW Command-line Tools](oci_ocssw_install)
+- Learn with OCI: [Run Level-2 Generator (l2gen) OCSSW program on OCI data](oci_ocssw_l2gen)
 
 </div>
 
@@ -40,8 +40,6 @@ This notebook was desgined to use cloud-enabled OCSSW programs, which are availa
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: /notebooks/oci_data_access/
-[ocssw_install]: /notebooks/oci_ocssw_install/
 
 ## Summary
 

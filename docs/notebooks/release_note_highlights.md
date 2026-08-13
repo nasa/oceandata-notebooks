@@ -134,7 +134,7 @@ The OB.DAAC provides [documentation](https://oceancolor.gsfc.nasa.gov/data/repro
 - [PACE HARP2 V4 Processing Notes][HARP-4]
 - [PACE SPEXone V4 Processing Notes][SPEXone-4]
 
-The latest reprocessing for PACE-OCI remains at [version 3.2](#version-3.2).
+The latest reprocessing for PACE-OCI remains at Version 3.2.
 
 [HARP-4]: https://oceandata.sci.gsfc.nasa.gov/files/data/reprocessing/V4/pace-harp2/PACE_HARP2_V4_Release_Notes.pdf
 [SPEXone-4]: https://oceandata.sci.gsfc.nasa.gov/files/data/reprocessing/V4/pace-spexone/PACE_SPEXone_V4_Release_Notes.pdf

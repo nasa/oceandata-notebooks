@@ -52,7 +52,7 @@ running**. There are three cases to distinguish:
 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud.
 
 [pypi]: https://pypi.org/
-[conda]: /notebooks/oci-data-access/
+[conda]: https://conda-forge.org/
 [cmr]: https://www.earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/cmr
 [edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
 [earthaccess-docs]: https://earthaccess.readthedocs.io/en/latest/
@@ -276,7 +276,7 @@ dataset
 
 <div class="alert alert-block alert-warning">
 
-Anywhere in any of [these notebooks](/) where `paths = earthaccess.open(...)` is used to read data directly from the NASA Earthdata Cloud, you need to substitute `paths = earthaccess.download(..., local_path)` before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
+Anywhere in any of [these notebooks](https://nasa.github.io/oceandata-notebooks/) where `paths = earthaccess.open(...)` is used to read data directly from the NASA Earthdata Cloud, you need to substitute `paths = earthaccess.download(..., local_path)` before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
 
 </div>
 

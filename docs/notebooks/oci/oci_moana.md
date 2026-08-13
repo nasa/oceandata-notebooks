@@ -23,7 +23,7 @@ Last updated: August 11, 2026
 
 The following notebooks are **prerequisites** for this tutorial.
 
-- Learn with OCI: [Data Access](oci-data-access)
+- Learn with OCI: [Data Access](oci_data_access)
 
 </div>
 
