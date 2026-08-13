@@ -225,7 +225,7 @@ Here you can see that *Prochlorococcus* is more abundant in offshore waters wher
 
 +++
 
-# 2. Visualize MOANA data as an RGB triplet
+## 2. Visualize MOANA data as an RGB triplet
 
 The phytoplankton size classes can be combined into a single “false true-color” image, where each pixel is represented by an RGB triplet. The red, green, and blue channels correspond to Pro, Syn, and pico fractions, respectively. Because the three fractions at each pixel sum to 1, the resulting color directly represents their relative contributions. This visualization provides an intuitive, spatially explicit view of phytoplankton dominance, while blended colors reveal regions where multiple phytoplankton contribute substantially.
 

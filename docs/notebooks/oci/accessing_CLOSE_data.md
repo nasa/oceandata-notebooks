@@ -46,7 +46,7 @@ At the end of this notebook, you will know how to:
 
 +++
 
-# 1. Setup
+## 1. Setup
 
 +++
 
@@ -64,7 +64,7 @@ Set your Earthdata Login credentials. You can add `persist=True` to save your cr
 auth = earthaccess.login()
 ```
 
-# 2. Availability
+## 2. Availability
 
 +++
 
@@ -90,7 +90,7 @@ for m in months:
     print()
 ```
 
-# 3. Search and access
+## 3. Search and access
 
 +++
 
@@ -113,7 +113,7 @@ for label, short_name in datasets.items():
 paths = earthaccess.open(list(files.values()))
 ```
 
-# 4. Open and plot
+## 4. Open and plot
 
 +++
 
@@ -202,7 +202,7 @@ cbar.ax.set_position(
 plt.show()
 ```
 
-# 5. Closing the loop on chlorophyll a
+## 5. Closing the loop on chlorophyll a
 
 +++
 
