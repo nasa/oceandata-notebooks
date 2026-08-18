@@ -1,12 +1,10 @@
 ---
 jupytext:
-  notebook_metadata_filter: -all,kernelspec,jupytext
-  cell_metadata_filter: all,-trusted
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.1
+    jupytext_version: 1.19.5
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -51,20 +49,6 @@ By the end of this notebook, you will understand:
 - How to visualize basic aerosol properties
 - How to evaluate data quality
 
-## Contents
-
-1. [Setup](#1.-Setup)
-2. [Get Level-2 Data](#2.-Get-Level-2-Data)
-3. [Understanding SPEXone L2 product structure](#3.-Understanding-SPEXone-L2-product-structure)
-4. [Visulize SPEXone L2 aerosol properties](#4.-Visulize-SPEXone-L2-aerosol-properties)
-5. [Improve data quality: filter low AOD pixels](#5.-Improve-data-quality:-filter-low-AOD-pixels)
-6. [Advanced quality assessment](#6.-Advanced-quality-assessment)
-7. [Optional: Multi-angle data mask for cloud and data screening](#7.-Optional:-Multi-angle-data-mask-for-cloud-and-data-screening)
-8. [Optional: pixel level uncertainty estimation](#8.-Optional:-pixel-level-uncertainty-estimation)
-9. [Reference](#9.-Reference)
-
-+++
-
 ## 1. Setup
 
 Begin by importing all of the packages used in this notebook. If your kernel uses an environment defined following the guidance on the [tutorials] page, then the imports will be successful.
@@ -88,10 +72,6 @@ import cartopy.feature as cfeature
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
 ```
-
-[back to top](#Contents)
-
-+++
 
 ## 2. Get Level-2 Data
 
@@ -138,10 +118,6 @@ dataset = xr.merge(datatree.to_dict().values())
 dataset
 ```
 
-[back to top](#Contents)
-
-+++
-
 ## 3. Understanding SPEXone L2 product structure
 
 The SPEXone FastMAPOL L2 product suite includes a long list of aerosol optical properties for both fine and coarse modes (defined in the same format as HARP2 L2 products):
@@ -167,10 +143,6 @@ And a set of other products:
 ```{code-cell} ipython3
 datatree["geophysical_data"]
 ```
-
-[back to top](#Contents)
-
-+++
 
 ## 4. Visulize SPEXone L2 aerosol properties
 
@@ -354,10 +326,6 @@ We can clearly see the aerosol event with less absorption (high SSA) and large s
 
 +++
 
-[back to top](#Contents)
-
-+++
-
 ## 5. Improve data quality: filter low AOD pixels
 
 +++ {"lines_to_next_cell": 2}
@@ -395,10 +363,6 @@ plot_l2_product(
     lon, lat, data, label=label, title=title, vmin=0, vmax=1, cmap="jet"
 )
 ```
-
-[back to top](#Contents)
-
-+++
 
 ## 6. Advanced quality assessment
 
@@ -443,10 +407,6 @@ plot_l2_product(
 ```
 
 We can evaluate quality flag based on the $\chi^2$ and $N$, and most pixels have reach to the best quality with quality_flag=0.
-
-+++
-
-[back to top](#Contents)
 
 +++
 
@@ -496,7 +456,3 @@ As mentioned previously, pixel level uncertainty can be evalated through error p
 
 - [**Validation**] Gao, M., Aryal, K., Zhai, P.-W., Knobelspiesse, K., Franz, B. A., Cairns, B., Cetinić, I., Fu, G., Hasekamp, O., Ibrahim, A., Sayer, A. M., and Werdell, P. J.: Where sky meets sea: Integrated aerosol and ocean color retrieval from PACE SPEXone multi-angle polarimetry, Remote Sens. Environ., 345, 115603, https://doi.org/10.1016/j.rse.2026.115603, 2026.
 - [**Algorithm**] Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, Atmos. Meas. Tech., 16, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023.
-
-+++
-
-[back to top](#Contents)
