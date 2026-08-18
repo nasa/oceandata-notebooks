@@ -186,13 +186,10 @@ print(wavelength)
 ```
 
 ```{code-cell} ipython3
-data
-```
-
-```{code-cell} ipython3
 def plot_l2_product(
     lon, lat, data,
     label, title,
+    plot_range=None,
     vmin=None, vmax=None,
     figsize=(12, 4),
     cmap="viridis",
@@ -214,7 +211,11 @@ def plot_l2_product(
     mask_valid = np.isfinite(data)
     valid = data[mask_valid]
     lat_valid, lon_valid = lat[mask_valid], lon[mask_valid]
-    plot_range = [lon_valid.min(), lon_valid.max(), lat_valid.min(), lat_valid.max()]
+    if plot_range is None:
+        plot_range = [
+            lon_valid.min(), lon_valid.max(),
+            lat_valid.min(), lat_valid.max()
+        ]
     if valid.size == 0:
         raise ValueError("No finite values in `data`.")
 

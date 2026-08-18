@@ -121,7 +121,9 @@ if not results_land:
 
 if not results_ocean:
     raise FileNotFoundError("No MAPOL_OCEAN granule was found.")
+```
 
+```{code-cell} ipython3
 # ---------------------------------------------------------
 # Open or download the files
 # ---------------------------------------------------------
@@ -347,8 +349,8 @@ title = "Aerosol Optical Depth (AOD): " + str(wavelength[wavelength_index]) + " 
 label = "AOD"
 data = aot[:, :, wavelength_index]
 ellipses = [
-    {"label": "Smoke?", "xy": (-118.5, 31), "width": 3, "height": 8, "angle": 0, "edgecolor": (0.004, 0.451, 0.698)},
-    {"label": "Dust?", "xy": (-113.5, 24), "width": 10, "height": 11, "angle": 15, "edgecolor": (0.871, 0.561, 0.02)},
+    {"label": "Smoke", "xy": (-118.5, 31), "width": 3, "height": 8, "angle": 0, "edgecolor": (0.004, 0.451, 0.698)},
+    {"label": "Dust", "xy": (-113.5, 24), "width": 10, "height": 11, "angle": 15, "edgecolor": (0.871, 0.561, 0.02)},
 ]
 plot_l2_product(
     lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.5, ellipses=ellipses, cmap="jet"
@@ -393,7 +395,7 @@ Aerosol absorption and microphysics have larger uncertainties when aerosol loadi
 
 ```{code-cell} ipython3
 wavelength_index = 1
-aot_min = 0.15
+aot_min = 0.1
 title = (
     "Filtered single scattering albedo (SSA): "
     + str(wavelength[wavelength_index])
@@ -414,7 +416,7 @@ The difference in appearance (after matplotlib automatically normalizes the data
 
 ```{code-cell} ipython3
 wavelength_index = 1
-aot_min = 0.15
+aot_min = 0.1
 title = "Fine mode fraction (AOD 550>" + str(aot_min) + ")"
 label = "FVF"
 data = filtered_ssa = np.where(aot[:, :, wavelength_index] >= aot_min, fvf, np.nan)

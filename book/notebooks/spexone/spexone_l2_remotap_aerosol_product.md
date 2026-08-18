@@ -181,6 +181,7 @@ For future L2 product, the wavelength variable will be called simple `wavelength
 def plot_l2_product(
     lon, lat, data,
     label, title,
+    plot_range=None,
     vmin=None, vmax=None,
     figsize=(12, 4),
     cmap="viridis",
@@ -202,7 +203,12 @@ def plot_l2_product(
     mask_valid = np.isfinite(data)
     valid = data[mask_valid]
     lat_valid, lon_valid = lat[mask_valid], lon[mask_valid]
-    plot_range = [lon_valid.min(), lon_valid.max(), lat_valid.min(), lat_valid.max()]
+    
+    if plot_range is None:
+        plot_range = [
+            lon_valid.min(), lon_valid.max(),
+            lat_valid.min(), lat_valid.max()
+        ]
     if valid.size == 0:
         raise ValueError("No finite values in `data`.")
 
@@ -359,6 +365,8 @@ plot_l2_product(
 The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
 
 ```{code-cell} ipython3
+:scrolled: true
+
 wavelength_index = 7
 aot_min = 0.05
 title = "Fine mode fraction (AOD 550>" + str(aot_min) + ")"
