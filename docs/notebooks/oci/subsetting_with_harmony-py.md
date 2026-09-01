@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: subsetting_with_harmony-py.md
+  title: md
+- file: ../../_downloads/notebooks/oci/subsetting_with_harmony-py.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

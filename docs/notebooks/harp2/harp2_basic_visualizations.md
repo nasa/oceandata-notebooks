@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: harp2_basic_visualizations.md
+  title: md
+- file: ../../_downloads/notebooks/harp2/harp2_basic_visualizations.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

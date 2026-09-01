@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: ml_cloud_mask.md
+  title: md
+- file: ../../_downloads/notebooks/oci/ml_cloud_mask.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

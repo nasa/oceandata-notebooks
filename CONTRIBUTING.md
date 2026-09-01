@@ -230,32 +230,32 @@ Use your preferred method of working with Git to stage the `docs/_cache.dvc` cha
 
 +++
 
-The next cell builds a static website in `docs/_build/html` using `jupyter-book`.
+For now, we need a step that manually updates the "ipynb" downloads.
 
 ```{code-cell} ipython3
 :scrolled: true
 
-jupyter-book build docs
+cd docs
+for f in notebooks/**/*.md
+do
+  mkdir -p "_downloads/${f%/*}"
+  jupytext --to ipynb --output "_downloads/${f%.md}.ipynb" $f
+done
 ```
 
-Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
-
-```{code-cell} ipython3
-find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
-```
-
-Run the next cell to preview the website.
-Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
+The next cell starts running a website preview using `jupyter-book`.
 
 ```{code-cell} ipython3
 :scrolled: true
 
-python -m http.server -d docs/_build/html
+jupyter book start
 ```
 
 > [!NOTE]
 >
 > On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
+
+Interrupt the kernel (press ◾️ in the toolbar) to stop previewing the website.
 
 +++
 

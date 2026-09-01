@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: spexone_basic_visualizations.md
+  title: md
+- file: ../../_downloads/notebooks/spexone/spexone_basic_visualizations.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

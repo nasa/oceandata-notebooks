@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: accessing_CLOSE_data.md
+  title: md
+- file: ../../_downloads/notebooks/oci/accessing_CLOSE_data.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

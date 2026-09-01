@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: oci_gpig.md
+  title: md
+- file: ../../_downloads/notebooks/oci/oci_gpig.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

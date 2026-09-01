@@ -85,7 +85,7 @@ pip = "*"
 
 [tool.jupytext]
 formats = { "notebooks" = "ipynb", "docs/notebooks" = "md:myst" }
-notebook_metadata_filter = "-all,kernelspec,jupytext"
+notebook_metadata_filter = "-all,jupytext,kernelspec,downloads"
 cell_metadata_filter = "all,-trusted"
 
 [tool.ruff.lint]

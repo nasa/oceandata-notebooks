@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: release_note_highlights.md
+  title: md
+- file: ../_downloads/notebooks/release_note_highlights.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

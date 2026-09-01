@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: oci_file_structure.md
+  title: md
+- file: ../../_downloads/notebooks/oci/oci_file_structure.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md
