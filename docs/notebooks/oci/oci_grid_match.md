@@ -2,7 +2,7 @@
 downloads:
 - file: oci_grid_match.md
   title: md
-- file: ../../_downloads/notebooks/oci/oci_grid_match.ipynb
+- file: oci_grid_match.ipynb
   title: ipynb
 jupytext:
   text_representation:

@@ -2,7 +2,7 @@
 downloads:
 - file: spexone_l2_remotap_aerosol_product.md
   title: md
-- file: ../../_downloads/notebooks/spexone/spexone_l2_remotap_aerosol_product.ipynb
+- file: spexone_l2_remotap_aerosol_product.ipynb
   title: ipynb
 jupytext:
   text_representation:

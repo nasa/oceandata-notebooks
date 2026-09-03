@@ -2,7 +2,7 @@
 downloads:
 - file: harp2_l2_cloud_gpc_product.md
   title: md
-- file: ../../_downloads/notebooks/harp2/harp2_l2_cloud_gpc_product.ipynb
+- file: harp2_l2_cloud_gpc_product.ipynb
   title: ipynb
 jupytext:
   text_representation:

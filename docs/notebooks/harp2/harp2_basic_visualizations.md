@@ -2,7 +2,7 @@
 downloads:
 - file: harp2_basic_visualizations.md
   title: md
-- file: ../../_downloads/notebooks/harp2/harp2_basic_visualizations.ipynb
+- file: harp2_basic_visualizations.ipynb
   title: ipynb
 jupytext:
   text_representation:
@@ -467,7 +467,7 @@ You can see some multi-layer clouds in the southwest corner of the granule: noti
 
 The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
 
-<img alt="multi-angle HARP2 animation" src="./harp2_red_anim_20250109T200019.gif">
+![multi-angle HARP2 animation](harp2_red_anim_20250109T200019.gif)
 
 Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By default, `matplotlib` will not display an animation. To view the animation, we saved it as a file and displayed the result in the next cell. Alternatively, you could change the default by executing `%matplotlib widget`. The `widget` setting, which works in Jupyter Lab but not on a static website, you can use `plt.show()` as well as `an.pause()` and `an.resume()`.
 

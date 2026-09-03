@@ -2,7 +2,7 @@
 downloads:
 - file: oci_project_and_format.md
   title: md
-- file: ../../_downloads/notebooks/oci/oci_project_and_format.ipynb
+- file: oci_project_and_format.ipynb
   title: ipynb
 jupytext:
   text_representation:

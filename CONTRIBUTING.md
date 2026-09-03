@@ -235,12 +235,7 @@ For now, we need a step that manually updates the "ipynb" downloads.
 ```{code-cell} ipython3
 :scrolled: true
 
-cd docs
-for f in notebooks/**/*.md
-do
-  mkdir -p "_downloads/${f%/*}"
-  jupytext --to ipynb --output "_downloads/${f%.md}.ipynb" $f
-done
+jupytext --to ipynb $(git ls-files docs/notebooks)
 ```
 
 The next cell starts running a website preview using `jupyter-book`.
@@ -248,7 +243,7 @@ The next cell starts running a website preview using `jupyter-book`.
 ```{code-cell} ipython3
 :scrolled: true
 
-jupyter book start
+(cd docs && jupyter book start)
 ```
 
 > [!NOTE]

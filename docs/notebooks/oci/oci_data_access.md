@@ -2,7 +2,7 @@
 downloads:
 - file: oci_data_access.md
   title: md
-- file: ../../_downloads/notebooks/oci/oci_data_access.ipynb
+- file: oci_data_access.ipynb
   title: ipynb
 jupytext:
   text_representation:

@@ -2,7 +2,7 @@
 downloads:
 - file: oci_ocssw_giop.md
   title: md
-- file: ../../_downloads/notebooks/oci/oci_ocssw_giop.ipynb
+- file: oci_ocssw_giop.ipynb
   title: ipynb
 jupytext:
   text_representation:

@@ -2,7 +2,7 @@
 downloads:
 - file: modis_explore_l2.md
   title: md
-- file: ../../_downloads/notebooks/modis/modis_explore_l2.ipynb
+- file: modis_explore_l2.ipynb
   title: ipynb
 jupytext:
   text_representation:

@@ -2,7 +2,7 @@
 downloads:
 - file: satdata_visualization.md
   title: md
-- file: ../../_downloads/notebooks/oci/satdata_visualization.ipynb
+- file: satdata_visualization.ipynb
   title: ipynb
 jupytext:
   text_representation:

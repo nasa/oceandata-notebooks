@@ -2,7 +2,7 @@
 downloads:
 - file: oci_ocssw_install.md
   title: md
-- file: ../../_downloads/notebooks/oci/oci_ocssw_install.ipynb
+- file: oci_ocssw_install.ipynb
   title: ipynb
 jupytext:
   text_representation:

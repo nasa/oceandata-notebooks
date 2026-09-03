@@ -2,7 +2,7 @@
 downloads:
 - file: oci_ocssw_processing_overview.md
   title: md
-- file: ../../_downloads/notebooks/oci/oci_ocssw_processing_overview.ipynb
+- file: oci_ocssw_processing_overview.ipynb
   title: ipynb
 jupytext:
   text_representation:

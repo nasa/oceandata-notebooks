@@ -2,7 +2,7 @@
 downloads:
 - file: oci_moana.md
   title: md
-- file: ../../_downloads/notebooks/oci/oci_moana.ipynb
+- file: oci_moana.ipynb
   title: ipynb
 jupytext:
   text_representation:

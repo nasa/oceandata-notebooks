@@ -2,7 +2,7 @@
 downloads:
 - file: satellite_insitu_matchups.md
   title: md
-- file: ../../_downloads/notebooks/hackweek/satellite_insitu_matchups.ipynb
+- file: satellite_insitu_matchups.ipynb
   title: ipynb
 jupytext:
   text_representation:
