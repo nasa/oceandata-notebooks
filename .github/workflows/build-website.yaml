@@ -46,6 +46,8 @@ jobs:
         run: jupytext --to ipynb $(git ls-files docs/notebooks)
       - name: Build jupyter book
         shell: micromamba-shell {0}
+        env:
+          BASE_URL: /${{ github.event.repository.name }}
         run: cd docs && jupyter book build --html
       - name: Upload html
         if: ${{ inputs.upload }}
