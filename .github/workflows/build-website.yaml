@@ -43,7 +43,10 @@ jobs:
       #     AWS_SESSION_TOKEN: '${{ secrets.AWS_SESSION_TOKEN }}'
       - name: Build jupyter book
         shell: micromamba-shell {0}
-        run: cd docs && jupyter book build
+        run: jupytext --to ipynb $(git ls-files docs/notebooks)
+      - name: Build jupyter book
+        shell: micromamba-shell {0}
+        run: cd docs && jupyter book build --html
       - name: Upload html
         if: ${{ inputs.upload }}
         uses: actions/upload-pages-artifact@v5
