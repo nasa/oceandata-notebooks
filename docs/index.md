@@ -36,44 +36,44 @@ Recent updates to file structures, variable names, and data organization may imp
 
 :::{card}
 :link: sections/data-access
-:link-type: doc
 :header: Data Access
 :footer: Learn More →
 
 ![Data Access](images/data.jpg)
+
 Learn the fundamentals of accessing OB.DAAC data products.
 
 :::
 
 :::{card}
 :link: sections/processing
-:link-type: doc
 :header: Processing
 :footer: Learn More →
 
 ![Data Access](images/data.jpg)
+
 Begin to process data products for your analyses and pipelines.
 
 :::
 
 :::{card}
 :link: sections/visualization
-:link-type: doc
 :header: Visualization
 :footer: Learn More →
 
 ![visualization](images/visualizations.jpg)
+
 Find out how to make visualizations with data from various instruments
 
 :::
 
 :::{card}
 :link: sections/seadas
-:link-type: doc
 :header: SeaDAS & OCSSW
 :footer: Learn More →
 
 ![SeaDAS](images/ocssw.jpg)
+
 The official software created by the OB.DAAC for satellite data.
 
 :::
@@ -87,33 +87,33 @@ The official software created by the OB.DAAC for satellite data.
 
 :::{card}
 :link: sections/ocean
-:link-type: doc
 :header: Ocean
 :footer: Learn More →
 
 ![Ocean](images/ocean.png)
+
 Dive deeper into ocean data products.
 
 :::
 
 :::{card}
 :link: sections/cloud-atmosphere
-:link-type: doc
 :header: Atmosphere
 :footer: Learn More →
 
 ![Atmosphere](images/atmosphere.jpg)
+
 Explore atmospheric and cloud data products including aerosol retrievals and trace gases.
 
 :::
 
 :::{card}
 :link: sections/land
-:link-type: doc
 :header: Terrestrial
 :footer: Learn More →
 
 ![Land](images/land.jpg)
+
 Work with terrestrial data products for monitoring vegetation and land cover.
 
 :::
@@ -125,14 +125,14 @@ Work with terrestrial data products for monitoring vegetation and land cover.
 ::::{grid} 1 1 3 3
 
 :::{card}
-:link: ./faq
+:link: faq
 
 Frequently Asked Questions about data and tools
 
 :::
 
 :::{card}
-:link: ./sections/other-useful-tutorials
+:link: sections/other-useful-tutorials
 
 Websites by friends of the Ocean Ecology Lab
 
