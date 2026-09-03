@@ -119,10 +119,11 @@ project:
         - file: reference/how-to-cite.md
         - file: reference/glossary.md
 site:
+  template: book-theme
   options:
     analytics_google: G-E0VPP0Z29X
     folders: true
     logo: HelpHub.png
     logo_dark: HelpHub-dark.png
     logo_alt: OB.DAAC Help Hub
-  template: book-theme
+    style: style.css
