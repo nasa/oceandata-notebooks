@@ -1,27 +1,27 @@
-# SeaDAS GUI
+# SeaDAS Desktop
 
 ## Summary
 
-Learn to use the SeaDAS Graphical User Interface for interactive ocean color data processing and visualization.
-The SeaDAS GUI provides an intuitive interface for users who prefer visual tools over command-line processing.
+Learn to use the SeaDAS desktop application for interactive ocean color data processing and visualization.
+SeaDAS provides an intuitive interface for users who prefer visual tools over command-line processing.
 
 ## Learning Objectives
 
-- Navigating the SeaDAS GUI interface
+- Navigating the SeaDAS interface
 - Interactive data loading and visualization
 - Point-and-click processing and analysis workflows
 - Exporting results for further analysis
 
 ## Video Training Playlists
 
-These video tutorials provide comprehensive training on using SeaDAS GUI for ocean color data analysis, from basic operations to advanced processing techniques.
+These video tutorials provide comprehensive training on using SeaDAS for ocean color data analysis, from basic operations to advanced processing techniques.
 
-### Getting Started with SeaDAS GUI
+### Getting Started with SeaDAS
 
 - [SeaDAS | Introduction 30th Anniversary](https://www.youtube.com/watch?v=GZG2saE9ecc&list=PLf60TttfDm30SjrRVBSXptm0tGRax5fKq&index=6&pp=iAQB0gcJCQgKAYcqIYzv) 
 - [ SeaDAS | Getting Started : Installation : Install and Open SeaDAS (on a Mac OS)](https://www.youtube.com/watch?v=xYjfd--JLFI&list=PLf60TttfDm30SjrRVBSXptm0tGRax5fKq&index=1&pp=iAQB)
 
-### SeaDAS Science Processors
+### SeaDAS Tutorials: Science Processors
 
 - [SeaDAS | Science Processors : Installation : Set up Earthdata Login access](https://www.youtube.com/watch?v=HR-5-Q5Emfg&list=PLf60TttfDm30AkfKNAJU6lW_YZODNCFZB&index=1&pp=iAQB0gcJCQgKAYcqIYzv)
 - [SeaDAS | Science Processors : Installation : Set up Python for the Science Processors (Mac, Linux)](https://www.youtube.com/watch?v=bvyxNYY_C4A&list=PLf60TttfDm30AkfKNAJU6lW_YZODNCFZB&index=2&pp=iAQB)

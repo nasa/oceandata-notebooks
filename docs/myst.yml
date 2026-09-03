@@ -1,6 +1,5 @@
 version: 1
 project:
-  title: OB.DAAC Help Hub
   license: NASA-1.3
   copyright: 2025-2026 The Ocean Ecology Laboratory at NASA Goddard
   github: https://github.com/nasa/oceandata-notebooks
@@ -12,108 +11,90 @@ project:
         - file: faq.md
           title: Data and Tools FAQ
         - file: team.md
-    - title: Help Hub Core
+    - title: Basics
       children:
-        - file: sections/data-access-basics.md
+        - file: sections/data-access.md
+          title: Data Access
           children:
             - file: notebooks/oci/oci_data_access.md
               title: Access Data Products
             - file: notebooks/oci/oci_file_structure.md
               title: Intro to Product Levels
-            - file: notebooks/oci/subsetting_with_harmony-py.md
-              title: Dataset Subsetting
             - file: notebooks/modis/modis_explore_l2.md
               title: Orientation to Level-2
             - file: notebooks/modis/modis_explore_l3.md
               title: Orientation to Level-3
-            - file: notebooks/oci/oci_grid_match.md
-              title: Projecting & GeoTIFFs
-            - file: notebooks/hackweek/satellite_insitu_matchups.md
-              title: In Situ Matchups
-            - file: notebooks/oci/ml_cloud_mask.md
-              title: Machine Learning Tutorial
-        - file: sections/visualizations.md
+            - file: notebooks/oci/subsetting_with_harmony-py.md
+              title: Dataset Subsetting
+        - file: sections/processing.md
+          title: Processing
           children:
-            - file: notebooks/harp2/harp2_basic_visualizations.md
-              title: PACE-HARP2
-            - file: notebooks/spexone/spexone_basic_visualizations.md
-              title: PACE-SPEXone
-            - file: notebooks/oci/satdata_visualization.md
-              title: PACE-OCI Part I
-            - file: notebooks/oci/oci_data_visualization_part2.md
-              title: PACE-OCI Part II
-        - file: sections/ocean.md
-          children:
-            - file: notebooks/oci/oci_gpig.md
-              title: Gaussian Pigments (GPig)
-            - file: notebooks/oci/oci_sdp.md
-              title: Spectral Derivative Pigments (SDP)
-            - file: notebooks/oci/oci_moana.md
-              title: Multi Ordination ANAlysis (MOANA)
-            - file: notebooks/oci/accessing_CLOSE_data.md
-              title: Access the CLOSE Dataset
-        - file: sections/cloud-atmosphere.md
-          children:
-            - file: notebooks/harp2/harp2_l2_fastmapol_aerosol_ocean_product.md
-              title: HARP2 Ocean Aerosols (FastMAPOL)
-            - file: notebooks/harp2/harp2_l2_fastmapol_aerosol_land_product.md
-              title: HARP2 Land Aerosols (FastMAPOL)
-            - file: notebooks/spexone/spexone_l2_fastmapol_aerosol_product.md
-              title: SPEXone Aerosols (FastMAPOL)
-            - file: notebooks/spexone/spexone_l2_remotap_aerosol_product.md
-              title: SPEXone Aerosols (RemoTAP)
-            - file: notebooks/harp2/harp2_l2_cloud_gpc_product.md
-              title: Clouds from PACE-HARP2
-            - file: notebooks/oci/oci_no2.md
-              title: Nitrogen Dioxide from PACE-OCI
-        - file: sections/land.md
-          children:
-            - file: notebooks/oci/oci_terrestrial_data.md
-              title: Land Surface from PACE-OCI
-    - title: SeaDAS - OCSSW Toolbox
-      children:
-        - file: sections/seadas-toolbox.md
-          children:
-            - file: sections/seadas-desktop.md
-              title: SeaDAS Desktop Application
-            - file: notebooks/oci/oci_ocssw_install.md
-              title: Install SeaDAS Processors
             - file: notebooks/oci/oci_ocssw_processing_overview.md
               title: Basic Processing
             - file: notebooks/oci/oci_ocssw_l2gen.md
               title: Generate Level-2 Products
-            - file: notebooks/oci/oci_ocssw_giop.md
-              title: Run the GIOP Algorithm
+            - file: notebooks/oci/oci_grid_match.md
+              title: Export for GIS
+            - file: notebooks/hackweek/satellite_insitu_matchups.md
+              title: In Situ Matchups
+            - file: notebooks/oci/ml_cloud_mask.md
+              title: Machine Learning
+        - file: sections/visualization.md
+          title: Visualization
+          children:
+            - file: notebooks/oci/satdata_visualization.md
+              title: PACE-OCI Part I
+            - file: notebooks/oci/oci_data_visualization_part2.md
+              title: PACE-OCI Part II
+            - file: notebooks/harp2/harp2_basic_visualizations.md
+              title: PACE-HARP2
+            - file: notebooks/spexone/spexone_basic_visualizations.md
+              title: PACE-SPEXone
+        - file: sections/seadas.md
+          title: SeaDAS
+          children:
+            - file: sections/seadas-desktop.md
+              title: SeaDAS Application
+            - file: notebooks/oci/oci_ocssw_install.md
+              title: SeaDAS Processors (OCSSW)
+    - file: sections/ocean.md
+      children:
+        - file: notebooks/oci/oci_ocssw_giop.md
+          title: Run the GIOP Algorithm
+        - file: notebooks/oci/oci_gpig.md
+          title: Gaussian Pigments (GPig)
+        - file: notebooks/oci/oci_sdp.md
+          title: Spectral Derivative Pigments (SDP)
+        - file: notebooks/oci/oci_moana.md
+          title: Multi Ordination ANAlysis (MOANA)
+        - file: notebooks/oci/accessing_CLOSE_data.md
+          title: Access the CLOSE Dataset
+    - file: sections/cloud-atmosphere.md
+      title: Atmosphere
+      children:
+        - file: notebooks/harp2/harp2_l2_fastmapol_aerosol_ocean_product.md
+          title: HARP2 Ocean Aerosols (FastMAPOL)
+        - file: notebooks/harp2/harp2_l2_fastmapol_aerosol_land_product.md
+          title: HARP2 Land Aerosols (FastMAPOL)
+        - file: notebooks/spexone/spexone_l2_fastmapol_aerosol_product.md
+          title: SPEXone Aerosols (FastMAPOL)
+        - file: notebooks/spexone/spexone_l2_remotap_aerosol_product.md
+          title: SPEXone Aerosols (RemoTAP)
+        - file: notebooks/harp2/harp2_l2_cloud_gpc_product.md
+          title: Clouds from PACE-HARP2
+        - file: notebooks/oci/oci_no2.md
+          title: Nitrogen Dioxide from PACE-OCI
+    - file: sections/land.md
+      title: Terrestrial
+      children:
+        - file: notebooks/oci/oci_terrestrial_data.md
+          title: Land Surface from PACE-OCI
     - title: Resources
       children:
         - file: notebooks/release_note_highlights.md
           title: Reprocessing Notes
         - file: sections/other-useful-tutorials.md
-          children:
-            - url: https://nasa.github.io/VITALS/python/emit_pace/01_Colocate_PACE_EMIT_Data.html
-              title: PACE & EMIT
-            - url: https://github.com/seanremy/pace-earthcare-matchups
-              title: PACE - Earthcare Matchups
-            - url: https://github.com/wekeo/learn-olci
-              title: Wekeo - Learn OLCI
         - file: sections/past-trainings.md
-          children:
-            - url: https://fish-pace.github.io/hackweek-2025/intro.html
-              title: Fish-PACE Hackweek 2026
-            - url: https://pacehackweek.github.io/pace-2025/presentations/notebooks.html
-              title: PACE Data Hackweek 2025
-            - url: https://misclab.umeoce.maine.edu/OceanOpticsClass2025/
-              title: Ocean Optics Class 2025
-            - url: https://nmfs-opensci.github.io/EDMW-EarthData-Workshop-2025/
-              title: NOAA EDMW 2025 - PACE
-            - url: https://appliedsciences.nasa.gov/get-involved/training/english/arset-introduction-plankton-aerosol-cloud-ocean-ecosystem-pace
-              title: ARSET - Hyperspectral Water Quality Monitoring
-            - url: https://pacehackweek.github.io/pace-2024/intro.html
-              title: PACE Data Hackweek 2024
-            - url: https://www.us-ocb.org/pace-mission-training-activity/
-              title: PACE Training Lectures 2022
-            - url: https://seadas.gsfc.nasa.gov/tutorials/seadas101/
-              title: OCSSW & SeaDAS 101
     - title: Reference
       children:
         - file: reference/how-to-cite.md
@@ -123,7 +104,25 @@ site:
   options:
     analytics_google: G-E0VPP0Z29X
     folders: true
+    hide_footer_links: true
     logo: HelpHub.png
+    logo_alt: Logo for the OB.DAAC Help Hub
     logo_dark: HelpHub-dark.png
-    logo_alt: OB.DAAC Help Hub
     style: style.css
+  nav:
+    - title: Basics
+      children:
+        - title: Data Access
+          url: /sections/data-access
+        - title: Processing
+          url: /sections/processing
+        - title: Visualization
+          url: /sections/visualization
+        - title: SeaDAS
+          url: /sections/seadas
+    - title: Ocean
+      url: /sections/ocean
+    - title: Atmosphere
+      url: /sections/cloud-atmosphere
+    - title: Terrestrial
+      url: /sections/land
