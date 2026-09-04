@@ -15,7 +15,7 @@ kernelspec:
 
 **Authors:** Ian Carroll (NASA, UMBC), Anna Windle (NASA, SSAI)
 
-Last updated: July 23, 2026
+Last updated: September 4, 2026
 
 ## Summary
 
