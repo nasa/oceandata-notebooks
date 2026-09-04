@@ -19,11 +19,11 @@ Last updated: July 23, 2026
 
 ## Summary
 
-Satellite data are periodically [reprocessed](https://oceancolor.gsfc.nasa.gov/data/reprocessing/) to incorporate improvements in sensor calibration, atmospheric correction, retrieval algorithms, and ancillary datasets, as well as to correct known processing issues. Reprocessing produces a more accurate and internally consistent data record, ensuring that changes over time reflect real environmental variability rather than differences in processing methods.
+Satellite data are periodically reprocessed to incorporate improvements in sensor calibration, atmospheric correction, retrieval algorithms, and ancillary datasets, as well as to correct known processing issues. Reprocessing produces a more accurate and internally consistent data record, ensuring that changes over time reflect real environmental variability rather than differences in processing methods.
 
 <div class="alert alert-warning" role="alert">
 
-This page will be updated as reprocessings occur. Currently, it highlights the key file structure changes introduced in PACE OCI version 3.2 and demonstrates how to update existing workflows developed for version 3.1. As version 3.1 data are phased out, these approaches will become the standard for accessing and analyzing PACE OCI data. Future reprocessing campaigns, including Version 4, are expected to introduce additional file structure changes, which will be communicated to the PACE user community.
+This page will be updated as reprocessings occur. Currently, it highlights the key file structure changes introduced in PACE-OCI version 3.2 and demonstrates how to update existing workflows developed under version 3.1. As version 3.1 data are phased out, these approaches will become the standard for accessing and analyzing PACE-OCI data. Version 4 reprocessing is expected to introduce additional file structure changes, which will be communicated to the PACE user community.
 
 For the PACE polarimeters (HARP2 and SPEXone), Level-1, Level-2, and Level-3 products have been updated to Version 4, with improved calibration and updated science data products. 
 
@@ -34,10 +34,10 @@ For the PACE polarimeters (HARP2 and SPEXone), Level-1, Level-2, and Level-3 pro
 At the end of this notebook you will know:
 
 - The version of every PACE collection available on Earthdata Cloud
-- The differences in OCI Level-2 file structure between version 3.1 and 3.2
-- How to open OCI version 3.1 and 3.2 data with `xarray`
-- New OCI version 3.2 L3M collection and granule names
-- Updates from HARP2 and SPEXone version 4.0 data
+- The differences in Level-2 file structure between PACE-OCI version 3.1 and 3.2
+- How to open PACE-OCI version 3.1 and 3.2 data with `xarray`
+- New PACE-OCI version 3.2 Level-3 collection and granule names
+- Updates from PACE-HARP2 and PACE-SPEXone version 4 data
 
 +++
 
@@ -134,19 +134,16 @@ The OB.DAAC provides [documentation](https://oceancolor.gsfc.nasa.gov/data/repro
 
 +++
 
-- [PACE HARP2 V4 Processing Notes][HARP-4]
-- [PACE SPEXone V4 Processing Notes][SPEXone-4]
-
-
+- [PACE-HARP2 V4 Processing Notes][HARP-4]
+- [PACE-SPEXone V4 Processing Notes][SPEXone-4]
 
 [HARP-4]: https://oceandata.sci.gsfc.nasa.gov/files/reprocessing/PACE_HARP2_V4_Release_Notes.pdf
-
 [SPEXone-4]: 
 https://oceandata.sci.gsfc.nasa.gov/files/reprocessing/PACE_SPEXone_V4_Release_Notes.pdf
 
-The PACE HARP2 and SPEXone Version 4 (V4) data products were released in April 2026. Level-1 updates include improved radiometric and polarimetric calibration and geolocation for HARP2, and improved radiometric accuracy and stray-light correction for SPEXone. At Level-2, SPEXone **RemoTAP** was upgraded to the Hybrid algorithm, FastMAPOL **MAPOL_OCEAN** was updated for both instruments with a new HARP2 **MAPOL_LAND** product, and HARP2 **CLOUD_GPC** products were updated. Daily, 8-day, and monthly global Level-3 products are also available.
+The PACE-HARP2 and PACE-SPEXone Version 4 (V4) data products were released in April 2026. Level-1 updates include improved radiometric and polarimetric calibration and geolocation for HARP2, and improved radiometric accuracy and stray-light correction for SPEXone. At Level-2, SPEXone **RemoTAP** was upgraded to the Hybrid algorithm, FastMAPOL **MAPOL_OCEAN** was updated for both instruments with a new HARP2 **MAPOL_LAND** product, and HARP2 **CLOUD_GPC** products were updated. Daily, 8-day, and monthly global Level-3 products are also available.
 
-Please refer to the [Jupyter notebook tutorials](https://nasa.github.io/oceandata-notebooks/sections/cloud-atmosphere.html) to explore the new V4 data products.
+Please refer to the [tutorials](../sections/cloud-atmosphere) to explore the new V4 data products.
 
 The latest reprocessing for PACE-OCI remains at Version 3.2. 
 
@@ -156,11 +153,11 @@ The latest reprocessing for PACE-OCI remains at Version 3.2.
 
 +++
 
-- [PACE OCI V3 Processing Notes][OCI-3.2]
+- [PACE-OCI V3 Processing Notes][OCI-3]
 
-PACE OCI version 3.2 was released in April 2026. This reprocessing primarily corrected an implementation error in the bidirectional reflectance distribution function (BRDF) correction applied to spectral remote-sensing reflectance (Rrs), and also included updated vicarious calibration and several minor processing improvements. The NetCDF file structure was also updated as part of this release. Reprocessing was essential for the PACE-OCI ocean color product suites (AOP, IOP, BGC, PAR), but the land surface (SRFEFL, LANDVI), atmosphere (AER_UAA, UVAI_UAA), and cloud (CLOUD, CLOUD_MASK) products remain at version 3.1.
+PACE-OCI version 3.2 was released in April 2026. This reprocessing primarily corrected an implementation error in the bidirectional reflectance distribution function (BRDF) correction applied to spectral remote-sensing reflectance (Rrs), and also included updated vicarious calibration and several minor processing improvements. The NetCDF file structure was also updated as part of this release. Reprocessing was essential for the PACE-OCI ocean color product suites (AOP, IOP, BGC, PAR), but the land surface (SRFEFL, LANDVI), atmosphere (AER_UAA, UVAI_UAA), and cloud (CLOUD, CLOUD_MASK) products remain at version 3.1.
 
-[OCI-3.2]: https://oceancolor.gsfc.nasa.gov/files/data/reprocessing/V3/PACE_OCI_V3_Release_Notes.pdf
+[OCI-3]: https://oceandata.sci.gsfc.nasa.gov/files/reprocessing/PACE_OCI_V3_Release_Notes.pdf
 
 +++
 
@@ -280,13 +277,11 @@ Code previously developed for the version 3.1 structure, such as `xr.merge(datat
 
 +++
 
-- [PACE OCI V3 Processing Notes][OCI-3.1]
-
-[OCI-3.1]: https://oceandata.sci.gsfc.nasa.gov/files/data/reprocessing/V3/PACE_OCI_V3_Release_Notes.pdf
+- [PACE OCI V3 Processing Notes][OCI-3]
 
 +++
 
-If you have a `datatree` returned by `xarray.open_datatree` applied to a level-2 collection at version 3.1, then an (abridged) output from `print(datatree)` would look like:
+If you have a `datatree` returned by `xarray.open_datatree` applied to a Level-2 collection at version 3.1, then an (abridged) output from `print(datatree)` would look like:
 
 <!---
 results = earthaccess.search_data(
@@ -357,9 +352,7 @@ dataset = dataset.set_coords(("longitude", "latitude"))
 
 +++
 
-- [PACE Science Data Reprocessing Version 3][3.0]
-
-[3.0]: https://oceancolor.gsfc.nasa.gov/data/reprocessing/V3.0/pace-oci/
+- [PACE OCI V3 Processing Notes][OCI-3]
 
 +++
 
@@ -372,9 +365,9 @@ refinements, bug fixes, data format improvements, and expanded product suites. T
 
 +++
 
-- [PACE Science Data Reprocessing Version 3][2.0]
+- [PACE Science Data Reprocessing Version 3][PACE-2]
 
-[2.0]: https://oceancolor.gsfc.nasa.gov/data/reprocessing/V2.0/pace-oci/
+[PACE-2]: https://oceandata.sci.gsfc.nasa.gov/files/reprocessing/PACE_Science_Data_V2_Release_Notes.pdf
 
 +++
 
@@ -388,9 +381,9 @@ collected by the three PACE instruments.
 
 +++
 
-- [Initial Release Notes][1.0]
+- [Initial Release Notes][PACE-1]
 
-[1.0]: https://oceancolor.gsfc.nasa.gov/data/reprocessing/V1.0/pace-oci/
+[PACE-1]: https://oceandata.sci.gsfc.nasa.gov/files/reprocessing/PACE_Science_Data_V1_Release_Notes.pdf
 
 +++
 
