@@ -365,7 +365,7 @@ refinements, bug fixes, data format improvements, and expanded product suites. T
 
 +++
 
-- [PACE Science Data Reprocessing Version 3][PACE-2]
+- [PACE Science Data Reprocessing Version 2][PACE-2]
 
 [PACE-2]: https://oceandata.sci.gsfc.nasa.gov/files/reprocessing/PACE_Science_Data_V2_Release_Notes.pdf
 
