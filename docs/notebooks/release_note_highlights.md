@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.5
+    jupytext_version: 1.19.1
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -23,7 +23,9 @@ Satellite data are periodically [reprocessed](https://oceancolor.gsfc.nasa.gov/d
 
 <div class="alert alert-warning" role="alert">
 
-This page will be updated as reprocessings occur. Currently, it highlights the key file structure changes introduced in PACE version 3.2 and demonstrates how to update existing workflows developed for version 3.1. As version 3.1 data are phased out, these approaches will become the standard for accessing and analyzing PACE OCI data. Future reprocessing campaigns, including Version 4, are expected to introduce additional file structure changes, which will be communicated to the PACE user community.
+This page will be updated as reprocessings occur. Currently, it highlights the key file structure changes introduced in PACE OCI version 3.2 and demonstrates how to update existing workflows developed for version 3.1. As version 3.1 data are phased out, these approaches will become the standard for accessing and analyzing PACE OCI data. Future reprocessing campaigns, including Version 4, are expected to introduce additional file structure changes, which will be communicated to the PACE user community.
+
+For the PACE polarimeters (HARP2 and SPEXone), Level-1, Level-2, and Level-3 products have been updated to Version 4, with improved calibration and updated science data products. 
 
 </div>
 
@@ -33,8 +35,9 @@ At the end of this notebook you will know:
 
 - The version of every PACE collection available on Earthdata Cloud
 - The differences in OCI Level-2 file structure between version 3.1 and 3.2
-- How to open version 3.1 and 3.2 data with `xarray`
-- New version 3.2 L3M collection and granule names
+- How to open OCI version 3.1 and 3.2 data with `xarray`
+- New OCI version 3.2 L3M collection and granule names
+- Updates from HARP2 and SPEXone version 4.0 data
 
 +++
 
@@ -134,10 +137,18 @@ The OB.DAAC provides [documentation](https://oceancolor.gsfc.nasa.gov/data/repro
 - [PACE HARP2 V4 Processing Notes][HARP-4]
 - [PACE SPEXone V4 Processing Notes][SPEXone-4]
 
-The latest reprocessing for PACE-OCI remains at Version 3.2.
 
-[HARP-4]: https://oceandata.sci.gsfc.nasa.gov/files/data/reprocessing/V4/pace-harp2/PACE_HARP2_V4_Release_Notes.pdf
-[SPEXone-4]: https://oceandata.sci.gsfc.nasa.gov/files/data/reprocessing/V4/pace-spexone/PACE_SPEXone_V4_Release_Notes.pdf
+
+[HARP-4]: https://oceandata.sci.gsfc.nasa.gov/files/reprocessing/PACE_HARP2_V4_Release_Notes.pdf
+
+[SPEXone-4]: 
+https://oceandata.sci.gsfc.nasa.gov/files/reprocessing/PACE_SPEXone_V4_Release_Notes.pdf
+
+The PACE HARP2 and SPEXone Version 4 (V4) data products were released in April 2026. Level-1 updates include improved radiometric and polarimetric calibration and geolocation for HARP2, and improved radiometric accuracy and stray-light correction for SPEXone. At Level-2, SPEXone **RemoTAP** was upgraded to the Hybrid algorithm, FastMAPOL **MAPOL_OCEAN** was updated for both instruments with a new HARP2 **MAPOL_LAND** product, and HARP2 **CLOUD_GPC** products were updated. Daily, 8-day, and monthly global Level-3 products are also available.
+
+Please refer to the [Jupyter notebook tutorials](https://nasa.github.io/oceandata-notebooks/sections/cloud-atmosphere.html) to explore the new V4 data products.
+
+The latest reprocessing for PACE-OCI remains at Version 3.2. 
 
 +++
 
