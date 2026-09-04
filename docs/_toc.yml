@@ -74,6 +74,8 @@ parts:
         sections:
           - file: notebooks/oci/oci_terrestrial_data
             title: Land Surface from PACE-OCI
+          - file: notebooks/harp2/harp2_l2_fastmapol_land_product
+            title: Land Surface from PACE-HARP2
 
   - caption: SeaDAS - OCSSW Toolbox
     chapters:
