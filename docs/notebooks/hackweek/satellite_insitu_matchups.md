@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: satellite_insitu_matchups.md
+  title: md
+- file: satellite_insitu_matchups.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

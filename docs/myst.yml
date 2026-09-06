@@ -1,0 +1,128 @@
+version: 1
+project:
+  license: NASA-1.3
+  copyright: 2025-2026 The Ocean Ecology Laboratory at NASA Goddard
+  github: https://github.com/nasa/oceandata-notebooks
+  toc:
+    - file: index.md
+    - title: Welcome
+      children:
+        - file: getting-started.md
+        - file: faq.md
+          title: Data and Tools FAQ
+        - file: team.md
+    - title: Basics
+      children:
+        - file: sections/data-access.md
+          title: Data Access
+          children:
+            - file: notebooks/oci/oci_data_access.md
+              title: Access Data Products
+            - file: notebooks/oci/oci_file_structure.md
+              title: Intro to Product Levels
+            - file: notebooks/modis/modis_explore_l2.md
+              title: Orientation to Level-2
+            - file: notebooks/modis/modis_explore_l3.md
+              title: Orientation to Level-3
+            - file: notebooks/oci/subsetting_with_harmony-py.md
+              title: Dataset Subsetting
+        - file: sections/processing.md
+          title: Processing
+          children:
+            - file: notebooks/oci/oci_ocssw_processing_overview.md
+              title: Basic Processing
+            - file: notebooks/oci/oci_ocssw_l2gen.md
+              title: Generate Level-2 Products
+            - file: notebooks/oci/oci_grid_match.md
+              title: Export for GIS
+            - file: notebooks/hackweek/satellite_insitu_matchups.md
+              title: In Situ Matchups
+            - file: notebooks/oci/ml_cloud_mask.md
+              title: Machine Learning
+        - file: sections/visualization.md
+          title: Visualization
+          children:
+            - file: notebooks/oci/satdata_visualization.md
+              title: PACE-OCI Part I
+            - file: notebooks/oci/oci_data_visualization_part2.md
+              title: PACE-OCI Part II
+            - file: notebooks/harp2/harp2_basic_visualizations.md
+              title: PACE-HARP2
+            - file: notebooks/spexone/spexone_basic_visualizations.md
+              title: PACE-SPEXone
+        - file: sections/seadas.md
+          title: SeaDAS
+          children:
+            - file: sections/seadas-desktop.md
+              title: SeaDAS Application
+            - file: notebooks/oci/oci_ocssw_install.md
+              title: SeaDAS Processors (OCSSW)
+    - file: sections/ocean.md
+      children:
+        - file: notebooks/oci/oci_ocssw_giop.md
+          title: Run the GIOP Algorithm
+        - file: notebooks/oci/oci_gpig.md
+          title: Gaussian Pigments (GPig)
+        - file: notebooks/oci/oci_sdp.md
+          title: Spectral Derivative Pigments (SDP)
+        - file: notebooks/oci/oci_moana.md
+          title: Multi Ordination ANAlysis (MOANA)
+        - file: notebooks/oci/accessing_CLOSE_data.md
+          title: Access the CLOSE Dataset
+    - file: sections/cloud-atmosphere.md
+      title: Atmosphere
+      children:
+        - file: notebooks/harp2/harp2_l2_fastmapol_aerosol_ocean_product.md
+          title: HARP2 Ocean Aerosols (FastMAPOL)
+        - file: notebooks/harp2/harp2_l2_fastmapol_aerosol_land_product.md
+          title: HARP2 Land Aerosols (FastMAPOL)
+        - file: notebooks/spexone/spexone_l2_fastmapol_aerosol_product.md
+          title: SPEXone Aerosols (FastMAPOL)
+        - file: notebooks/spexone/spexone_l2_remotap_aerosol_product.md
+          title: SPEXone Aerosols (RemoTAP)
+        - file: notebooks/harp2/harp2_l2_cloud_gpc_product.md
+          title: Clouds from PACE-HARP2
+        - file: notebooks/oci/oci_no2.md
+          title: Nitrogen Dioxide from PACE-OCI
+    - file: sections/land.md
+      title: Terrestrial
+      children:
+        - file: notebooks/oci/oci_terrestrial_data.md
+          title: Land Surface from PACE-OCI
+    - title: Resources
+      children:
+        - file: notebooks/release_note_highlights.md
+          title: Reprocessing Notes
+        - file: sections/other-useful-tutorials.md
+        - file: sections/past-trainings.md
+    - title: Reference
+      children:
+        - file: reference/how-to-cite.md
+        - file: reference/glossary.md
+site:
+  template: book-theme
+  options:
+    analytics_google: G-E0VPP0Z29X
+    folders: true
+    hide_footer_links: true
+    logo: HelpHub.png
+    logo_alt: Logo for the OB.DAAC Help Hub
+    logo_dark: HelpHub-dark.png
+    style: style.css
+  nav:
+    - title: Basics
+      children:
+        - title: Data Access
+          url: /sections/data-access
+        - title: Processing
+          url: /sections/processing
+        - title: Visualization
+          url: /sections/visualization
+        - title: SeaDAS
+          url: /sections/seadas
+    - title: Ocean
+      url: /sections/ocean
+    - title: Atmosphere
+      url: /sections/cloud-atmosphere
+    - title: Terrestrial
+      url: /sections/land

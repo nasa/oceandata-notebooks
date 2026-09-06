@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: spexone_l2_remotap_aerosol_product.md
+  title: md
+- file: spexone_l2_remotap_aerosol_product.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

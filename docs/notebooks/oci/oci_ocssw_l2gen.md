@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: oci_ocssw_l2gen.md
+  title: md
+- file: oci_ocssw_l2gen.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

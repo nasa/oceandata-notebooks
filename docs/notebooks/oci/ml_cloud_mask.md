@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: ml_cloud_mask.md
+  title: md
+- file: ml_cloud_mask.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md
@@ -329,7 +334,7 @@ ax.legend()
 plt.show()
 ```
 
-If you're curious to see more activation functions, [this table](https://en.wikipedia.org/wiki/Activation_function#:~:text=is%20often%20used.-,Table%20of%20activation%20functions,-%5Bedit%5D) is a good place to start.
+If you're curious to see more activation functions, [this table](https://en.wikipedia.org/wiki/Activation_function#Table_of_activation_functions) is a good place to start.
 
 Without activation functions, no matter how many layers we include in our MLP, and no matter how large those layers, the MLP will only ever be able to approximate linear relationships between the inputs and outputs. When we include these non-linear functions, however, it can be shown that MLPs are "universal function approximators." This means that an arbitrarily wide and deep MLP is able to approximate any function up to an arbitrarily small error.
 
@@ -622,7 +627,7 @@ plt.legend()
 plt.show()
 ```
 
-Convolution generalizes to multiple dimensions. Two-dimensional convolution is extremely useful for image processing. [This graphic](https://en.wikipedia.org/wiki/Convolution#/media/File:2D_Convolution_Animation.gif) is a great visualization of how it works. Its as simple as multiplying where our kernel overlaps our image and summing the values, then repeating that in a sliding window fashion across the whole image.
+Convolution generalizes to multiple dimensions. Two-dimensional convolution is extremely useful for image processing. [This graphic](https://en.wikipedia.org/wiki/File:2D_Convolution_Animation.gif) is a great visualization of how it works. Its as simple as multiplying where our kernel overlaps our image and summing the values, then repeating that in a sliding window fashion across the whole image.
 
 We can convolve an image with different "kernels" or "filters" to achieve specific effects on the image. For example, the 2D normal (Gaussian) distribution is useful for [blurring an image](https://en.wikipedia.org/wiki/Gaussian_blur). The standard deviation of the Gaussian will determine the strength of the blur. Another useful filter is the [Sobel filter](https://en.wikipedia.org/wiki/Sobel_operator) which is useful for extracting information about the edges in an image.
 

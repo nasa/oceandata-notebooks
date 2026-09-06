@@ -26,7 +26,7 @@ We encourage you to visit these organizations to learn about options for using t
 Alternatively, you may want to learn about [getting started with AWS for Earth data][edcloud].
 
 All tutorials in the Help Hub are applicable whether you plan to download data or access it directly from AWS.
-The [Data Access](notebooks/oci/oci_data_access) notebook steps through differences between the two approaches in detail.
+The [Data Access](./notebooks/oci/oci_data_access.md) notebook steps through differences between the two approaches in detail.
 
 ## Jupyter Setup
 
@@ -53,7 +53,7 @@ Alternatively, to avoid any updates, use a date string formatted as "YYYYMMDD" f
 
 ### Using a Conda Environment
 
-For the second option, download our {download}`conda-lock.yml <../container/conda-lock.yml>` configuration file,
+For the second option, download our {download}`../container/conda-lock.yml` configuration file,
 which specifies exact versions of packages on {term}`Conda-Forge` and {term}`PyPI` that must be installed.
 You need {term}`Mamba` available to create an environment from this configuration file;
 you can use either the `mamba` command that comes with {term}`Conda` (recommended) or the [Micromamba][micromamba] distribution.
