@@ -15,9 +15,9 @@ Head over to our [Help Hub] to access the website published from this repository
 ## For Notebook Authors and Reviewers
 
 The Help Hub [team] supports development of these resources by authoring or updating content as well as reviewing contributions from the public.
-We welcome contributions in the form of new notebooks or suggestions from anyone, but ask all to observe our [CODE_OF_CONDUCT](?tab=coc-ov-file).
+We welcome contributions in the form of new notebooks or suggestions from anyone, but ask all to observe our [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
 Please also take a minute to familiarize yourself with the following information about our notebooks, which are formatted as MyST Markdown rather than as Jupyter Notebooks.
-Note that our [CONTRIBUTING](?tab=contributing-ov-file) guide is primarily of use to team members.
+Note that our [CONTRIBUTING](CONTRIBUTING.md) guide is primarily of use to team members.
 
 [team]: https://nasa.github.io/oceandata-notebooks/team.html
 
