@@ -8,15 +8,20 @@ Welcome to the repository of tutorials for users of the [Ocean Biology Distribut
 
 ## For Data Users
 
-Head over to our [Help Hub] to access the published tutorials.
+Head over to our [Help Hub] to access the website published from this repository.
 
 [Help Hub]: https://nasa.github.io/oceandata-notebooks/
 
 ## For Notebook Authors and Reviewers
 
-Please take a minute to familiarize yourself with the following information about our tutorials, which are stored as MyST Markdown rather than as Jupyter Notebooks.
+The Help Hub [team] supports development of these resources by authoring or updating content as well as reviewing contributions from the public.
+We welcome contributions in the form of new notebooks or suggestions from anyone, but ask all to observe our [CODE_OF_CONDUCT](?tab=coc-ov-file).
+Please also take a minute to familiarize yourself with the following information about our notebooks, which are formatted as MyST Markdown rather than as Jupyter Notebooks.
+Note that our [CONTRIBUTING](?tab=contributing-ov-file) guide is primarily of use to team members.
 
-### Edit Notebooks & Commit Markdown
+[team]: https://nasa.github.io/oceandata-notebooks/team.html
+
+### Editing MyST Markdown
 
 > [!IMPORTANT]
 > 
