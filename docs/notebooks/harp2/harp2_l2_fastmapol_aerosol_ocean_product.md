@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: harp2_l2_fastmapol_aerosol_ocean_product.md
+  title: md
+- file: harp2_l2_fastmapol_aerosol_ocean_product.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

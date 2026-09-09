@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: oci_no2.md
+  title: md
+- file: oci_no2.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

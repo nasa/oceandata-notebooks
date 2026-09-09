@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: oci_terrestrial_data.md
+  title: md
+- file: oci_terrestrial_data.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

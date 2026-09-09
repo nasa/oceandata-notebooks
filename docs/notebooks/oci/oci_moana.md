@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: oci_moana.md
+  title: md
+- file: oci_moana.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md

@@ -1,0 +1,7 @@
+div.myst-toc > a {
+  display: none;
+}
+
+.myst-card-header {
+  font-weight: bold;
+}
