@@ -1,12 +1,10 @@
 ---
 jupytext:
-  cell_metadata_filter: all,-trusted
-  notebook_metadata_filter: -all,kernelspec,jupytext
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.5
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -23,7 +21,7 @@ Last updated: March 5, 2026
 
 The following notebooks are **prerequisites** for this tutorial.
 
-- [File Structure (OCI Example)](/notebooks/oci-file-structure/)
+- [File Structure (OCI Example)](oci_file_structure)
 
 </div>
 
@@ -304,4 +302,4 @@ You have completed the notebook introducing NO<sub>2</sub> data products from OC
 
 </div>
 
-[terrestrial]: /notebooks/oci-terrestrial-data/
+[terrestrial]: /notebooks/oci/oci_terrestrial_data

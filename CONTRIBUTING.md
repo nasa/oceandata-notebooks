@@ -4,11 +4,11 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.4
 kernelspec:
+  name: bash
   display_name: Bash
   language: bash
-  name: bash
 ---
 
 # Maintainer's Guide
@@ -23,7 +23,7 @@ Maintainers are responsible for:
 2. publishing the notebooks to [GitHub Pages] as the [Help Hub] (a.k.a releasing!).
 
 > [!IMPORTANT]
-> 
+>
 > This guide is an executable MyST Markdown file: use right-click > "Open With" > "Notebook" to open,
 > and select the `bash` kernel to run code cells on JupyterLab.
 
@@ -45,6 +45,20 @@ The following sections relate to the content of this repository as follows:
 
 +++
 
+## Jupytext Sync
+
++++
+
+As noted in the README, working with ".ipynb" files in the "notebooks" folder is the supported approach.
+Running some of the ".md" files in the "docs/notebooks" folder creates output, which we don't want to accidentally
+commit.
+
+```{code-cell} ipython3
+:scrolled: true
+
+jupytext --sync $(git ls-files docs/notebooks)
+```
+
 ## Reproducible Environment
 
 +++
@@ -59,10 +73,17 @@ If you are running this guide from the image, to get the additional tools used b
 [conda-lock]: https://conda.github.io/conda-lock/
 [environment]: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 
-mamba install --yes --log-level error --category tools --file container/conda-lock.yml
+mamba install --yes --log-level error --category tools --file /srv/container/conda-lock.yml
+```
+
+If any package needs to be updated, e.g. `earthaccess`, then edit the following cell as needed and run it.
+
+```{raw-cell}
+# cell type is "Raw" for optional use
+conda-lock lock --lockfile container/conda-lock.yml --update earthaccess
 ```
 
 If any dependency list is updated in `pyproject.toml` or any `environment-*.yml` file,
@@ -70,20 +91,23 @@ then a new lock file should be generated, a new image built, and the new image u
 Realistically, that's unlikely to be done manually for every change,
 but it really must be done before updating the `latest` tag on the GitHub Container Registry.
 
-```{code-cell}
-conda-lock lock --log-level ERROR --check-input-hash --without-cuda --lockfile container/conda-lock.yml \
+```{raw-cell}
+:scrolled: true
+
+# cell type is "Raw" for optional use
+conda-lock lock --without-cuda --lockfile container/conda-lock.yml \
   --file pyproject.toml \
-  --file container/environment.yml \
   --file environment-container.yml \
   --file environment-jupyter.yml \
   --file environment-notebooks.yml \
-  --file environment-tools.yml
+  --file environment-tools.yml \
+  --file container/environment.yml
 ```
 
 The `container` folder has additional configuration files that [repo2docker] uses to build the container image.
 The following command builds and runs the image locally, while the (.github/container-image.yml) workflow causes GitHub to build the image and deploy it to the GitHub Container Registry.
 
-If you have Docker available, you can build and run the image locally.
+If you have Docker available, you can build the image and run a container locally.
 
 ```shell
 repo2docker \
@@ -102,86 +126,96 @@ repo2docker \
 
 +++
 
-### Build and Preview
-
-+++
-
 The `docs` folder contains configuration and content for the [Jupyter Book] we host on GitHub Pages.
-The tutorials are written in executable MyST Markdown, and publishing the website requires pulling execution results from a notebook cache.
+The tutorials are written in executable MyST Markdown, and publishing the website requires pulling execution results from a cache.
 We use [DVC] to share that cache among maintainers as well as to the deployment workflow on GitHub.
 
 > [!IMPORTANT]
-> 
+>
 > Only notebooks listed in `docs/_toc.yml` are built, so adding a new notebook requires updating `docs/_toc.yml`.
-
-The `dvc pull` command retrieves the notebook cache.
-We execute it via `uv run` only because we've included the DVC tool in the project environment to simplify this workflow.
 
 [Jupyter Book]: https://jupyterbook.org/
 [DVC]: https://dvc.org/
 
-```{code-cell}
++++
+
+### Execute & Cache Notebooks
+
++++
+
+The `dvc pull` command retrieves the current notebook cache. Add `--force` to overwrite any conflicting local files.
+
+```{code-cell} ipython3
+:scrolled: true
+
 dvc pull
+```
+
+The notebooks now available in the cache can be displayed with `jcache`.
+
+```{code-cell} ipython3
+jcache notebook --cache-path docs/_cache list --path-length 0
+```
+
+We should always keep the tables in release_note_highlights as current as possible, so invalidate the cache for that notebook.
+
+```{code-cell} ipython3
+yes | jcache notebook -p docs/_cache invalidate 27
+```
+
+If you want to re-execute all notebooks in parallel, for example if you are testing a new container image with updated packages, invalidate the whole notebook cache.
+
+```{raw-cell}
+:scrolled: true
+
+# cell type is "Raw" for optional use
+yes | jcache notebook -p docs/_cache invalidate --all
+```
+
+If you need to add a notebook, modify the next cell to specify its path under "docs/":
+
+```{raw-cell}
+# cell type is "Raw" for optional use
+jcache notebook -p docs/_cache add --reader myst_nb_md docs/notebooks/oci/oci_data_access.md
+sqlite3 docs/_cache/global.db "update nbproject set uri = replace(uri, \"$PWD/\", \"\")"
 ```
 
 Update the notebook cache as needed by executing notebooks.
 We use the isolated virtual environment to make sure the environment configuration is correct.
 We use `jcache` directly to achieve parallel execution.
-For a full but slow test of the environment configuration, delete `docs/_cache` before executing.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 
 jcache project -p docs/_cache execute --executor temp-parallel --timeout -1
 ```
 
-The next cell builds a static website in `docs/_build/html` using `jupyter-book`.
+If notebooks have been successfully executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
+Follow the next steps to share any cache updates using DVC and a git commit with changes to `docs/_cache.dvc`.
 
-```{code-cell}
-:scrolled: true
+First "reset" the database to erase spurious changes that would appear to DVC as updates.
 
-jupyter-book build docs
+```{code-cell} ipython3
+sqlite3 docs/_cache/global.db "update nbcache set accessed = created"
+sqlite3 docs/_cache/global.db .dump | sqlite3 /tmp/global.db
+mv /tmp/global.db docs/_cache/global.db
 ```
 
-Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
+Now check whether the cache has actually changed.
 
-```{code-cell}
-find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
-```
-
-Run the next cell to preview the website.
-Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
-
-> [!NOTE]
-> 
-> On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
-
-```{code-cell}
-:scrolled: true
-
-python -m http.server -d docs/_build/html
-```
-
-### Notebook Cache
-
-+++
-
-If any notebooks have been executed, the updated notebook cache needs to be made available to the GitHub Action that deploys the website.
-Follow the next steps to share the updates using DVC, starting with checking whether the cache has actually changed.
-
-```{code-cell}
+```{code-cell} ipython3
 dvc status
 ```
 
-If the status is *not* "Data and pipelines are up to date." then commit the updated cache with `dvc commit`. (The purpose of `--force` is only to skip the confirmation prompt that you can't interact with from within a notebook).
+If the status is *not* "Data and pipelines are up to date." then commit the updated cache with `dvc commit`.
 
-```{code-cell}
-dvc commit --force
+```{code-cell} ipython3
+yes | dvc commit
 ```
 
 Now use `dvc` to push your cache to the remote location accessible to the website build.
 
-```{code-cell}
+```{code-cell} ipython3
 :scrolled: true
 
 dvc push
@@ -189,6 +223,39 @@ dvc push
 
 Finally, if changes are committed by DVC, then there will be changes you also need to commit with Git.
 Use your preferred method of working with Git to stage the `docs/_cache.dvc` changes, commit, and push them.
+
++++
+
+### Jupyter Book Preview
+
++++
+
+The next cell builds a static website in `docs/_build/html` using `jupyter-book`.
+
+```{code-cell} ipython3
+:scrolled: true
+
+jupyter-book build docs
+```
+
+Fix faulty links in the HTML (see [jupyter-book#2271](https://github.com/jupyter-book/jupyter-book/issues/2271#issuecomment-2735366715)).
+
+```{code-cell} ipython3
+find docs/_build/html -name '*.html' -print0 | xargs -0 sed -i 's/&amp;amp;/\&amp;/g'
+```
+
+Run the next cell to preview the website.
+Interrupt the kernel (press ◾️ in the toolbar) to stop the server.
+
+```{code-cell} ipython3
+:scrolled: true
+
+python -m http.server -d docs/_build/html
+```
+
+> [!NOTE]
+>
+> On a JupyterHub? Try viewing at [/user-redirect/proxy/8000/](/user-redirect/proxy/8000/).
 
 +++
 
@@ -200,18 +267,19 @@ Use your preferred method of working with Git to stage the `docs/_cache.dvc` cha
 
 The temporary credentials shown after running the next block in a Python console must be recorded at [GitHub Secrets](https://github.com/nasa/oceandata-notebooks/settings/secrets/actions).
 
-```python
+```{code-cell} ipython3
+python -c '
 import os
 import boto3
 
-client = boto3.client('sts')
+client = boto3.client("sts")
 
-with open(os.environ['AWS_WEB_IDENTITY_TOKEN_FILE']) as f:
+with open(os.environ["AWS_WEB_IDENTITY_TOKEN_FILE"]) as f:
     TOKEN = f.read()
 
 response = client.assume_role_with_web_identity(
-    RoleArn=os.environ['AWS_ROLE_ARN'],
-    RoleSessionName=os.environ['JUPYTERHUB_CLIENT_ID'],
+    RoleArn=os.environ["AWS_ROLE_ARN"],
+    RoleSessionName=os.environ["JUPYTERHUB_CLIENT_ID"],
     WebIdentityToken=TOKEN,
     DurationSeconds=3600
 )
@@ -219,9 +287,8 @@ secrets = response["Credentials"]
 print("AWS_ACCESS_KEY_ID:", secrets["AccessKeyId"], sep="\n", end="\n\n")
 print("AWS_SECRET_ACCESS_KEY:", secrets["SecretAccessKey"], sep="\n", end="\n\n")
 print("AWS_SESSION_TOKEN:", secrets["SessionToken"], sep="\n", end="\n\n")
+'
 ```
-
-+++
 
 ### Publish (a.k.a. Release)
 
@@ -260,12 +327,12 @@ You may create hooks to run these automations, as needed, before making any comm
 
 [pre-commit]: https://pre-commit.com/
 
-```{code-cell}
+```{raw-cell}
 pre-commit install
 ```
 
 You can also run checks over all files chaged on a feature branch or the currently checked out git ref. For the latter:
 
-```{code-cell}
+```{raw-cell}
 pre-commit run --from-ref main --to-ref HEAD
 ```

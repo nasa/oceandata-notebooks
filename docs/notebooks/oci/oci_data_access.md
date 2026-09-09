@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.18.1
+    jupytext_version: 1.19.5
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -15,7 +15,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 
-Last updated: March 17, 2026
+Last updated: July 23, 2026
 
 <div class="alert alert-info" role="alert">
 
@@ -52,7 +52,7 @@ running**. There are three cases to distinguish:
 1. The notebook is running on a remote host that does have direct access to the NASA Earthdata Cloud.
 
 [pypi]: https://pypi.org/
-[conda]: /notebooks/oci-data-access/
+[conda]: https://conda-forge.org/
 [cmr]: https://www.earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/cmr
 [edcloud]: https://www.earthdata.nasa.gov/eosdis/cloud-evolution
 [earthaccess-docs]: https://earthaccess.readthedocs.io/en/latest/
@@ -199,14 +199,14 @@ on the `results` list.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    short_name="PACE_OCI_L3M_CHL",
+    short_name="PACE_OCI_L3M_BGC",
     temporal=("2024-06-01", "2024-06-01"),
 )
 paths = earthaccess.open(results)
 ```
 
 The list of outputs, which we called `paths`, contains references to files on a remote filesystem. They're not
-paths to a local file, but many utilities that expect a file path can also use these "file-like" paths.
+paths to a local file, but many utilities that expect a file path can also use these "path-like" values.
 
 +++
 
@@ -276,7 +276,7 @@ dataset
 
 <div class="alert alert-block alert-warning">
 
-Anywhere in any of [these notebooks](/) where `paths = earthaccess.open(...)` is used to read data directly from the NASA Earthdata Cloud, you need to substitute `paths = earthaccess.download(..., local_path)` before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
+Anywhere in any of [these notebooks](https://nasa.github.io/oceandata-notebooks/) where `paths = earthaccess.open(...)` is used to read data directly from the NASA Earthdata Cloud, you need to substitute `paths = earthaccess.download(..., local_path)` before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
 
 </div>
 

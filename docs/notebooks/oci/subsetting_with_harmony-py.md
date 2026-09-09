@@ -1,12 +1,10 @@
 ---
 jupytext:
-  cell_metadata_filter: all,-trusted
-  notebook_metadata_filter: -all,kernelspec,jupytext
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.4
+    jupytext_version: 1.19.5
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -23,7 +21,7 @@ Last Updated: July 7, 2026
 
 The following notebooks are **prerequisites** for this tutorial.
 
-- Learn with OCI: [Data Access](oci-data-access)
+- Learn with OCI: [Data Access](oci_data_access)
 
 </div>
 
@@ -44,8 +42,8 @@ This tutorial demonstrates how to subset PACE OCI L2 and L3M data. L2 data is su
 Harmony services can be used in multiple ways:
 1. through a graphical user interface (GUI) while downloading applicable granules from [Earthdata Search],
 2. by direct requests to [Harmony's RESTful API],
-3. through SeaDAS ≥ 11.0.0 or, as in this tutorial,
-4. using the `harmony-py` Python package.
+3. through [SeaDAS] ≥ 11.0.0,
+4. or, as in this tutorial, using the `harmony-py` Python package.
 
 The Python package handles NASA Earthdata Login (EDL) authentication and optionally integrates with the CMR Python Wrapper by accepting collection results as a request parameter. It's convenient for scientists who wish to use Harmony from Jupyter notebooks.
 After this tutorial, you can dive deeper into `harmony-py` on [ReadTheDocs](https://harmony-py.readthedocs.io/en/main/). 
@@ -58,6 +56,7 @@ This tutorial demonstrates how to subset and reformat PACE OCI data from the NAS
 [harmony-py]: https://github.com/nasa/harmony-py
 [NSIDC]: https://github.com/nsidc/NSIDC-Data-Tutorials/blob/main/notebooks/NASA_Earthdata_webinar_short/harmony-py-webinar-short.ipynb
 [NASA-Openscapes]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook/tutorials/Harmony.html
+[SeaDAS]: https://www.earthdata.nasa.gov/data/tools/seadas
 
 ## Learning Objectives
 
@@ -86,6 +85,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import rasterio
 import xarray as xr
+import rioxarray
 from harmony import (
     BBox,
     CapabilitiesRequest,
@@ -95,7 +95,6 @@ from harmony import (
     LinkType,
     Request,
 )
-from IPython.display import JSON
 from rasterio.enums import Resampling
 ```
 
@@ -144,7 +143,7 @@ Second, get a response from your request submission:
 
 ```{code-cell} ipython3
 response = harmony_client.submit(request)
-JSON(response)
+response["count"]
 ```
 
 For your first time through this tutorial, you shouldn't see any existing jobs. If you've already submitted a job with this label (e.g. because you are re-running this tutorial), then the response includes information about that existing job.
@@ -156,7 +155,7 @@ request = Request(
     collection=Collection(id="PACE_OCI_L2_BGC"),
     spatial=BBox(-76.75, 36.97, -75.74, 39.01),
     temporal={"start": datetime(2025, 7, 1), "stop": datetime(2025, 8, 1)},
-    variables=["geophysical_data/chlor_a"],
+    variables=["geophysical_data/chlor_a", "geophysical_data/l2_flags"],
     pixel_subset=True,
     labels=request.labels,
 )
@@ -304,6 +303,8 @@ ds
 
 ## 6. Plot the subsetted data
 
++++
+
 Let's do a quick plot of `chlor_a` from the first granule:
 
 ```{code-cell} ipython3
@@ -324,9 +325,17 @@ for ax, file in zip(axes, urls[:10]):
     ds = ds.set_coords(("longitude", "latitude"))
 
     da.append(ds["chlor_a"])
-    
+
     date = ds.attrs["time_coverage_start"]
-    im = ds["chlor_a"].plot(ax=ax, x="longitude", y="latitude", cmap="viridis", add_colorbar=False, vmin=0, vmax=20)
+    im = ds["chlor_a"].plot(
+        ax=ax,
+        x="longitude",
+        y="latitude",
+        cmap="viridis",
+        add_colorbar=False,
+        vmin=0,
+        vmax=20,
+    )
     ax.set_title(date, fontsize=8)
 
     ax.set_xlabel("")
@@ -336,96 +345,101 @@ fig.colorbar(im, ax=axes, orientation="vertical", shrink=0.8, label="Chl a (mg m
 plt.show()
 ```
 
-Now, we can make a 10-day Chl a composite:
+We can also make a L2 composite. However, in order to combine multiple granules into a common spatial framework we need to project the data onto a defined grid with a given reslution. We will use code presented in the [Projecting PACE Data onto a Predefined Grid tutorial.](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_grid_match.html)
 
 ```{code-cell} ipython3
-from scipy.stats import binned_statistic_2d
-
-def composite_swaths(dataarrays, resolution=0.01):
+def grid_data(src, resolution, dst_crs="epsg:4326", resampling=Resampling.nearest):
     """
-    Create a mean composite from a list of PACE L2 swath DataArrays.
-
-    Parameters
-    ----------
-    dataarrays : list of xr.DataArray
-        Each DataArray must have 2D latitude and longitude coordinates.
-    resolution : float
-        Grid resolution in degrees.
-
-    Returns
-    -------
-    xr.DataArray
-        Mean composite on a regular lat/lon grid.
+    Reproject a L2 dataset to match an input grid. Makes sure 3D variables are
+        in (Z, Y, X) dimension order, and all variables have spatial dims/crs 
+        assigned.
+    Args:
+        src - an xarray dataset or dataarray to reproject
+        resolution - resolution of the output grid, in dst_crs units
+        dst_crs - CRS of the output data
+        resampling - resampling method (see rasterio.enums)
+    Returns:
+        dst - projected xr dataset
     """
+    if (len(list(src.dims)) == 3) and (list(src.dims)[0] != "wavelength"):
+        src = src.transpose("wavelength", ...)
+    src = src.rio.set_spatial_dims("pixels_per_line", "number_of_lines")
+    src = src.rio.write_crs("epsg:4326")
 
-    # Determine overall bounds
-    lon_min = min(float(da.longitude.min()) for da in dataarrays)
-    lon_max = max(float(da.longitude.max()) for da in dataarrays)
-    lat_min = min(float(da.latitude.min()) for da in dataarrays)
-    lat_max = max(float(da.latitude.max()) for da in dataarrays)
-
-    # Create grid edges
-    lon_edges = np.arange(lon_min, lon_max + resolution, resolution)
-    lat_edges = np.arange(lat_min, lat_max + resolution, resolution)
-
-    # Collect all observations
-    lon = []
-    lat = []
-    value = []
-
-    for da in dataarrays:
-
-        mask = (
-            np.isfinite(da.values)
-            & np.isfinite(da.longitude.values)
-            & np.isfinite(da.latitude.values)
-        )
-
-        lon.append(da.longitude.values[mask])
-        lat.append(da.latitude.values[mask])
-        value.append(da.values[mask])
-
-    lon = np.concatenate(lon)
-    lat = np.concatenate(lat)
-    value = np.concatenate(value)
-
-    # Mean in each grid cell
-    grid, _, _, _ = binned_statistic_2d(
-        lon,
-        lat,
-        value,
-        statistic="mean",
-        bins=[lon_edges, lat_edges],
+    # Calculating the default affine transform
+    defaults = rasterio.warp.calculate_default_transform(
+        src.rio.crs,
+        dst_crs,
+        src.rio.width,
+        src.rio.height,
+        left=src.attrs["geospatial_lon_min"],
+        bottom=src.attrs["geospatial_lat_min"],
+        right=src.attrs["geospatial_lon_max"],
+        top=src.attrs["geospatial_lat_max"],
     )
-
-    # Cell centers
-    lon_centers = (lon_edges[:-1] + lon_edges[1:]) / 2
-    lat_centers = (lat_edges[:-1] + lat_edges[1:]) / 2
-
-    return xr.DataArray(
-        grid.T,
-        coords={
-            "Latitude": lat_centers,
-            "Longitude": lon_centers,
-        },
-        dims=("Latitude", "Longitude"),
-        name="chlor_a",
-        attrs=dataarrays[0].attrs,
+    # Aligning that transform to our desired resolution
+    transform, width, height = rasterio.warp.aligned_target(*defaults, resolution)
+    
+    dst = src.rio.reproject(
+        dst_crs=dst_crs,
+        shape=(height, width),
+        transform=transform,
+        src_geoloc_array=(
+            src["longitude"],
+            src["latitude"],
+        ),
+        nodata=np.nan,
+        resample=resampling,
     )
+    dst["x"] = dst["x"].round(9)
+    dst["y"] = dst["y"].round(9)
+    
+    return dst.rename({"x":"longitude", "y":"latitude"})
+```
+
+Now, we can make a 10-day Chl a composite. The `l2_flags` variable cannot be gridded using this function; if you need to use the `l2_flags` to mask out additional data, you can do that on the subetted granules before gridding.
+
+```{code-cell} ipython3
+gridded_list = []
+resolution = (0.015, 0.015)
+
+for file in urls[:10]:
+
+    dt = xr.open_datatree(file, **kwargs)
+    ds = xr.merge(dt.to_dict().values())
+    ds = ds.set_coords(("longitude", "latitude"))
+    ds = ds.drop_vars("l2_flags")
+
+    ds_gridded = grid_data(ds, resolution)
+
+    gridded_list.append(ds_gridded.chlor_a)
+
+stack = xr.concat(gridded_list, dim="scene")
+
+chlor_a_mean = stack.mean(dim="scene", skipna=True)
 ```
 
 ```{code-cell} ipython3
-chlor_a_mean = composite_swaths(da, resolution=0.02)
+fig, ax = plt.subplots(figsize=(8, 6))
 
 chlor_a_mean.plot(
+    ax=ax,
     cmap="viridis",
     vmin=0,
-    vmax=20,
-    figsize=(8,6)
+    vmax=20
 )
+
+ax.set_xlabel("")
+ax.set_ylabel("")
+ax.set_title("")
+
+plt.tight_layout()
+plt.show()
 ```
 
 ## 7. Subsetting L3M data
+
++++
 
 Currently, `harmony-py` does not support spatial subsetting for PACE OCI L3M products. You can verify this by submitting a Harmony request and inspecting the available services, where the subset capabilities are listed as `False`.
 
@@ -441,9 +455,9 @@ Let's begin by opening a monthly (MO) PACE_OCI_L3M_BGC composite at 4 km spatial
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-        short_name="PACE_OCI_L3M_BGC",
-        temporal=("2025-07", "2025-07"),
-        granule_name="*.MO.*.4km.*",
+    short_name="PACE_OCI_L3M_BGC",
+    temporal=("2025-07", "2025-07"),
+    granule_name="*.MO.*.4km.*",
 )
 paths = earthaccess.open(results)
 ```
@@ -456,14 +470,14 @@ ds
 Now we are going to subset in two ways, first, by selecting a variable with `.sel`, and secondly by selecting a spatial subset with `slice`. We can do this all in one line:
 
 ```{code-cell} ipython3
-ds_sub = ds['chlor_a'].sel({"lat": slice(39.01, 36.97), "lon": slice(-76.75, -75.74)})
+ds_sub = ds["chlor_a"].sel({"lat": slice(39.01, 36.97), "lon": slice(-76.75, -75.74)})
 plot = ds_sub.plot.imshow()
 ```
 
 If we now save this sliced dataset to a netCDF file, we have effectively "downloaded" a subsetted dataset:
 
 ```{code-cell} ipython3
-subsetted_data = Path("./subsetted_data")  
+subsetted_data = Path("./subsetted_data")
 subsetted_data.mkdir(exist_ok=True)
 path = subsetted_data / ds.attrs["product_name"]
 path = path.with_suffix(".subsetted.nc")
