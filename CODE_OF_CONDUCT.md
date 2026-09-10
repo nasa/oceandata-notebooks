@@ -19,12 +19,12 @@ Dedication to the following behaviors, in actions and in principle, is endorsed 
 - Testing your changes before requesting reviews
 - Detecting and following exisiting patterns and coding-style
 - Making focussed, modularized contributions
-- Including your name and email in the "Author" field of commits.
+- Including your name and email in the "Author" field within commits
 
 ### Using Artificial Intelligence (AI)
 
 - Responsibly using productivity tools to conserve natural resources
-- Acknowledging AI involvement in all relevant commit messages with "Co-authored-by"
+- Acknowledging productivity tools in all relevant commits with a [`--trailer`][tr] for "Assisted-by"
 
 ## Restricted Behaviors
 
@@ -41,5 +41,9 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 ## Attribution
 
-This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org/version/3/0/), the [Jupyter Project Code of Conduct](https://jupyter.org/governance/conduct/code-of-conduct/), and the [`earthaccess` AI policy](https://earthaccess.readthedocs.io/en/stable/contributor/ai-policy/).
+This Code of Conduct is adapted from the [Contributor Covenant][cc], the [Jupyter Project Code of Conduct][jp], and the [`earthaccess` AI policy][].
 
+[tr]: https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---trailertokenvalue
+[cc]: https://www.contributor-covenant.org/version/3/0/
+[jp]: https://jupyter.org/governance/conduct/code-of-conduct/
+[ea]: https://earthaccess.readthedocs.io/en/stable/contributor/ai-policy/
