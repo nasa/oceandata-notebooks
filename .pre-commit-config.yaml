@@ -1,0 +1,54 @@
+fail_fast: true
+repos:
+  # - repo: meta
+  #   hooks:
+  #     - id: identity
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-vcs-permalinks
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.8.0
+    hooks:
+      - id: uv-lock
+      - id: uv-export
+        name: export-kernel-dependencies
+        args: [ -q, --no-hashes, --no-default-groups, --group=notebooks, --group=kernel, --output-file=requirements.txt ]
+        files: ^uv\.lock$
+      - id: uv-export
+        name: export-container-dependencies
+        args: [ -q, --no-hashes, --no-default-groups, --group=notebooks, --group=kernel, --group=container, --output-file=container/requirements.txt ]
+        files: ^uv\.lock$
+  # FIXME format code blocks in md:myst (https://github.com/astral-sh/ruff/issues/3792)
+  - repo: local
+    hooks:
+      - id: update-setup-py
+        name: update-setup-py
+        description: Embed the dependencies (with group "kernel") in the metadata of docs/setup.py.
+        language: system
+        entry: uv add --script docs/setup.py -r
+        files: ^requirements\.txt$
+      - id: repo2docker-requirements
+        name: repo2docker-requirements
+        # FIXME: updates pyproject.toml "constraints" group, rm container/requirements.in
+        description: Generate container/requirements.in with prerequisites from repo2docker.
+        stages: [ manual ]
+        language: python
+        additional_dependencies:
+          - "jupyter-repo2docker==2025.08.0"
+        pass_filenames: false
+        entry: repo2docker --Repo2Docker.platform=linux/amd64 --volume container/requirements.in:./out container sh -c "pip list --format=freeze > out"
+        files: ^container/environment\.yml$

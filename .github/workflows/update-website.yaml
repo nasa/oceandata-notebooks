@@ -1,0 +1,27 @@
+name: Update website
+on:
+  push:
+    paths:
+      - .github/workflows/build-website.yaml
+      - .github/workflows/update-website.yaml
+      - docs/**
+jobs:
+  call:
+    uses: ./.github/workflows/build-website.yaml
+    with:
+      upload: &UPLOAD ${{ github.ref == 'refs/heads/main' || github.repository_owner != 'nasa' }}
+    secrets: inherit
+  deploy:
+    if: *UPLOAD
+    needs: call
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v5
