@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.4
+    jupytext_version: 1.19.5
 kernelspec:
   name: bash
   display_name: Bash
@@ -31,7 +31,8 @@ The **Ocean Biology Python Image** available on {term}`CryoCloud` and other {ter
 
 </div>
 
-[oci-data-access]: /notebooks/oci_data_access/
+[edl]: https://urs.earthdata.nasa.gov/
+[oci-data-access]: /notebooks/oci/oci_data_access
 
 ## Summary
 

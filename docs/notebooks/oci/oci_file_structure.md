@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.4
+    jupytext_version: 1.19.5
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -96,7 +96,7 @@ paths = earthaccess.open(results)
 We want to know whether we are running code on a remote host with direct access to the NASA Earthdata Cloud.
 If without direct access, consider the substitution explained in the [Data Access][data-access] notebook to download granules.
 
-[data-access]: /notebooks/oci-data-access/
+[data-access]: /notebooks/oci/oci_data_access
 
 +++
 

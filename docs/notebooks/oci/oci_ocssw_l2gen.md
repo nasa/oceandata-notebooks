@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.4
+    jupytext_version: 1.19.5
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -39,8 +39,8 @@ The **Ocean Biology Python Image** available on {term}`CryoCloud` and other {ter
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: /notebooks/oci_data_access/
-[ocssw_install]: /notebooks/oci_ocssw_install/
+[oci-data-access]: /notebooks/oci/oci_data_access
+[ocssw_install]: /notebooks/oci/oci_ocssw_install
 
 ## Summary
 

@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.4
+    jupytext_version: 1.19.5
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -39,8 +39,8 @@ The **Ocean Biology Python Image** available on {term}`CryoCloud` and other {ter
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: /notebooks/oci_data_access/
-[ocssw_install]: /notebooks/oci_ocssw_install/
+[oci-data-access]: /notebooks/oci/oci_data_access
+[ocssw_install]: /notebooks/oci/oci_ocssw_install
 
 ## Summary
 
@@ -214,7 +214,7 @@ Using this pattern, run the `l2gen` command with the single argument `help` to v
 To process a L1B file using `l2gen`, at a minimum, you need to set an infile name (`ifile`) and an outfile name (`ofile`). You can also indicate a data suite or L2 products; in this example, we will proceed with chlorophyll *a* estimates.
 
 Parameters can be passed to OCSSW programs through a text file. They can also be passed as arguments, but writing to a text file leaves a clear processing record. Define the parameters in a dictionary, then send it to the `write_par` function
-defined in the [Setup](#setup) section.
+defined in the "Setup" section.
 
 Let's first make a folder called 'data' to store the outputs:
 

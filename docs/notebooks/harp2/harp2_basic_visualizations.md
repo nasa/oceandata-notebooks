@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.4
+    jupytext_version: 1.19.5
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -32,7 +32,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: /notebooks/oci_data_access/
+[oci-data-access]: /notebooks/oci/oci_data_access
 
 ## Summary
 

@@ -1,12 +1,10 @@
 ---
 jupytext:
-  cell_metadata_filter: all,-trusted
-  notebook_metadata_filter: -all,kernelspec,jupytext
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.4
+    jupytext_version: 1.19.5
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -23,7 +21,7 @@ Last Updated: July 7, 2026
 
 The following notebooks are **prerequisites** for this tutorial.
 
-- Learn with OCI: [Data Access](oci-data-access)
+- Learn with OCI: [Data Access](oci_data_access)
 
 </div>
 
