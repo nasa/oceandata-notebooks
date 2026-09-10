@@ -6,7 +6,7 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.19.5
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: hhenv
   language: python
   name: python3
 ---
@@ -94,6 +94,8 @@ if not earthaccess.__store__.in_region:
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+
 datatree = xr.open_datatree(paths[0])
 datatree
 ```
