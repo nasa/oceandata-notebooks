@@ -53,25 +53,24 @@ Begin by importing all the packages used in this notebook. If your kernel uses a
 [tutorials]: https://oceancolor.gsfc.nasa.gov/resources/docs/tutorials/
 
 ```{code-cell} ipython3
-import requests
-import earthaccess
 import math
+from pathlib import Path
+
+import earthaccess
 import numpy as np
 import pandas as pd
 import xarray as xr
-from pathlib import Path
 ```
 
 ```{code-cell} ipython3
 auth = earthaccess.login(persist=True)
-fs = earthaccess.get_fsspec_https_session()
 ```
 
 ## 2. Get Level-2 Data
 
-HARP2 L2 data are available through both OB.DAAC and the Earthdata Cloud. Please refer to the L1C notebook for additional information on accessing data from the cloud. The following example retrieves a single HARP2 L2 `MAPOL_LAND` Version 4.0 granule.
-
 +++
+
+HARP2 L2 data are available through both OB.DAAC and the Earthdata Cloud. Please refer to the L1C notebook for additional information on accessing data from the cloud. The following example retrieves a single HARP2 L2 `MAPOL_LAND` Version 4.0 granule.
 
 Download the HARP2 `MAPOL_LAND` data over Rail Road Valley (38.4958, -115.6964) as one of the validaiton site part of RadCalNet. Further analysis on spectral and anglar information will be discussed in later section.
 
@@ -86,6 +85,8 @@ paths = earthaccess.open(results)
 ```
 
 ```{code-cell} ipython3
+:tags: [remove-cell]
+
 # this cell is tagged to be removed from HTML renders,
 # but we currently want to download when we don't have direct access
 if not earthaccess.__store__.in_region:
@@ -93,22 +94,21 @@ if not earthaccess.__store__.in_region:
 ```
 
 ```{code-cell} ipython3
-:scrolled: true
-
 datatree = xr.open_datatree(paths[0])
 datatree
 ```
 
-Here, we merge all data groups for convenience in subsequent data manipulation.
+Here, we merge all data groups for convenience in subsequent data manipulation and mark the latitude and longitude variables as coordinates.
 
 ```{code-cell} ipython3
 dataset = xr.merge(datatree.to_dict().values())
-#add coordinates
 dataset=dataset.set_coords(("latitude", "longitude"))
 dataset
 ```
 
 ## 3. Understanding the HARP2 L2 Product Structure
+
++++
 
 The HARP2 FastMAPOL L2 `MAPOL_LAND` product includes aerosol optical properties for both fine and coarse aerosol modes, as well as retrieved land surface properties.
 
@@ -120,8 +120,6 @@ Land surface product variables include:
 * Land white-sky albedo
 
 Multi-angle land surface reflectance is derived by applying atmospheric correction independently to each HARP2 viewing angle. `rhos_angular` represents the retrieved surface reflectance before BRDF correction, while `rhos_nadir` represents the reflectance after BRDF correction and adjustment to nadir viewing geometry. Angular means and standard deviations are also provided as `rhos_nadir_mean`, `rhos_nadir_std`, `rhos_angular_mean`, and `rhos_angular_std`.
-
-+++
 
 The following lists variables related to the land surface model (names beginning with `land`) and land surface reflectance (names beginning with `rhos`).
 
@@ -136,6 +134,8 @@ dataset_sub
 ```
 
 ## 4. Visualize HARP2 L2 Land Surface Properties
+
++++
 
 In this example, we visualize the retrieved land surface reflectance. We first read the angular means and standard deviations before and after BRDF correction.
 
@@ -156,12 +156,12 @@ lat = dataset["latitude"].values
 lon = dataset["longitude"].values
 plot_range = [lon.min(), lon.max(), lat.min(), lat.max()]
 wavelength = dataset["wavelength"].values
-print(wavelength)
+wavelength
 ```
 
-+++ {"jp-MarkdownHeadingCollapsed": true}
+### Define helper functions for visualization
 
-### Load helper functions for visualization
++++
 
 The following helper functions are used to visualize single-band and RGB maps, examine the angular dependence of surface reflectance, and calculate reflectance ratios between selected viewing angles.
 
@@ -467,6 +467,8 @@ The HARP2 land product also provides spectral information. Here, we examine a lo
 
 ### Find the center pixel
 
++++
+
 The nearest HARP2 pixel to the target latitude and longitude is identified from the two-dimensional geolocation arrays.
 
 ```{code-cell} ipython3
@@ -482,6 +484,8 @@ print("Lat/Lon:", lat[iy, ix], lon[iy, ix])
 ```
 
 ### Extract the reflectance
+
++++
 
 To explore the influence of pixel-to-pixel variability, we calculate the mean and standard deviation within a ±n-pixel neighborhood, corresponding to a (2n+1) × (2n+1) pixel box centered on the target location. The center-pixel reflectance is retained for comparison. The variability within the box can be used to assess the homogeneity of the surface properties.
 
@@ -514,6 +518,8 @@ print("average pixel rhos:", rhos_mean)
 ```
 
 ### Plot the reflectance spectrum
+
++++
 
 The figure compares the center-pixel spectrum with the 5 × 5 spatial mean. The shaded region represents ±1 standard deviation within the neighborhood.
 
@@ -663,6 +669,8 @@ For this example, the BRDF correction reduces a substantial portion of the angul
 
 ## 8. Advanced: Quality Assessment
 
++++
+
 As with the aerosol products, retrieval quality metrics are important for evaluating the land products, particularly when analyzing multi-angle information.
 
 The primary metrics examined here are the retrieval cost function (`chi2`), the number of retained reflectance measurements (`nv_ref`), the number of retained DoLP (degree of linear polarization) measurements (`nv_dolp`), and the overall `quality_flag`. Please see the [aerosol product tutorial](https://nasa.github.io/oceandata-notebooks/sections/cloud-atmosphere.html) or [ATBD](https://fastmapol.github.io/mapol-doc/chapters/fastmapol_product_quality.html) for more details.
@@ -766,6 +774,8 @@ The `quality_flag` is determined using retrieval metrics including $\chi^2$ and 
 
 ## 9. Advanced: Multi-Angle Data Mask
 
++++
+
 To better understand the fitting and screening of individual angular measurements, we can examine the adaptive data masks.
 
 `mask_ref` indicates which reflectance measurements are retained or excluded during the retrieval, while `mask_dolp` provides the corresponding information for DoLP measurements.
@@ -817,12 +827,10 @@ plot_l2_product(
 
 Examining these masks for individual viewing angles can help identify where angular observations have been screened from the inversion.
 
++++
+
 ## 10. References
 
 * [FastMAPOL ATBD](https://fastmapol.github.io/mapol-doc/).
 
 * [**Algorithm**] Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, *Atmos. Meas. Tech.*, **16**, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023.
-
-```{code-cell} ipython3
-
-```

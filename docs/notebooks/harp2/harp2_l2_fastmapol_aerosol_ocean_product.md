@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.1
+    jupytext_version: 1.19.5
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -85,6 +85,8 @@ paths = earthaccess.open(results)
 ```
 
 ```{code-cell} ipython3
+:tags: [remove-cell]
+
 # this cell is tagged to be removed from HTML renders,
 # but we currently want to download when we don't have direct access
 if not earthaccess.__store__.in_region:

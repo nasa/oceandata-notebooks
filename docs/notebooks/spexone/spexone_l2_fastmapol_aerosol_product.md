@@ -94,6 +94,8 @@ RemoTAP product can be download in the same way by replacing short_name="PACE_SP
 </div>
 
 ```{code-cell} ipython3
+:tags: [remove-cell]
+
 # this cell is tagged to be removed from HTML renders,
 # but we currently want to download when we don't have direct access
 if not earthaccess.__store__.in_region:
