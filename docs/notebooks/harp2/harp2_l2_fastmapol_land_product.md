@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.1
+    jupytext_version: 1.19.5
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -665,7 +665,7 @@ For this example, the BRDF correction reduces a substantial portion of the angul
 
 As with the aerosol products, retrieval quality metrics are important for evaluating the land products, particularly when analyzing multi-angle information.
 
-The primary metrics examined here are the retrieval cost function (`chi2`), the number of retained reflectance measurements (`nv_ref`), the number of retained DoLP (degree of linear polarization) measurements (`nv_dolp`), and the overall `quality_flag`. Please see the [aerosol product tutorial](https://nasa.github.io/oceandata-notebooks/sections/cloud-atmosphere.html) or [ATBD](https://fastmapol.github.io/mapol-doc/chapters/fastmapol_product_quality.html) for more details. 
+The primary metrics examined here are the retrieval cost function (`chi2`), the number of retained reflectance measurements (`nv_ref`), the number of retained DoLP (degree of linear polarization) measurements (`nv_dolp`), and the overall `quality_flag`. Please see the [aerosol product tutorial](https://nasa.github.io/oceandata-notebooks/sections/cloud-atmosphere.html) or [ATBD](https://fastmapol.github.io/mapol-doc/chapters/fastmapol_product_quality.html) for more details.
 
 ```{code-cell} ipython3
 chi2 = dataset["chi2"].values
