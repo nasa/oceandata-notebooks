@@ -41,7 +41,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 ## Attribution
 
-This Code of Conduct is adapted from the [Contributor Covenant][cc], the [Jupyter Project Code of Conduct][jp], and the [`earthaccess` AI policy][].
+This Code of Conduct is adapted from the [Contributor Covenant][cc], the [Jupyter Project Code of Conduct][jp], and the [`earthaccess` AI policy][ea].
 
 [tr]: https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---trailertokenvalue
 [cc]: https://www.contributor-covenant.org/version/3/0/
