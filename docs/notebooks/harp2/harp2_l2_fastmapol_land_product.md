@@ -94,6 +94,8 @@ if not earthaccess.__store__.in_region:
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+
 datatree = xr.open_datatree(paths[0])
 datatree
 ```
