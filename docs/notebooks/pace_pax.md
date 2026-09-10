@@ -17,7 +17,7 @@ kernelspec:
 
 **Authors:** Anna Windle (NASA, SSAI), Ivona Cetinić (NASA, MSU), Kirk Knobelspiesse (NASA)
 
-Last updated: September 2, 2026
+Last updated: September 10, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -40,6 +40,8 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 The PACE Postlaunch Airborne eXperiment ([PACE-PAX](https://pace.oceansciences.org/pace-pax.htm)) was a field campaign conducted in September 2024 in California and adjacent coastal areas. PACE-PAX brought together airborne and ship-based in situ observations to collect complementary atmospheric and oceanic measurements for the validation of observations from NASA's PACE mission.
 
 All [PACE-PAX datasets](https://www.earthdata.nasa.gov/data/projects/pace-pax) are publicly available through the NASA Earthdata Cloud. This tutorial demonstrates how to access multiple PACE-PAX datasets, combine observations from different platforms, and create integrated visualizations to explore coupled atmosphere–ocean processes.
+
+This notebook generates the multi-panel figure corresponding to Figure 9 in [Knobelspiesse et al. (in review).](https://doi.org/10.5194/essd-2026-541)
 
 ## Learning Objectives
 
@@ -66,7 +68,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-# import plotly
+#import plotly
 #import plotly.graph_objects as go
 #import plotly.io as pio
 
@@ -107,7 +109,7 @@ import sb_utilities as sb
 
 +++
 
-Let's find a PACE OCI Level-2 IOP granule acquired during the PACE-PAX campaign over the Santa Barbara Channel, California.
+Let's find a PACE OCI Level-2 IOP granule acquired during the PACE-PAX campaign over the Santa Barbara Channel, California. The IOP suite contains particulate backscattering data. 
 
 ```{code-cell} ipython3
 tspan = ("2024-09-26", "2024-09-26")
@@ -134,7 +136,7 @@ for item in ("longitude", "latitude"):
 oci_ds
 ```
 
-Let's subset the PACE OCI bbp_442 data to a smaller geographical region:
+Let's subset the PACE OCI bbp_442 data to a smaller geographical region in the Santa Barbara Channel and plot it:
 
 ```{code-cell} ipython3
 subset = (
@@ -230,6 +232,8 @@ twinotter_bbp = twinotter_bbp[valid] * 1e6  # Mm⁻¹ sr⁻¹
 twinotter_bbp.shape
 ```
 
+And use this to plot the flight track and vertical profile:
+
 ```{code-cell} ipython3
 fig, axs = plt.subplots(
     1, 2,
@@ -275,8 +279,6 @@ plt.show()
 
 The High Spectral Resolution Lidar 2 (HSRL-2) instrument was flown aboard NASA's high altitude Earth Resources 2 (ER-2) aircraft to characterize atmospheric aerosol particles. We will use the aerosol backscatter coefficient measured at 532 nm.
 
-TODO: figure out difference between R0 and R1 data.
-
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     temporal=tspan,
@@ -288,6 +290,8 @@ print(len(results))
 hsrl_paths = earthaccess.open(results)
 hsrl_paths
 ```
+
+We'll open the file ending in 'R1', which indicates 'Revision 1', the contains the most up-to-date data. 
 
 ```{code-cell} ipython3
 hslr_dt = xr.open_datatree(hsrl_paths[1])
@@ -365,7 +369,7 @@ plt.show()
 
 In situ oceanic observations were collected aboard the NOAA R/V Shearwater. Particulate backscattering was measured using an SC6 backscattering sensor.
 
-Let's open particulate backscattering at 440 nm (`bbp440`) collected on Sep 26th.
+Let's open the SC6 data collected on Sep 26th:
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
@@ -379,9 +383,10 @@ shearwater_paths = earthaccess.open(results)
 shearwater_paths
 ```
 
+There are four files ending in `.sb` rather than `tgz.sb`, indicating that they are SeaBASS files. SeaBASS files can be opened using the `sb_utilities` library, which we imported above as `sb`. The `sb_read()` function reads the SeaBASS file and loads its contents into a Pandas DataFrame. 
+
 ```{code-cell} ipython3
 profiles = []
-cruise_title = ""
 
 for file in shearwater_paths:
     file_path = file.path if hasattr(file, "path") else str(file)
@@ -394,11 +399,14 @@ for file in shearwater_paths:
         # Extract station location from header metadata
         station_lat = float(header["north_latitude"].split("[")[0])
         station_lon = float(header["east_longitude"].split("[")[0])
-        cruise_title = header.get("cruise", "Map")
+        date = header["start_date"]
+        time = header["start_time"].split("[")[0]
 
         # Add metadata columns to each profile measurement
         profile = pd.DataFrame(
             {
+                "date": date,
+                "time (GMT)": time,
                 "latitude": station_lat,
                 "longitude": station_lon,
                 "depth": df["depth"].values,
@@ -409,15 +417,10 @@ for file in shearwater_paths:
         profiles.append(profile)
 
 shearwater_df = pd.concat(profiles, ignore_index=True)
-
-shearwater_lat = shearwater_df["latitude"].values
-shearwater_lon = shearwater_df["longitude"].values
-shearwater_depths = shearwater_df["depth"].values
-
 shearwater_df.head()
 ```
 
-And we can now plot the vertical profiles of particulate backscattering at 440 nm:
+And we can now plot the vertical profiles of particulate backscattering at 440 nm (`bbp440`):
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(5, 6))
@@ -460,6 +463,8 @@ print(len(results))
 glider_paths = earthaccess.open(results)
 glider_paths
 ```
+
+We will use `sb.read()` to open this data as well:
 
 ```{code-cell} ipython3
 glider_data = sb.sb_read(glider_paths[0], no_warn=True)
