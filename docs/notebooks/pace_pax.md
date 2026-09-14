@@ -376,7 +376,7 @@ len(results)
 ```
 
 ```{code-cell} ipython3
-shearwater_paths = earthaccess.download(results)
+shearwater_paths = earthaccess.open(results)
 ```
 
 These granules each reference multiple files containing data for that granule.
