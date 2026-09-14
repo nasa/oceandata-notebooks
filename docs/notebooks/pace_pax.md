@@ -383,7 +383,7 @@ These granules each reference multiple files containing data for that granule.
 
 ```{code-cell} ipython3
 for file in shearwater_paths:
-    print(getattr(file, "full_name", file.name))
+    print(getattr(file, "full_name", None) or file.name)
 ```
 
 One file for each granule ends in `.sb` rather than `tgz.sb`, indicating that it is a SeaBASS file. SeaBASS files can be opened using the `sb_utilities` library, which we imported above as `sb`. The `sb_read()` function reads the SeaBASS file and loads its contents into a `pd.DataFrame`.
