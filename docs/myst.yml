@@ -1,8 +1,6 @@
 version: 1
 project:
-  license: NASA-1.3
-  copyright: 2025-2026 The Ocean Ecology Laboratory at NASA Goddard
-  github: https://github.com/nasa/oceandata-notebooks
+  github: nasa/oceandata-notebooks
   toc:
     - file: index.md
     - title: Welcome
