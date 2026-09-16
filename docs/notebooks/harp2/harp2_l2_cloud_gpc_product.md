@@ -1,10 +1,11 @@
 ---
 jupytext:
+  formats: md:myst,ipynb:myst
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.5
+    jupytext_version: 1.17.2
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -15,7 +16,7 @@ kernelspec:
 
 **Author(s):** Chamara Rajapakshe (NASA, SSAI), Kirk Knobelspiesse (NASA), Andy Sayer (NASA, UMBC), Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU)
 
-Last updated: July 22, 2026
+Last updated: Sep 16, 2026
 
 ## Summary
 
@@ -81,7 +82,7 @@ Search for available granules within a time range and geospatial area of interes
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_HARP2_L2_CLOUD_GPC",
-    granule_name='PACE_HARP2.20240904T205635.L2.CLOUD_GPC.V3*.nc',
+    granule_name='PACE_HARP2.20240904T205635.L2.CLOUD_GPC.V4*.nc',
 )
 for item in results:
     display(item)
