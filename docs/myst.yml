@@ -99,13 +99,16 @@ project:
         - file: reference/glossary.md
 site:
   template: book-theme
+  parts:
+    primary_sidebar_footer: _site/google-translate.md
   options:
-    analytics_google: G-E0VPP0Z29X
+    # analytics_google: G-E0VPP0Z29X
     folders: true
     hide_footer_links: true
     logo: HelpHub.png
     logo_alt: Logo for the OB.DAAC Help Hub
     logo_dark: HelpHub-dark.png
+    outline_maxdepth: 1
     style: style.css
   nav:
     - title: Basics
