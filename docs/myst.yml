@@ -100,7 +100,7 @@ project:
 site:
   template: book-theme
   parts:
-    primary_sidebar_footer: _site/google-translate.md
+    primary_sidebar_footer: google-translate.md
   options:
     # analytics_google: G-E0VPP0Z29X
     folders: true

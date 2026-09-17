@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: oci_ocssw_processing_overview.md
-  title: md
+  title: MyST Markdown
 - file: oci_ocssw_processing_overview.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

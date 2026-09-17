@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: satellite_insitu_matchups.md
-  title: md
+  title: MyST Markdown
 - file: satellite_insitu_matchups.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

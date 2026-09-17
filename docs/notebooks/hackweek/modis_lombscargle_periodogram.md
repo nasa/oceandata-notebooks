@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: modis_lombscargle_periodogram.md
-  title: md
+  title: MyST Markdown
 - file: modis_lombscargle_periodogram.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

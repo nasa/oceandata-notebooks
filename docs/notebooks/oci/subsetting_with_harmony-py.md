@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: subsetting_with_harmony-py.md
-  title: md
+  title: MyST Markdown
 - file: subsetting_with_harmony-py.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

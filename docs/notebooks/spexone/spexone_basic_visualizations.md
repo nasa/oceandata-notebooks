@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: spexone_basic_visualizations.md
-  title: md
+  title: MyST Markdown
 - file: spexone_basic_visualizations.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

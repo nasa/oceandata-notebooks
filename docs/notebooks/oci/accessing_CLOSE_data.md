@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: accessing_CLOSE_data.md
-  title: md
+  title: MyST Markdown
 - file: accessing_CLOSE_data.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

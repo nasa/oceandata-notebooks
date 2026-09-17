@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: oci_data_visualization_part2.md
-  title: md
+  title: MyST Markdown
 - file: oci_data_visualization_part2.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

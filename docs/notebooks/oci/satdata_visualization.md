@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: satdata_visualization.md
-  title: md
+  title: MyST Markdown
 - file: satdata_visualization.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

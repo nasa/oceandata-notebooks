@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: oci_terrestrial_data.md
-  title: md
+  title: MyST Markdown
 - file: oci_terrestrial_data.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: oci_grid_match.md
-  title: md
+  title: MyST Markdown
 - file: oci_grid_match.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

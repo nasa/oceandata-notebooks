@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: dask_gridding.md
-  title: md
+  title: MyST Markdown
 - file: dask_gridding.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

@@ -1,13 +1,9 @@
 ---
 site:
-  hide_toc: true
   hide_outline: true
-  hide_title_block: true
 ---
 
-+++ { "kind": "justified"}
-
-## Satellite data processing can be difficult.
+# Satellite data processing can be difficult.
 
 ## We're here to help you climb out of that hole!
 
@@ -29,9 +25,9 @@ Recent updates to file structures, variable names, and data organization may imp
 :::
 ::::
 
-### Basics: core concepts and skills for every data user
+## Basics: core concepts and skills
 
-::::{grid} 1 2 2 4
+::::{grid} 1 2 2 2
 :gutter: 2
 
 :::{card}
@@ -80,9 +76,9 @@ The official software created by the OB.DAAC for satellite data.
 
 ::::
 
-### Domains: approaches for your Earth science speciality
+### Domains: your Earth science interest
 
-::::{grid} 1 2 2 3
+::::{grid} 1 1 3 3
 :gutter: 2
 
 :::{card}

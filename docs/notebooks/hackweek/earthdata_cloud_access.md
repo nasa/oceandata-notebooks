@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: earthdata_cloud_access.md
-  title: md
+  title: MyST Markdown
 - file: earthdata_cloud_access.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

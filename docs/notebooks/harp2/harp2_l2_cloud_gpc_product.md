@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: harp2_l2_cloud_gpc_product.md
-  title: md
+  title: MyST Markdown
 - file: harp2_l2_cloud_gpc_product.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

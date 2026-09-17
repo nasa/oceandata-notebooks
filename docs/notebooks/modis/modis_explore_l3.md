@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: modis_explore_l3.md
-  title: md
+  title: MyST Markdown
 - file: modis_explore_l3.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

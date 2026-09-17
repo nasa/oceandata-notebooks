@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: oci_no2.md
-  title: md
+  title: MyST Markdown
 - file: oci_no2.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md

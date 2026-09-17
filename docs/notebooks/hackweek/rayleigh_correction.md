@@ -1,9 +1,9 @@
 ---
 downloads:
 - file: rayleigh_correction.md
-  title: md
+  title: MyST Markdown
 - file: rayleigh_correction.ipynb
-  title: ipynb
+  title: Jupyter Notebook
 jupytext:
   text_representation:
     extension: .md
