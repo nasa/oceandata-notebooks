@@ -7,4 +7,10 @@ Learn to use the SeaDAS (Sea, earth and atmosphere Data Analysis System) process
 - [SeaDAS Application](./seadas-desktop.md) - Resources and tutorials for using the SeaDAS desktop applicaiton
 - [SeaDAS Processors (OCSSW)](../notebooks/oci/oci_ocssw_install.md) - Setting up the OCSSW command-line tools
 
-Browse the tutorials above to master SeaDAS and OCSSW tools for ocean color data processing.
+**Tutorials with the SeaDAS Processors (OCSSW):**
+
+- [Basic Processing](../notebooks/oci/oci_ocssw_processing_overview.md)
+- [Generate Level-2 Products](../notebooks/oci/oci_ocssw_l2gen.md) 
+- [Run the GIOP Algorithm](../notebooks/oci/oci_ocssw_giop.md)
+
+Browse the tutorials above to master using SeaDAS, including the OCSSW command-line tools, for data processing.
