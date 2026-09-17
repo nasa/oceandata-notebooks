@@ -32,7 +32,7 @@ project:
             - file: notebooks/oci/oci_ocssw_l2gen.md
               title: Generate Level-2 Products
             - file: notebooks/oci/oci_grid_match.md
-              title: Export for GIS
+              title: Projecting & GeoTIFFs
             - file: notebooks/hackweek/satellite_insitu_matchups.md
               title: In Situ Matchups
             - file: notebooks/oci/ml_cloud_mask.md

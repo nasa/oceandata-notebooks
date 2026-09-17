@@ -1,4 +1,9 @@
 ---
+downloads:
+- file: modis_lombscargle_periodogram.md
+  title: md
+- file: modis_lombscargle_periodogram.ipynb
+  title: ipynb
 jupytext:
   text_representation:
     extension: .md
@@ -10,9 +15,9 @@ kernelspec:
   language: python
   name: python3
 license:
-  id: NASA-1.3
   name: NASA Open Source Agreement
   url: https://github.com/nasa/oceandata-notebooks/raw/refs/heads/main/LICENSE
+  version: 1.3
 notice: 'Copyright © 2024 United States Government as represented by the Administrator
   of
 
