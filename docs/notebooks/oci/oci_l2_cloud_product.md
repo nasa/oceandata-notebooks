@@ -52,10 +52,12 @@ Global settings and variables used throughout the notebook.
 
 ```{code-cell} ipython3
 plt.style.use("seaborn-v0_8-notebook")
-plt.rcParams.update({
-    "xtick.labelsize": 12,
-    "ytick.labelsize": 12,
-})
+plt.rcParams.update(
+    {
+        "xtick.labelsize": 12,
+        "ytick.labelsize": 12,
+    }
+)
 projection = ccrs.PlateCarree()
 ```
 
@@ -80,7 +82,9 @@ You can use the short name PACE_OCI_L2_CLOUD to get the most recent version avai
 
 ```{code-cell} ipython3
 results = earthaccess.search_datasets(
-    keyword="clouds", instrument="oci", processing_level_id="2",
+    keyword="clouds",
+    instrument="oci",
+    processing_level_id="2",
 )
 ```
 
@@ -141,6 +145,7 @@ def print_variable_description(dataset, variables_pattern=None):
     prints the variable name and units.
     """
     import pandas as pd
+
     df = pd.DataFrame(columns=("Units", "Description"))
     for key, value in dataset.data_vars.items():
         if variables_pattern is None or variables_pattern in key:
@@ -295,7 +300,7 @@ def plot_cloud_flag(dataset, name, fig, ax):
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
-plot_cloud_flag(dataset, "cld_phase_21", fig, ax, )
+plot_cloud_flag(dataset, "cld_phase_21", fig, ax)
 plt.show()
 ```
 
