@@ -278,8 +278,16 @@ def plot_cloud_flag(dataset, name, fig, ax):
         transform : ccrs.PlateCarree(central_longitude=0)
     """
     array = dataset[name]
-    flag_values = array.attrs["flag_values"]
-    flag_meanings = array.attrs["flag_meanings"].split(", ")
+    #--------------------------------------------------------------
+    # Will be replaced from the commented lines when correct attributes added in future data product versions
+    description = array.attrs["long_name"]
+    long_name, flags = description.split(": ")
+    flag_pairs = re.findall(r"([0-9]) - ([^,]+)", flags)
+    flag_values = np.array([int(a) for a, b in flag_pairs], dtype=array.encoding["dtype"])
+    flag_meanings = [b.replace(" ", "_") for a, b in flag_pairs]
+    #flag_values = array.attrs["flag_values"]
+    #flag_meanings = array.attrs["flag_meanings"].split(", ")
+    #--------------------------------------------------------------
     cmap = plt.get_cmap("tab20", flag_values.size)
     cmap.set_bad("grey")
     ctf = array.plot.pcolormesh(
