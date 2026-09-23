@@ -76,6 +76,11 @@
   Markedly Structured Text (MyST) is a rich and extensible flavor of {term}`Markdown`
   meant for technical documentation and publishing. It is used by {term}`Jupyter Book`.
 
+[Openscapes Mentors](https://openscapes.org/initiatives#mentors-framework)
+  The Mentors Framework is a multi-year engine for culture change within organizations.
+  It blends tech and community building through mentoring, coaching, facilitating, art,
+  open source, environment, inclusion, movements, and leaders we admire.
+
 [PyPI](https://pypi.org)
   The Python Package Index is an archive and distribution system for Python packages,
   searched and accessed by `pip` as well as other Python package installers.
