@@ -105,6 +105,8 @@ parts:
             title: PACE - Earthcare Matchups
           - url: https://github.com/wekeo/learn-olci
             title: Wekeo - Learn OLCI
+          - url: https://nasa-openscapes.github.io/earthdata-cloud-cookbook/
+            title: Earthdata Cloud Cookbook
 
       - file: sections/past-trainings
         sections:
