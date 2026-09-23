@@ -15,7 +15,15 @@ kernelspec:
 
 **Author(s):** Chamara Rajapakshe (NASA, SSAI), Kirk Knobelspiesse (NASA), Andy Sayer (NASA, UMBC), Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU)
 
-Last updated: July 22, 2026
+Last updated: Sep 16, 2026
+
+<div class="alert alert-info" role="alert">
+
+An [Earthdata Login][edl] account is required to access NASA's Earth science data products.
+
+</div>
+
+[edl]: https://urs.earthdata.nasa.gov/
 
 ## Summary
 
@@ -81,7 +89,7 @@ Search for available granules within a time range and geospatial area of interes
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_HARP2_L2_CLOUD_GPC",
-    granule_name='PACE_HARP2.20240904T205635.L2.CLOUD_GPC.V3*.nc',
+    granule_name="PACE_HARP2.20240904T205635.L2.CLOUD_GPC.V4*.nc",
 )
 for item in results:
     display(item)
@@ -333,8 +341,9 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on HARP2 cloud products. May we suggest studying the notebook on [HARP2 aerosol products]?
+You have completed the notebook on HARP2 cloud products. May we suggest studying the notebooks on HARP2 [aerosol over ocean] and [aerosol over land] products?
 
-[HARP2 aerosol products]: https://nasa.github.io/oceandata-notebooks/notebooks/harp2/harp2_l2_aerosol_product.html
+[aerosol over ocean]: https://nasa.github.io/oceandata-notebooks/notebooks/harp2/harp2_l2_fastmapol_aerosol_ocean_product.html
+[aerosol over land]: https://nasa.github.io/oceandata-notebooks/notebooks/harp2/harp2_l2_fastmapol_aerosol_land_product.html
 
 </div>
