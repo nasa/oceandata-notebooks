@@ -142,11 +142,13 @@ request = JobsRequest(labels=["help-hub-tutorial"])
 Second, get a response from your request submission:
 
 ```{code-cell} ipython3
+:tags: [remove-output]
+
 response = harmony_client.submit(request)
 response["count"]
 ```
 
-For your first time through this tutorial, you shouldn't see any existing jobs. If you've already submitted a job with this label (e.g. because you are re-running this tutorial), then the response includes information about that existing job.
+For your first time through this tutorial, the count should be `0`: your account has no existing jobs with the `help-hub-tutorial` label. A count of `1` or more means your account already has matching jobs, for example from a previous run of this tutorial. The published page omits this account-specific output; running the cell in your own notebook displays your count and includes matching job information in `response`.
 
 Let's continue to build a request for the subsetting job we want the service to run. Using the "labels" keyword tags jobs so that we can easily find and re-use results from this job later.
 
