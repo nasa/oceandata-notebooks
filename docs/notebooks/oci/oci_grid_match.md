@@ -160,7 +160,7 @@ Before we get to the actual regridding of our data, we need to make sure the dat
 
 ### Masking
 
-In the plot above, there are clearly cloudy pixels in both the surface reflectance (`rhos`) and the VIs. L2 PACE data includes the `l2_flags` variable, which keeps track of quality flags for each pixel in the dataset. The `cf_xarray` package will allow us to make use of those flags and mask out any low-quality data we see fit. A list of all possible flags can be found [here](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/).
+In the plot above, there are clearly cloudy pixels in both the surface reflectance (`rhos`) and the VIs. L2 PACE data includes the `l2_flags` variable, which keeps track of quality flags for each pixel in the dataset. The `cf_xarray` package will allow us to make use of those flags and mask out any low-quality data we see fit. A list of all possible flags can be found [here](https://oceandata.sci.gsfc.nasa.gov/ocl2flags/).
 
 ```{code-cell} ipython3
 def mask_ds(ds, flag="CLDICE", reverse=False):
@@ -168,7 +168,7 @@ def mask_ds(ds, flag="CLDICE", reverse=False):
     Mask a PACE dataset for an L2 flag. Default is to mask for clouds
     Args:
         ds - xarray dataset containing "l2_flags" variable
-        flag - l2 flag to mask for (see https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/)
+        flag - l2 flag to mask for (see https://oceandata.sci.gsfc.nasa.gov/ocl2flags/)
         reverse - keep only pixels with the desired flag. Default is False. E.g., use the
                   "LAND" flag to mask water pixels. 
     Returns:

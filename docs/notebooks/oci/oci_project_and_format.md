@@ -129,7 +129,7 @@ vi_src
 
 The `cf_xarray` package allows us to interpret [CF-compliant](http://cfconventions.org/) attributes with xarray - for our dataset, this means we can use the data in `l2_flags` to mask for certain quality issues. [See their documentation](https://cf-xarray.readthedocs.io/en/latest/) for more information.
 
-L2 PACE OCI data has multiple quality flags we could apply, but here we will only mask for `CLDICE`, the flag for pixels contaminated with clouds and/or ice. The names of each available flag and what they mean can be found at [this link](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/).
+L2 PACE OCI data has multiple quality flags we could apply, but here we will only mask for `CLDICE`, the flag for pixels contaminated with clouds and/or ice. The names of each available flag and what they mean can be found at [this link](https://oceandata.sci.gsfc.nasa.gov/ocl2flags/).
 
 ```{code-cell} ipython3
 if vi_src["l2_flags"].cf.is_flag_variable:
