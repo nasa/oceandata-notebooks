@@ -151,9 +151,9 @@ For example, say we want to mask any pixels flagged as clouds and/or water in ou
 dataset["l2_flags"].cf.is_flag_variable
 ```
 
-The statement returned `True`, which means `l2_flags` is recognized as a flag variable. By referencing the OBPG [ocean color flags documentation](https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/), we find the names of the flags we want to mask out. In this case, "CLDICE" is the cloud flag, and while there is no specific water mask (this is an ocean mission, after all) there is a "LAND" flag we can invert to mask out water. The expressions in the cell below will retain any pixel identified as land which is also not a cloud (thanks to the `~`).
+The statement returned `True`, which means `l2_flags` is recognized as a flag variable. By referencing the OBPG [ocean color flags documentation](https://oceandata.sci.gsfc.nasa.gov/ocl2flags/), we find the names of the flags we want to mask out. In this case, "CLDICE" is the cloud flag, and while there is no specific water mask (this is an ocean mission, after all) there is a "LAND" flag we can invert to mask out water. The expressions in the cell below will retain any pixel identified as land which is also not a cloud (thanks to the `~`).
 
-[ocean color flags documentation]: https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/
+[ocean color flags documentation]: https://oceandata.sci.gsfc.nasa.gov/ocl2flags/
 
 ```{code-cell} ipython3
 cldwater_mask = (

@@ -490,7 +490,7 @@ Tip: You can run `get_product_info l sensor=oci` to see the many many products l
 
 Let's write a new .par file named "l2gen_mod.par" to define the L2 products listed above and rerun `l2gen`.
 
-[l2flags]: https://oceancolor.gsfc.nasa.gov/resources/atbd/ocl2flags/
+[l2flags]: https://oceandata.sci.gsfc.nasa.gov/ocl2flags/
 
 ```{code-cell} ipython3
 par = {
