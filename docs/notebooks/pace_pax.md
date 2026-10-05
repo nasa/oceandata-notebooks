@@ -15,9 +15,10 @@ kernelspec:
 
 +++
 
-**Authors:** Anna Windle (NASA, SSAI), Ivona Cetinić (NASA, MSU), Kirk Knobelspiesse (NASA)
+**Authors:** Anna Windle (NASA, SSAI) <br>
+Adapted from code developed by: Ivona Cetinić (NASA, MSU), Kirk Knobelspiesse (NASA)
 
-Last updated: September 10, 2026
+Last updated: October 5, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -39,9 +40,11 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 The PACE Postlaunch Airborne eXperiment ([PACE-PAX](https://pace.oceansciences.org/pace-pax.htm)) was a field campaign conducted in September 2024 in California and adjacent coastal areas. PACE-PAX brought together airborne and ship-based in situ observations to collect complementary atmospheric and oceanic measurements for the validation of observations from NASA's PACE mission.
 
-All [PACE-PAX datasets](https://www.earthdata.nasa.gov/data/projects/pace-pax) are publicly available through the NASA Earthdata Cloud. This tutorial demonstrates how to access multiple PACE-PAX datasets, combine observations from different platforms, and create integrated visualizations to explore coupled atmosphere–ocean processes.
+All [PACE-PAX datasets](https://www.earthdata.nasa.gov/data/projects/pace-pax) are publicly available through the NASA Earthdata Cloud. This tutorial demonstrates how to access multiple PACE-PAX datasets, combine observations from different platforms, and create integrated visualizations to explore coupled atmosphere–ocean processes. This tutorial generates the multi-panel figure corresponding to Figure 9 in [Knobelspiesse et al. (in review).](https://doi.org/10.5194/essd-2026-541)
 
-This notebook generates the multi-panel figure corresponding to Figure 9 in [Knobelspiesse et al. (in review).](https://doi.org/10.5194/essd-2026-541)
+We will use the `seabass-utils` Python library to read in some of the PACE-PAX data. The SeaWiFS Bio-optical Archive and Storage System [(SeaBASS)](sb) is a publicly shared archive of in situ oceanographic and atmospheric data maintained by the NASA Ocean Biology Processing Group (OBPG). `seabass-utils` is a collection of Python functions developed to assist with SeaBASS data processing, file manipulation, and mapping tasks, originally developed at NASA Goddard Space Flight Center (GSFC).
+
+[sb]: https://seabass.gsfc.nasa.gov/
 
 ## Learning Objectives
 
@@ -61,8 +64,13 @@ At the end of this notebook you will be able to:
 Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting-Started](/getting-started) page, then the imports will be successful.
 
 ```{code-cell} ipython3
-# FIXME: remove once these are both in conda-lock.yml
-%pip install plotly https://seabass.gsfc.nasa.gov/wiki/seabass_tools/sb_utilities-0.0.5-py3-none-any.whl
+---
+collapsed: true
+jupyter:
+  outputs_hidden: true
+---
+# FIXME: remove when in conda-lock.yml
+%pip install --extra-index-url https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/ "seabass-utils[all]" 
 ```
 
 ```{code-cell} ipython3
@@ -73,10 +81,8 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio
-import sb_utilities as sb
+import seabass_utils as sb
 import xarray as xr
-
-plt.rcdefaults()
 ```
 
 Set your Earthdata Login credentials. You can add persist=True to save your credentials in a .netrc file, allowing you to authenticate automatically in the future sessions without re-entering your Earthdata credentials.
@@ -84,12 +90,6 @@ Set your Earthdata Login credentials. You can add persist=True to save your cred
 ```{code-cell} ipython3
 auth = earthaccess.login()
 ```
-
-Now, we'll import the [SeaBASS Utilities][sb] python package. The sb_utilities package is a collection of Python functions developed to assist with SeaBASS data processing, file manipulation, and mapping tasks, originally developed at NASA Goddard Space Flight Center (GSFC).
-
-[sb]: https://seabass.gsfc.nasa.gov/wiki/seabass_tools#SeaBASS%20Utilities%20python%20package
-
-+++
 
 ## 2. Access PACE-OCI ocean particulate backscattering data
 
@@ -190,10 +190,6 @@ twinotter_ds
 Let's filter out the data collected when the aircraft was flying in a spiral:
 
 ```{code-cell} ipython3
-twinotter_ds["fine_amb_back_coef"].min()
-```
-
-```{code-cell} ipython3
 twinotter_lat = twinotter_ds["Latitude_BUCHOLTZ"].values
 twinotter_lon = twinotter_ds["Longitude_BUCHOLTZ"].values
 # Scale altitude for plotting
@@ -216,13 +212,13 @@ track = (
 
 twinotter_bbp = twinotter_bbp[track, wv_idx]
 
-valid = np.isfinite(twinotter_bbp) & (twinotter_bbp > 0) & (twinotter_bbp < 1e-2)
-
+valid = np.isfinite(twinotter_bbp)
 twinotter_lon_track = twinotter_lon[track][valid]
 twinotter_lat_track = twinotter_lat[track][valid]
 twinotter_alt_track = twinotter_alt[track][valid]
-twinotter_bbp = twinotter_bbp[valid] * 1e6  # Mm⁻¹ sr⁻¹
-twinotter_bbp.shape
+twinotter_bbp = twinotter_bbp[valid]
+
+print(twinotter_bbp.shape)
 ```
 
 And use this to plot the flight track and vertical profile:
@@ -311,17 +307,26 @@ track = (
 
 lidar_lon = lidar_lon[track]
 lidar_lat = lidar_lat[track]
+```
 
-# Convert to Mm⁻¹ sr⁻¹ and mask invalid values
+And convert bbp to Mm⁻¹ sr⁻¹ and mask invalid values:
+
+```{code-cell} ipython3
 lidar_bbp = lidar_bbp[track, :] * 1000
 lidar_bbp = np.where(lidar_bbp > -0.01, lidar_bbp, np.nan)
+```
 
-# Restrict to lowest 1 km (scaled by 10 for plotting)
+We'll restrict the data to the lowest 1 km of altitude (scaled by 10 for plotting):
+
+```{code-cell} ipython3
 alt_mask = (lidar_alt > 0) & (lidar_alt <= 1000)
 lidar_alt = lidar_alt[alt_mask] / 10
 lidar_bbp = lidar_bbp[:, alt_mask]
+```
 
-# Build 3D curtain
+And then build the lidar aerosol backscatter curtain:
+
+```{code-cell} ipython3
 X_lidar, Z_lidar = np.meshgrid(lidar_lon, lidar_alt)
 Y_lidar, _ = np.meshgrid(lidar_lat, lidar_alt)
 
@@ -332,7 +337,7 @@ lidar_cmin = np.nanmin(lidar_bbp)
 lidar_cmax = np.nanmax(lidar_bbp)
 ```
 
-And plot the lidar aerosol backscatter curtain:
+And plot it!
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(8, 4))
@@ -386,7 +391,9 @@ for file in shearwater_paths:
     print(getattr(file, "full_name", None) or file.name)
 ```
 
-One file for each granule ends in `.sb` rather than `tgz.sb`, indicating that it is a SeaBASS file. SeaBASS files can be opened using the `sb_utilities` library, which we imported above as `sb`. The `sb_read()` function reads the SeaBASS file and loads its contents into a `pd.DataFrame`.
+One file for each granule ends in `.sb` rather than `tgz.sb`, indicating that it is a SeaBASS file. SeaBASS files can be opened using the `seabass_utils` library, which we imported above as `sb`. The `sb_read()` function reads the SeaBASS file, which can be opened as a `pd.DataFrame`.
+
+Station information is extracted from header metadata and added as DataFrame columns:
 
 ```{code-cell} ipython3
 profiles = []
@@ -399,13 +406,11 @@ for file in shearwater_paths:
         df = pd.DataFrame(sb_data.data)
         header = sb_data.headers
 
-        # Extract station location from header metadata
         station_lat = float(header["north_latitude"].split("[")[0])
         station_lon = float(header["east_longitude"].split("[")[0])
         date = header["start_date"]
         time = header["start_time"].split("[")[0]
 
-        # Add metadata columns to each profile measurement
         profile = pd.DataFrame(
             {
                 "date": date,
@@ -420,6 +425,9 @@ for file in shearwater_paths:
         profiles.append(profile)
 
 shearwater_df = pd.concat(profiles, ignore_index=True)
+shearwater_lat = shearwater_df["latitude"].values
+shearwater_lon = shearwater_df["longitude"].values
+shearwater_depths = shearwater_df["depth"].values
 shearwater_df.head()
 ```
 
@@ -444,7 +452,6 @@ ax.set_xlabel("Longitude")
 ax.set_ylabel("Depth (m)")
 ax.set_title(r"R/V Shearwater SC6 $b_{bp}(440)$ profiles")
 
-# Colorbar
 cbar = plt.colorbar(sc, ax=ax)
 cbar.set_label(r"$b_{bp}(440)$ (m$^{-1}$)")
 
@@ -479,7 +486,7 @@ glider_df = pd.DataFrame(glider_data.data)
 glider_df.head()
 ```
 
-Let's filter out glider data from a specified date and location:
+Let's filter out glider data from a specified date and location and keep only positive values:
 
 ```{code-cell} ipython3
 glider_subset = glider_df[
@@ -519,7 +526,6 @@ ax.set_xlabel("Longitude")
 ax.set_ylabel("Depth (m)")
 ax.set_title("PACE-PAX Glider $b_{bp}(532)$ on Sept 26 2024")
 
-# Colorbar
 cbar = plt.colorbar(sc, ax=ax)
 cbar.set_label(r"$b_{bp}(532)$ (m$^{-1}$)")
 
@@ -527,7 +533,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-## 7. Multidimensional plot 
+## 7. Multidimensional plot
 
 +++
 
@@ -644,16 +650,19 @@ fig.add_trace(
         z=twinotter_alt_track,
         mode="markers",
         marker=dict(
-            size=4,
+            size=3,
             color=twinotter_bbp,
-            colorscale="Plasma_r",
+            colorscale="Plasma",
             showscale=True,
-            cmin=0.15,
-            cmax=0.4,
-            line=dict(color="black", width=1.5),
+            cmin=0,
+            cmax=4.5,
+            line=dict(
+                color="black",
+                width=1,
+            ),
             colorbar=dict(
                 title=dict(
-                    text=f"Twin otter aerosol <br> bbp(532) (Mm⁻¹sr⁻¹)",
+                    text="Twin Otter aerosol<br>bbp(532) (Mm⁻¹ sr⁻¹)",
                     side="right",
                     font=dict(size=10),
                 ),
@@ -663,7 +672,7 @@ fig.add_trace(
                 len=0.25,
             ),
         ),
-        name=f"Twin Otter",
+        name="Twin Otter",
     )
 )
 
