@@ -539,7 +539,7 @@ plt.show()
 
 +++
 
-Now, let's plot all this data together in a multi-dimensional plot
+Now, let's plot all this data together in a multi-dimensional plot: 
 
 ```{code-cell} ipython3
 pio.renderers.default = "notebook"
@@ -654,7 +654,7 @@ fig.add_trace(
         marker=dict(
             size=3,
             color=twinotter_bbp,
-            colorscale="Plasma",
+            colorscale="Plasma_r",
             showscale=True,
             cmin=0,
             cmax=4.5,
