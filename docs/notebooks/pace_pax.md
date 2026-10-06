@@ -18,7 +18,7 @@ kernelspec:
 **Authors:** Anna Windle (NASA, SSAI) <br>
 Adapted from code developed by: Ivona Cetinić (NASA, MSU), Kirk Knobelspiesse (NASA)
 
-Last updated: October 5, 2026
+Last updated: October 6, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -64,16 +64,6 @@ At the end of this notebook you will be able to:
 Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting-Started](/getting-started) page, then the imports will be successful.
 
 ```{code-cell} ipython3
----
-collapsed: true
-jupyter:
-  outputs_hidden: true
----
-# FIXME: remove when in conda-lock.yml
-%pip install --extra-index-url https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/ "seabass-utils[all]" 
-```
-
-```{code-cell} ipython3
 import cartopy.crs as ccrs
 import earthaccess
 import matplotlib.pyplot as plt
@@ -95,7 +85,7 @@ auth = earthaccess.login()
 
 +++
 
-Let's find a PACE OCI Level-2 IOP granule acquired during the PACE-PAX campaign over the Santa Barbara Channel, California. The IOP suite contains particulate backscattering data.
+Let's find a PACE-OCI Level-2 Inherent Optical Property (IOP) granule acquired during the PACE-PAX campaign over the Santa Barbara Channel, California. The IOP suite contains particulate backscattering data.
 
 ```{code-cell} ipython3
 tspan = ("2024-09-26", "2024-09-26")
@@ -122,7 +112,7 @@ for item in ("longitude", "latitude"):
 oci_bbp
 ```
 
-Let's subset the PACE-OCI bbp_442 data to a smaller geographical region in the Santa Barbara Channel and plot it:
+Let's subset the PACE-OCI `bbp_442` data to a smaller geographical region in the Santa Barbara Channel and plot it:
 
 ```{code-cell} ipython3
 subset = (
@@ -163,11 +153,15 @@ plt.tight_layout()
 plt.show()
 ```
 
+Higher `bbp_442` values are observed along the coast, indicating greater particulate backscattering and potentially higher particle concentrations.
+
++++
+
 ## 3. Access aircraft aerosol particle backscattering data
 
 +++
 
-Now let's access data collected from one of the aircraft flown during PACE-PAX. A Twin Otter airplane from the Center for Interdisciplinary Remotely Piloted Aircraft Studies (CIRPAS) at the Naval Postgraduate School in Monterey, CA, collected data on aerosol particles in the atmosphere. We will use the aerosol backscattering coefficient at 532 nm, measured under ambient relative humidity, temperature, and pressure, represented by the variable `fine_amb_back_coef`.
+Now let's access data collected from one of the aircraft flown during PACE-PAX. A Twin Otter airplane from the Center for Interdisciplinary Remotely Piloted Aircraft Studies (CIRPAS) at the Naval Postgraduate School in Monterey, CA, collected data on aerosol particles in the atmosphere. We will use the aerosol backscattering coefficient at 532 nm, measured under ambient relative humidity, temperature, and pressure, represented by the variable `fine_amb_back_coef`, produced by the In Situ Aerosol Retrieval Algorithm (ISARA). 
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
@@ -261,6 +255,10 @@ fig.colorbar(
 plt.show()
 ```
 
+Note that the ISARA data are still being reprocessed, and ongoing changes may affect data validity and availability.
+
++++
+
 ## 4. Access Aircraft High Spectral Resolution Lidar 2 (HSRL-2) data
 
 +++
@@ -309,7 +307,7 @@ lidar_lon = lidar_lon[track]
 lidar_lat = lidar_lat[track]
 ```
 
-And convert bbp to Mm⁻¹ sr⁻¹ and mask invalid values:
+And convert values to Mm⁻¹ sr⁻¹ and mask invalid values:
 
 ```{code-cell} ipython3
 lidar_bbp = lidar_bbp[track, :] * 1000
@@ -362,6 +360,10 @@ ax.set_title("HSRL-2 Aerosol Backscatter Curtain")
 plt.tight_layout()
 plt.show()
 ```
+
+Notice higher aerosol backscatter at lower altitudes.
+
++++
 
 ## 5. Access in situ ocean particle backscattering data
 
@@ -463,7 +465,7 @@ plt.show()
 
 +++
 
-An autonomous ocean glider was also deployed along a 10-km transect for 25 days. The glider was equipped with optical sensors that measured particulate backscatter at 532 nm.
+An autonomous ocean glider was also deployed along a 10 km transect for 25 days. The glider was equipped with optical sensors that measured particulate backscatter at 532 nm.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
