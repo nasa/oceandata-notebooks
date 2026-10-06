@@ -37,7 +37,7 @@ notebooks = [
   "rasterio>=1.4.1",
   "rioxarray>=0.19.0",
   "ray[default]>=2.55.1 ; sys_platform == 'linux'",  # https://github.com/conda/conda-lock/issues/925
-  "seabass-utils[all] @ https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl#sha256=52a2a515bcff9cf09df018161d93dfe441c3da1b2ec52d976f4e6a4c1f9ee490",
+  "seabass-utils[all] @ https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl#sha256=bab01fde32cb72b762fc6285ea6da403f19ee4d2628231fcee73dac5b13e35f5",
   "sdp[ray] @ git+https://github.com/max-danenhower/rrs-SDP-pigments.git ; sys_platform == 'linux'",
   "scipy>=1.13.1",
   "seaborn>=0.13.2",

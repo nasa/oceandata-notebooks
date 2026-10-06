@@ -15,10 +15,10 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: a37cc2dd2030255d9d93cb4d973b34cf643b0abfa319cdd7cbdcf13b3235ff1c
-    osx-64: 33cefefb9c0135d972f803c2c0add51f99875acbb9af58a3961d1569e28b9a7f
-    linux-aarch64: d8a226340b2257694dcb17f5ad02dd3406b675fa9788d75bddaccba36c733d62
-    osx-arm64: 485d4780fda74e3fdc207984e54ca50bd67668a307e1c096f80f81f3e9b2f13e
+    linux-64: 457e809d878b60e75e2086259d299ab4d278b942b0346ca9a75c409ad2cee530
+    osx-64: 1ed578a7181bcf9b9761bf665e4f29cb75db707790019f5fa5dbe8c155332a0a
+    linux-aarch64: d1243cc2c8a415be707be9f8010d0a8b709fd0688dda9faf2462c316bf9b8008
+    osx-arm64: 9f8f0601297b9e1e02da81fd805b1f9389d41a0cd1c6897a73689dd554c497b3
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -43885,10 +43885,10 @@ package:
     xarray: '>=2023.1.0'
   url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl
   hash:
-    sha256: 52a2a515bcff9cf09df018161d93dfe441c3da1b2ec52d976f4e6a4c1f9ee490
+    sha256: bab01fde32cb72b762fc6285ea6da403f19ee4d2628231fcee73dac5b13e35f5
   source:
     type: url
-    url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl#sha256=52a2a515bcff9cf09df018161d93dfe441c3da1b2ec52d976f4e6a4c1f9ee490
+    url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl#sha256=bab01fde32cb72b762fc6285ea6da403f19ee4d2628231fcee73dac5b13e35f5
   category: notebooks
   optional: true
 - name: seabass-utils
@@ -43904,10 +43904,10 @@ package:
     xarray: '>=2023.1.0'
   url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl
   hash:
-    sha256: 52a2a515bcff9cf09df018161d93dfe441c3da1b2ec52d976f4e6a4c1f9ee490
+    sha256: bab01fde32cb72b762fc6285ea6da403f19ee4d2628231fcee73dac5b13e35f5
   source:
     type: url
-    url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl#sha256=52a2a515bcff9cf09df018161d93dfe441c3da1b2ec52d976f4e6a4c1f9ee490
+    url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl#sha256=bab01fde32cb72b762fc6285ea6da403f19ee4d2628231fcee73dac5b13e35f5
   category: notebooks
   optional: true
 - name: seabass-utils
@@ -43923,10 +43923,10 @@ package:
     xarray: '>=2023.1.0'
   url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl
   hash:
-    sha256: 52a2a515bcff9cf09df018161d93dfe441c3da1b2ec52d976f4e6a4c1f9ee490
+    sha256: bab01fde32cb72b762fc6285ea6da403f19ee4d2628231fcee73dac5b13e35f5
   source:
     type: url
-    url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl#sha256=52a2a515bcff9cf09df018161d93dfe441c3da1b2ec52d976f4e6a4c1f9ee490
+    url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl#sha256=bab01fde32cb72b762fc6285ea6da403f19ee4d2628231fcee73dac5b13e35f5
   category: notebooks
   optional: true
 - name: seabass-utils
@@ -43942,10 +43942,10 @@ package:
     xarray: '>=2023.1.0'
   url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl
   hash:
-    sha256: 52a2a515bcff9cf09df018161d93dfe441c3da1b2ec52d976f4e6a4c1f9ee490
+    sha256: bab01fde32cb72b762fc6285ea6da403f19ee4d2628231fcee73dac5b13e35f5
   source:
     type: url
-    url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl#sha256=52a2a515bcff9cf09df018161d93dfe441c3da1b2ec52d976f4e6a4c1f9ee490
+    url: https://oceandata.sci.gsfc.nasa.gov/fileshare/oceanpy/seabass-utils/seabass_utils-0.0.6-py3-none-any.whl#sha256=bab01fde32cb72b762fc6285ea6da403f19ee4d2628231fcee73dac5b13e35f5
   category: notebooks
   optional: true
 - name: seaborn
