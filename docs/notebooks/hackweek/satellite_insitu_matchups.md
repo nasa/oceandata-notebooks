@@ -1450,7 +1450,7 @@ df_aeronet.head()
 
 ## 3. Download PACE OCI granules
 
-We will use the function `get_sat_ts_matchups` to search for `PACE_OCI_L2_AOP_NRT` data using `earthaccess` within the specified time range and at the (lat,lon) coordinate of the AAOT AERONET-OC site. This function finds the closest pixel and extracts all data within a 5x5 pixel window, excludes pixels based on L2 flags, calculates the mean to retrive a single Rrs spectra, and computes matchup statistics. The function outputs a pandas dataframe of every `PACE_OCI_L2_AOP` Rrs spectra for the specified time range. We'll also include an optional list of unique date strings from the AERONET-OC dataframe to "skip" the granules that don't have any field data associated with them.
+We will use the function `get_sat_ts_matchups` to search for `PACE_OCI_L2_AOP_NRT` data using `earthaccess` within the specified time range and at the (lat,lon) coordinate of the AAOT AERONET-OC site. This function finds the closest pixel and extracts all data within a 5x5 pixel window, excludes pixels based on L2 flags, calculates the mean to retrieve a single Rrs spectra, and computes matchup statistics. The function outputs a pandas dataframe of every `PACE_OCI_L2_AOP` Rrs spectra for the specified time range. We'll also include an optional list of unique date strings from the AERONET-OC dataframe to "skip" the granules that don't have any field data associated with them.
 
 <div class="alert alert-block alert-warning">
 Note: This section will actually take quite a while to pull enough granules for the plotting section to give us robust stats (at least 35 valid matchups are needed), so we'll be skipping this part in favor of a pre-made dataset for the demo.
