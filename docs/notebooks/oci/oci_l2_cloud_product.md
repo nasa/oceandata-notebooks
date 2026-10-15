@@ -4,30 +4,37 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.5
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
 
-# Visualize OCI CLOUD L2 Product
+# Visualize the PACE-OCI Level-2 CLOUD Products
 
 **Author(s):** Chamara Rajapakshe (NASA, SSAI), Andy Sayer (NASA, UMBC), Kirk Knobelspiesse (NASA), Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU)
 
-Last updated: Sep 16, 2026
+Last updated: Oct 15, 2026
+
+<div class="alert alert-info" role="alert">
+
+An [Earthdata Login][edl] account is required to access data from the NASA Earthdata system, including NASA ocean color data.
+
+</div>
+
+[edl]: https://urs.earthdata.nasa.gov/
 
 ## Summary
 
-This notebook summarizes how to access OCI CLOUD products (CLOUD) in Level-2 (L2) granules. The CLOUD product provides cloud optical and microphysical retrievals derived from multi-spectral observations. Note that this notebook is based on an early preliminary version of the product and is therefore subject to future optimizations and changes.
+This notebook summarizes how to access PACE-OCI cloud optical properties (CLOUD) in Level-2 (L2) granules. The CLOUD suite provides cloud optical and microphysical retrievals derived from multi-spectral observations. Note that this notebook is based on an early preliminary version of the product and is therefore subject to future optimizations and changes.
 
 ## Learning Objectives
 
 By the end of this notebook, you will understand:
 
-- How to acquire OCI Level-2 CLOUD data
-- Available variables in the product
-- How to visualize variables
+- How to acquire PACE-OCI L2 CLOUD data
+- Available variables in the CLOUD suite
+- How to visualize cloud properties from PACE-OCI
 
 +++
 
@@ -45,12 +52,14 @@ import earthaccess
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import xarray as xr
 ```
 
 Global settings and variables used throughout the notebook.
 
 ```{code-cell} ipython3
+pd.options.display.max_colwidth = None
 plt.style.use("seaborn-v0_8-notebook")
 plt.rcParams.update(
     {
@@ -74,62 +83,15 @@ Set (and optionally `persist` to your home directory as a "netrc" file) your Ear
 auth = earthaccess.login()
 ```
 
-## 2. Get Level-2 Data
-
-+++
-
-You can use the short name PACE_OCI_L2_CLOUD to get the most recent version available for the CLOUD product at Level-2 for the OCI instrument. Add the Near Real Time (NRT) suffix for the most recent observations (i.e. PACE_OCI_L2_CLOUD_NRT).
-
-```{code-cell} ipython3
-results = earthaccess.search_datasets(
-    keyword="clouds",
-    instrument="oci",
-    processing_level_id="2",
-)
-```
-
-Print the product short names and titles:
-
-```{code-cell} ipython3
-for item in results:
-    summary = item.summary()
-    title = item["umm"]["EntryTitle"][26:]
-    print(f'{summary["short-name"]}: {title}')
-```
-
-Search for available granules within a time range and geospatial area of interest. The `sort_key` parameter can help when multiple versions are available; the `-revision_date` key will show the most recent versions first.
-
-```{code-cell} ipython3
-results = earthaccess.search_data(
-    short_name=["PACE_OCI_L2_CLOUD", "PACE_OCI_L2_CLOUD_NRT"],
-    temporal=tspan,
-    bounding_box=bbox,
-    sort_key="-revision_date",
-)
-for item in results:
-    display(item)
-```
-
-```{code-cell} ipython3
-paths = earthaccess.open(results[:1])
-```
-
-Here we merge all the data groups together for convenience in data manipulations.
-
-```{code-cell} ipython3
-datatree = xr.open_datatree(paths[0])
-dataset = xr.merge(datatree.to_dict().values())
-dataset = dataset.set_coords(("latitude", "longitude"))
-```
-
-## 3. Understanding OCI L2.CLOUD Product Structure
-
-OCI CLOUD products provide various cloud optical and microphysical properties. The product structure includes multiple variables with descriptive metadata. Given the early stage of the product, improvements and changes are expected in future versions.
+Define functions for some repeatable tasks performed in the tutorial.
 
 ```{code-cell} ipython3
 def print_variable_description(dataset, variables_pattern=None):
     """
     Print a table of variables, units, and descriptions from a dataset.
+
+    Long descriptions are wrapped to 100 characters; only the first line
+    prints the variable name and units.
 
     Parameters
     ----------
@@ -139,10 +101,10 @@ def print_variable_description(dataset, variables_pattern=None):
     variables_pattern : str, optional
         Pattern to filter variable names. If None, all variables are shown.
 
-    Notes
+    Returns
     -----
-    Long descriptions are wrapped to 100 characters; only the first line
-    prints the variable name and units.
+    pandas.DataFrame
+        Table describing variables in the dataset
     """
     import pandas as pd
 
@@ -154,25 +116,6 @@ def print_variable_description(dataset, variables_pattern=None):
             df.loc[key, :] = [units, desc]
     return df
 ```
-
-### Cloud Optical Properties
-
-Cloud optical thickness and effective radius are fundamental properties retrieved from multi-spectral observations.
-
-```{code-cell} ipython3
-print_variable_description(dataset, variables_pattern="cer")
-print_variable_description(dataset, variables_pattern="cot")
-```
-
-### Cloud Phase and Other Properties
-
-Additional variables include cloud phase information and other cloud properties.
-
-```{code-cell} ipython3
-print_variable_description(dataset)
-```
-
-## 4. Visualizing Variables
 
 ```{code-cell} ipython3
 def extremes_removed_limits(array):
@@ -193,9 +136,10 @@ def extremes_removed_limits(array):
     vmin = q1 - 1.5 * (q3 - q1)
     vmax = q3 + 1.5 * (q3 - q1)
     return max(q0, vmin), min(q4, vmax)
+```
 
-
-def geo_axis_tags(ax, crs=ccrs.PlateCarree()):
+```{code-cell} ipython3
+def geo_axis_tags(ax, crs=None):
     """
     Add coastlines and labeled latitude/longitude gridlines to a Cartopy axis.
 
@@ -207,6 +151,8 @@ def geo_axis_tags(ax, crs=ccrs.PlateCarree()):
         Coordinate reference system used for the gridlines.
         Default is a Plate Carrée projection with central longitude = 0.
     """
+    if crs is None:
+        crs = ccrs.PlateCarree()
     gl = ax.gridlines(
         crs=crs,
         draw_labels=["left", "bottom"],
@@ -217,7 +163,148 @@ def geo_axis_tags(ax, crs=ccrs.PlateCarree()):
     return
 ```
 
+```{code-cell} ipython3
+def plot_cloud_phase(dataset, name, ax):
+    """Plot a map of cloud phase, a categorical variable, on a cartopy GeoAxes
+
+    Parameters
+    ----------
+    dataset: xarray.Dataset
+        The granule with cloud phase variables
+    name: str
+        The name of a variable with categorical values
+    ax : cartopy.mpl.geoaxes.GeoAxes
+        Axes object on which to draw the gridlines and coastlines.
+    """
+    array = dataset[name]
+    try:
+        flag_values = array.attrs["flag_values"]
+        flag_meanings = array.attrs["flag_meanings"].split(" ")
+    except KeyError:
+        description = array.attrs["long_name"]
+        long_name, flags = description.split(": ")
+        flag_pairs = re.findall(r"([0-9]) - ([^,]+)", flags)
+        flag_values = np.array([int(a) for a, b in flag_pairs], dtype=array.dtype)
+        flag_meanings = [b.replace(" ", "_") for a, b in flag_pairs]
+    cmap = plt.get_cmap("tab20", flag_values.size)
+    cmap.set_bad("grey")
+    ctf = array.plot.pcolormesh(
+        x="longitude",
+        y="latitude",
+        cmap=cmap,
+        vmin=flag_values.min() - 0.5,
+        vmax=flag_values.max() + 0.5,
+        add_colorbar=False,
+    )
+    cbar = ax.figure.colorbar(ctf, ax=ax, orientation="vertical")
+    cbar.set_ticks(flag_values)
+    cbar.set_ticklabels(flag_meanings)
+    ax.gridlines(draw_labels=["left", "bottom"])
+    ax.coastlines()
+    ax.set_title(name)
+```
+
+## 2. Get Level-2 Data
+
++++
+
+Search Earthdata collections with `earthaccess.search_datasets` to find likely candidates, based on a free-text search for "clouds", among the L2 products from the PACE-OCI instrument.
+
+```{code-cell} ipython3
+results = earthaccess.search_datasets(
+    keyword="clouds",
+    platform="PACE",
+    instrument="OCI",
+    processing_level_id="2",
+)
+for item in results:
+    summary = item.summary()
+    title = item["umm"]["EntryTitle"].replace("PACE OCI Level-2 Regional", "")
+    print(f'{summary["short-name"]}: {title}')
+```
+
+You can use the short name PACE_OCI_L2_CLOUD to get the most recent version available for the CLOUD product at Level-2 for the PACE-OCI instrument. Add the Near Real Time (NRT) suffix for the most recent observations (i.e. PACE_OCI_L2_CLOUD_NRT).
+
+Search for available granules within a time range and geospatial area of interest. The `sort_key` parameter can help when multiple versions are available; the `-revision_date` key will show the most recent versions first.
+
+```{code-cell} ipython3
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L2_CLOUD",
+    temporal=tspan,
+    bounding_box=bbox,
+    sort_key="-revision_date",
+)
+for item in results:
+    display(item)
+```
+
+```{code-cell} ipython3
+paths = earthaccess.open(results)
+```
+
+Extract the science variables from groups within the granule into an `xarray.Dataset` for convenience in data manipulations.
+
+```{code-cell} ipython3
+datatree = xr.open_datatree(paths[0])
+dataset = datatree["geophysical_data"].to_dataset()
+for item in ("latitude", "longitude"):
+    dataset.coords[item] = datatree["navigation_data"][item]
+dataset
+```
+
+## 3. Understanding PACE-OCI L2 CLOUD Variables
+
++++
+
+PACE-OCI CLOUD products provide various cloud optical and microphysical properties. The product structure includes multiple variables with descriptive metadata. Given the early stage of the product, improvements and changes are expected in future versions.
+
+We'll use our own `print_variable_description` function to inspect the dataset.
+
+```{code-cell} ipython3
+help(print_variable_description)
+```
+
+### Cloud Optical Properties
+
++++
+
+Cloud optical thickness and effective radius are fundamental properties retrieved from multi-spectral observations.
+
+```{code-cell} ipython3
+print_variable_description(dataset, "cot")
+```
+
+```{code-cell} ipython3
+print_variable_description(dataset, "cer")
+```
+
+### Cloud Phase and Other Properties
+
++++
+
+Additional variables include cloud phase information and other cloud properties.
+
+```{code-cell} ipython3
+print_variable_description(dataset)
+```
+
+## 4. Visualizing Variables
+
++++
+
+To visualize the L2 variables, we plot them on `cartopy` GeoAxes dressed up with our `geo_axis_tags` function with the color range limited by our `extremes_removed_limits` function.
+
+```{code-cell} ipython3
+help(geo_axis_tags)
+```
+
+```{code-cell} ipython3
+help(extremes_removed_limits)
+```
+
 ### Cloud Effective Radius
+
++++
 
 Visualize the cloud effective radius retrieved from OCI observations. The colorbar limits are adjusted based on the range of observed effective radii, excluding extreme values.
 
@@ -242,6 +329,8 @@ plt.show()
 
 ### Cloud Optical Thickness
 
++++
+
 Cloud optical thickness provides information about the opacity of clouds to solar radiation.
 
 ```{code-cell} ipython3
@@ -265,50 +354,17 @@ plt.show()
 
 ### Cloud Phase
 
-Cloud phase classification distinguishes between liquid and ice clouds.
++++
+
+Cloud phase classification distinguishes between liquid and ice clouds. These variables are discrete, also known as categorical, which we visualize with our `plot_cloud_phase` function.
 
 ```{code-cell} ipython3
-def plot_cloud_flag(dataset, name, fig, ax):
-    """
-    To plot projected maps of cloud_flag
-    parameters:
-        dataset: xarray.core.dataset.Dataset
-        cloud_flag_option: 'cloud_flag' or 'cloud_flag_dilated'
-        fig,ax : fig,ax = plt.subplots(figsize=(8,6), subplot_kw={'projection':projection=ccrs.PlateCarree(central_longitude=0)})
-        transform : ccrs.PlateCarree(central_longitude=0)
-    """
-    array = dataset[name]
-    #--------------------------------------------------------------
-    # Will be replaced from the commented lines when correct attributes added in future data product versions
-    description = array.attrs["long_name"]
-    long_name, flags = description.split(": ")
-    flag_pairs = re.findall(r"([0-9]) - ([^,]+)", flags)
-    flag_values = np.array([int(a) for a, b in flag_pairs], dtype=array.encoding["dtype"])
-    flag_meanings = [b.replace(" ", "_") for a, b in flag_pairs]
-    #flag_values = array.attrs["flag_values"]
-    #flag_meanings = array.attrs["flag_meanings"].split(", ")
-    #--------------------------------------------------------------
-    cmap = plt.get_cmap("tab20", flag_values.size)
-    cmap.set_bad("grey")
-    ctf = array.plot.pcolormesh(
-        x="longitude",
-        y="latitude",
-        cmap=cmap,
-        vmin=flag_values.min() - 0.5,
-        vmax=flag_values.max() + 0.5,
-        add_colorbar=False,
-    )
-    cbar = fig.colorbar(ctf, ax=ax, orientation="vertical")
-    cbar.set_ticks(flag_values)
-    cbar.set_ticklabels(flag_meanings)
-    ax.gridlines(draw_labels=["left", "bottom"])
-    ax.coastlines()
-    ax.set_title(name)
+help(plot_cloud_phase)
 ```
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
-plot_cloud_flag(dataset, "cld_phase_21", fig, ax)
+plot_cloud_phase(dataset, "cld_phase_21", ax)
 plt.show()
 ```
 
@@ -326,7 +382,3 @@ You have completed the notebook on OCI cloud products. May we suggest studying t
 [HARP2 cloud products]: https://nasa.github.io/oceandata-notebooks/notebooks/harp2/harp2_l2_cloud_gpc_product.html
 
 </div>
-
-```{code-cell} ipython3
-
-```
