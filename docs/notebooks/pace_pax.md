@@ -18,14 +18,13 @@ kernelspec:
 **Authors:** Anna Windle (NASA, SSAI) <br>
 Adapted from code developed by: Ivona Cetinić (NASA, MSU), Kirk Knobelspiesse (NASA)
 
-Last updated: October 6, 2026
+Last updated: October 16, 2026
 
 <div class="alert alert-success" role="alert">
 
 The following notebooks are **prerequisites** for this tutorial.
 
 - Learn with OCI: [Data Access](oci-data-access)
-- SeaBASS? when its ready
 </div>
 
 <div class="alert alert-info" role="alert">
@@ -40,7 +39,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 The PACE Postlaunch Airborne eXperiment ([PACE-PAX](https://pace.oceansciences.org/pace-pax.htm)) was a field campaign conducted in September 2024 in California and adjacent coastal areas. PACE-PAX brought together airborne and ship-based in situ observations to collect complementary atmospheric and oceanic measurements for the validation of observations from NASA's PACE mission.
 
-All [PACE-PAX datasets](https://www.earthdata.nasa.gov/data/projects/pace-pax) are publicly available through the NASA Earthdata Cloud. This tutorial demonstrates how to access multiple PACE-PAX datasets, combine observations from different platforms, and create integrated visualizations to explore coupled atmosphere–ocean processes. This tutorial generates the multi-panel figure corresponding to Figure 9 in [Knobelspiesse et al. (in review).](https://doi.org/10.5194/essd-2026-541)
+All [PACE-PAX datasets](https://www.earthdata.nasa.gov/data/projects/pace-pax) are publicly available through the NASA Earthdata Cloud. This tutorial demonstrates how to access multiple PACE-PAX datasets, combine observations from different platforms, and create integrated visualizations to explore coupled atmosphere–ocean processes. This tutorial generates a multi-panel figure corresponding to Figure 9 in [Knobelspiesse et al. (in review).](https://doi.org/10.5194/essd-2026-541)
 
 We will use the `seabass-utils` Python library to read in some of the PACE-PAX data. The SeaWiFS Bio-optical Archive and Storage System [(SeaBASS)](sb) is a publicly shared archive of in situ oceanographic and atmospheric data maintained by the NASA Ocean Biology Processing Group (OBPG). `seabass-utils` is a collection of Python functions developed to assist with SeaBASS data processing, file manipulation, and mapping tasks, originally developed at NASA Goddard Space Flight Center (GSFC).
 
@@ -112,7 +111,7 @@ for item in ("longitude", "latitude"):
 oci_bbp
 ```
 
-Let's subset the PACE-OCI `bbp_442` data to a smaller geographical region in the Santa Barbara Channel and plot it:
+Let's subset the PACE-OCI `bbp_442` data to a smaller geographical region in the Santa Barbara Channel, retain only positive values, and plot it:
 
 ```{code-cell} ipython3
 subset = (
@@ -121,7 +120,7 @@ subset = (
     & (oci_bbp["latitude"] >= 33.8)
     & (oci_bbp["latitude"] <= 34.5)
 )
-oci_bbp = oci_bbp.where(subset & (oci_bbp > 0))
+oci_bbp = oci_bbp.where(subset & (oci_bbp >= 0))
 oci_bbp
 ```
 
@@ -161,7 +160,7 @@ Higher `bbp_442` values are observed along the coast, indicating greater particu
 
 +++
 
-Now let's access data collected from one of the aircraft flown during PACE-PAX. A Twin Otter airplane from the Center for Interdisciplinary Remotely Piloted Aircraft Studies (CIRPAS) at the Naval Postgraduate School in Monterey, CA, collected data on aerosol particles in the atmosphere. We will use the aerosol backscattering coefficient at 532 nm, measured under ambient relative humidity, temperature, and pressure, represented by the variable `fine_amb_back_coef`, produced by the In Situ Aerosol Retrieval Algorithm (ISARA). 
+Now let's access data collected from one of the aircraft flown during PACE-PAX. A Twin Otter airplane from the Center for Interdisciplinary Remotely Piloted Aircraft Studies (CIRPAS) at the Naval Postgraduate School in Monterey, CA, collected data on aerosol particles in the atmosphere. We will use the aerosol backscattering coefficient at 532 nm, measured under ambient relative humidity, temperature, and pressure, represented by the variable `fine_amb_back_coef`, produced by the In Situ Aerosol Retrieval Algorithm (ISARA).
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
@@ -177,42 +176,32 @@ twinotter_paths = earthaccess.open(results)
 
 ```{code-cell} ipython3
 twinotter_dt = xr.open_datatree(twinotter_paths[-1])
-twinotter_ds = xr.merge(twinotter_dt.to_dict().values())
-twinotter_ds
+
+twinotter_bbp = twinotter_dt["derived"]["fine_amb_back_coef"].sel({"wavelength": 532})
+for item in ("longitude", "latitude", "altitude"):
+    source_name = "GPS_Altitude_BUCHOLTZ" if item == "altitude" else f"{item.capitalize()}_BUCHOLTZ"
+    twinotter_bbp[item] = twinotter_dt["source"][source_name]
+
+twinotter_bbp
 ```
 
 Let's filter out the data collected when the aircraft was flying in a spiral:
 
 ```{code-cell} ipython3
-twinotter_lat = twinotter_ds["Latitude_BUCHOLTZ"].values
-twinotter_lon = twinotter_ds["Longitude_BUCHOLTZ"].values
+twinotter_lat = twinotter_bbp["latitude"]
+twinotter_lon = twinotter_bbp["longitude"]
 # Scale altitude for plotting
-twinotter_alt = twinotter_ds["GPS_Altitude_BUCHOLTZ"].values / 10
+twinotter_alt = twinotter_bbp["altitude"] / 10
 
-twinotter_bbp = np.where(
-    np.isfinite(twinotter_ds["fine_amb_back_coef"].values),
-    twinotter_ds["fine_amb_back_coef"].values,
-    np.nan,
-)
-
-wv_idx = np.where(twinotter_ds["wavelength"].values == 532)[0][0]
-
-track = (
+spiral = (
     (twinotter_lon >= -120.5)
     & (twinotter_lon <= -119.0)
     & (twinotter_lat >= 34.1)
     & (twinotter_lat <= 34.5)
 )
 
-twinotter_bbp = twinotter_bbp[track, wv_idx]
-
-valid = np.isfinite(twinotter_bbp)
-twinotter_lon_track = twinotter_lon[track][valid]
-twinotter_lat_track = twinotter_lat[track][valid]
-twinotter_alt_track = twinotter_alt[track][valid]
-twinotter_bbp = twinotter_bbp[valid]
-
-print(twinotter_bbp.shape)
+twinotter_bbp = twinotter_bbp.where(spiral, drop=True)
+twinotter_bbp
 ```
 
 And use this to plot the flight track and vertical profile:
@@ -221,8 +210,8 @@ And use this to plot the flight track and vertical profile:
 fig, axs = plt.subplots(1, 2, figsize=(10, 4))
 
 sc1 = axs[0].scatter(
-    twinotter_lon_track,
-    twinotter_lat_track,
+    twinotter_bbp["longitude"],
+    twinotter_bbp["latitude"],
     c=twinotter_bbp,
     s=20,
     cmap="plasma_r",
@@ -235,8 +224,8 @@ axs[0].axis("equal")
 
 
 sc2 = axs[1].scatter(
-    twinotter_lon_track,
-    twinotter_alt_track,
+    twinotter_bbp["longitude"],
+    twinotter_bbp["altitude"],
     c=twinotter_bbp,
     s=20,
     cmap="plasma_r",
@@ -265,74 +254,56 @@ Note that the ISARA data are still being reprocessed, and ongoing changes may af
 
 The High Spectral Resolution Lidar 2 (HSRL-2) instrument was flown aboard NASA's high altitude Earth Resources 2 (ER-2) aircraft to characterize atmospheric aerosol particles. We will use the aerosol backscatter coefficient measured at 532 nm.
 
+We'll open the file containing 'R1' indicating 'Revision 1', which contains the most up-to-date data.
+
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE-PAX_AircraftRemoteSensing_ER2_HSRL2_Data",
     temporal=tspan,
-    granule_name="*.h5",
+    granule_name="*R1*.h5",
 )
 len(results)
 ```
-
-We'll open the file ending in 'R1', which indicates 'Revision 1', the contains the most up-to-date data.
 
 ```{code-cell} ipython3
 hsrl_paths = earthaccess.open(results)
 ```
 
+We will open this file using `phony_dims='sort'`. This is due to the NetCDF file containing groups or variables that reference dimensions that are not explicitly defined in the file. `phony_dims='sort'` creates phony dimensions in a sorted, more deterministic way to better reproduce NetCDF dimension behavior.
+
 ```{code-cell} ipython3
-hslr_dt = xr.open_datatree(hsrl_paths[1], phony_dims="sort")
+hslr_dt = xr.open_datatree(hsrl_paths[-1], phony_dims='sort')
 hslr_dt
 ```
 
-Let's filter the data to a specific geographic location and time:
+Let's filter the data to a specific geographic location and time. We'll restrict altitude to lowest 1 km (scaled by 10 for plotting). We will select the `532_bsc_cloud_screened` variable, convert values to Mm⁻¹ sr⁻¹, and mask values > -0.01:
 
 ```{code-cell} ipython3
-lidar_lat = hslr_dt["lat"]
-lidar_lon = hslr_dt["lon"]
-lidar_alt = hslr_dt["z"]
-lidar_time = hslr_dt["time"]
-lidar_bbp = hslr_dt["DataProducts"]["532_bsc_cloud_screened"]
-
-track = (
-    (lidar_time >= np.datetime64("2024-09-26T19:32:24"))
-    & (lidar_time <= np.datetime64("2024-09-26T19:38:24"))
-    & (lidar_lon >= -120.2)
-    & (lidar_lon <= -119.0)
-    & (lidar_lat >= 34.1)
-    & (lidar_lat <= 34.5)
+track_time = (
+    (hslr_dt["time"] >= np.datetime64("2024-09-26T19:32:24"))
+    & (hslr_dt["time"] <= np.datetime64("2024-09-26T19:38:24"))
+    & (hslr_dt["lon"] >= -120.2)
+    & (hslr_dt["lon"] <= -119.0)
+    & (hslr_dt["lat"] >= 34.1)
+    & (hslr_dt["lat"] <= 34.5)
 )
 
-lidar_lon = lidar_lon[track]
-lidar_lat = lidar_lat[track]
+track_z = (hslr_dt["z"] > 0) & (hslr_dt["z"] <= 1000)
+track = track_time & track_z
+
+lidar_bbp = hslr_dt["DataProducts"]["532_bsc_cloud_screened"].where(track, drop=True)
+lidar_bbp = (lidar_bbp.where(lidar_bbp > -0.01) * 1000).T
+lidar_lon = hslr_dt["lon"].where(track_time, drop=True)
+lidar_lat = hslr_dt["lat"].where(track_time, drop=True)
+lidar_alt = lidar_bbp["z"] / 10
 ```
 
-And convert values to Mm⁻¹ sr⁻¹ and mask invalid values:
-
-```{code-cell} ipython3
-lidar_bbp = lidar_bbp[track, :] * 1000
-lidar_bbp = np.where(lidar_bbp > -0.01, lidar_bbp, np.nan)
-```
-
-We'll restrict the data to the lowest 1 km of altitude (scaled by 10 for plotting):
-
-```{code-cell} ipython3
-alt_mask = (lidar_alt > 0) & (lidar_alt <= 1000)
-lidar_alt = lidar_alt[alt_mask] / 10
-lidar_bbp = lidar_bbp[:, alt_mask]
-```
-
-And then build the lidar aerosol backscatter curtain:
+Let's build the 3D curtain for the multidimensional plot below:
 
 ```{code-cell} ipython3
 X_lidar, Z_lidar = np.meshgrid(lidar_lon, lidar_alt)
 Y_lidar, _ = np.meshgrid(lidar_lat, lidar_alt)
-
-lidar_bbp = lidar_bbp.T
 Z_lidar = np.where(np.isnan(lidar_bbp), np.nan, Z_lidar)
-
-lidar_cmin = np.nanmin(lidar_bbp)
-lidar_cmax = np.nanmax(lidar_bbp)
 ```
 
 And plot it!
@@ -346,8 +317,8 @@ pcm = ax.pcolormesh(
     lidar_bbp,
     shading="auto",
     cmap="inferno_r",
-    vmin=lidar_cmin,
-    vmax=lidar_cmax,
+    vmin=lidar_bbp.min(),
+    vmax=lidar_bbp.max(),
 )
 
 cbar = fig.colorbar(pcm, ax=ax)
@@ -419,17 +390,14 @@ for file in shearwater_paths:
                 "time (GMT)": time,
                 "latitude": station_lat,
                 "longitude": station_lon,
-                "depth": df["depth"].values,
-                "bbp440": df["bbp440"].values,
+                "depth": df["depth"],
+                "bbp440": df["bbp440"],
             }
         )
 
         profiles.append(profile)
 
 shearwater_df = pd.concat(profiles, ignore_index=True)
-shearwater_lat = shearwater_df["latitude"].values
-shearwater_lon = shearwater_df["longitude"].values
-shearwater_depths = shearwater_df["depth"].values
 shearwater_df.head()
 ```
 
@@ -438,18 +406,15 @@ And we can now plot the vertical profiles of particulate backscattering at 440 n
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(5, 6))
 
-for (lat, lon), group in shearwater_df.groupby(["latitude", "longitude"]):
-
-    sc = ax.scatter(
-        np.full(len(group), lon),
-        group["depth"],
-        c=group["bbp440"],
-        s=35,
-        cmap="viridis",
-    )
+sc = ax.scatter(
+    shearwater_df["longitude"],
+    shearwater_df["depth"],
+    c=shearwater_df["bbp440"],
+    s=35,
+    cmap="viridis",
+)
 
 ax.invert_yaxis()
-
 ax.set_xlabel("Longitude")
 ax.set_ylabel("Depth (m)")
 ax.set_title(r"R/V Shearwater SC6 $b_{bp}(440)$ profiles")
@@ -488,31 +453,24 @@ glider_df = pd.DataFrame(glider_data.data)
 glider_df.head()
 ```
 
-Let's filter out glider data from a specified date and location and keep only positive values:
+Let's filter out glider data for a specified date and location and keep only positive `bbp532` values:
 
 ```{code-cell} ipython3
-glider_subset = glider_df[
+mask = (
     (glider_df["date"] == 20240926)
-    & (glider_df["lon"] >= -120.5)
-    & (glider_df["lon"] <= -119.0)
-    & (glider_df["lat"] >= 33.8)
-    & (glider_df["lat"] <= 34.5)
-]
+    & glider_df["lon"].between(-120.5, -119.0)
+    & glider_df["lat"].between(33.8, 34.5)
+    & (glider_df["bbp532"] > 0)
+)
 
-glider_lon = glider_subset["lon"].values
-glider_lat = glider_subset["lat"].values
+glider_subset = glider_df.loc[mask]
 
-glider_depth = -np.abs(glider_subset["depth"].values)
-glider_bbp = glider_subset["bbp532"].values
+glider_lon = glider_subset["lon"]
+glider_lat = glider_subset["lat"]
+glider_depth = -glider_subset["depth"].abs()
+glider_bbp = glider_subset["bbp532"]
 
-valid = glider_bbp > 0
-
-glider_lon = glider_lon[valid]
-glider_lat = glider_lat[valid]
-glider_depth = glider_depth[valid]
-glider_bbp = glider_bbp[valid]
-
-glider_bbp.shape
+print(glider_bbp.shape)
 ```
 
 And we can plot `bbp(532)` along the glider's track as it descended and ascended throughout the day:
@@ -539,7 +497,7 @@ plt.show()
 
 +++
 
-Now, let's plot all this data together in a multi-dimensional plot: 
+Now, let's plot all this data together in a multi-dimensional plot:
 
 ```{code-cell} ipython3
 pio.renderers.default = "notebook"
@@ -581,9 +539,9 @@ fig.add_trace(
 # --- Shearwater Profile ---
 fig.add_trace(
     go.Scatter3d(
-        x=shearwater_lon,
-        y=shearwater_lat,
-        z=-np.abs(shearwater_depths),
+        x=shearwater_df["longitude"],
+        y=shearwater_df["latitude"],
+        z=-np.abs(shearwater_df["depth"]),
         mode="markers",
         marker=dict(
             size=3,
@@ -611,7 +569,7 @@ fig.add_trace(
             colorscale="Viridis",
             showscale=False,
             cmin=ocean_cmin,
-            cmax=np.nanmax(glider_bbp),
+            cmax=glider_bbp.max(),
         ),
         line=dict(color="lightgray", width=2),
         name="Glider Track",
@@ -644,12 +602,13 @@ fig.add_trace(
     )
 )
 
+
 # --- Twin Otter Flight Path ---
 fig.add_trace(
     go.Scatter3d(
-        x=twinotter_lon_track,
-        y=twinotter_lat_track,
-        z=twinotter_alt_track,
+        x=twinotter_bbp["longitude"],
+        y=twinotter_bbp["latitude"],
+        z=twinotter_bbp["altitude"],
         mode="markers",
         marker=dict(
             size=3,
