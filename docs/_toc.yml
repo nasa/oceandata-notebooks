@@ -67,6 +67,8 @@ parts:
             title: SPEXone Aerosols (RemoTAP)
           - file: notebooks/harp2/harp2_l2_cloud_gpc_product
             title: Clouds from PACE-HARP2
+          - file: notebooks/oci/oci_l2_cloud_product.md
+            title: Clouds from PACE-OCI
           - file: notebooks/oci/oci_no2
             title: Nitrogen Dioxide from PACE-OCI
 
