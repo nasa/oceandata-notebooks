@@ -353,49 +353,48 @@ results = earthaccess.search_data(
 len(results)
 ```
 
-```{code-cell} ipython3
-shearwater_paths = earthaccess.open(results)
-```
-
-These granules each reference multiple files containing data for that granule.
+These granules each reference multiple files containing data for that granule. One file for each granule ends in `.sb` rather than `tgz.sb`, indicating that it is a SeaBASS file. We want to extract the other data URLs.
 
 ```{code-cell} ipython3
-for file in shearwater_paths:
-    print(getattr(file, "full_name", None) or file.name)
+urls = []
+for item in results:
+    urls += [i for i in item.data_links() if not i.endswith(".tgz.sb")]
+urls
 ```
 
-One file for each granule ends in `.sb` rather than `tgz.sb`, indicating that it is a SeaBASS file. SeaBASS files can be opened using the `seabass_utils` library, which we imported above as `sb`. The `sb_read()` function reads the SeaBASS file, which can be opened as a `pd.DataFrame`.
+```{code-cell} ipython3
+shearwater_paths = earthaccess.open(urls)
+```
 
-Station information is extracted from header metadata and added as DataFrame columns:
+SeaBASS files can be read using the `seabass_utils` library, which we imported above as `sb`. The `sb_read()` function reads the SeaBASS file, which can be opened as a `pd.DataFrame`.
+
+Station information is extracted from header metadata and added as `pd.DataFrame` columns:
 
 ```{code-cell} ipython3
 profiles = []
 
 for file in shearwater_paths:
-    file_path = file.path if hasattr(file, "path") else str(file)
+    sb_data = sb.sb_read(file, no_warn=True)
+    df = pd.DataFrame(sb_data.data)
+    header = sb_data.headers
 
-    if file_path.endswith(".sb") and not file_path.endswith(".tgz.sb"):
-        sb_data = sb.sb_read(file, no_warn=True)
-        df = pd.DataFrame(sb_data.data)
-        header = sb_data.headers
+    station_lat = float(header["north_latitude"].split("[")[0])
+    station_lon = float(header["east_longitude"].split("[")[0])
+    date = header["start_date"]
+    time = header["start_time"].split("[")[0]
 
-        station_lat = float(header["north_latitude"].split("[")[0])
-        station_lon = float(header["east_longitude"].split("[")[0])
-        date = header["start_date"]
-        time = header["start_time"].split("[")[0]
+    profile = pd.DataFrame(
+        {
+            "date": date,
+            "time (GMT)": time,
+            "latitude": station_lat,
+            "longitude": station_lon,
+            "depth": df["depth"].values,
+            "bbp440": df["bbp440"].values,
+        }
+    )
 
-        profile = pd.DataFrame(
-            {
-                "date": date,
-                "time (GMT)": time,
-                "latitude": station_lat,
-                "longitude": station_lon,
-                "depth": df["depth"],
-                "bbp440": df["bbp440"],
-            }
-        )
-
-        profiles.append(profile)
+    profiles.append(profile)
 
 shearwater_df = pd.concat(profiles, ignore_index=True)
 shearwater_df.head()
