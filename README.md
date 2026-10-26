@@ -21,6 +21,18 @@ Note that our [CONTRIBUTING](CONTRIBUTING.md) guide is primarily of use to team 
 
 [team]: https://nasa.github.io/oceandata-notebooks/team.html
 
+### Create a New Notebook
+
+> [!NOTE]
+> 
+> - Create new notebooks by copying `COPYME.ipynb` into a suitable location within the top-level `notebooks` folder.
+> - `COPYME.ipynb` also serves as a detailed style guide, maintaining consistency between notebooks
+> - When you save your new notebook, watch for a new markdown file to appear in the `docs/notebooks` folder and add that file to a commit.
+
+Notebooks submitted to the Help Hub should follow the style guide as closely as possible to ensure a polished and consistent look for all published material. Reviewers should also reference the guide when editing submitted content. The timeline for reviews is expected to be around 2 weeks. 
+
+If your new saved notebook does not appear as a markdown file in the appropriate `docs/notebooks` folder, see the section below on how to sync Jupyter Notebook and MyST markdown files.
+
 ### Editing MyST Markdown
 
 > [!IMPORTANT]
@@ -43,14 +55,6 @@ jupytext --sync $(git ls-files docs/notebooks)
 ```
 
 [Jupytext]: https://jupytext.readthedocs.io/
-
-### Create a New Notebook
-
-> [!NOTE]
-> 
-> Create new notebooks by copying `COPYME.ipynb` into a suitable location within the top-level `notebooks` folder.
-
-When you save your new notebook, watch for a new markdown file to appear in the `docs/notebooks` folder and add that file to a commit.
 
 ## How to Cite
 
