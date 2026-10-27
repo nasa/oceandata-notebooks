@@ -39,9 +39,9 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 The PACE Postlaunch Airborne eXperiment ([PACE-PAX](https://pace.oceansciences.org/pace-pax.htm)) was a field campaign conducted in September 2024 in California and adjacent coastal areas. PACE-PAX brought together airborne and ship-based in situ observations to collect complementary atmospheric and oceanic measurements for the validation of observations from NASA's PACE mission.
 
-All [PACE-PAX datasets](https://www.earthdata.nasa.gov/data/projects/pace-pax) are publicly available through the NASA Earthdata Cloud. This tutorial demonstrates how to access multiple PACE-PAX datasets, combine observations from different platforms, and create integrated visualizations to explore coupled atmosphere–ocean processes. This tutorial generates a multi-panel figure corresponding to Figure 9 in [Knobelspiesse et al. (in review).](https://doi.org/10.5194/essd-2026-541)
+All [PACE-PAX datasets](https://www.earthdata.nasa.gov/data/projects/pace-pax) are publicly available through the NASA Earthdata Cloud. This tutorial demonstrates how to access multiple PACE-PAX datasets, combine observations from different platforms, and create integrated visualizations to explore coupled atmosphere–ocean processes. This tutorial generates a multi-platform figure corresponding to Figure 9 in [Knobelspiesse et al. (in review).](https://doi.org/10.5194/essd-2026-541).
 
-We will use the `seabass-utils` Python library to read in some of the PACE-PAX data. The SeaWiFS Bio-optical Archive and Storage System [(SeaBASS)](sb) is a publicly shared archive of in situ oceanographic and atmospheric data maintained by the NASA Ocean Biology Processing Group (OBPG). `seabass-utils` is a collection of Python functions developed to assist with SeaBASS data processing, file manipulation, and mapping tasks, originally developed at NASA Goddard Space Flight Center (GSFC).
+We will use the `seabass-utils` Python library to read in some of the PACE-PAX data. The SeaWiFS Bio-optical Archive and Storage System [(SeaBASS)](sb) is a public archive of in situ oceanographic and atmospheric data maintained by the Ocean Biology Processing Group (OBPG) at NASA Goddard Space Flight Center (GSFC). `seabass-utils` is a collection of Python functions, also developed by the OBPG, to assist with SeaBASS data processing, file manipulation, and mapping tasks.
 
 [sb]: https://seabass.gsfc.nasa.gov/
 
@@ -50,7 +50,7 @@ We will use the `seabass-utils` Python library to read in some of the PACE-PAX d
 At the end of this notebook you will be able to:
 
 - Access PACE-PAX datasets from the NASA Earthdata Cloud
-- Read and explore PACE-PAX datasets using SeaBASS Python tools
+- Read and explore PACE-PAX datasets from SeaBASS
 - Combine observations from multiple platforms into a single data fusion visualization
 - Explore coupled atmosphere–ocean observations collected during PACE-PAX
 
@@ -66,7 +66,6 @@ Begin by importing all of the packages used in this notebook. If you followed th
 import cartopy.crs as ccrs
 import earthaccess
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio
@@ -74,13 +73,13 @@ import seabass_utils as sb
 import xarray as xr
 ```
 
-Set your Earthdata Login credentials. You can add persist=True to save your credentials in a .netrc file, allowing you to authenticate automatically in the future sessions without re-entering your Earthdata credentials.
+Set your Earthdata Login credentials. You can add `persist=True` to save your credentials in plain text in a netrc file, allowing you to authenticate automatically in the future sessions without re-entering your Earthdata credentials.
 
 ```{code-cell} ipython3
 auth = earthaccess.login()
 ```
 
-## 2. Access PACE-OCI ocean particulate backscattering data
+## 2. Access PACE-OCI data
 
 +++
 
@@ -120,8 +119,8 @@ subset = (
     & (oci_bbp["latitude"] >= 33.8)
     & (oci_bbp["latitude"] <= 34.5)
 )
-oci_bbp = oci_bbp.where(subset & (oci_bbp >= 0))
-oci_bbp
+oci_bbp = oci_bbp.where(subset & (oci_bbp >= 0), drop=True)
+oci_bbp.sizes
 ```
 
 ```{code-cell} ipython3
@@ -129,19 +128,16 @@ crs = ccrs.PlateCarree()
 fig, ax = plt.subplots(figsize=(8, 6), subplot_kw={"projection": crs})
 
 oci_bbp.plot(
-    ax=ax,
     x="longitude",
     y="latitude",
     cmap="viridis",
     vmax=0.015,
-    cbar_kwargs={"shrink": 0.6},
+    cbar_kwargs={"shrink": 0.65},
+    ax=ax,
 )
 
 ax.coastlines(resolution="10m", linewidth=1)
-
-ax.set_extent([-120.5, -119.0, 33.8, 34.5], crs=crs)
-
-gl = ax.gridlines(
+ax.gridlines(
     draw_labels={"bottom": True, "left": True, "top": False, "right": False},
     xlocs=plt.MaxNLocator(5),
     ylocs=plt.MaxNLocator(5),
@@ -156,7 +152,7 @@ Higher `bbp_442` values are observed along the coast, indicating greater particu
 
 +++
 
-## 3. Access aircraft aerosol particle backscattering data
+## 3. Access airborne optical data
 
 +++
 
@@ -171,37 +167,30 @@ len(results)
 ```
 
 ```{code-cell} ipython3
-twinotter_paths = earthaccess.open(results)
+isara_paths = earthaccess.open(results)
 ```
 
 ```{code-cell} ipython3
-twinotter_dt = xr.open_datatree(twinotter_paths[-1])
-
-twinotter_bbp = twinotter_dt["derived"]["fine_amb_back_coef"].sel({"wavelength": 532})
+isara_dt = xr.open_datatree(isara_paths[-1])
+isara_bbp = isara_dt["derived"]["fine_amb_back_coef"].sel({"wavelength": 532})
 for item in ("longitude", "latitude", "altitude"):
     source_name = "GPS_Altitude_BUCHOLTZ" if item == "altitude" else f"{item.capitalize()}_BUCHOLTZ"
-    twinotter_bbp[item] = twinotter_dt["source"][source_name]
-
-twinotter_bbp
+    isara_bbp[item] = isara_dt["source"][source_name]    
+isara_bbp
 ```
 
-Let's filter out the data collected when the aircraft was flying in a spiral:
+Let's subset the data collected when the aircraft was flying in a spiral below 1 km:
 
 ```{code-cell} ipython3
-twinotter_lat = twinotter_bbp["latitude"]
-twinotter_lon = twinotter_bbp["longitude"]
-# Scale altitude for plotting
-twinotter_alt = twinotter_bbp["altitude"] / 10
-
-spiral = (
-    (twinotter_lon >= -120.5)
-    & (twinotter_lon <= -119.0)
-    & (twinotter_lat >= 34.1)
-    & (twinotter_lat <= 34.5)
+subset = (
+    (isara_bbp["longitude"] >= -120.5)
+    & (isara_bbp["longitude"] <= -119.0)
+    & (isara_bbp["latitude"] >= 34.1)
+    & (isara_bbp["latitude"] <= 34.5)
+    & (isara_bbp["altitude"] <= 1000)
 )
-
-twinotter_bbp = twinotter_bbp.where(spiral, drop=True)
-twinotter_bbp
+isara_bbp = isara_bbp.where(subset, drop=True)
+isara_bbp.sizes
 ```
 
 And use this to plot the flight track and vertical profile:
@@ -209,12 +198,16 @@ And use this to plot the flight track and vertical profile:
 ```{code-cell} ipython3
 fig, axs = plt.subplots(1, 2, figsize=(10, 4))
 
+cmap = plt.colormaps["plasma_r"].copy()
+cmap.set_bad("gray")
+
 sc1 = axs[0].scatter(
-    twinotter_bbp["longitude"],
-    twinotter_bbp["latitude"],
-    c=twinotter_bbp,
+    isara_bbp["longitude"],
+    isara_bbp["latitude"],
+    c=isara_bbp,
     s=20,
-    cmap="plasma_r",
+    cmap=cmap,
+    plotnonfinite=True,
 )
 
 axs[0].set_xlabel("Longitude")
@@ -222,13 +215,13 @@ axs[0].set_ylabel("Latitude")
 axs[0].set_title("Twin Otter Flight Track")
 axs[0].axis("equal")
 
-
 sc2 = axs[1].scatter(
-    twinotter_bbp["longitude"],
-    twinotter_bbp["altitude"],
-    c=twinotter_bbp,
+    isara_bbp["longitude"],
+    isara_bbp["altitude"],
+    c=isara_bbp,
     s=20,
-    cmap="plasma_r",
+    cmap=cmap,
+    plotnonfinite=True,
 )
 
 axs[1].set_xlabel("Longitude")
@@ -248,7 +241,7 @@ Note that the ISARA data are still being reprocessed, and ongoing changes may af
 
 +++
 
-## 4. Access Aircraft High Spectral Resolution Lidar 2 (HSRL-2) data
+## 4. Access airborne lidar data
 
 +++
 
@@ -266,69 +259,69 @@ len(results)
 ```
 
 ```{code-cell} ipython3
-hsrl_paths = earthaccess.open(results)
+hsrl2_paths = earthaccess.open(results)
 ```
 
 We will open this file using `phony_dims='sort'`. This is due to the NetCDF file containing groups or variables that reference dimensions that are not explicitly defined in the file. `phony_dims='sort'` creates phony dimensions in a sorted, more deterministic way to better reproduce NetCDF dimension behavior.
 
 ```{code-cell} ipython3
-hslr_dt = xr.open_datatree(hsrl_paths[-1], phony_dims='sort')
-hslr_dt
+hsrl2_dt = xr.open_datatree(hsrl2_paths[-1], phony_dims='sort')
+hsrl2_dt
 ```
 
-Let's filter the data to a specific geographic location and time. We'll restrict altitude to lowest 1 km (scaled by 10 for plotting). We will select the `532_bsc_cloud_screened` variable, convert values to Mm⁻¹ sr⁻¹, and mask values > -0.01:
+We select the `532_bsc_cloud_screened` variable and manually merge the auxiliary coordinates for longitude and latitude with the `xarray.DataArray` holding the backscatter coefficient.
 
 ```{code-cell} ipython3
-track_time = (
-    (hslr_dt["time"] >= np.datetime64("2024-09-26T19:32:24"))
-    & (hslr_dt["time"] <= np.datetime64("2024-09-26T19:38:24"))
-    & (hslr_dt["lon"] >= -120.2)
-    & (hslr_dt["lon"] <= -119.0)
-    & (hslr_dt["lat"] >= 34.1)
-    & (hslr_dt["lat"] <= 34.5)
+hsrl2_bbp = hsrl2_dt["DataProducts"]["532_bsc_cloud_screened"]
+for item in ("lon", "lat"):
+    hsrl2_bbp[item] = hsrl2_dt[item]
+hsrl2_bbp
+```
+
+We need to subset the data to a specific geographic location, altitude, and time.
+Both altitude and time are dimension coordinates, so we can extract the subset by slicing these coordinates. We restrict altitude from the surface to 1 km, and times within our time span of interest. This is a much reduced slice of the original data.
+
+```{code-cell} ipython3
+hsrl2_bbp = hsrl2_bbp.sel(
+    {
+        "time": slice("2024-09-26T19:32:24", "2024-09-26T19:38:24"),
+        "z": slice(0, 1000),
+    },
 )
-
-track_z = (hslr_dt["z"] > 0) & (hslr_dt["z"] <= 1000)
-track = track_time & track_z
-
-lidar_bbp = hslr_dt["DataProducts"]["532_bsc_cloud_screened"].where(track, drop=True)
-lidar_bbp = (lidar_bbp.where(lidar_bbp > -0.01) * 1000).T
-lidar_lon = hslr_dt["lon"].where(track_time, drop=True)
-lidar_lat = hslr_dt["lat"].where(track_time, drop=True)
-lidar_alt = lidar_bbp["z"] / 10
+hsrl2_bbp.sizes
 ```
 
-Let's build the 3D curtain for the multidimensional plot below:
+Since we cannot slice on any auxiliary coordinates lacking an index, we must mask the backscatter coefficients for our geographic subsetting.
 
 ```{code-cell} ipython3
-X_lidar, Z_lidar = np.meshgrid(lidar_lon, lidar_alt)
-Y_lidar, _ = np.meshgrid(lidar_lat, lidar_alt)
-Z_lidar = np.where(np.isnan(lidar_bbp), np.nan, Z_lidar)
+subset = (
+    (hsrl2_bbp["lon"] >= -120.2)
+    & (hsrl2_bbp["lon"] <= -119.0)
+    & (hsrl2_bbp["lat"] >= 34.1)
+    & (hsrl2_bbp["lat"] <= 34.5)
+)
+hsrl2_bbp = hsrl2_bbp.where(subset, drop=True)
+hsrl2_bbp.sizes
 ```
 
-And plot it!
+Now we are ready to visualize the lidar curtain as seen by the ER-2!
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(8, 4))
 
-pcm = ax.pcolormesh(
-    lidar_lon,
-    lidar_alt,
-    lidar_bbp,
-    shading="auto",
+pcm = hsrl2_bbp.plot.imshow(
+    x="lon",
+    y="z",
     cmap="inferno_r",
-    vmin=lidar_bbp.min(),
-    vmax=lidar_bbp.max(),
+    vmin=hsrl2_bbp.min(),
+    vmax=hsrl2_bbp.max(),
+    ax=ax,
+    cbar_kwargs={"label": "532 nm Backscatter [Mm$^{-1}$ sr$^{-1}$]"}
 )
 
-cbar = fig.colorbar(pcm, ax=ax)
-cbar.set_label(r"532 nm Backscatter (Mm$^{-1}$ sr$^{-1}$)")
-
 ax.set_xlabel("Longitude")
-ax.set_ylabel("Altitude (×10 m)")
 ax.set_title("HSRL-2 Aerosol Backscatter Curtain")
 
-plt.tight_layout()
 plt.show()
 ```
 
@@ -336,7 +329,7 @@ Notice higher aerosol backscatter at lower altitudes.
 
 +++
 
-## 5. Access in situ ocean particle backscattering data
+## 5. Access ship cast data
 
 +++
 
@@ -346,14 +339,14 @@ Let's open the SC6 data collected on Sep 26th:
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    temporal=tspan,
     short_name="PACE-PAX",
+    temporal=tspan,
     granule_name="*Shearwater*SC6026*",
 )
 len(results)
 ```
 
-These granules each reference multiple files containing data for that granule. One file for each granule ends in `.sb` rather than `tgz.sb`, indicating that it is a SeaBASS file. We want to extract the other data URLs.
+These granules each reference multiple files containing data for that granule. At least one file for each granule is a plain `.sb`, rather than a `.tgz.sb`, indicating that it is a SeaBASS file.
 
 ```{code-cell} ipython3
 urls = []
@@ -363,41 +356,38 @@ urls
 ```
 
 ```{code-cell} ipython3
-shearwater_paths = earthaccess.open(urls)
+sc6_paths = earthaccess.open(urls)
 ```
 
-SeaBASS files can be read using the `seabass_utils` library, which we imported above as `sb`. The `sb_read()` function reads the SeaBASS file, which can be opened as a `pd.DataFrame`.
+SeaBASS files can be read using the `seabass_utils` library, which we imported above as `sb`. The `sb_read()` function reads the SeaBASS file into a dictionary that `pandas` converts into a `DataFrame`.
 
-Station information is extracted from header metadata and added as `pd.DataFrame` columns:
+Station information is extracted from header metadata and added as `pandas.DataFrame` columns:
 
 ```{code-cell} ipython3
-profiles = []
+sc6_bbp = []
 
-for file in shearwater_paths:
-    sb_data = sb.sb_read(file, no_warn=True)
-    df = pd.DataFrame(sb_data.data)
-    header = sb_data.headers
+for file in sc6_paths:
+    data = sb.sb_read(file, no_warn=True)
+    df = pd.DataFrame(data.data)
+    headers = data.headers
 
-    station_lat = float(header["north_latitude"].split("[")[0])
-    station_lon = float(header["east_longitude"].split("[")[0])
-    date = header["start_date"]
-    time = header["start_time"].split("[")[0]
+    lat = float(headers["north_latitude"].split("[")[0])
+    lon = float(headers["east_longitude"].split("[")[0])
+    date = headers["start_date"]
+    time = headers["start_time"].split("[")[0]
 
-    profile = pd.DataFrame(
-        {
+    bbp = df[["depth", "bbp440"]].assign(
+        **{
             "date": date,
-            "time (GMT)": time,
-            "latitude": station_lat,
-            "longitude": station_lon,
-            "depth": df["depth"].values,
-            "bbp440": df["bbp440"].values,
+            "time": time,
+            "latitude": lat,
+            "longitude": lon,
         }
     )
+    sc6_bbp.append(bbp)
 
-    profiles.append(profile)
-
-shearwater_df = pd.concat(profiles, ignore_index=True)
-shearwater_df.head()
+sc6_bbp = pd.concat(sc6_bbp, ignore_index=True)
+sc6_bbp.head()
 ```
 
 And we can now plot the vertical profiles of particulate backscattering at 440 nm (`bbp440`):
@@ -406,9 +396,9 @@ And we can now plot the vertical profiles of particulate backscattering at 440 n
 fig, ax = plt.subplots(figsize=(5, 6))
 
 sc = ax.scatter(
-    shearwater_df["longitude"],
-    shearwater_df["depth"],
-    c=shearwater_df["bbp440"],
+    sc6_bbp["longitude"],
+    sc6_bbp["depth"],
+    c=sc6_bbp["bbp440"],
     s=35,
     cmap="viridis",
 )
@@ -416,60 +406,53 @@ sc = ax.scatter(
 ax.invert_yaxis()
 ax.set_xlabel("Longitude")
 ax.set_ylabel("Depth (m)")
-ax.set_title(r"R/V Shearwater SC6 $b_{bp}(440)$ profiles")
+ax.set_title("R/V Shearwater SC6 $b_{bp}(440)$ profiles")
 
 cbar = plt.colorbar(sc, ax=ax)
-cbar.set_label(r"$b_{bp}(440)$ (m$^{-1}$)")
+cbar.set_label("$b_{bp}(440)$ (m$^{-1}$)")
 
 plt.tight_layout()
 plt.show()
 ```
 
-## 6. Access glider backscattering data
+## 6. Access ocean glider data
 
 +++
 
-An autonomous ocean glider was also deployed along a 10 km transect for 25 days. The glider was equipped with optical sensors that measured particulate backscatter at 532 nm.
+An autonomous ocean glider was also deployed along a 10 km transect for 25 days. The glider was equipped with a Seabird ECO Triplet optical sensor that measured particulate backscatter at 532 nm.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
-    temporal=tspan,
     short_name="PACE-PAX",
+    temporal=tspan,
     granule_name="*glider*bbp*",
 )
 len(results)
 ```
 
 ```{code-cell} ipython3
-glider_paths = earthaccess.open(results)
+eco_paths = earthaccess.open(results)
 ```
 
 We will use `sb.read()` to open this data as well:
 
 ```{code-cell} ipython3
-glider_data = sb.sb_read(glider_paths[0], no_warn=True)
-glider_df = pd.DataFrame(glider_data.data)
-glider_df.head()
+eco_data = sb.sb_read(eco_paths[0], no_warn=True)
+eco_df = pd.DataFrame(eco_data.data)
+eco_df.head()
 ```
 
 Let's filter out glider data for a specified date and location and keep only positive `bbp532` values:
 
 ```{code-cell} ipython3
-mask = (
-    (glider_df["date"] == 20240926)
-    & glider_df["lon"].between(-120.5, -119.0)
-    & glider_df["lat"].between(33.8, 34.5)
-    & (glider_df["bbp532"] > 0)
+subset = (
+    (eco_df["date"] == 20240926)
+    & eco_df["lon"].between(-120.5, -119.0)
+    & eco_df["lat"].between(33.8, 34.5)
 )
 
-glider_subset = glider_df.loc[mask]
-
-glider_lon = glider_subset["lon"]
-glider_lat = glider_subset["lat"]
-glider_depth = -glider_subset["depth"].abs()
-glider_bbp = glider_subset["bbp532"]
-
-print(glider_bbp.shape)
+eco_bbp = eco_df.loc[subset & (eco_df["bbp532"] > 0)]
+eco_bbp.shape
 ```
 
 And we can plot `bbp(532)` along the glider's track as it descended and ascended throughout the day:
@@ -478,25 +461,45 @@ And we can plot `bbp(532)` along the glider's track as it descended and ascended
 fig, ax = plt.subplots(figsize=(8, 5))
 
 sc = ax.scatter(
-    glider_lon, glider_depth, c=glider_bbp, s=15, cmap="viridis", vmax=0.004
+    eco_bbp["lon"],
+    eco_bbp["depth"],
+    c=eco_bbp["bbp532"],
+    s=15,
+    cmap="viridis",
+    vmax=0.004,
 )
 
+ax.invert_yaxis()
 ax.set_xlabel("Longitude")
-ax.set_ylabel("Depth (m)")
+ax.set_ylabel("Depth [m]")
 ax.set_title("PACE-PAX Glider $b_{bp}(532)$ on Sept 26 2024")
 
 cbar = plt.colorbar(sc, ax=ax)
-cbar.set_label(r"$b_{bp}(532)$ (m$^{-1}$)")
+cbar.set_label("$b_{bp}(532)$ [m$^{-1}$]")
 
 plt.tight_layout()
 plt.show()
 ```
 
-## 7. Multidimensional plot
+## 7. Muli-platform Visualization
 
 +++
 
-Now, let's plot all this data together in a multi-dimensional plot:
+In order to make all these data visually comparable, there are couple units discrepancies to smooth out. Ocean data use depth, which we'll standardize to a "z" variable consistent with the altitude as used by airborne platforms. Both are in meters, just different conventions for positive.
+
+```{code-cell} ipython3
+sc6_bbp["z"] = -sc6_bbp["depth"]
+eco_bbp["z"] = -eco_bbp["depth"]
+```
+
+The backscattering coefficients from the Twin Otter and ER-2 platforms are not the same units. We can convert the ER-2 platform's data to units of Mm$^{-1}$ sr$^{-1}$ for plotting together.
+
+```{code-cell} ipython3
+hsrl2_bbp = hsrl2_bbp * 1000
+hsrl2_bbp.attrs["units"] = "Mm-1.sr-1"
+```
+
+Now, we are able to show all this data together in one 3-dimensional plot:
 
 ```{code-cell} ipython3
 pio.renderers.default = "notebook"
@@ -504,232 +507,200 @@ pio.renderers.default = "notebook"
 fig = go.Figure()
 
 ocean_cmin = 0
-ocean_cmax = 0.01
+ocean_cmax = 0.015
+atmos_cmin = 0
+atmos_cmax = 4
 
-# --- PACE OCI bbp ---
+# --- PACE ---
 fig.add_trace(
     go.Surface(
-        x=oci_bbp.longitude,
-        y=oci_bbp.latitude,
-        z=oci_bbp,
+        x=oci_bbp["longitude"],
+        y=oci_bbp["latitude"],
+        z=oci_bbp.where(oci_bbp.isnull(), 0),
         surfacecolor=oci_bbp,
         colorscale="viridis",
-        name="PACE OCI surface bbp",
         showscale=True,
         opacity=0.8,
         cmin=ocean_cmin,
         cmax=ocean_cmax,
-        colorbar=dict(
-            title=dict(
-                text="Ocean b<sub>bp</sub>(λ) (m⁻¹)",
-                side="right",
-                font=dict(size=10),
-            ),
-            tickfont=dict(size=9),
-            x=0.84,
-            y=0.20,
-            len=0.25,
-            tickvals=[0, 0.002, 0.004, 0.006, 0.008, 0.01],
-            ticktext=["0", "0.002", "0.004", "0.006", "0.008", "0.01"],
-        ),
+        colorbar={
+            "title": {
+                "text": "Ocean b<sub>bp</sub>(λ) [m⁻¹]",
+                "side": "right",
+                "font": {"size": 10},
+            },
+            "tickfont": {"size": 9},
+            "x": 0.8,
+            "y": 0.2,
+            "len": 0.4,
+            "tickvals": [0, 0.002, 0.004, 0.006, 0.008, 0.01],
+            "ticktext": ["0", "0.002", "0.004", "0.006", "0.008", "0.01"],
+        },
     )
 )
 
-# --- Shearwater Profile ---
+# --- Shearwater ---
 fig.add_trace(
     go.Scatter3d(
-        x=shearwater_df["longitude"],
-        y=shearwater_df["latitude"],
-        z=-np.abs(shearwater_df["depth"]),
+        x=sc6_bbp["longitude"],
+        y=sc6_bbp["latitude"],
+        z=sc6_bbp["z"],
         mode="markers",
-        marker=dict(
-            size=3,
-            color=shearwater_df["bbp440"],
-            colorscale="viridis",
-            showscale=False,
-            cmin=ocean_cmin,
-            cmax=ocean_cmax,
-        ),
-        name="Shearwater Profile",
+        marker={
+            "size": 3,
+            "color": sc6_bbp["bbp440"],
+            "colorscale": "viridis",
+            "showscale": False,
+            "cmin": ocean_cmin,
+            "cmax": ocean_cmax,
+        },
     )
 )
 
-# --- Glider Track ---
+# --- Glider ---
 fig.add_trace(
     go.Scatter3d(
-        x=glider_lon,
-        y=glider_lat,
-        z=glider_depth,
+        x=eco_bbp["lon"],
+        y=eco_bbp["lat"],
+        z=eco_bbp["z"],
         mode="markers",
-        marker=dict(
-            symbol="square",
-            size=3,
-            color=glider_bbp,
-            colorscale="Viridis",
-            showscale=False,
-            cmin=ocean_cmin,
-            cmax=glider_bbp.max(),
-        ),
-        line=dict(color="lightgray", width=2),
-        name="Glider Track",
+        marker={
+            "symbol": "square",
+            "size": 3,
+            "color": eco_bbp["bbp532"],
+            "colorscale": "viridis",
+            "showscale": False,
+            "cmin": ocean_cmin,
+            "cmax": ocean_cmax,
+        },
+        line={"color": "lightgray", "width": 2},
     )
 )
 
-# --- HSRL Lidar Curtain ---
+# --- ER-2 ---
+x, y, z, c = xr.broadcast(hsrl2_bbp["lon"], hsrl2_bbp["lat"], hsrl2_bbp["z"], hsrl2_bbp)
 fig.add_trace(
     go.Surface(
-        x=X_lidar,
-        y=Y_lidar,
-        z=Z_lidar,
-        surfacecolor=lidar_bbp,
-        colorscale="Inferno_r",
-        name="HSRL-2 Lidar Curtain",
+        x=x,
+        y=y,
+        z=z.where(c.notnull()),
+        surfacecolor=c,
+        colorscale="inferno_r",
         showscale=True,
-        cmin=-0.009,
-        cmax=4.5,
-        colorbar=dict(
-            title=dict(
-                text="ER2 HSRL-2 aerosol <br> bbp(532) (Mm⁻¹sr⁻¹)",
-                side="right",
-                font=dict(size=10),
-            ),
-            tickfont=dict(size=9),
-            x=0.84,
-            y=0.70,
-            len=0.25,
-        ),
+        cmin=atmos_cmin,
+        cmax=atmos_cmax,
+        colorbar={
+            "title": {
+                "text": "Aerosol b<sub>bp</sub>(532) [Mm⁻¹sr⁻¹]",
+                "side": "right",
+                "font": {"size": 10},
+            },
+            "tickfont": {"size": 9},
+            "x": 0.8,
+            "y": 0.6,
+            "len": 0.4,
+        },
     )
 )
 
 
-# --- Twin Otter Flight Path ---
+# --- Twin Otter ---
 fig.add_trace(
     go.Scatter3d(
-        x=twinotter_bbp["longitude"],
-        y=twinotter_bbp["latitude"],
-        z=twinotter_bbp["altitude"],
+        x=isara_bbp["longitude"],
+        y=isara_bbp["latitude"],
+        z=isara_bbp["altitude"],
         mode="markers",
-        marker=dict(
-            size=3,
-            color=twinotter_bbp,
-            colorscale="Plasma_r",
-            showscale=True,
-            cmin=0,
-            cmax=4.5,
-            line=dict(
-                color="black",
-                width=1,
-            ),
-            colorbar=dict(
-                title=dict(
-                    text="Twin Otter aerosol<br>bbp(532) (Mm⁻¹ sr⁻¹)",
-                    side="right",
-                    font=dict(size=10),
-                ),
-                tickfont=dict(size=9),
-                x=0.84,
-                y=0.45,
-                len=0.25,
-            ),
-        ),
-        name="Twin Otter",
+        marker={
+            "size": 3,
+            "color": isara_bbp,
+            "colorscale": "plasma_r",
+            "showscale": False,
+            "cmin": atmos_cmin,
+            "cmax": atmos_cmax,
+            "line": {
+                "color": "black",
+                "width": 1,
+            },
+        },
     )
 )
 
 fig.update_layout(
-    title=dict(
-        text="Multi-Platform 3D Ocean/Atmosphere Visualization (Santa Barbara)",
-        y=0.995,
-        yanchor="top",
-        x=0.4,
-        xanchor="center",
-    ),
-    scene=dict(
-        aspectmode="manual",
-        aspectratio=dict(x=1, y=1, z=0.8),
-        xaxis=dict(title="Longitude", range=[-120.2, -119.2]),
-        yaxis=dict(title="Latitude", range=[34.15, 34.45]),
-        zaxis=dict(
-            title="Depth (m) / Altitude (m)",
-            range=[-50, 100],
-            autorange=False,
-            tickvals=[-50, -40, -30, -20, -10, 0, 20, 40, 60, 80, 100],
-            ticktext=[
-                "-50",
-                "-40",
-                "-30",
-                "-20",
-                "-10",
-                "0",
-                "200",
-                "400",
-                "600",
-                "800",
-                "1000",
-            ],
-        ),
-        camera=dict(eye=dict(x=-1.3, y=-1.3, z=0.2)),
-    ),
+    title={
+        "text": "Multi-Platform 3D Ocean/Atmosphere Visualization (Santa Barbara)",
+        "y": 0.995,
+        "yanchor": "top",
+        "x": 0.4,
+        "xanchor": "center",
+    },
+    scene={
+        "aspectmode": "manual",
+        "aspectratio": {"x": 1, "y": 1, "z": 0.8},
+        "xaxis": {"title": "Longitude", "range": [-120.2, -119.2]},
+        "yaxis": {"title": "Latitude", "range": [34.15, 34.45]},
+        "zaxis": {"title": "Height [m]", "range": [-400, 1000]},
+    },
     width=1100,
     height=800,
-    margin=dict(l=0, r=100, b=200, t=0),
+    margin={"l": 0, "r": 100, "b": 200, "t": 0},
     showlegend=False,
 )
 
 annotations_3d = [
-    dict(
-        x=-120.1,
-        y=34.4,
-        z=5,
-        text="<b>PACE OCI bbp</b>",
-        showarrow=False,
-        font=dict(size=12, color="white"),
-        bgcolor="rgba(0,0,0,0.7)",
-        borderpad=4,
-    ),
-    dict(
-        x=-119.35,
-        y=34.22,
-        z=-45,
-        text="<b>Shearwater Profiles</b>",
-        showarrow=False,
-        font=dict(size=12, color="blue"),
-        bgcolor="rgba(255,255,255,0.85)",
-        borderpad=4,
-    ),
-    dict(
-        x=-120.05,
-        y=34.4,
-        z=-30,
-        text="<b>Glider profiles</b>",
-        showarrow=False,
-        font=dict(size=12, color="green"),
-        bgcolor="rgba(255,255,255,0.85)",
-        borderpad=4,
-    ),
-    dict(
-        x=-119.6,
-        y=34.2,
-        z=80,
-        text="<b>Twin Otter Spiral</b>",
-        showarrow=False,
-        font=dict(size=12, color="purple"),
-        bgcolor="rgba(255,255,255,0.85)",
-        borderpad=4,
-    ),
-    dict(
-        x=-120.07,
-        y=34.41,
-        z=90,
-        text="<b>ER2 HSRL-2 Curtain</b>",
-        showarrow=False,
-        font=dict(size=12, color="orange"),
-        bgcolor="rgba(255,255,255,0.85)",
-        borderpad=4,
-    ),
+    {
+        "x": -120.1,
+        "y": 34.4,
+        "z": 5,
+        "text": "<b>PACE</b>",
+        "showarrow": False,
+        "font": {"size": 12, "color": "white"},
+        "bgcolor": "rgba(0,0,0,0.7)",
+        "borderpad": 4,
+    },
+    {
+        "x": -119.6,
+        "y": 34.22,
+        "z": -100,
+        "text": "<b>Shearwater</b>",
+        "showarrow": False,
+        "font": {"size": 12, "color": "blue"},
+        "bgcolor": "rgba(255,255,255,0.85)",
+        "borderpad": 4,
+    },
+    {
+        "x": -120.05,
+        "y": 34.3,
+        "z": -300,
+        "text": "<b>Glider</b>",
+        "showarrow": False,
+        "font": {"size": 12, "color": "green"},
+        "bgcolor": "rgba(255,255,255,0.85)",
+        "borderpad": 4,
+    },
+    {
+        "x": -119.6,
+        "y": 34.2,
+        "z": 800,
+        "text": "<b>Twin Otter</b>",
+        "showarrow": False,
+        "font": {"size": 12, "color": "purple"},
+        "bgcolor": "rgba(255,255,255,0.85)",
+        "borderpad": 4,
+    },
+    {
+        "x": -120.07,
+        "y": 34.41,
+        "z": 900,
+        "text": "<b>ER-2</b>",
+        "showarrow": False,
+        "font": {"size": 12, "color": "orange"},
+        "bgcolor": "rgba(255,255,255,0.85)",
+        "borderpad": 4,
+    },
 ]
 
-fig.update_layout(scene=dict(annotations=annotations_3d))
+fig.update_layout(scene={"annotations": annotations_3d})
 fig.show()
 ```
 
