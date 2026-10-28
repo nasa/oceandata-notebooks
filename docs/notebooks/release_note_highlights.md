@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.1
+    jupytext_version: 1.19.5
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -145,7 +145,7 @@ The PACE-HARP2 and PACE-SPEXone Version 4 (V4) data products were released in Ap
 
 Please refer to the [tutorials](../sections/cloud-atmosphere) to explore the new V4 data products.
 
-The latest reprocessing for PACE-OCI remains at Version 3.2. 
+The latest reprocessing for PACE-OCI remains at Version 3.2.
 
 +++
 
