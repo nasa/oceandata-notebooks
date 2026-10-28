@@ -20,7 +20,7 @@ this can benefit workflows that process a large amount of data or that require h
 We recommend the [NASA Earthdata Cloud Cookbook][cookbook], a resource maintained by the [NASA-Openscapes][nasa-openscapes] community,
 for in-depth guidance on these topics.
 
-{term}`JupyterHub` instances maintained by {term}`CryoCloud`, [Openscapes][openscapes-hub], [NASA MAAP][maap],
+{term}`JupyterHub` instances maintained by {term}`StratusGeo`, [Openscapes][openscapes-hub], [NASA MAAP][maap],
 and NASA Goddard's [Open Science Studio][oss] are all examples of platforms operating in AWS with direct access to the Earthdata Cloud.
 We encourage you to visit these organizations to learn about options for using these existing platforms.
 Alternatively, you may want to learn about [getting started with AWS for Earth data][edcloud].
@@ -34,7 +34,7 @@ An advantage that comes with community-maintained JupyterHubs is having a comple
 Even so, the default ecosystem will probably not be capable of running all the Help Hub tutorials.
 Here are two ways to get a Jupyter ecosystem that's ready to run them all:
 
-  1. **On a bring-your-own-image capable JupyterHub**: run a {term}`container` from the image built for CryoCloud
+  1. **On a bring-your-own-image capable JupyterHub**: run a {term}`container` from the image built for {term}`StratusGeo`
   1. **Without a JupyterHub**: run JupyterLab from a {term}`Conda` environment
 
 ### Using a Container
@@ -77,7 +77,6 @@ mamba run --name <NAME> jupyter lab
 Have a question or an idea? Share it with us on the [Earthdata Forum][forum] using tags OBDAAC (under DAAC) and Data Recipes (under Services/Usage).
 
 [cookbook]: https://nasa-openscapes.github.io/earthdata-cloud-cookbook/
-[cryocloud]: https://hub.cryointhecloud.com/
 [edcloud]: https://www.earthdata.nasa.gov/learn/webinars-and-tutorials/cloud-primer-amazon-web-services
 [edl]: https://urs.earthdata.nasa.gov/
 [forum]: https://forum.earthdata.nasa.gov/viewforum.php?f=7&DAAC=86&ServicesUsage=16&tagMatch=all
