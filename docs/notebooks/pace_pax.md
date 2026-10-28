@@ -18,7 +18,7 @@ kernelspec:
 **Authors:** Anna Windle (NASA, SSAI) <br>
 Adapted from code developed by: Ivona Cetinić (NASA, MSU), Kirk Knobelspiesse (NASA)
 
-Last updated: October 16, 2026
+Last updated: October 28, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -39,7 +39,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 The PACE Postlaunch Airborne eXperiment ([PACE-PAX](https://pace.oceansciences.org/pace-pax.htm)) was a field campaign conducted in September 2024 in California and adjacent coastal areas. PACE-PAX brought together airborne and ship-based in situ observations to collect complementary atmospheric and oceanic measurements for the validation of observations from NASA's PACE mission.
 
-All [PACE-PAX datasets](https://www.earthdata.nasa.gov/data/projects/pace-pax) are publicly available through the NASA Earthdata Cloud. This tutorial demonstrates how to access multiple PACE-PAX datasets, combine observations from different platforms, and create integrated visualizations to explore coupled atmosphere–ocean processes. This tutorial generates a multi-platform figure corresponding to Figure 9 in [Knobelspiesse et al. (in review).](https://doi.org/10.5194/essd-2026-541).
+All [PACE-PAX datasets](https://www.earthdata.nasa.gov/data/projects/pace-pax) are publicly available through the NASA Earthdata Cloud. This tutorial demonstrates how to access multiple PACE-PAX datasets, combine observations from different platforms, and create integrated visualizations to explore coupled atmosphere–ocean processes. This tutorial generates a multi-platform figure corresponding to Figure 9 in [Knobelspiesse et al. (in review)](https://doi.org/10.5194/essd-2026-541).
 
 We will use the `seabass-utils` Python library to read in some of the PACE-PAX data. The SeaWiFS Bio-optical Archive and Storage System [(SeaBASS)](sb) is a public archive of in situ oceanographic and atmospheric data maintained by the Ocean Biology Processing Group (OBPG) at NASA Goddard Space Flight Center (GSFC). `seabass-utils` is a collection of Python functions, also developed by the OBPG, to assist with SeaBASS data processing, file manipulation, and mapping tasks.
 
@@ -640,6 +640,9 @@ fig.update_layout(
         "xaxis": {"title": "Longitude", "range": [-120.2, -119.2]},
         "yaxis": {"title": "Latitude", "range": [34.15, 34.45]},
         "zaxis": {"title": "Height [m]", "range": [-400, 1000]},
+        "camera": {
+            "eye": {"x": -1.5, "y": -1.5, "z": 0.1}
+        },
     },
     width=1100,
     height=800,
