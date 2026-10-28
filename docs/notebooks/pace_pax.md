@@ -24,7 +24,7 @@ Last updated: October 28, 2026
 
 The following notebooks are **prerequisites** for this tutorial.
 
-- Learn with OCI: [Data Access](oci-data-access)
+- Learn with OCI: [Data Access][oci-data-access]
 </div>
 
 <div class="alert alert-info" role="alert">
@@ -33,6 +33,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 </div>
 
+[oci-data-access]: /notebooks/oci/oci_data_access
 [edl]: https://urs.earthdata.nasa.gov/
 
 ## Summary
