@@ -43,6 +43,8 @@ parts:
             title: PACE-OCI Part I
           - file: notebooks/oci/oci_data_visualization_part2
             title: PACE-OCI Part II
+          - file: notebooks/pace_pax
+            title: PACE-PAX
 
       - file: sections/ocean
         sections:

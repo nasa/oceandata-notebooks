@@ -278,6 +278,8 @@ results[0]
 ```
 
 ```{code-cell} ipython3
+:scrolled: true
+
 l1b_paths = earthaccess.open(results)
 ```
 
@@ -344,6 +346,7 @@ Now, let's run `l2gen` using this new .par file. This can take several minutes.
 ```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
+:collapsed: true
 
 !source {env}; l2gen par=l2gen_iop.par
 ```
@@ -533,6 +536,7 @@ write_par("l2gen_iop_mod.par", par)
 ```{code-cell} ipython3
 :scrolled: true
 :tags: [scroll-output]
+:collapsed: true
 
 !source {env}; l2gen par=l2gen_iop_mod.par
 ```
