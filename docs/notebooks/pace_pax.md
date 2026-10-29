@@ -42,7 +42,7 @@ The PACE Postlaunch Airborne eXperiment ([PACE-PAX](https://pace.oceansciences.o
 
 All [PACE-PAX datasets](https://www.earthdata.nasa.gov/data/projects/pace-pax) are publicly available through the NASA Earthdata Cloud. This tutorial demonstrates how to access multiple PACE-PAX datasets, combine observations from different platforms, and create integrated visualizations to explore coupled atmosphere–ocean processes. This tutorial generates a multi-platform figure corresponding to Figure 9 in [Knobelspiesse et al. (in review)](https://doi.org/10.5194/essd-2026-541).
 
-We will use the `seabass-utils` Python library to read in some of the PACE-PAX data. The SeaWiFS Bio-optical Archive and Storage System [(SeaBASS)](sb) is a public archive of in situ oceanographic and atmospheric data maintained by the Ocean Biology Processing Group (OBPG) at NASA Goddard Space Flight Center (GSFC). `seabass-utils` is a collection of Python functions, also developed by the OBPG, to assist with SeaBASS data processing, file manipulation, and mapping tasks.
+We will use the `seabass-utils` Python library to read in some of the PACE-PAX data. The SeaWiFS Bio-optical Archive and Storage System ([SeaBASS][sb]) is a public archive of in situ oceanographic and atmospheric data maintained by the Ocean Biology Processing Group (OBPG) at NASA Goddard Space Flight Center (GSFC). `seabass-utils` is a collection of Python functions, also developed by the OBPG, to assist with SeaBASS data processing, file manipulation, and mapping tasks.
 
 [sb]: https://seabass.gsfc.nasa.gov/
 
