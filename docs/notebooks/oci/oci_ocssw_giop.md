@@ -4,7 +4,6 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.5
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -33,11 +32,17 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 </div>
 
-<div class="alert alert-info" role="alert">
+<div class="alert alert-warning" role="alert">
 
-This notebook was desgined to use cloud-enabled OCSSW programs, which are available in OCSSW tag V2025.2 or higher. Cloud-enabled OCSSW programs can only be run on an AWS EC2 instance, such as CryoCloud.
+The **Ocean Biology Python Image** available on {term}`StratusGeo` and other {term}`container` images [built for Help Hub users](https://github.com/orgs/nasa/packages?repo_name=oceandata-notebooks) come with OCSSW pre-installed. This notebook was desgined to use cloud-enabled OCSSW programs, which are available in OCSSW tag V2025.2 or higher.
 
 </div>
+
+<div class="alert alert-warning" role="alert">
+
+
+</div>
+
 
 [edl]: https://urs.earthdata.nasa.gov/
 

@@ -4,7 +4,6 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.5
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -276,7 +275,7 @@ dataset
 
 <div class="alert alert-block alert-warning">
 
-Anywhere in any of [these notebooks](https://nasa.github.io/oceandata-notebooks/) where `paths = earthaccess.open(...)` is used to read data directly from the NASA Earthdata Cloud, you need to substitute `paths = earthaccess.download(..., local_path)` before running the notebook on a local host or a remote host that does not have direct access to the NASA Earthdata Cloud.
+If you are working on a local or remote host that does not have direct access to the NASA Earthdata Cloud (i.e., you are working outside the cloud), you may notice slower performance when using `earthaccess.open(...)`. As an alternative, anywhere in [these notebooks](https://nasa.github.io/oceandata-notebooks/) where `paths = earthaccess.open(...)` is used, you can instead use `paths = earthaccess.download(..., local_path)` to download the data to your local machine before working with it. This can be a better option when working with large datasets or when network access to the Earthdata Cloud is limited or slow.
 
 </div>
 

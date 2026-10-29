@@ -12,7 +12,7 @@
   A software environment that appears to applications running inside it like a complete computer,
   while actually running in parallel with other containers on the same computer.
 
-[CryoCloud](https://book.cryointhecloud.com/)
+[StratusGeo](https://stratusgeo.org)
   A NASA-supported community and cloud platform built in partnership with the
   International Interactive Computing Collaboration ([2i2c](https://2i2c.org)) and
   designed to advance collaborative, data-intensive Earth science across all disciplines.
@@ -75,6 +75,11 @@
 [MyST](https://myst-parser.readthedocs.io)
   Markedly Structured Text (MyST) is a rich and extensible flavor of {term}`Markdown`
   meant for technical documentation and publishing. It is used by {term}`Jupyter Book`.
+
+[Openscapes Mentors](https://openscapes.org/initiatives#mentors-framework)
+  The Mentors Framework is a multi-year engine for culture change within organizations.
+  It blends tech and community building through mentoring, coaching, facilitating, art,
+  open source, environment, inclusion, movements, and leaders we admire.
 
 [PyPI](https://pypi.org)
   The Python Package Index is an archive and distribution system for Python packages,
