@@ -54,6 +54,8 @@ parts:
             title: Multi Ordination ANAlysis (MOANA)
           - file: notebooks/oci/accessing_CLOSE_data
             title: Access the CLOSE Dataset
+          - file: notebooks/spexone/spexone_l2_fastmapol_ocean_product
+            title: Ocean Color from PACE-SPEXone
 
       - file: sections/cloud-atmosphere
         sections:
