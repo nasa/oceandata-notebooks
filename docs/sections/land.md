@@ -6,7 +6,7 @@ This section focuses on terrestrial data products and land surface observations 
 
 - [Land Surface from PACE/OCI](../notebooks/oci/oci_terrestrial_data) - Working with land surface reflectance and vegetation data from PACE/OCI
 
-- [Land Surface from PACE/HARP2](../notebooks/harp2/harp2_l2_fastmapol_land_product) - Working with land surface reflectance and vegetation data from PACE/OCI
+- [Land Surface from PACE/HARP2](../notebooks/harp2/harp2_l2_fastmapol_land_product) - Exploring land surface reflectance from PACE/HARP2
 
 - 
 Browse the tutorial above to get started with analyzing land surface data from PACE.
