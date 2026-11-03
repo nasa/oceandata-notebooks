@@ -12,7 +12,7 @@
   A software environment that appears to applications running inside it like a complete computer,
   while actually running in parallel with other containers on the same computer.
 
-[CryoCloud](https://book.cryointhecloud.com/)
+[StratusGeo](https://stratusgeo.org)
   A NASA-supported community and cloud platform built in partnership with the
   International Interactive Computing Collaboration ([2i2c](https://2i2c.org)) and
   designed to advance collaborative, data-intensive Earth science across all disciplines.

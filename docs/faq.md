@@ -214,7 +214,7 @@ There are two general categories of options:
 
 **1. Externally funded, ready-to-use community hubs** (no cost to you, managed by the nonprofit 2i2c):
 - The [**NASA OpenScapes JupyterHub**](https://openscapes.cloud/) – A "cloud playground" primarily intended for workshops and NASA OpenScapes Champions, ideal for exploring what cloud-based Jupyter work is like. PACE researchers interested in access can reach out directly.
-- [**CryoCloud JupyterHub**](https://cryointhecloud.com/) – A research-oriented platform, currently free to use, open to the entire geosciences community (not just cryosphere research). Access requires filling out a sign-up form and emailing the CryoCloud leadership team about your research interests.
+- **{term}`StratusGeo`** – A research-oriented platform, currently free to use, open to the entire geosciences community (not just cryosphere research). Access requires filling out a sign-up form and emailing the StratusGeo leadership team about your research interests.
 
 **2. More customizable platforms** (require more setup, but offer greater flexibility):
 - [**NASA Science Cloud**](https://science.data.nasa.gov/science-cloud) – Available to anyone with ROSES funding. Provides a similar JupyterHub-style environment with direct AWS access, plus a support team that can help with technical customization and cost/budget planning for grant proposals. (Note: As of this discussion, ROSES 2026 guidance on cloud computing costs in proposals was still pending, though ROSES 2025 did not address this explicitly.)
@@ -229,7 +229,7 @@ There are two general categories of options:
 
 **Analysis/processing time is what may cost money.** As soon as you read data using a virtual computer running in the cloud (e.g., to add two images together, run calculations, etc.), that qualifies as "compute," and you're billed for the time that virtual machine is running — typically by the minute or even microsecond, depending on the type of processor used (e.g., standard CPU vs. GPU).
 
-That said, if you're using an externally funded platform like [CryoCloud](https://cryointhecloud.com/) or [NASA OpenScapes JupyterHub](https://openscapes.cloud/), those costs are already covered by their existing grants, so you likely won't pay anything out of pocket. Costs become more relevant if you set up your own custom environment (e.g., via [NASA Science Cloud](https://science.data.nasa.gov/science-cloud) or [Cloud Bank](https://www.cloudbank.org/) credits) for a specific research budget or grant proposal.
+That said, if you're using an externally funded platform like {term}`StratusGeo` or [NASA OpenScapes JupyterHub](https://openscapes.cloud/), those costs are already covered by their existing grants, so you likely won't pay anything out of pocket. Costs become more relevant if you set up your own custom environment (e.g., via [NASA Science Cloud](https://science.data.nasa.gov/science-cloud) or [Cloud Bank](https://www.cloudbank.org/) credits) for a specific research budget or grant proposal.
 
 </details>
 
