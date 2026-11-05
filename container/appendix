@@ -1,4 +1,9 @@
 
+# update micromamba
+USER root
+RUN micromamba self-update --version 2.10.0
+USER ${NB_USER}
+
 # install OCSSW core files but not $OCSSWROOT/share or $OCSSWROOT/var
 USER root
 ARG OCSSWTAG=V2026.5
@@ -14,12 +19,12 @@ RUN chmod +x install_ocssw \
 USER ${NB_USER}
 
 # install (locked) dependencies
-RUN ${MAMBA_EXE} create --yes --prefix ${NB_PYTHON_PREFIX} --file ${REPO_DIR}/conda-lock.yml \
+RUN micromamba create --yes --prefix ${NB_PYTHON_PREFIX} --file ${REPO_DIR}/conda-lock.yml \
       --category main \
       --category notebooks \
       --category jupyter \
       --category container \
- && ${MAMBA_EXE} clean --yes --all --force-pkgs-dirs
+ && micromamba clean --yes --all --force-pkgs-dirs
 
 # system configuration
 USER root
