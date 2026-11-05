@@ -4,7 +4,6 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.5
 kernelspec:
   name: python3
   display_name: Python 3 (ipykernel)
@@ -508,7 +507,7 @@ pio.renderers.default = "notebook"
 fig = go.Figure()
 
 ocean_cmin = 0
-ocean_cmax = 0.015
+ocean_cmax = 0.016
 atmos_cmin = 0
 atmos_cmax = 4
 
@@ -531,11 +530,11 @@ fig.add_trace(
                 "font": {"size": 10},
             },
             "tickfont": {"size": 9},
-            "x": 0.8,
+            "x": 0.65,
             "y": 0.2,
             "len": 0.4,
-            "tickvals": [0, 0.002, 0.004, 0.006, 0.008, 0.01],
-            "ticktext": ["0", "0.002", "0.004", "0.006", "0.008", "0.01"],
+            "tickvals": [0, 0.004, 0.008, 0.012, 0.016],
+            "ticktext": ["0", "0.004",  "0.008", "0.012", "0.016"],
         },
     )
 )
@@ -597,7 +596,7 @@ fig.add_trace(
                 "font": {"size": 10},
             },
             "tickfont": {"size": 9},
-            "x": 0.8,
+            "x": 0.65,
             "y": 0.6,
             "len": 0.4,
         },
@@ -625,30 +624,6 @@ fig.add_trace(
             },
         },
     )
-)
-
-fig.update_layout(
-    title={
-        "text": "Multi-Platform 3D Ocean/Atmosphere Visualization (Santa Barbara)",
-        "y": 0.995,
-        "yanchor": "top",
-        "x": 0.4,
-        "xanchor": "center",
-    },
-    scene={
-        "aspectmode": "manual",
-        "aspectratio": {"x": 1, "y": 1, "z": 0.8},
-        "xaxis": {"title": "Longitude", "range": [-120.2, -119.2]},
-        "yaxis": {"title": "Latitude", "range": [34.15, 34.45]},
-        "zaxis": {"title": "Height [m]", "range": [-400, 1000]},
-        "camera": {
-            "eye": {"x": -1.5, "y": -1.5, "z": 0.1}
-        },
-    },
-    width=1100,
-    height=800,
-    margin={"l": 0, "r": 100, "b": 200, "t": 0},
-    showlegend=False,
 )
 
 annotations_3d = [
@@ -704,7 +679,35 @@ annotations_3d = [
     },
 ]
 
-fig.update_layout(scene={"annotations": annotations_3d})
+fig.update_layout(
+    title={
+        "text": "Multi-Platform 3D Ocean/Atmosphere Visualization (Santa Barbara)",
+        "y": 0.995,
+        "yanchor": "top",
+        "x": 0.4,
+        "xanchor": "center",
+    },
+    scene={
+         "domain": {
+            "x": [0.0, 0.68],
+            "y": [0.05, 0.95],
+        },
+        "aspectmode": "manual",
+        "aspectratio": {"x": 1, "y": 1, "z": 0.8},
+        "xaxis": {"title": "Longitude", "range": [-120.2, -119.2]},
+        "yaxis": {"title": "Latitude", "range": [34.15, 34.45]},
+        "zaxis": {"title": "Height [m]", "range": [-400, 1000]},
+        "camera": {
+            "eye": {"x": -1.5, "y": -1.5, "z": 0.1}
+        },
+        "annotations": annotations_3d,
+    },
+    width=1200,
+    height=800,
+    margin={"l": 0, "r": 180, "b": 50, "t": 50},
+    showlegend=False,
+)
+
 fig.show()
 ```
 
