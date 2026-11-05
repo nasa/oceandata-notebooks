@@ -30,7 +30,8 @@ RUN micromamba create --yes --prefix ${NB_PYTHON_PREFIX} --file ${REPO_DIR}/cond
 USER root
 RUN git config --system credential.helper 'cache --timeout 86400 --socket /tmp/git-credential-cache/socket' \
  && sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh' \
- && dvc config --system cache.dir /tmp/dvc/cache
+ && dvc config --system cache.dir /tmp/dvc/cache \
+ && dvc config --system cache.type symlink
 USER ${NB_USER}
 
 # jupyter configuration
@@ -38,4 +39,7 @@ COPY --chown=${NB_USER}:${NB_USER} src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # ignore select Python warnings
 # TODO: specifically cartopy.io.DownloadWarning
-ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
+ENV PYTHONWARNINGS=ignore::FutureWarning,ignore:::cartopy.io
+
+# set generic cache directory
+ENV XDG_CACHE_HOME=/tmp

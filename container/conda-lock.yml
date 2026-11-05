@@ -15,11 +15,11 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: 2fe1d9ebbe09d11be7daa4357172af53eef9a621532f14d7bc66ebf434f63c26
-    osx-64: 548711b04aa3bfff0994fe906db6e5afafa522d2c5f3fd6f5945191cb4780123
-    linux-aarch64: d62b0b4613253419242dff6a3fd2872a2a7c375bf34ab540214568d8f955922f
-    osx-arm64: 0ddaf4de446ee9f34db299ccbeaa44d8fbb3ef99ff16336c82ece7c08bf5314d
-    win-64: 4e51bd652bff795c92fd888ae43766f3cede2b7bc8868efdcd02bf216296ae30
+    linux-64: 590f86b9a662930aa1d1b40623c3635715e7640adb064d3554c26a76737f0a68
+    osx-64: 70225b6e63a689cfdd01ee7e48c292a2e7a6173f2859c703f89f3cd31497bf42
+    linux-aarch64: a53999e9208bcb0fe858cb159092e4c7ee565c35f1f42f8a364099ab39de2712
+    osx-arm64: 58268cf6759e2fae4a24acb3c36140ac45b761107b5f4395fadf35beef432f4f
+    win-64: 4a650e8387a3180cf8c63cf8047eab2dfd6a20e2fbb5c6dc9211bffdf956d725
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -50182,6 +50182,61 @@ package:
   url: https://files.pythonhosted.org/packages/d9/bc/e6050a87eec348711d09dff7f2020b48386fbcef9fd75389a47b69264795/jupyterlab_h5web-12.8.0-py3-none-any.whl
   hash:
     sha256: eaa0c63c8083d378e35fd1d56871bff893efb1be00608548a2daf7f1906c323b
+  category: jupyter
+  optional: true
+- name: jupyterlab-myst
+  version: 2.7.0
+  manager: pip
+  platform: linux-64
+  dependencies:
+    jupyter-server: '>=2.0.1,<3'
+  url: https://files.pythonhosted.org/packages/2b/08/ad5d4d383807ca379c02b8fa94f744c30ea0929a9b3953a19b00bea52b8b/jupyterlab_myst-2.7.0-py3-none-any.whl
+  hash:
+    sha256: 7c66aae898a5b0db84b1d4b83fa68d5d37f846b4f891621de78abb960678e70e
+  category: jupyter
+  optional: true
+- name: jupyterlab-myst
+  version: 2.7.0
+  manager: pip
+  platform: linux-aarch64
+  dependencies:
+    jupyter-server: '>=2.0.1,<3'
+  url: https://files.pythonhosted.org/packages/2b/08/ad5d4d383807ca379c02b8fa94f744c30ea0929a9b3953a19b00bea52b8b/jupyterlab_myst-2.7.0-py3-none-any.whl
+  hash:
+    sha256: 7c66aae898a5b0db84b1d4b83fa68d5d37f846b4f891621de78abb960678e70e
+  category: jupyter
+  optional: true
+- name: jupyterlab-myst
+  version: 2.7.0
+  manager: pip
+  platform: osx-64
+  dependencies:
+    jupyter-server: '>=2.0.1,<3'
+  url: https://files.pythonhosted.org/packages/2b/08/ad5d4d383807ca379c02b8fa94f744c30ea0929a9b3953a19b00bea52b8b/jupyterlab_myst-2.7.0-py3-none-any.whl
+  hash:
+    sha256: 7c66aae898a5b0db84b1d4b83fa68d5d37f846b4f891621de78abb960678e70e
+  category: jupyter
+  optional: true
+- name: jupyterlab-myst
+  version: 2.7.0
+  manager: pip
+  platform: osx-arm64
+  dependencies:
+    jupyter-server: '>=2.0.1,<3'
+  url: https://files.pythonhosted.org/packages/2b/08/ad5d4d383807ca379c02b8fa94f744c30ea0929a9b3953a19b00bea52b8b/jupyterlab_myst-2.7.0-py3-none-any.whl
+  hash:
+    sha256: 7c66aae898a5b0db84b1d4b83fa68d5d37f846b4f891621de78abb960678e70e
+  category: jupyter
+  optional: true
+- name: jupyterlab-myst
+  version: 2.7.0
+  manager: pip
+  platform: win-64
+  dependencies:
+    jupyter-server: '>=2.0.1,<3'
+  url: https://files.pythonhosted.org/packages/2b/08/ad5d4d383807ca379c02b8fa94f744c30ea0929a9b3953a19b00bea52b8b/jupyterlab_myst-2.7.0-py3-none-any.whl
+  hash:
+    sha256: 7c66aae898a5b0db84b1d4b83fa68d5d37f846b4f891621de78abb960678e70e
   category: jupyter
   optional: true
 - name: jupytext

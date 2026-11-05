@@ -51,6 +51,7 @@ jupyter = [
   "jupyterlab-code-formatter>=3.0.2",
   "jupyterlab-git>=0.55.0",
   "jupyterlab-h5web>=12.3.0",
+  "jupyterlab-myst>=2.4.3",
   "jupytext>=1.17.2",
 ]
 # additional packages for container image
