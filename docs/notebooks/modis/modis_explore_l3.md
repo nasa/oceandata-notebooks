@@ -14,7 +14,7 @@ kernelspec:
 
 **Author(s):** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA)
 
-Last updated: August 3, 2025
+Last updated: November 5, 2026
 
 <div class="alert alert-success" role="alert">
 
@@ -82,8 +82,11 @@ results = earthaccess.search_datasets(
 )
 ```
 
+Each result has a `summary` attribute with information such as the collection's short-name.
+
 ```{code-cell} ipython3
-set((i.summary()["short-name"] for i in results))
+for item in results:
+    print(item.summary["short-name"])
 ```
 
 You will want to go on to https://search.earthdata.nasa.gov/ and enter the short names to read about each data collection. We want to use the `MODISA_L3m_CHL` data collection for our first plot. We can get the files (granules) in that collection with `earthaccess.search_data()`.

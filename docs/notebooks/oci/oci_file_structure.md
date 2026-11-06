@@ -283,7 +283,7 @@ Let's take a closer look at one of the larger sized granules first, using the me
 
 ```{code-cell} ipython3
 for item in results:
-    if item.size() > 2000:
+    if item.size > 2000:
         display(item)
         break
 ```

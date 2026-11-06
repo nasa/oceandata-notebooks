@@ -78,9 +78,9 @@ You can use PACE_HARP2_L2_CLOUD_GPC as the short name to get the most recent ver
 ```{code-cell} ipython3
 results = earthaccess.search_datasets(instrument="harp2")
 for item in results:
-    summary = item.summary()
-    if "CLOUD" in summary["short-name"]:
-        print(summary["short-name"])
+    short_name = item.summary["short-name"]
+    if "CLOUD" in short_name:
+        print(short_name)
 ```
 
 Search for available granules within a time range and geospatial area of interest. The order of values in a "bounding_box" is always West (longitude), South (latitude), East (longitude), North (latitude). If you know the actual granule name, you can use "granule_name" explicitly. You may get multiple versions if you include a `*` instead of an explicit version.
