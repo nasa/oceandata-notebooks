@@ -1,2 +1,6 @@
 /_build
 /_cache
+/notebooks/**
+!/notebooks/**/
+/notebooks/**/.ipynb_checkpoints
+!/notebooks/**/*.md

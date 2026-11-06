@@ -80,20 +80,12 @@ from datetime import datetime
 from pathlib import Path
 
 import earthaccess
+import harmony
 import matplotlib.pyplot as plt
 import numpy as np
 import rasterio
-import xarray as xr
 import rioxarray
-from harmony import (
-    BBox,
-    CapabilitiesRequest,
-    Client,
-    Collection,
-    JobsRequest,
-    LinkType,
-    Request,
-)
+import xarray as xr
 from rasterio.enums import Resampling
 ```
 
@@ -105,7 +97,7 @@ The `earthaccess` package lets us easily authenticate with NASA's Earthdata Logi
 
 ```{code-cell} ipython3
 auth = earthaccess.login()
-harmony_client = Client(token=earthaccess.get_edl_token())
+harmony_client = harmony.Client(token=earthaccess.get_edl_token())
 ```
 
 ## 3. Discover subsetting capabilities for Level-2 PACE OCI data
@@ -115,12 +107,12 @@ harmony_client = Client(token=earthaccess.get_edl_token())
 Define which data set you’d like to access using either the dataset `short_name` or its collection `concept_id`. For this example, we’ll use PACE OCI Level-2 Regional Ocean Biogeochemical Properties Data (PACE_OCI_L2_BGC).
 
 ```{code-cell} ipython3
-capabilities_request = CapabilitiesRequest(short_name="PACE_OCI_L2_BGC")
+capabilities_request = harmony.CapabilitiesRequest(short_name="PACE_OCI_L2_BGC")
 capabilities = harmony_client.submit(capabilities_request)
-capabilities
+capabilities["summary"]
 ```
 
-You can see here under `['services']` that this dataset can be subsetted using the `'podacc/l2-subsetter'`
+You can see here under `['summary']` that there is a Harmony service for spatial subsetting by a bounding box or shape.
 
 +++
 
@@ -135,24 +127,23 @@ One type of request, the `JobsRequest`, let's you check for any previously submi
 First step, create a request:
 
 ```{code-cell} ipython3
-request = JobsRequest(labels=["help-hub-tutorial"])
+request = harmony.JobsRequest(labels=["help-hub-tutorial"])
 ```
 
-Second, get a response from your request submission:
+Second step, get a response to your request:
 
 ```{code-cell} ipython3
 response = harmony_client.submit(request)
-response["count"]
 ```
 
-For your first time through this tutorial, you shouldn't see any existing jobs. If you've already submitted a job with this label (e.g. because you are re-running this tutorial), then the response includes information about that existing job.
+For your first time through this tutorial, you aren't expecting to recover any previously submitted jobs, so `response["count"]` ought to be zero. If you've already submitted a job with this label (e.g. because you are re-running this tutorial), then the response includes information about that existing job.
 
 Let's continue to build a request for the subsetting job we want the service to run. Using the "labels" keyword tags jobs so that we can easily find and re-use results from this job later.
 
 ```{code-cell} ipython3
-request = Request(
-    collection=Collection(id="PACE_OCI_L2_BGC"),
-    spatial=BBox(-76.75, 36.97, -75.74, 39.01),
+request = harmony.Request(
+    collection=harmony.Collection(id="PACE_OCI_L2_BGC"),
+    spatial=harmony.BBox(-76.75, 36.97, -75.74, 39.01),
     temporal={"start": datetime(2025, 7, 1), "stop": datetime(2025, 8, 1)},
     variables=["geophysical_data/chlor_a", "geophysical_data/l2_flags"],
     pixel_subset=True,
@@ -170,14 +161,21 @@ else:
 job_id
 ```
 
-The `job_id` can be used to check on the details of your job progress. If you are logged into Earthdata, you can see your jobs here: https://harmony.earthdata.nasa.gov/workflow-ui
-or look at your process by running this line:
+The `job_id` can be used to check on the details of your job progress. If you are logged into Earthdata, you can see your jobs:
+
+> https://harmony.earthdata.nasa.gov/workflow-ui
+
+Or watch your progress here by calling the `wait_for_processing` method:
 
 ```{code-cell} ipython3
 harmony_client.wait_for_processing(job_id, show_progress=True)
 ```
 
-Note: Requesting a job can take a variable amount of time. In our experience, running this particular job has ranged from 2 to 24 minutes.
+**Note**:
+Requesting a job can take a variable amount of time. In our experience, running this particular job has ranged from 2 to 24 minutes. If you run into trouble and need to replace this job, remove it's label and start again from the top:
+```python
+harmony_client.submit(harmony.DeleteLabelsRequest(labels=request.labels, job_ids=[job_id]))
+```
 
 ```{code-cell} ipython3
 job_summary = harmony_client.result_json(job_id)
@@ -280,7 +278,7 @@ We need to get the url for the data in the S3 bucket. We can do this using `resu
 ```{code-cell} ipython3
 :scrolled: true
 
-urls = list(harmony_client.result_urls(job_id, link_type=LinkType.s3))
+urls = list(harmony_client.result_urls(job_id, link_type=harmony.LinkType.s3))
 urls
 ```
 
@@ -293,7 +291,6 @@ kwargs = {
         "client_kwargs": harmony_client.aws_credentials(),
     },
 }
-
 dt = xr.open_datatree(urls[0], **kwargs)
 ds = xr.merge(dt.to_dict().values())
 ds = ds.set_coords(("longitude", "latitude"))
@@ -443,12 +440,12 @@ plt.show()
 Currently, `harmony-py` does not support spatial subsetting for PACE OCI L3M products. You can verify this by submitting a Harmony request and inspecting the available services, where the subset capabilities are listed as `False`.
 
 ```{code-cell} ipython3
-capabilities_request = CapabilitiesRequest(short_name="PACE_OCI_L3M_BGC")
+capabilities_request = harmony.CapabilitiesRequest(short_name="PACE_OCI_L3M_BGC")
 capabilities = harmony_client.submit(capabilities_request)
-capabilities
+capabilities["summary"]
 ```
 
-Because spatial subsetting is not currently supported for PACE OCI L3M products through Harmony, we will instead use `xarray` to subset the data locally. Since L3M products are already mapped to a regular spatial grid, this approach is both straightforward and computationally efficient.
+Because spatial subsetting is not currently supported for PACE OCI L3M products through Harmony, we will instead use `xarray` to subset the data using spatial coordinates. Since L3M products are already mapped to a regular spatial grid, this approach is both straightforward and computationally efficient.
 
 Let's begin by opening a monthly (MO) PACE_OCI_L3M_BGC composite at 4 km spatial resolution using `earthaccess`:
 
@@ -466,7 +463,7 @@ ds = xr.open_dataset(paths[0])
 ds
 ```
 
-Now we are going to subset in two ways, first, by selecting a variable with `.sel`, and secondly by selecting a spatial subset with `slice`. We can do this all in one line:
+Now we are going to subset in two ways, first, by choosing one variable with `["chlor_a"]`, and secondly by selecting a spatial subset with `slice`. We can do this all in one line:
 
 ```{code-cell} ipython3
 ds_sub = ds["chlor_a"].sel({"lat": slice(39.01, 36.97), "lon": slice(-76.75, -75.74)})
@@ -490,7 +487,7 @@ ds_sub.to_netcdf(path)
 You should now see this file in your "subsetted_data" folder. Let's compare the size to the original L3M file:
 
 ```{code-cell} ipython3
-og_size = results[0].size()
+og_size = results[0].size
 sub_size = path.stat().st_size / 2**20
 print(f"Original Data Size: {og_size:.2f} MB")
 print(f"Output Data Size: {sub_size:.2f} MB")

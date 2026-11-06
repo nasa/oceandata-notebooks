@@ -122,7 +122,7 @@ results = earthaccess.search_datasets(instrument="oci")
 :tags: [scroll-output]
 
 for item in results:
-    summary = item.summary()
+    summary = item.summary
     print(summary["short-name"])
 ```
 

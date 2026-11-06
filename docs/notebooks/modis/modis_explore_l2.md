@@ -14,7 +14,7 @@ kernelspec:
 
 **Author(s):** Guoqing Wang (NASA, GSFC), Ian Carroll (NASA, UMBC), Eli Holmes (NOAA), Anna Windle (NASA, GSFC)
 
-Last updated: August 3, 2025
+Last updated: November 5, 2026
 
 <div class="alert alert-info" role="alert">
 
@@ -96,10 +96,11 @@ results = earthaccess.search_datasets(
 )
 ```
 
-Each result has a `summary` method with information such as the collection's short-name.
+Each result has a `summary` attribute with information such as the collection's short-name.
 
 ```{code-cell} ipython3
-set((i.summary()["short-name"] for i in results))
+for item in results:
+    print(item.summary["short-name"])
 ```
 
 We are interested in the `MODISA_L2_OC` dataset.
@@ -127,11 +128,11 @@ Now we can print some info about these granules using the built-in methods. We c
 results[0]
 ```
 
-Or we could use the `data_links` and `size` methods provided on each result.
+Or we could use the `data_links` method and `size` attributes available on each result.
 
 ```{code-cell} ipython3
-data_links = [{"links": i.data_links(), "size (MB):": i.size()} for i in results]
-JSON(data_links, expanded=True)
+data_links = [{"links": i.data_links(), "size (MB):": i.size} for i in results]
+data_links
 ```
 
 Or we can interactively inspect all the fields underlying all results.

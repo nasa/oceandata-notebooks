@@ -2,13 +2,16 @@
 imagemagick
 groff
 
-# dependencies for OCSSW
+# required by jupyter-sshd-proxy
+openssh-server
+
+# required by OCSSW
 attr
 
-# dependencies for Navteca/OSS JupyterHub
+# required by Navteca/OSS
 fuse
 
-# # dependencies for nbconvert and myst
+# # required by nbconvert and myst
 # pandoc
 
 # # LaTeX tools

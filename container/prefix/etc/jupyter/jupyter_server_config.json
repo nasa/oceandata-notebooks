@@ -1,5 +1,17 @@
 {
-    "ContentsManager": {
-        "allow_hidden": true
-    }
+  "ContentsManager": {
+      "allow_hidden": true
+  },
+  "KernelManager": {
+    "transport": "ipc"
+  },
+  "NotebookIntelligence": {
+    "disabled_coding_agent_launchers": [
+      "claude-code",
+      "opencode",
+      "pi",
+      "github-copilot-cli",
+      "codex"
+    ]
+  }
 }

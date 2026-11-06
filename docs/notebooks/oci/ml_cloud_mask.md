@@ -22,7 +22,7 @@ The following notebooks are **prerequisites** for this tutorial:
 
 - [Data Access](./oci_data_access)
 
-**NOTE**: This notebook will download a [cloud mask dataset](https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek/). Update `CLDMASK_PATH` if you would like the download and extracted archive to be persisted after running this notebook.
+**NOTE**: This notebook will download a [cloud mask dataset](https://oceancolor.gsfc.nasa.gov/fileshare/q9C5fV1jS8xN/pace-hackweek/). Update `CLDMASK_PATH` if you would like the download and extracted archive to be persisted after running this notebook.
 
 </div>
 
@@ -100,7 +100,7 @@ if CLDMASK_PATH is None or not CLDMASK_PATH.exists():
     tempdir = tempfile.TemporaryDirectory()
     CLDMASK_PATH = Path(tempdir.name)
     with tempfile.TemporaryFile() as f:
-        url = "https://oceancolor.gsfc.nasa.gov/fileshare/ian_carroll/pace-hackweek/cldmask_dataset.tar.gz"
+        url = "https://oceancolor.gsfc.nasa.gov/fileshare/q9C5fV1jS8xN/pace-hackweek/cldmask_dataset.tar.gz"
         r = requests.get(url, stream=True)
         for chunk in r.iter_content(chunk_size=2**24):
             f.write(chunk)

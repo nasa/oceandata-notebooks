@@ -1,38 +1,46 @@
 
-# change USER
+# update micromamba
 USER root
-
-# system configuration
-RUN git config --system credential.helper 'cache --timeout 86400 --socket /tmp/git-credential-cache/socket' \
- && git config --system core.excludesFile '/etc/gitignore' \
- && echo 'core.[0-9]*' > /etc/gitignore \
- && sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh'
+RUN micromamba self-update --version 2.10.0
+USER ${NB_USER}
 
 # install OCSSW core files but not $OCSSWROOT/share or $OCSSWROOT/var
-ARG OCSSWTAG=V2026.4
+USER root
+ARG OCSSWTAG=V2026.5
 ENV OCSSWROOT=${OCSSWROOT}
-ADD https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw ./
-ADD https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py ./
+ADD https://oceandata.sci.gsfc.nasa.gov/manifest/install_ocssw .
+ADD https://oceandata.sci.gsfc.nasa.gov/manifest/manifest.py .
 RUN chmod +x install_ocssw \
  && ./install_ocssw --tag=${OCSSWTAG} -a odps --root --bin --opt --python \
  && rm install_ocssw manifest.py \
  && ln -s ${OCSSWROOT_PUBLIC}/var ${OCSSWROOT} \
  && ln -s ${OCSSWROOT_PUBLIC}/share ${OCSSWROOT} \
  && chown ${NB_USER}:${NB_USER} ${OCSSWROOT}/*.json ${OCSSWROOT}/python/*.json
-
-# revert USER
 USER ${NB_USER}
 
 # install (locked) dependencies
-RUN ${MAMBA_EXE} create --yes --prefix ${NB_PYTHON_PREFIX} --file ${REPO_DIR}/conda-lock.yml \
- && ${MAMBA_EXE} install --log-level error --yes --prefix ${NB_PYTHON_PREFIX} --file ${REPO_DIR}/conda-lock.yml --category notebooks \
- && ${MAMBA_EXE} install --log-level error --yes --prefix ${NB_PYTHON_PREFIX} --file ${REPO_DIR}/conda-lock.yml --category jupyter \
- && ${MAMBA_EXE} install --log-level error --yes --prefix ${NB_PYTHON_PREFIX} --file ${REPO_DIR}/conda-lock.yml --category container \
- && ${MAMBA_EXE} clean --yes --all --force-pkgs-dirs
+RUN micromamba create --yes --prefix ${NB_PYTHON_PREFIX} --file ${REPO_DIR}/conda-lock.yml \
+      --category main \
+      --category notebooks \
+      --category jupyter \
+      --category container \
+      --category ci \
+ && micromamba clean --yes --all --force-pkgs-dirs
+
+# system configuration
+USER root
+RUN git config --system credential.helper 'cache --timeout 86400 --socket /tmp/git-credential-cache/socket' \
+ && sh -c 'echo "shopt -s globstar" > /etc/profile.d/globstar.sh' \
+ && dvc config --system cache.dir /tmp/dvc/cache \
+ && dvc config --system cache.type symlink
+USER ${NB_USER}
 
 # jupyter configuration
 COPY --chown=${NB_USER}:${NB_USER} src/prefix/ ${NB_PYTHON_PREFIX}/
 
 # ignore select Python warnings
 # TODO: specifically cartopy.io.DownloadWarning
-ENV PYTHONWARNINGS="ignore::FutureWarning,ignore:::cartopy.io"
+ENV PYTHONWARNINGS=ignore::FutureWarning,ignore:::cartopy.io
+
+# set generic cache directory
+ENV XDG_CACHE_HOME=/tmp
