@@ -218,9 +218,8 @@ results = earthaccess.search_datasets(
     processing_level_id="2",
 )
 for item in results:
-    summary = item.summary()
     title = item["umm"]["EntryTitle"].replace("PACE OCI Level-2 Regional", "")
-    print(f'{summary["short-name"]}: {title}')
+    print(f'{item.summary["short-name"]}: {title}')
 ```
 
 You can use the short name PACE_OCI_L2_CLOUD to get the most recent version available for the CLOUD product at Level-2 for the PACE-OCI instrument. Add the Near Real Time (NRT) suffix for the most recent observations (i.e. PACE_OCI_L2_CLOUD_NRT).
