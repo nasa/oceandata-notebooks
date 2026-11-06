@@ -74,9 +74,16 @@ HARP2 L2 data are available through both OB.DAAC and the Earthdata Cloud. Please
 Download the HARP2 `MAPOL_LAND` data over Rail Road Valley (38.4958, -115.6964) as one of the validaiton site part of RadCalNet. Further analysis on spectral and anglar information will be discussed in later section.
 
 ```{code-cell} ipython3
+# 20240928T200026
+temporal = ("2024-09-28T20:00:26", "2024-09-28T20:00:27")
+## 20240928195526
+#temporal=("2024-09-28T19:55:26", "2024-09-28T19:55:27")
+```
+
+```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_HARP2_L2_MAPOL_LAND",
-    temporal=("2024-09-28T19:55:26", "2024-09-28T19:55:27"),
+    temporal=temporal,
     granule_name='*V4_0*',
     count=1,
 )
@@ -441,7 +448,7 @@ valid = np.all(np.isfinite(data_rgb), axis=-1)
 
 # Gamma correction and scaling
 data_rgb = np.clip(data_rgb, 0, None) ** 0.6
-data_rgb = np.clip(data_rgb / 0.5, 0, 1)
+data_rgb = np.clip(data_rgb*1.5, 0, 1)
 
 # Add transparency
 data_rgba = np.dstack([
@@ -578,7 +585,7 @@ plot_rhos_angular(
     "rhos_angular",
     iy, ix,
     title="Angular Surface Reflectance (Before BRDF Correction)",
-    ylim=(0, 0.4)
+    ylim=(0, 0.6)
 )
 ```
 
@@ -630,7 +637,7 @@ plot_rhos_angular(
     "rhos_nadir",
     iy, ix,
     title="Angular Surface Reflectance (After BRDF Correction)",
-    ylim=(0, 0.4)
+    ylim=(0, 0.6)
 )
 ```
 
@@ -666,7 +673,9 @@ ratio
 
 For this example, the BRDF correction reduces a substantial portion of the angular variation, although residual angular dependence remains. The performance of this correction is still under evaluation.
 
-+++
+```{code-cell} ipython3
+
+```
 
 ## 8. Advanced: Quality Assessment
 
@@ -828,9 +837,118 @@ plot_l2_product(
 
 Examining these masks for individual viewing angles can help identify where angular observations have been screened from the inversion.
 
+```{code-cell} ipython3
+
+```
+
+## 10. Understand aerosol retrievals and resolve possible bias
+
 +++
 
-## 10. References
+Total AOD, we can identify a major smoke event, but overall there is a high AOD background (higher than expected as validated with AERONET).
+The high values at the cloud edge can be removed using better quality flags.
+
+```{code-cell} ipython3
+wavelength_index = 1
+label = "aot"
+title = f"{label}: " + str(wavelength[wavelength_index]) + " nm"
+
+data = dataset[label][:, :, wavelength_index]
+
+plot_l2_product(
+    lon, lat, data,
+    plot_range=plot_range,
+    label=label,
+    title=title,
+    vmin=0,
+    vmax=0.5,
+    cmap="YlOrRd"
+)
+```
+
+Fine mode AOD, we can identify the smoke event
+
+```{code-cell} ipython3
+wavelength_index = 1
+label = "aot_fine"
+title = f"{label}: " + str(wavelength[wavelength_index]) + " nm"
+
+data = dataset[label][:, :, wavelength_index]
+
+plot_l2_product(
+    lon, lat, data,
+    plot_range=plot_range,
+    label=label,
+    title=title,
+    vmin=0,
+    vmax=0.5,
+    cmap="YlOrRd"
+)
+```
+
+Coarse mode aod, it seems there is a background corase mode AOD, likely high
+
+```{code-cell} ipython3
+wavelength_index = 1
+label = "aot_coarse"
+title = f"{label}: " + str(wavelength[wavelength_index]) + " nm"
+
+data = dataset[label][:, :, wavelength_index]
+
+plot_l2_product(
+    lon, lat, data,
+    plot_range=plot_range,
+    label=label,
+    title=title,
+    vmin=0,
+    vmax=0.5,
+    cmap="YlOrRd"
+)
+```
+
+Likely the fine mode AOD bias is related to a small fine mode SSA. 
+
+```{code-cell} ipython3
+wavelength_index = 1
+label = "ssa_fine"
+title = f"{label}: " + str(wavelength[wavelength_index]) + " nm"
+
+data = dataset[label][:, :, wavelength_index]
+
+plot_l2_product(
+    lon, lat, data,
+    plot_range=plot_range,
+    label=label,
+    title=title,
+    vmin=0.0,
+    vmax=1,
+    cmap="Spectral"
+)
+```
+
+Coarse mode usually is not absorptive, other reason may contribute to the bias.
+
+```{code-cell} ipython3
+wavelength_index = 1
+label = "ssa_coarse"
+title = f"{label}: " + str(wavelength[wavelength_index]) + " nm"
+
+data = dataset[label][:, :, wavelength_index]
+
+plot_l2_product(
+    lon, lat, data,
+    plot_range=plot_range,
+    label=label,
+    title=title,
+    vmin=0.0,
+    vmax=1,
+    cmap="Spectral"
+)
+```
+
++++ {"jp-MarkdownHeadingCollapsed": true}
+
+## 11. References
 
 * [FastMAPOL ATBD](https://fastmapol.github.io/mapol-doc/).
 
