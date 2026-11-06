@@ -530,7 +530,7 @@ fig.add_trace(
                 "font": {"size": 10},
             },
             "tickfont": {"size": 9},
-            "x": 0.65,
+            "x": 0.9,
             "y": 0.2,
             "len": 0.4,
             "tickvals": [0, 0.004, 0.008, 0.012, 0.016],
@@ -596,7 +596,7 @@ fig.add_trace(
                 "font": {"size": 10},
             },
             "tickfont": {"size": 9},
-            "x": 0.65,
+            "x": 0.9,
             "y": 0.6,
             "len": 0.4,
         },
@@ -682,14 +682,14 @@ annotations_3d = [
 fig.update_layout(
     title={
         "text": "Multi-Platform 3D Ocean/Atmosphere Visualization (Santa Barbara)",
-        "y": 0.995,
+        "y": 0.95,
         "yanchor": "top",
         "x": 0.4,
         "xanchor": "center",
     },
     scene={
          "domain": {
-            "x": [0.0, 0.68],
+            "x": [0.0, 0.85],
             "y": [0.05, 0.95],
         },
         "aspectmode": "manual",
@@ -702,13 +702,13 @@ fig.update_layout(
         },
         "annotations": annotations_3d,
     },
-    width=1200,
+    autosize=True,
     height=800,
-    margin={"l": 0, "r": 180, "b": 50, "t": 50},
+    margin={"l": 0, "r": 20, "b": 20, "t": 20},
     showlegend=False,
 )
 
-fig.show()
+fig.show(config={"responsive": True})
 ```
 
 <div class="alert alert-info" role="alert">
