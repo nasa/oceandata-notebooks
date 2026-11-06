@@ -66,6 +66,13 @@ tools = [
   "pre-commit>=4.0.1",
   "ruff>=0.7.1",
 ]
+# duplicate packages for CI/CD (the only category installed)
+ci = [
+  "dvc[s3]",
+  "jupyter-book",
+  "jupytext",
+]
+
 
 [tool.conda-lock]
 default-non-conda-source = "pip"
