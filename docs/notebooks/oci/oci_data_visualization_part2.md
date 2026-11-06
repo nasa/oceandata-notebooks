@@ -762,5 +762,3 @@ plt.show()
 You have completed the notebook on PACE data visualization!
 
 </div>
-
-**TEST: If you see this, the file is rendering correctly.**
