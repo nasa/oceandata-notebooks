@@ -20,7 +20,6 @@ jobs:
       matrix:
         name:
           - jupyterlab
-          - oss
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: oceandata-${{ matrix.name }}

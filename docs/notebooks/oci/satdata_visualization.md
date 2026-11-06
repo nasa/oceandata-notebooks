@@ -557,12 +557,11 @@ tspan = ("2024-05-20", "2024-05-20")
 results = earthaccess.search_data(
     short_name="PACE_HARP2_L1C_SCI",
     temporal=tspan,
-    count=1,
 )
 ```
 
 ```{code-cell} ipython3
-paths = earthaccess.open(results)
+paths = earthaccess.open(results[-1:])
 ```
 
 ```{code-cell} ipython3
