@@ -1,14 +1,22 @@
 {
-    "@jupyterlab/apputils-extension:notification": {
-        "checkForUpdates": false,
-        "fetchNews": "false"
-    },
-    "@jupyterlab/filebrowser-extension:widget": {
-        "toolbar": [
-            {
-                "name": "gitClone",
-                "disabled": true
-            }
-        ]
-    }
+  "@jupyterlab/apputils-extension:notification": {
+    "checkForUpdates": false,
+    "fetchNews": "false"
+  },
+  "@jupyterlab/filebrowser-extension:widget": {
+    "toolbar": [
+      {
+        "name": "gitClone",
+        "disabled": true
+      }
+    ]
+  },
+  "@jupyterlab/application-extension:top-bar": {
+    "toolbar": [
+      {
+        "name": "workspaceIndicator",
+        "disabled": false
+      }
+    ]
+  }
 }
