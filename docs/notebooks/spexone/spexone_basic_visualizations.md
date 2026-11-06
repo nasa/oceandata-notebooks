@@ -60,24 +60,19 @@ import xarray as xr
 ```
 
 ```{code-cell} ipython3
-auth = earthaccess.login(persist=True)
+auth = earthaccess.login()
 ```
 
 ## 2. Get Level-1C Data
 
-Download some HARP2 Level-1C data using the `short_name` value "PACE_SPEXONE_L1C_SCI" in `earthaccess.search_data`. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface. Note that this might take a while, depending on the speed of your internet connection, and the progress bar will seem frozen because we're only downloading one file.
+Download some HARP2 Level-1C data using the `short_name` value "PACE_SPEXONE_L1C_SCI" in `earthaccess.search_data`. Level-1C corresponds to geolocated imagery. This means the imagery coming from the satellite has been calibrated and assigned to locations on the Earth's surface.
 
 ```{code-cell} ipython3
-auth = earthaccess.login(persist=True)
-
 results = earthaccess.search_data(
     short_name="PACE_SPEXONE_L1C_SCI",
-    # temporal=("2024-05-20", "2024-05-20"),
-    temporal=("2025-01-09T20:00:20", "2025-01-09T20:00:21"),
-    count=1,
+    temporal=("2025-01-09 20:01", "2025-01-09 20:01"),
 )
-
-paths = earthaccess.open(results)
+paths = earthaccess.open(results[-1:])
 ```
 
 <div class="alert alert-danger" role="alert">
