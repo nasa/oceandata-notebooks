@@ -52,25 +52,22 @@ jupyter = [
   "jupyterlab-git>=0.55.0",
   "jupyterlab-h5web>=12.3.0",
   "jupyterlab-myst>=2.4.3",
-  "jupytext>=1.17.2",
 ]
 # additional packages for container image
 container = [
   "dask-gateway>=2024.1.0",
-  "dvc[s3]>=3.63.0",
 ]
 # packages that provide command-line tools for maintainers
 tools = [
   "boto3>=1.35.36",
-  "jupyter-book>=1.0,<2",
   "pre-commit>=4.0.1",
   "ruff>=0.7.1",
 ]
-# duplicate packages for CI/CD (the only category installed)
+# packages that provide command-line tools for CI/CD (see .github/workflows/build-website.yaml)
 ci = [
-  "dvc[s3]",
-  "jupyter-book",
-  "jupytext",
+  "dvc[s3]>=3.63.0",
+  "jupyter-book>=1.0,<2",
+  "jupytext>=1.17.2",
 ]
 
 

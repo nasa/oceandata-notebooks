@@ -24,6 +24,7 @@ RUN micromamba create --yes --prefix ${NB_PYTHON_PREFIX} --file ${REPO_DIR}/cond
       --category notebooks \
       --category jupyter \
       --category container \
+      --category ci \
  && micromamba clean --yes --all --force-pkgs-dirs
 
 # system configuration
