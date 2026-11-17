@@ -155,7 +155,7 @@ plot = dataset_moana["prococcus_moana"][0].plot.imshow(robust="true")
 
 
 
-
+<br>
 We can do another quick plot for the land vegetation indices dataset. Notice the map is much more complete, which is expected in monthly compared to daily products.
 
 ```{code-cell} ipython3
