@@ -346,3 +346,37 @@ You have completed the notebook on HARP2 cloud products. May we suggest studying
 [aerosol over land]: https://nasa.github.io/oceandata-notebooks/notebooks/harp2/harp2_l2_fastmapol_aerosol_land_product.html
 
 </div>
+::::{admonition} Test what you learned in this notebook
+:class: note
+
+<details>
+<summary>What are the three main retrieval techniques in the HARP2 CLOUD_GPC product, and what do they retrieve?</summary>
+
+**Cloud Bow (parametric):** Retrieves droplet effective radius and variance using the cloud bow feature in polarized reflectance. **RFT (Rainbow Fourier Transform):** Retrieves bimodal droplet size distributions (two modes with separate radius, variance, and fraction). **CLI (Cloud Liquid Index):** Measures the fraction of cloud top composed of liquid vs. ice (values &lt; 0.3 indicate glaciated cloud tops).
+</details>
+
+<details>
+<summary>Why do the effective radius and variance maps show data only in a narrow stripe down the center of the swath?</summary>
+
+Cloud bow retrievals require observing the rainbow scattering angles (around 140°), which only occurs when HARP2's multi-angle views span a wide enough range. This angular coverage is only available in the central portion of the swath. The `cloud_bow_quality_retrieval_fail` flag indicates where and why retrievals failed.
+</details>
+
+<details>
+<summary>What makes effective variance a "key parameter uniquely provided by polarimetry"?</summary>
+
+Effective variance describes the width of the cloud droplet size distribution. Traditional passive remote sensing (like OCI) can retrieve effective radius but not variance. Polarimetry is sensitive to the detailed shape of the droplet size distribution, enabling variance retrievals. Together, effective radius and variance fully characterize the modified gamma distribution of cloud droplet sizes.
+</details>
+
+<details>
+<summary>The GPC product includes cloud liquid water path (LWP) derived from HARP2 and OCI data. Which sensor provides which piece of information?</summary>
+
+HARP2 provides the cloud droplet **effective radius** from cloud bow retrievals. OCI provides the cloud **optical thickness**. LWP is calculated by combining these two: LWP is proportional to optical thickness × effective radius, assuming liquid water content increases linearly with height from cloud base.
+</details>
+
+<details>
+<summary>Cloud Bow retrieves a single effective radius, but RFT retrieves two modes. When would a bimodal distribution be more realistic?</summary>
+
+Bimodal distributions occur when clouds have two distinct droplet populations, such as: (1) drizzle formation, where large drops coexist with smaller cloud droplets; (2) mixing between cloud layers with different microphysics; or (3) aerosol effects creating separate nucleation modes. Single-mode retrievals would average these populations, missing important cloud processes.
+</details>
+
+::::
