@@ -302,3 +302,38 @@ You have completed the notebook introducing NO<sub>2</sub> data products from OC
 </div>
 
 [terrestrial]: /notebooks/oci/oci_terrestrial_data
+
+::::{admonition} Test what you learned in this notebook
+:class: note
+
+<details>
+<summary>NO₂ shows high values over cities like Los Angeles but low values over the ocean. Why does NO₂ have such strong spatial patterns?</summary>
+
+NO₂ has a **short atmospheric lifetime** (hours to ~1 day), so it stays close to its sources: vehicles, power plants, and industry. Unlike long-lived gases (like CO₂), NO₂ doesn't mix globally. This makes it a powerful tracer of **local air quality and human activity**. Ocean regions show low values because there are few combustion sources there.
+</details>
+
+<details>
+<summary>The time series plot shows NO₂ varying from about 4×10¹⁵ to 8×10¹⁵ molecules cm⁻² over Los Angeles throughout 2025. What might cause these month-to-month changes?</summary>
+
+NO₂ concentrations vary with **emissions** (traffic patterns, industrial activity, heating/cooling demand) and **meteorology** (wind disperses pollution, sunlight drives photochemical reactions that destroy NO₂, temperature inversions trap pollution). Seasonal patterns often show higher NO₂ in winter (more heating, weaker photochemistry, stable atmospheres) and lower in summer.
+</details>
+
+<details>
+<summary>PACE measures NO₂ from space using the "total vertical column." How is this different from ground-level NO₂ measurements from air quality monitors?</summary>
+
+PACE measures the **total amount of NO₂ in the entire atmospheric column** from the surface to space (units: molecules cm⁻²). Ground monitors measure **concentration at one altitude** (units: ppb or μg m⁻³). Satellite columns are useful for tracking pollution transport and regional patterns, while ground monitors are better for assessing local air quality and health impacts.
+</details>
+
+<details>
+<summary>The L2 search for a single point (34°N, -118°W) returned 17 granules over 14 days. Why more than one per day?</summary>
+
+A single location can appear in **multiple swaths per day** when it's near the edge of OCI's wide swath (2600 km). The notebook filters these by checking the distance to the swath edges—only scenes where the point is well within the swath (not within 5.5° of the edge) are plotted.
+</details>
+
+<details>
+<summary>The L2 NO₂ maps show much more spatial detail than the L3M map. What's the trade-off?</summary>
+
+L2 data are at **native resolution** (~1 km) and show fine-scale features like individual plumes from highways or power plants. However, L2 data have **gaps** (clouds, swath edges, quality flags) and require more processing. L3M data are **gap-filled and averaged** over time and space, making them easier to use but smoothing out small-scale features.
+</details>
+
+::::
