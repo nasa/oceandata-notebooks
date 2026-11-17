@@ -772,7 +772,7 @@ You have completed the notebook on PACE data visualization!
 </div>
 
 
-:::{admonition} Test what you learned in this notebook
+::::{admonition} Test what you learned in this notebook
 :class: note
 
 :::{dropdown} 1. You made a quick plot with `.plot.imshow()` but can't see much. What's the fastest fix?
@@ -800,4 +800,4 @@ Prochlorococcus has much higher concentrations (cells/ml) than Synechococcus and
 Use `.resample(date='MS').mean()`, where `'MS'` stands for the month's starting day. This groups the data by month and calculates the mean for each group.
 :::
 
-:::
+::::
