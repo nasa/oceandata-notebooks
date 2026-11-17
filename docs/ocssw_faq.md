@@ -337,24 +337,28 @@ titleFormat=Chlorophyll Concentration, OCI Algorithm
 
 **l2bin** takes a Level-2 file as input and produces a bin file. **l3bin** aggregates one or more existing Level-3 bin files into another bin file, primarily used for temporal binning (e.g., combining daily bins into a monthly file), but it can also combine data spatially.
 
-This table illustrates the key similarities and differences in functionality between the processors “l2bin”, “l3bin” and “l3mapgen”:
+This table illustrates the key similarities and differences in functionality between the processors `l2bin`, `l3bin` and `l3mapgen`:
+
+<div style="font-size: 85%; line-height: 1.25;">
 
 | Functionality | l2bin | l3bin | l3mapgen |
-|---|---|---|---|
-| **Input** | One or more Level-2 files | One or more Level-3 binned files | Level-3 binned file |
-| **Output** | Level-3 binned file | Level-3 binned file | Level-3 mapped file or image file |
+|---|:---:|:---:|:---:|
+| **Input** | One or more<br>Level-2 files | One or more<br>Level-3 binned files | Level-3<br>binned file |
+| **Output** | Level-3<br>binned file | Level-3<br>binned file | Level-3 mapped file<br>or image file |
 | **Projection option** | No (Fixed) | No (Fixed) | Yes |
 | **Applies Level-2 flags** | Yes | No | No |
 | **Temporal subsetting** | Yes | No | No |
 | **Spatial subsetting** | Yes | Yes | Yes |
 | **Product subsetting** | Yes | Yes | Yes |
 | **Binning scheme** | Yes | Yes | No |
-| **Resolution** | Discrete resolution | Discrete resolution and no upsampling | Any |
+| **Resolution** | Discrete resolution | Discrete resolution<br>and no upsampling | Any |
 | **Interpolation** | Yes | No | Yes |
 | **Unit weight option** | No | Yes | No |
 | **Median option** | No | Yes | No |
-| **Data stored** | Per bin: sum, sum of squares, weights, num source Level-2 files, num source Level-2 pixels | Per bin: sum, sum of squares, weights, num source Level-2 files, num source Level-2 pixels | Per pixel: mean |
-| **Geocoding stored** | Global: resolution<br>Per bin: bin number | Global: resolution<br>Per bin: bin number | Per pixel: lat, lon |
+| **Data stored** | Per bin:<br>sum, sum of squares, weights,<br>num source Level-2 files,<br>num source Level-2 pixels | Per bin:<br>sum, sum of squares, weights,<br>num source Level-2 files,<br>num source Level-2 pixels | Per pixel:<br>mean |
+| **Geocoding stored** | Global: resolution<br>Per bin: bin number | Global: resolution<br>Per bin: bin number | Per pixel:<br>lat, lon |
+
+</div>
 
 </details>
 
