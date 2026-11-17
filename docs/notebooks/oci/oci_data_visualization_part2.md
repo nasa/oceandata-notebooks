@@ -771,9 +771,8 @@ You have completed the notebook on PACE data visualization!
 
 </div>
 
-## Test what you learned in this notebook
 
-:::{admonition} Quiz
+:::{admonition} Test what you learned in this notebook
 :class: note
 
 :::{dropdown} 1. You made a quick plot with `.plot.imshow()` but can't see much. What's the fastest fix?
@@ -802,6 +801,3 @@ Use `.resample(date='MS').mean()`, where `'MS'` stands for the month's starting 
 :::
 
 :::
-
-:::
-
