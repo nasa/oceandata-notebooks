@@ -150,6 +150,9 @@ Notice that we do not see much. In this case, the dataset contains outliers. If 
 plot = dataset_moana["prococcus_moana"][0].plot.imshow(robust="true")
 ```
 
+<details><summary><b>Checkpoint: What did <code>robust=True</code> just do?</b></summary>It automatically removed outliers so the colorbar focuses on the main data range. This is great for quick plots, but for analysis you'll want more control. In Section 4, you'll clean the data using the built-in <code>valid_min</code> and <code>valid_max</code> attributes instead.</details>
+
+
 We can do another quick plot for the land vegetation indices dataset. Notice the map is much more complete, which is expected in monthly compared to daily products.
 
 ```{code-cell} ipython3
@@ -762,3 +765,16 @@ plt.show()
 You have completed the notebook on PACE data visualization!
 
 </div>
+
+## Test what you learned in this notebook
+
+<details><summary>1. You made a quick plot with <code>.plot.imshow()</code> but can't see much. What's the fastest fix?</summary>Add <code>robust=True</code> to remove outliers automatically. For more control, use <code>.clip()</code> with the variable's <code>valid_min</code> and <code>valid_max</code> attributes.</details>
+
+<details><summary>2. Why normalize the data before making the RGB map?</summary>Normalization scales all variables to the same range (0 to 1), so they can be compared visually. Without it, one variable might dominate the color channels.</details>
+
+<details><summary>3. In the RGB map, which color channel represents Synechococcus in the ocean?</summary>Red. The order is set by <code>.sel(variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"])</code>, which maps to Red, Green, and Blue.</details>
+
+<details><summary>4. Why does the Prochlorococcus timeline use a second y-axis (<code>twinx</code>)?</summary>Prochlorococcus has much higher concentrations (cells/ml) than Synechococcus and Picoeukaryotes. A second axis lets you see all three trends clearly without one dominating the scale.</details>
+
+<details><summary>5. The daily timeline looks noisy. How do you smooth it to monthly averages?</summary>Use <code>.resample(date='MS').mean()</code>, where <code>'MS'</code> stands for the month's starting day. This groups the data by month and calculates the mean for each group.</details>
+
