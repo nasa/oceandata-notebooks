@@ -472,3 +472,38 @@ Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By d
 You have completed the notebook giving a first look at HARP2 data. More notebooks are coming soon!
 
 </div>
+
+::::{admonition} Test what you learned in this notebook
+:class: note
+
+<details>
+<summary>HARP2 has 4 spectral bands and 90 total channels. Why aren't there just 4 channels?</summary>
+
+HARP2 is multi-angle, meaning it views the same scene from many different angles. The red band has 60 viewing angles, while green, blue, and NIR each have 10. Angles and spectral bands are combined into one axis, giving 90 total channels (10 + 60 + 10 + 10).
+</details>
+
+<details>
+<summary>What do the I, Q, and U components of the Stokes vector represent?</summary>
+
+**I** is the total intensity (what your eyes would see). **Q** describes how much light is polarized in the -90°/90° direction vs. 0°/180°. **U** describes polarization in the -135°/45° direction vs. -45°/135°. HARP2 only measures linear polarization, so there's no V component (circular polarization).
+</details>
+
+<details>
+<summary>What does DoLP (degree of linear polarization) tell you about a scene?</summary>
+
+DoLP measures how much of the light is linearly polarized (vs. randomly polarized). High DoLP indicates surfaces or particles that preferentially polarize light, such as water, ice, or aerosols. Low DoLP indicates diffuse surfaces like vegetation or soil.
+</details>
+
+<details>
+<summary>Why convert radiance to reflectance?</summary>
+
+Reflectance compensates for differences in appearance caused by viewing angle and sun angle, making it easier to compare measurements. The physical meaning changes even though the visual appearance (after normalization) looks similar.
+</details>
+
+<details>
+<summary>The animation shows clouds with a parallax effect. What does this reveal about the clouds?</summary>
+
+The parallax effect between cloud layers reveals that the clouds have multiple layers at different altitudes. Multi-angle data captures information about 3D structure that would be hard to identify from a single viewing angle.
+</details>
+
+::::
