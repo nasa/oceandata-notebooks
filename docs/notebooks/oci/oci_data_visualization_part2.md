@@ -151,9 +151,11 @@ plot = dataset_moana["prococcus_moana"][0].plot.imshow(robust="true")
 ```
 
 
-> [!faq]- Checkpoint: What did <code>robust=True</code> just do?</b>
-> It automatically removed outliers so the colorbar focuses on the main data range. This is great for quick plots, but for analysis you'll want more control. In Section 4, you'll clean the data using the built-in <code>valid_min</code> and <code>valid_max</code> attributes instead.
+:::{admonition} Checkpoint: What did `robust=True` just do?
+:class: dropdown
 
+It automatically removed outliers so the colorbar focuses on the main data range. This is great for quick plots, but for analysis you'll want more control. In Section 4, you'll clean the data using the built-in `valid_min` and `valid_max` attributes instead.
+:::
 
 <br>
 We can do another quick plot for the land vegetation indices dataset. Notice the map is much more complete, which is expected in monthly compared to daily products.
