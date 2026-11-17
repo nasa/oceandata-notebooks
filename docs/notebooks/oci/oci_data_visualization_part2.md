@@ -773,13 +773,33 @@ You have completed the notebook on PACE data visualization!
 
 ## Test what you learned in this notebook
 
-<details><summary>1. You made a quick plot with <code>.plot.imshow()</code> but can't see much. What's the fastest fix?</summary>Add <code>robust=True</code> to remove outliers automatically. For more control, use <code>.clip()</code> with the variable's <code>valid_min</code> and <code>valid_max</code> attributes.</details>
+:::{admonition} Quiz
+:class: note
 
-<details><summary>2. Why normalize the data before making the RGB map?</summary>Normalization scales all variables to the same range (0 to 1), so they can be compared visually. Without it, one variable might dominate the color channels.</details>
+::::{details} 1. You made a quick plot with `.plot.imshow()` but can't see much. What's the fastest fix?
 
-<details><summary>3. In the RGB map, which color channel represents Synechococcus in the ocean?</summary>Red. The order is set by <code>.sel(variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"])</code>, which maps to Red, Green, and Blue.</details>
+Add `robust=True` to remove outliers automatically. For more control, use `.clip()` with the variable's `valid_min` and `valid_max` attributes.
+::::
 
-<details><summary>4. Why does the Prochlorococcus timeline use a second y-axis (<code>twinx</code>)?</summary>Prochlorococcus has much higher concentrations (cells/ml) than Synechococcus and Picoeukaryotes. A second axis lets you see all three trends clearly without one dominating the scale.</details>
+::::{details} 2. Why normalize the data before making the RGB map?
 
-<details><summary>5. The daily timeline looks noisy. How do you smooth it to monthly averages?</summary>Use <code>.resample(date='MS').mean()</code>, where <code>'MS'</code> stands for the month's starting day. This groups the data by month and calculates the mean for each group.</details>
+Normalization scales all variables to the same range (0 to 1), so they can be compared visually. Without it, one variable might dominate the color channels.
+::::
+
+::::{details} 3. In the RGB map, which color channel represents Synechococcus in the ocean?
+
+Red. The order is set by `.sel(variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"])`, which maps to Red, Green, and Blue.
+::::
+
+::::{details} 4. Why does the Prochlorococcus timeline use a second y-axis (`twinx`)?
+
+Prochlorococcus has much higher concentrations (cells/ml) than Synechococcus and Picoeukaryotes. A second axis lets you see all three trends clearly without one dominating the scale.
+::::
+
+::::{details} 5. The daily timeline looks noisy. How do you smooth it to monthly averages?
+
+Use `.resample(date='MS').mean()`, where `'MS'` stands for the month's starting day. This groups the data by month and calculates the mean for each group.
+::::
+
+:::
 
