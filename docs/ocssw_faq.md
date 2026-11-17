@@ -399,11 +399,11 @@ $$
 $$
 
 $$
-\text{variance} = \frac{\left( \dfrac{\text{sum\_squared}}{\text{weight}} - \text{mean}^{2} \right) \text{weight}^{2}}{\text{weight}^{2} - \text{nscenes}}
+\text{variance} = \frac{\left( \dfrac{\text{sum_squared}}{\text{weight}} - \text{mean}^{2} \right) \text{weight}^{2}}{\text{weight}^{2} - \text{nscenes}}
 $$
 
 $$
-\text{standard\_deviation} = \sqrt{\text{variance}}
+\text{standard_deviation} = \sqrt{\text{variance}}
 $$
 
 A binned product is built from three NetCDF compound data structures:
