@@ -772,7 +772,7 @@ You have completed the notebook on PACE data visualization!
 </div>
 
 ::::{admonition} Test what you learned in this notebook
-:class: note
+:class: important
 
 <details>
 <summary>1. You made a quick plot with <code>.plot.imshow()</code> but can't see much. What's the fastest fix?</summary>
