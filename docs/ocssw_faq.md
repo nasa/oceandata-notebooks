@@ -448,11 +448,11 @@ $$
 $$
 
 $$
-\text{variance} = \frac{\left( \dfrac{\text{sum\_squared}}{\text{weight}} - \text{mean}^{2} \right) \text{weight}^{2}}{\text{weight}^{2} - \text{nscenes}}
+\text{variance} = \frac{\left( \dfrac{\text{sum_squared}}{\text{weight}} - \text{mean}^{2} \right) \text{weight}^{2}}{\text{weight}^{2} - \text{nscenes}}
 $$
 
 $$
-\text{standard\_deviation} = \sqrt{\text{variance}}
+\text{standard_deviation} = \sqrt{\text{variance}}
 $$
 
 where `sum` is the weighted sum of pixel values in the bin, `sum_squared` is the weighted sum of squares, `weight` is the sum of observation weights, and `nscenes` is the number of contributing scenes.
