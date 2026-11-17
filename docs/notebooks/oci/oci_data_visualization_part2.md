@@ -776,30 +776,32 @@ You have completed the notebook on PACE data visualization!
 :::{admonition} Quiz
 :class: note
 
-::::{details} 1. You made a quick plot with `.plot.imshow()` but can't see much. What's the fastest fix?
+:::{dropdown} 1. You made a quick plot with `.plot.imshow()` but can't see much. What's the fastest fix?
 
 Add `robust=True` to remove outliers automatically. For more control, use `.clip()` with the variable's `valid_min` and `valid_max` attributes.
-::::
+:::
 
-::::{details} 2. Why normalize the data before making the RGB map?
+:::{dropdown} 2. Why normalize the data before making the RGB map?
 
 Normalization scales all variables to the same range (0 to 1), so they can be compared visually. Without it, one variable might dominate the color channels.
-::::
+:::
 
-::::{details} 3. In the RGB map, which color channel represents Synechococcus in the ocean?
+:::{dropdown} 3. In the RGB map, which color channel represents Synechococcus in the ocean?
 
 Red. The order is set by `.sel(variable=["syncoccus_moana", "picoeuk_moana", "prococcus_moana"])`, which maps to Red, Green, and Blue.
-::::
+:::
 
-::::{details} 4. Why does the Prochlorococcus timeline use a second y-axis (`twinx`)?
+:::{dropdown} 4. Why does the Prochlorococcus timeline use a second y-axis (`twinx`)?
 
 Prochlorococcus has much higher concentrations (cells/ml) than Synechococcus and Picoeukaryotes. A second axis lets you see all three trends clearly without one dominating the scale.
-::::
+:::
 
-::::{details} 5. The daily timeline looks noisy. How do you smooth it to monthly averages?
+:::{dropdown} 5. The daily timeline looks noisy. How do you smooth it to monthly averages?
 
 Use `.resample(date='MS').mean()`, where `'MS'` stands for the month's starting day. This groups the data by month and calculates the mean for each group.
-::::
+:::
+
+:::
 
 :::
 
