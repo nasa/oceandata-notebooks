@@ -393,3 +393,39 @@ plt.show()
 You have completed the notebook giving a first look at SPEXone data. More notebooks are coming soon!
 
 </div>
+
+::::{admonition} Test what you learned in this notebook
+:class: note
+
+<details>
+<summary>SPEXone has 400 intensity bands and 50 polarization bands. Why are the dimensions different?</summary>
+
+SPEXone measures intensity across a wider spectral range (380–779 nm with 400 bands) than polarization (385–770 nm with 50 bands). This is why the I component has a different spectral dimension than Q and U, and why you need to select different wavelength indices when visualizing them together.
+</details>
+
+<details>
+<summary>What the spectral difference between SPEXone and HARP2?</summary>
+
+SPEXone is **hyperspectral**, with 400 intensity bands covering 380–779 nm. HARP2 only has 4 spectral bands. This means SPEXone can capture detailed spectral signatures of aerosols and clouds that HARP2 cannot, though HARP2 has many more viewing angles (up to 60 vs. SPEXone's 5).
+</details>
+
+<details>
+<summary>Why doesn't SPEXone need to combine angles and wavelengths into one axis like HARP2 does?</summary>
+
+HARP2's different spectral bands have different numbers of angles (60 for red, 10 for others), so they're combined into one 90-channel axis. SPEXone measures the <i>same</i> 5 viewing angles for all spectral bands, so angles and wavelengths can stay as separate dimensions, making the data easier to work with.
+</details>
+
+<details>
+<summary>The code selects wavelength indices <code>[60, 170, 285]</code> for RGB visualization. Why use indices instead of exact wavelengths?</summary>
+
+SPEXone's 400 intensity bands are closely spaced (~1 nm apart), so you select the index closest to your target wavelength (e.g., index 285 is near 665 nm for red). Using `.sel(wavelength=665, method="nearest")` would also work, but indices are faster when you know the approximate position.
+</details>
+
+<details>
+<summary>SPEXone's swath is 100 km wide. How does this affect the viewing geometry compared to OCI's 2600 km swath?</summary>
+
+A narrower swath means the sensor zenith angle stays closer to nadir (0°) across the entire swath. SPEXone's "nadir" view is relatively uniform, while OCI's wide swath means pixels at the edges are viewed at very high angles (up to ~60°).
+</details>
+
+::::
+
