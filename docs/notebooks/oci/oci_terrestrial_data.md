@@ -335,3 +335,38 @@ array.hvplot(
 You have completed the notebook introducing terrestrial data products from OCI. We suggest looking at the notebook on "Satellite Data Visualization" for tips on making beautiful PACE/OCI images.
 
 </div>
+
+::::{admonition} Test what you learned in this notebook
+:class: note
+
+<details>
+<summary>Why does the notebook use <code>xr.merge</code> after opening the L2 file with <code>xr.open_datatree</code>?</summary>
+
+L2 files store variables in separate groups (like `geophysical_data`, `navigation_data`, and `sensor_band_parameters`). `xr.merge` combines the variables you need from different groups into a single dataset, making them easier to work with together.
+</details>
+
+<details>
+<summary>How do you mask out clouds and water from the surface reflectance data?</summary>
+
+Use the `l2_flags` variable with `cf_xarray`. The expression `(dataset["l2_flags"].cf == "LAND") & ~(dataset["l2_flags"].cf == "CLDICE")` keeps land pixels that are not clouds. Then apply it with `.where()`.
+</details>
+
+<details>
+<summary>Why average multiple PACE bands when calculating NDVI instead of using just one red and one NIR band?</summary>
+
+PACE's bands are narrow (5 nm), so using just one would miss information from surrounding wavelengths. Averaging several bands simulates a multispectral sensor's broader bandwidth (like MODIS), making the NDVI more comparable to legacy datasets and incorporating more relevant information.
+</details>
+
+<details>
+<summary>What's the key difference between multispectral VIs (like NDVI) and hyperspectral-enabled VIs (like CIRE)?</summary>
+
+Multispectral VIs use wide bands to capture general spectral features (e.g., "greenness"). Hyperspectral-enabled VIs use narrow bands to target minute spectral fluctuations, revealing detailed features like specific pigment concentrations. For hyperspectral VIs, you <i>don't</i> want to average bands because you'd dilute the signal.
+</details>
+
+<details>
+<summary>CIRE has a higher dynamic range than NDVI. Why is this an advantage?</summary>
+
+NDVI saturates as vegetation density increases, so different ecosystems may have similar NDVI values. CIRE is less affected by leaf area and instead measures relative chlorophyll content, enabling it to track specific biochemical shifts in plants that indicate photosynthetic or photoprotective ability.
+</details>
+
+::::
