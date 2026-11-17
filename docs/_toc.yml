@@ -86,7 +86,7 @@ parts:
 
       - file: sections/seadas-toolbox
         sections:
-          - file: ocssw_faq
+          - file: ocssw_faq.md
             title: SeaDAD-OCSSW FAQ
           - file: sections/seadas-desktop
             title: SeaDAS Desktop Application
