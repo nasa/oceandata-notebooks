@@ -107,6 +107,11 @@ harmony_client = harmony.Client(token=earthaccess.get_edl_token())
 Define which data set you’d like to access using either the dataset `short_name` or its collection `concept_id`. For this example, we’ll use PACE OCI Level-2 Regional Ocean Biogeochemical Properties Data (PACE_OCI_L2_BGC).
 
 ```{code-cell} ipython3
+---
+collapsed: true
+jupyter:
+  outputs_hidden: true
+---
 capabilities_request = harmony.CapabilitiesRequest(short_name="PACE_OCI_L2_BGC")
 capabilities = harmony_client.submit(capabilities_request)
 capabilities["summary"]
@@ -114,16 +119,17 @@ capabilities["summary"]
 
 You can see here under `['summary']` that there is a Harmony service for spatial subsetting by a bounding box or shape.
 
-::::{admonition} Checkpoint: Read the capabilities output above
+::::{admonition} Knowledge check! 
 :class: note
 
 <details>
-<summary>Can you subset `PACE_OCI_L2_BGC` by variable? By bounding box? Can Harmony reproject it?</summary>
+<summary>After reading the capabilities output above, can you subset `PACE_OCI_L2_BGC` by variable? By bounding box? Can Harmony reproject it?</summary>
 
 Yes to variable (`variableSubset: True`) and bounding box (`bboxSubset: True`), but no to reprojection (`reproject: False`). Keep this in mind: later in the notebook, you'll grid the L2 data yourself before making a composite.
 </details>
 
 ::::
+
 +++
 
 ## 4. Build and submit a request
@@ -509,35 +515,36 @@ print(f"Data Size % Change: {100 * (1 - sub_size / og_size):.2f} % reduction")
 You have completed the notebook on Subsetting PACE OCI data!
 
 </div>
-::::{admonition}Test what you learned in this notebook
+
+::::{admonition}Test what you learned in this notebook!
 :class: note
 
 <details>
-<summary>Before building a Harmony request, how can you check whether a dataset can be subset?</summary>
+<summary>1. Before building a Harmony request, how can you check whether a dataset can be subset?</summary>
 
-Submit a `CapabilitiesRequest` with the dataset's short name. The response lists the available services and whether subsetting by variable, bounding box, shape, or time is supported. For `PACE_OCI_L2_BGC`, the service is `podaac/l2-subsetter`.
+Submit a `CapabilitiesRequest` with the dataset's short-name. The response lists the available services and whether subsetting by variable, bounding box, shape, or time is supported. For `PACE_OCI_L2_BGC`, the service is `podaac/l2-subsetter`.
 </details>
 
 <details>
-<summary>Why add `labels` to a Harmony request?</summary>
+<summary>2. Why add 'labels' to a Harmony request?</summary>
 
 Labels tag your jobs so you can find and reuse their results later with a `JobsRequest`, instead of submitting the same job again. Results are kept for 30 days.
 </details>
 
 <details>
-<summary>Why can't you run <code>harmony_client.result_urls(job_id, link_type=LinkType.s3)</code> on your laptop and to open the files?</summary>
+<summary>3. Why can't you run <code>harmony_client.result_urls(job_id, link_type=LinkType.s3)</code> locally on your laptop and open the files?</summary>
 
 Streaming with S3 links only works when you are running in the AWS us-west-2 region, the same region as the NASA Earthdata Cloud. On a laptop, use `harmony_client.download` or `download_all` instead.
 </details>
 
 <details>
-<summary>Why can't you simply average the 10 subsetted L2 granules to make a composite?</summary>
+<summary>4. Why can't you simply average the 10 subsetted L2 granules to make a composite?</summary>
 
 L2 data are in the instrument swath, so each granule has different pixel locations. The granules must first be projected onto a common grid, which is what the `grid_data` function does.
 </details>
 
 <details>
-<summary>Harmony can't subset `PACE_OCI_L3M_BGC`. How do you subset it instead?</summary>
+<summary>5. Harmony can't subset `PACE_OCI_L3M_BGC`. How do you subset it instead?</summary>
 
 L3M data are already on a regular grid, so you can subset them with xarray using `.sel` and `slice`, then save the result with `to_netcdf`. Remember that latitude runs north to south, so the slice goes from the larger value to the smaller one.
 </details>
