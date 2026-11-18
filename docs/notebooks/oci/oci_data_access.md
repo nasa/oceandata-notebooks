@@ -14,7 +14,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 
-Last updated: July 23, 2026
+Last updated: November 18, 2026
 
 <div class="alert alert-info" role="alert">
 
@@ -133,7 +133,30 @@ directly under the collection name, after clicking on the "i" button for a colle
 
 </div>
 
-::::{admonition} Decode the filename: `PACE_OCI.20240601_20240608.L3m.8D.BGC.V3_2.4km.nc`
+Next, we use the `search_data` function (as opposed to `search_datasets`) to find granules within a collection.
+You can use `search_data` across collections too, but we'll limit to a single collection by specifying one of the above `short_name` values.
+Let's use the `short_name` for the PACE/OCI Level-2 biogeochemistry (BGC) products.
+
+The `count` argument limits the number of granule records that are returned in the search results.
+
+```{code-cell} ipython3
+results = earthaccess.search_data(
+    short_name="PACE_OCI_L2_BGC",
+    count=1,
+)
+```
+
+Displaying results shows the direct download link (try it!), along with a "quick-look" of some variable within the granule.
+The link will download the granule to your local machine, which may or may not be what you want to do.
+Even if you are running the notebook on a remote host, this download link will open a new browser tab or window and offer to save a file to your local machine.
+If you are running the notebook locally, this may be of use.
+More likely, you want to open or download the granules by following the steps below.
+
+```{code-cell} ipython3
+results[0]
+```
+
+::::{admonition} Knowledge check! Decode the filename: `PACE_OCI.20240601_20240608.L3m.8D.BGC.V3_2.4km.nc`
 :class: note
 
 <details>
@@ -174,29 +197,6 @@ NRT means near-real-time. These versions are released quickly for time-sensitive
 
 ::::
 
-
-Next, we use the `search_data` function (as opposed to `search_datasets`) to find granules within a collection.
-You can use `search_data` across collections too, but we'll limit to a single collection by specifying one of the above `short_name` values.
-Let's use the `short_name` for the PACE/OCI Level-2 biogeochemistry (BGC) products.
-
-The `count` argument limits the number of granule records that are returned in the search results.
-
-```{code-cell} ipython3
-results = earthaccess.search_data(
-    short_name="PACE_OCI_L2_BGC",
-    count=1,
-)
-```
-
-Displaying results shows the direct download link (try it!), along with a "quick-look" of some variable within the granule.
-The link will download the granule to your local machine, which may or may not be what you want to do.
-Even if you are running the notebook on a remote host, this download link will open a new browser tab or window and offer to save a file to your local machine.
-If you are running the notebook locally, this may be of use.
-More likely, you want to open or download the granules by following the steps below.
-
-```{code-cell} ipython3
-results[0]
-```
 
 We can refine our search by passing more parameters that describe
 the spatiotemporal domain of our use case. Here, we use the
@@ -244,6 +244,7 @@ results = earthaccess.search_data(
     temporal=("2024-06-01", "2024-06-01"),
 )
 paths = earthaccess.open(results)
+paths
 ```
 
 The list of outputs, which we called `paths`, contains references to files on a remote filesystem. They're not
@@ -354,8 +355,7 @@ The search returns every granule whose time range includes June 1. That includes
 
 <details>
 <summary>4. Why does <code>xr.open_dataset(results[0])</code> fail?</summary>
-
-<code>results</code> contains catalog entries, not files. First run <code>paths = earthaccess.open(results)</code> or <code>paths = earthaccess.download(results, local_path="granules")</code>, then use <code>xr.open_dataset(paths[0])</code>.
+<code>results</code> contains catalog entries, not files. First run <code>paths = earthaccess.open(results)</code> or <code>paths = earthaccess.download(results, local_path="granules")</code>, then use <code>xr.open_dataset(paths[0])</code>. 
 </details>
 
 <details>
