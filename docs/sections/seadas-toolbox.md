@@ -4,6 +4,7 @@ Learn to use the SeaDAS (Sea, earth and atmosphere Data Analysis System) process
 
 **What you'll learn:**
 
+- [SeaDAS and OCSSW FAQ](../ocssw_faq) - Answers to common questions about versions, processors, Level-2 processing, binning, and mapping
 - [SeaDAS Desktop Application Resources](seadas-desktop) - Resources and tutorials for using the SeaDAS graphical interface
 - [Install SeaDAS Processors](../notebooks/oci/oci_ocssw_install) - Setting up OCSSW command-line processing tools
 - [Basic Processing](../notebooks/oci/oci_ocssw_processing_overview) - Getting started with OCSSW processing workflows
