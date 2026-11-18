@@ -5,16 +5,16 @@ jupytext:
     format_name: myst
     format_version: 0.13
 kernelspec:
-  display_name: Python 3.10 (conda)
-  language: python
   name: python3
+  display_name: Python 3 (ipykernel)
+  language: python
 ---
 
 # Explore HARP2 Aerosol Data from FastMAPOL
 
 **Authors:** Meng Gao (NASA/SSAI), Sean Foley (NASA/MSU), Skye Caplan (NASA/SSAI)
 
-Last updated: November 17th, 2026
+Last updated: November 18th, 2026
 
 [edl]: https://urs.earthdata.nasa.gov/
 
@@ -37,7 +37,11 @@ By the end of this notebook, you will understand:
 - How to visualize basic aerosol properties
 - How to evaluate data quality
 
++++
+
 ## 1. Setup
+
++++
 
 Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting-Started] page, then the imports will be successful.
 
@@ -59,7 +63,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 ```
 
-In order to make working with HARP2 data in this tutorial a smoother experience, we have defined a function in the dropdown cell below to assist with plotting. Expand this cell if you'd like to take an in-depth look at how the plots are being handled. 
+In order to make working with HARP2 data in this tutorial a smoother experience, we have defined a function in the dropdown cell below to assist with plotting. Expand this cell if you'd like to take an in-depth look at how the plots are being handled.
 
 ```{code-cell} ipython3
 ---
@@ -69,9 +73,14 @@ slideshow:
 tags: [hide-cell]
 ---
 def plot_l2_product(
-    lon, lat, data,
-    plot_range, label, title,
-    vmin=None, vmax=None,
+    lon,
+    lat,
+    data,
+    label,
+    title="",
+    plot_range=None,
+    vmin=None, 
+    vmax=None,
     figsize=(12, 4),
     ellipses=[],
     cmap="viridis",
@@ -183,12 +192,15 @@ def plot_l2_product(
     plt.show()
 ```
 
+We also need to log in to the Earthdata system in order to access the necessary data in Section two. We do this with the cell below.
+
 ```{code-cell} ipython3
 auth = earthaccess.login()
-#fs = earthaccess.get_fsspec_https_session()
 ```
 
 ## 2. Get Level-2 Data
+
++++
 
 HARP2 L2 data is available from NASA Earthdata. The following block retrieves a single HARP2 L2 granule at the time stamp 2025/01/09 20:00:19 UTC from both the MAPOL_LAND and MAPOL_OCEAN data suites. The most recent HARP2 data version, Version 4.0 (V4.0), is specified in the search.
 
@@ -220,7 +232,7 @@ if not results_ocean:
     raise FileNotFoundError("No MAPOL_OCEAN granule was found.")
 ```
 
-The following cell will assess whether the data we are using cloud resources located in the same region to access the data we just found, or whether we should download that data locally. You can change the local download path as necessary.
+The following cell will assess whether the cloud resources we are using are located in the same region as the data we just found, or whether we should download that data locally. You can change the local download path as necessary.
 
 ```{code-cell} ipython3
 if earthaccess.__store__.in_region:
@@ -254,6 +266,8 @@ dataset = dataset_land.combine_first(dataset_ocean)
 
 ## 3. Understanding HARP2 L2 product structure
 
++++
+
 In the print out of the dataset in the next cell, we can see that the L2 HARP2 FastMAPOL product suite includes a long list (70 variables!) of data:
 
 The MAPOL_OCEAN suite provides aquatic variables:
@@ -267,167 +281,217 @@ The MAPOL_LAND suite provides terrestrial information:
 
 Tutorials on land surface reflectance can be found in the [HARP2 Land Product notebook](https://nasa.github.io/oceandata-notebooks/notebooks/harp2/harp2_l2_fastmapol_land_product.html).
 
-Since we merge the **MAPOL_OCEAN** and **MAPOL_LAND** suites, we can explore continuous aerosol retrievals across both ocean and land, regardless of the underlying surface type. Please refer to the **HARP2 Aerosol-over-Ocean notebook** for a list of available aerosol properties, or explore the dataset directly to see the available variables.
+Since we merged the `MAPOL_OCEAN` and `MAPOL_LAND` suites, we can explore continuous aerosol retrievals across both ocean and land, regardless of the underlying surface type. Let's print the full combined dataset to explore all of the variables in one place.
 
 ```{code-cell} ipython3
 dataset
 ```
 
+From the list above, we will look at three relevant variables: aerosol optical thickness (AOT), single scattering albedo (SSA), and fine-mode volume fraction (FVF). The shapes of `aot` and `ssa` show us they are 3D variables, corresponding to (row, column, wavelength). HARP2 collects data at wavelengths = `[440.159, 549.465, 664.564, 865.283]`. Note that `fvf` is a 2D variable, as it has no wavelength dependence. 
+
 It should be noted that the due to the use of `xr.merge()`, the original netCDF groupings (e.g., `geophysical_data`, etc.) are no longer present, and each data variable is located in the root group.
+
++++
 
 ## 4. Visulize HARP2 L2 aerosol properties
 
-Now that we know what data we have, we can start working with it. In this example, we visualize the aerosol properties for a scene observed during the LA wild fires, which occured in early 2025. The scene has both smoke and dust events, which show HARP2's aerosol capabilities well. We read the total aerosol optical depth, single scattering albedo, and fine mode volume fraction as below:
++++
+
+Now that we know what data we have, we can start working with it. In this example, we visualize the aerosol properties for a scene observed during the LA wild fires, which occured in early 2025. The scene has two visible high AOT events occuring at the same time, which show HARP2's capabilities well. We can plot these and start to investigate the properties of each event to better characterize them.
 
 ```{code-cell} ipython3
 aot = dataset["aot"].values
 ssa = dataset["ssa"].values
 fvf = dataset["fvf"].values
-aot.shape, ssa.shape, fvf.shape
+
+print(f"Aerosol optical depth shape: {aod.shape}")
+print(f"Single scattering albedo shape: {ssa.shape}")
+print(f"Fine-mode volume fraction shape: {fvf.shape}")
 ```
 
-We also need the spatial and angular dimensions as below:
+From the shapes of the arrays above, we can see that AOD and SSA and are 3D variables, corresponding to (row, column, wavelength). HARP2 collects data at wavelengths = `[440.159, 549.465, 664.564, 865.283]`. Since we will need the center wavelengths along with the geolocation information, we can define those below as well. Note that FVF is a 2D variable as it has no wavelength dependence. 
 
 ```{code-cell} ipython3
 lat = dataset["latitude"].values
 lon = dataset["longitude"].values
+
 plot_range = [lon.min(), lon.max(), lat.min(), lat.max()]
+
 wavelength = dataset["wavelength"].values
-print(wavelength)
 ```
 
-Next, we define a function that will take in all of this information and allow us to plot any variables of interest easily.
-
-```{code-cell} ipython3
-
-```
+### Plotting AOD, SSA, and FVF
 
 First, let's take a look at the aerosol optical depth:
 
 ```{code-cell} ipython3
-wavelength_index = 1
-title = "Aerosol Optical Depth (AOD): " + str(wavelength[wavelength_index]) + " nm"
-label = "AOD"
-data = aot[:, :, wavelength_index]
 ellipses = [
-    {"label": "Smoke", "xy": (-118.5, 31), "width": 3, "height": 8, "angle": 0, "edgecolor": (0.004, 0.451, 0.698)},
-    {"label": "Dust", "xy": (-113.5, 24), "width": 10, "height": 11, "angle": 15, "edgecolor": (0.871, 0.561, 0.02)},
+    {"label": "Event 1", "xy": (-118.5, 31), "width": 3, "height": 8, "angle": 0, "edgecolor": (0.004, 0.451, 0.698)},
+    {"label": "Event 2", "xy": (-113.5, 24), "width": 10, "height": 11, "angle": 15, "edgecolor": (0.871, 0.561, 0.02)},
 ]
+
+wavelength = 550
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=0.3, ellipses=ellipses, cmap="YlOrRd"
+    dataset["longitude"], 
+    dataset["latitude"], 
+    dataset["aot"].sel(wavelength=wavelength, method="nearest").values,
+    plot_range=[-125, -95, 15, 36],
+    label="AOT", 
+    title=f"Aerosol Optical Thickness (AOT): {wavelength} nm",
+    vmin=0, 
+    vmax=0.3, 
+    ellipses=ellipses, 
+    cmap="YlOrRd"
 )
 ```
 
-From the plot above, we can identify two regions with high AOD that might be worth a closer look. We can use the single scattering albedo (SSA) and fine mode volume fraction (FVF) to further investigate what these events might be:
+From the plot above, we can identify two regions with high AOD that might be worth a closer look. We can use SSA and FVF to further investigate what these events might be:
 
 ```{code-cell} ipython3
-wavelength_index = 1
-title = "Single scattering albedo (SSA): " + str(wavelength[wavelength_index]) + " nm"
-label = "SSA"
-data = ssa[:, :, wavelength_index]
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, ellipses=ellipses, cmap="jet"
+    dataset["longitude"], 
+    dataset["latitude"], 
+    dataset["ssa"].sel(wavelength=wavelength, method="nearest").values,
+    plot_range=[-125, -95, 15, 36],
+    label="SSA", 
+    title=f"Single scattering albedo (SSA): {wavelength} nm",
+    vmin=0.7, 
+    vmax=1.0, 
+    ellipses=ellipses, 
+    cmap="jet"
 )
-```
 
-```{code-cell} ipython3
-wavelength_index = 1
-title = "Fine mode fraction"
-label = "FVF"
-data = fvf
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, ellipses=ellipses, cmap="jet"
+    dataset["longitude"], 
+    dataset["latitude"], 
+    dataset["fvf"].values,
+    plot_range=[-125, -95, 15, 36],
+    label="FVF", 
+    title=f"Fine-mode Volume Fraction",
+    vmin=0, 
+    vmax=1.0, 
+    ellipses=ellipses, 
+    cmap="jet"
 )
 ```
 
 These events give off oppsosite signals in both SSA and FVF, signifying that they are likely due to different types of aerosols and thus have different origins. We can be more sure of this by zeroing in on the high quality pixels present in these maps.
 
++++
+
 ## 5. Improving data quality: filter low AOD pixels
 
-Aerosol absorption and microphysics have larger uncertainties when aerosol loading is low. Users can further remove low AOD cases when necessary. With these cases removed, we can more clearly see two types of aerosol events with relatively high AOD, the upper one with high absorption (low SSA) and small size (high FVF), probably smoke due to the LA wildfires. The lower event with less absorption (high SSA) and large size (low FVF) is probably dust from off the coast of Baja California.
++++
+
+Aerosol absorption and microphysics have larger uncertainties when aerosol loading is low. To ensure we're using the highest quality retrievals, we can further remove low AOD cases when necessary. With these cases removed, the two types of aerosol events, both with relatively high AOD, can be seen more clearly. The cells below filter SSA and FVF pixels to keep only those with AOD above 0.1, where retrievals have lower uncertainty. 
 
 ```{code-cell} ipython3
-wavelength_index = 1
 aot_min = 0.1
-title = (
-    "Filtered single scattering albedo (SSA): "
-    + str(wavelength[wavelength_index])
-    + " nm (AOD 550>"
-    + str(aot_min)
-    + ")"
+filtered_ssa = np.where(
+    dataset["aot"].sel(wavelength=wavelength, method="nearest") >= aot_min, 
+    dataset["ssa"].sel(wavelength=wavelength, method="nearest"), 
+    np.nan
 )
-label = "SSA"
-data = filtered_ssa = np.where(
-    aot[:, :, wavelength_index] >= aot_min, ssa[:, :, wavelength_index], np.nan
-)
-plot_l2_product(
-    lon, lat,data, plot_range=plot_range, label=label, title=title, vmin=0.7, vmax=1, ellipses=ellipses, cmap="jet"
+filtered_fvf = np.where(
+    dataset["aot"].sel(wavelength=wavelength, method="nearest") >= aot_min, 
+    dataset["fvf"], 
+    np.nan
 )
 ```
 
-The difference in appearance (after matplotlib automatically normalizes the data) is negligible, but the difference in the physical meaning of the array values is quite important.
+Plotting the filtered datasets, the difference in appearance in the maps below versus the unfiltered plots above is negligible, but the difference in the physical meaning of the array values is quite important. Without the surrounding lower quality pixels, we can see how distinct the two events actually are. The aerosols to the north, with low scattering (or high absorption) and small particle size (high FVF), are probably smoke from the LA wildfires. The more southern event with more scattering (less absorption) and large particle size (low FVF) probably comes from dust being blown off the coast of Baja California.
 
 ```{code-cell} ipython3
-wavelength_index = 1
-aot_min = 0.1
-title = "Fine mode fraction (AOD 550>" + str(aot_min) + ")"
-label = "FVF"
-data = filtered_ssa = np.where(aot[:, :, wavelength_index] >= aot_min, fvf, np.nan)
+ellipses = [
+    {"label": "Smoke", "xy": (-118.5, 31), "width": 3, "height": 8, "angle": 0, "edgecolor": (0.004, 0.451, 0.698)},
+    {"label": "Dust", "xy": (-113.5, 24), "width": 10, "height": 11, "angle": 15, "edgecolor": (0.871, 0.561, 0.02)},
+]
+
 plot_l2_product(
-    lon, lat,data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=1, ellipses=ellipses, cmap="jet"
+    dataset["longitude"], 
+    dataset["latitude"], 
+    filtered_ssa,
+    plot_range=[-125, -95, 15, 36],
+    label="SSA", 
+    title=f"Filtered SSA: {wavelength} nm, (AOD 550>{aot_min})",
+    vmin=0.7, 
+    vmax=1.0, 
+    ellipses=ellipses, 
+    cmap="jet"
+)
+
+plot_l2_product(
+    dataset["longitude"], 
+    dataset["latitude"], 
+    filtered_fvf,
+    plot_range=[-125, -95, 15, 36],
+    label="FVF", 
+    title=f"Filtered FVF: {wavelength} nm, (AOD 550>{aot_min})",
+    vmin=0, 
+    vmax=1.0, 
+    ellipses=ellipses, 
+    cmap="jet"
 )
 ```
 
 ## 6. Advanced quality assessment
 
-The FastMAPOL algorithm is based on optimal estimation, minimizing a $\chi^2$ cost function defined as the difference between measurement (m) and forward model fitting (f), normalized by total uncertainties ($\sigma$). 
++++
+
+For a more advanced quality assessment than filtering pixels based on AOD, we can look to how FastMAPOL runs these retrievals. The algorithm is based on optimal estimation, minimizing a $\chi^2$ cost function defined as the difference between measurement (m) and forward model fitting (f), normalized by total uncertainties ($\sigma$). 
 
 $\chi^2 = \frac{1}{N} \sum (f - m)^2/\sigma^2$
 
-Here N is the total number of measureents used in retreival. The algorithm also adaptively evaluates fitting performance - if the fitting perform poorly, it will be removed from the retreival process. Therefore, the $\chi^2$ and $N$ can be used to evaluate retrieval performance. Pixels with small $\chi^2$ (good fit) and large $N$ (more pixels that can be fit) will better quality. A more quantitative approach based on error propogation can be also used to compute retrieval uncertainty, which will be included in future product.
+Here N is the total number of measureents used in retreival. The algorithm also adaptively evaluates fitting performance - if the fit performs poorly, it will be removed from the retreival process. Therefore, the $\chi^2$ and $N$ can be used to evaluate retrieval performance. Pixels with small $\chi^2$ (good fit) and large $N$ (more pixels that can be fit) will be higher quality. A more quantitative approach based on error propogation can be also used to compute retrieval uncertainty, which will be included in a future product version.
 
 To support Level-3 data processing, quality flags are defined to indicate retrieval quality. A quality flag of **0** represents the highest-quality retrievals, generally associated with lower $\chi^2$ and a larger number of valid measurements ($N_v$). Higher quality-flag values correspond to less stringent criteria, allowing larger $\chi^2$ and fewer valid measurements. For details, please refer to the [FastMAPOL ATBD Quality Flag section](https://fastmapol.github.io/mapol-doc/chapters/fastmapol_product_quality.html).
 
 We can plot $\chi^2$ and $N_v$ to assess the quality of the retrievals examined in Section 5.
 
 ```{code-cell} ipython3
-chi2 = dataset["chi2"].values
-nv_ref = dataset["nv_ref"].values
-nv_dolp = dataset["nv_dolp"].values
-quality_flag = dataset["quality_flag"].values
-```
-
-```{code-cell} ipython3
-title = r"Retrieval cost function: $\chi^2$"
-label = r"$\chi^2$"
-data = chi2
 plot_l2_product(
-    lon, lat,data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=3, cmap="jet"
+    dataset["longitude"], 
+    dataset["latitude"], 
+    dataset["chi2"].values,
+    plot_range=[-125, -95, 15, 36],
+    label="$\chi^2$", 
+    title="Retrieval cost function: $\chi^2$",
+    vmin=0, 
+    vmax=3, 
+    cmap="jet"
 )
-```
 
-```{code-cell} ipython3
-title = r"Total number of reflectance measurements"
-label = r"$N_{ref}$"
-data = nv_ref
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=90, cmap="jet"
+    dataset["longitude"], 
+    dataset["latitude"], 
+    dataset["nv_ref"].values,
+    plot_range=[-125, -95, 15, 36],
+    label="$N_{ref}$", 
+    title="Total number of reflectance measurements",
+    vmin=0, 
+    vmax=90, 
+    cmap="jet"
 )
-```
 
-```{code-cell} ipython3
-title = r"Total number of DoLP measurements"
-label = r"$N_{dolp}$"
-data = nv_dolp
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=90, cmap="jet"
+    dataset["longitude"], 
+    dataset["latitude"], 
+    dataset["nv_dolp"].values,
+    plot_range=[-125, -95, 15, 36],
+    label="$N_{dolp}$", 
+    title="Total number of DoLP measurements",
+    vmin=0, 
+    vmax=90, 
+    cmap="jet"
 )
 ```
 
 We can also take a look at the averages of these quality indicators, to get a sense of the whole scene:
 
 ```{code-cell} ipython3
-np.nanmean(chi2), np.nanmean(nv_ref), np.nanmean(nv_dolp)
+print("Mean \u03C7\u00B2: " + str(np.round(np.nanmean(chi2), 3)))
+print("Mean N_ref: " + str(np.round(np.nanmean(nv_ref), 3)))
+print("Mean N_dolp: " + str(np.round(np.nanmean(nv_dolp), 3)))
 ```
 
 Note that $\chi^2$ converges reasonably well with slight under fitting (an average around 1.6 and peak around 1.3). Since HARP2 measures 90 angles across 4 bands, the average number of measurements satisfying a good fit is only 52 for reflectance and 42 for DoLP, which indicates a potential discrepancy between the forward model and measurements. This is likely due to forward model assumptions or measurement calibrations.
@@ -435,11 +499,18 @@ Note that $\chi^2$ converges reasonably well with slight under fitting (an avera
 Now that we know what is behind the quality flagging, let's see how that informs the overall quality flag by variable:
 
 ```{code-cell} ipython3
-title = "Retrieval quality flag"
-label = "quality_flag"
-data = quality_flag
+cmap = plt.get_cmap('viridis', 5)
+
 plot_l2_product(
-    lon, lat, data, plot_range=plot_range, label=label, title=title, vmin=0, vmax=4, cmap="viridis" 
+    dataset["longitude"], 
+    dataset["latitude"], 
+    dataset["quality_flag"].values,
+    plot_range=[-125, -95, 15, 36],
+    label="Quality flag value", 
+    title="Retrieval quality flag",
+    vmin=0, 
+    vmax=4, 
+    cmap=cmap
 )
 ```
 
