@@ -31,7 +31,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: /notebooks/oci/oci_data_access
+[oci-data-access]: https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_access.html
 
 ## Summary
 
@@ -62,8 +62,10 @@ from matplotlib import animation
 from scipy.ndimage import gaussian_filter1d
 ```
 
+Set your Earthdata Login credentials. You can add `persist=True` to save your credentials in plain text in a netrc file, allowing you to authenticate automatically in the future sessions without re-entering your Earthdata credentials.
+
 ```{code-cell} ipython3
-auth = earthaccess.login(persist=True)
+auth = earthaccess.login()
 ```
 
 ## 2. Get Level-1C Data
@@ -76,20 +78,11 @@ Note that access might take a while, depending on the speed of your internet con
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_HARP2_L1C_SCI",
-    # temporal=("2025-07-20", "2025-07-20"),
     temporal=("2025-01-09T20:00:20", "2025-01-09T20:00:21"),
-    count=1
+    count=1,
 )
 paths = earthaccess.open(results)
 ```
-
-<div class="alert alert-danger" role="alert">
-
-If you see `HTTPFileSystem` in the output when you display `paths`, then `earthaccess` has determined that you do not have
-direct access to the NASA Earthdata Cloud.
-It may be [wrong](https://github.com/nsidc/earthaccess/issues/231).
-
-</div>
 
 ```{code-cell} ipython3
 :tags: [remove-cell]
@@ -375,7 +368,9 @@ sza_idx = (dataset["solar_zenith_angle"] // 1).to_numpy()
 sza_uq = np.unique(sza_idx[~np.isnan(sza_idx)]).astype(int)
 sza_masks = sza_idx[None] == sza_uq[:, None, None, None]
 refl_np = refl.to_numpy()[None]
-refl_mean_by_sza = np.nansum(refl_np * sza_masks, axis=(1,2,3)) / sza_masks.sum(axis=(1,2,3))
+refl_mean_by_sza = np.nansum(refl_np * sza_masks, axis=(1, 2, 3)) / sza_masks.sum(
+    axis=(1, 2, 3)
+)
 
 fig, ax = plt.subplots(figsize=(16, 6))
 plot_data = [("b", "o"), ("g", "^"), ("r", "*"), ("black", "s")]
@@ -383,7 +378,9 @@ for wv_idx in range(4):
     wv = wv_uq[wv_idx]
     wv_mask = wavelengths.values == wv
     sza_masks_wv = sza_masks[..., wv_mask]
-    refl_mean_by_sza = np.nansum(refl_np[..., wv_mask] * sza_masks_wv, axis=(1,2,3)) / np.clip(sza_masks_wv.sum(axis=(1,2,3)), min=1)
+    refl_mean_by_sza = np.nansum(
+        refl_np[..., wv_mask] * sza_masks_wv, axis=(1, 2, 3)
+    ) / np.clip(sza_masks_wv.sum(axis=(1, 2, 3)), min=1)
     c, m = plot_data[wv_idx]
     ax.plot(
         sza_uq,
@@ -447,9 +444,11 @@ Now we can use `matplotlib.animation` to create an initial plot, define a functi
 fig, ax = plt.subplots()
 im = ax.imshow(refl_pretty[{"number_of_views": 0}], cmap="gray")
 
+
 def update(i):
     im.set_data(refl_pretty[{"number_of_views": i}])
     return im
+
 
 an = animation.FuncAnimation(fig=fig, func=update, frames=frames, interval=30)
 filename = f'harp2_red_anim_{dataset.attrs["product_name"].split(".")[1]}.gif'
@@ -469,7 +468,7 @@ Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By d
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook giving a first look at HARP2 data. More notebooks are coming soon!
+You have completed the notebook giving a first look at HARP2 data. We suggest taking a look at the HARP2 Aerosol notebooks under the Cloud and Atmosphere section. 
 
 </div>
 
@@ -477,31 +476,31 @@ You have completed the notebook giving a first look at HARP2 data. More notebook
 :class: note
 
 <details>
-<summary>HARP2 has 4 spectral bands and 90 total channels. Why aren't there just 4 channels?</summary>
+<summary>1. HARP2 has 4 spectral bands and 90 total channels. Why aren't there just 4 channels?</summary>
 
 HARP2 is multi-angle, meaning it views the same scene from many different angles. The red band has 60 viewing angles, while green, blue, and NIR each have 10. Angles and spectral bands are combined into one axis, giving 90 total channels (10 + 60 + 10 + 10).
 </details>
 
 <details>
-<summary>What do the I, Q, and U components of the Stokes vector represent?</summary>
+<summary>2. What do the I, Q, and U components of the Stokes vector represent?</summary>
 
 **I** is the total intensity (what your eyes would see). **Q** describes how much light is polarized in the -90°/90° direction vs. 0°/180°. **U** describes polarization in the -135°/45° direction vs. -45°/135°. HARP2 only measures linear polarization, so there's no V component (circular polarization).
 </details>
 
 <details>
-<summary>What does DoLP (degree of linear polarization) tell you about a scene?</summary>
+<summary>3. What does DoLP (degree of linear polarization) tell you about a scene?</summary>
 
 DoLP measures how much of the light is linearly polarized (vs. randomly polarized). High DoLP indicates surfaces or particles that preferentially polarize light, such as water, ice, or aerosols. Low DoLP indicates diffuse surfaces like vegetation or soil.
 </details>
 
 <details>
-<summary>Why convert radiance to reflectance?</summary>
+<summary>4. Why convert radiance to reflectance?</summary>
 
 Reflectance compensates for differences in appearance caused by viewing angle and sun angle, making it easier to compare measurements. The physical meaning changes even though the visual appearance (after normalization) looks similar.
 </details>
 
 <details>
-<summary>The animation shows clouds with a parallax effect. What does this reveal about the clouds?</summary>
+<summary>5. The animation shows clouds with a parallax effect. What does this reveal about the clouds?</summary>
 
 The parallax effect between cloud layers reveals that the clouds have multiple layers at different altitudes. Multi-angle data captures information about 3D structure that would be hard to identify from a single viewing angle.
 </details>
