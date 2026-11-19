@@ -541,7 +541,7 @@ plot_l2_product(
     dataset["latitude"], 
     dataset["mask_dolp"][:, :, angle_index, 0].values,
     plot_range=[-125, -95, 15, 36],
-    label="mask_ref", 
+    label="mask_dolp", 
     title=f"Adaptive data mask on DoLP: angle index {angle_index}",
     vmin=0, 
     vmax=1, 
@@ -579,6 +579,6 @@ The datasets may be cited as:
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on HARP2's FastMAPOL aerosol retrievals over land and the ocean. We suggest you take a look at the "Visualize SPEXone L2 Aerosol Products" notebook to see how these retrievals look from the other PACE polarimeter!
+You have completed the notebook on HARP2's FastMAPOL aerosol retrievals over land and the ocean. We suggest you take a look at the "Visualize SPEXone L2 Aerosol Products" notebook to see how these retrievals look from PACE's other polarimeter!
 
 </div>
