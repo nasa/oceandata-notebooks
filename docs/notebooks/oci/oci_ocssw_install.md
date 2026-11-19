@@ -35,7 +35,7 @@ The **Ocean Biology Python Image** available on {term}`StratusGeo` and other {te
 
 ## Summary
 
-[SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a dektop application that includes the Ocean Color Science Software (OCSSW) libraries. There are also command line programs for the OCSSW libraries, which we can use to write processing scripts or notebooks. This tutorial will show you how to install OCSSW and test it by processing a Level-1B (L1B) file from PACE OCI to a Level-2 (L2) file using `l2gen`. The installation can find OCSSW tools that work on modern Linux and macOS operating systems but not Windows.
+[SeaDAS][seadas] is the official data analysis sofware of NASA's Ocean Biology Distributed Active Archive Center (OB.DAAC); used to process, display and analyse ocean color data. SeaDAS is a desktop application that includes the Ocean Color Science Software (OCSSW) libraries. There are also command line programs for the OCSSW libraries, which we can use to write processing scripts or notebooks. This tutorial will show you how to install OCSSW and test it by processing a Level-1B (L1B) file from PACE OCI to a Level-2 (L2) file using `l2gen`. The installation can find OCSSW tools that work on modern Linux and macOS operating systems but not Windows.
 
 [seadas]: https://seadas.gsfc.nasa.gov/
 
