@@ -26,7 +26,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-This notebook introduces the Level-2 files containing the surface reflectance product from the Ocean Color Instrument (OCI) on board the [PACE satellite]. The visualizations rely on flags accompanying the data variables that enable masking for features more relevant to terrestrial data products. The notebook highlights the hyperspectral-enabled vegetation indices (VIs) made possible by the high spectral resolution of OCI.
+This notebook introduces the Level-2 files containing the surface reflectance product from the Ocean Color Instrument (OCI) onboard the [PACE satellite]. The visualizations rely on flags accompanying the data variables that enable masking for features more relevant to terrestrial data products. The notebook highlights the hyperspectral-enabled vegetation indices (VIs) made possible by the high spectral resolution of OCI.
 
 [PACE satellite]: https://pace.oceansciences.org
 
@@ -50,8 +50,8 @@ We begin by importing the packages used in this notebook. At first glance, the `
 import cartopy
 import cf_xarray  # noqa: F401
 import earthaccess
-import hvplot.xarray  # noqa: F401
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import xarray as xr
 
 crs = cartopy.crs.PlateCarree()
@@ -59,19 +59,20 @@ crs = cartopy.crs.PlateCarree()
 
 ## 2. Search and Open Surface Reflectance Data
 
-Set and persist your Earthdata login credentials.
+Set your Earthdata login credentials. You can add `persist=True` to save your credentials in plain text in a .netrc file, allowing you to authenticate automatically in the future sessions without re-entering your Earthdata credentials.
 
 ```{code-cell} ipython3
-auth = earthaccess.login(persist=True)
+auth = earthaccess.login()
 ```
 
-We will use `earthaccess` to open a Level-2 surface reflectance granule that covers part of the Great Lakes region of North America. When fetching one specific granule, use the `concept_id` argument to provide a unique identifier looked up elsewhere.
+We will use `earthaccess` to open a Level-2 surface reflectance granule that covers part of the Great Lakes region of North America. When fetching one specific granule, we can use the `granule_name` argument to provide part of the filename.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
     short_name="PACE_OCI_L2_SFREFL",
     granule_name="*.20240701T175112.*",
 )
+
 for item in results:
     display(item)
 ```
@@ -155,9 +156,8 @@ The statement returned `True`, which means `l2_flags` is recognized as a flag va
 [ocean color flags documentation]: https://oceandata.sci.gsfc.nasa.gov/ocl2flags/
 
 ```{code-cell} ipython3
-cldwater_mask = (
-    (dataset["l2_flags"].cf == "LAND")
-    & ~(dataset["l2_flags"].cf == "CLDICE")
+cldwater_mask = (dataset["l2_flags"].cf == "LAND") & ~(
+    dataset["l2_flags"].cf == "CLDICE"
 )
 rhos = dataset["rhos"].where(cldwater_mask)
 ```
@@ -183,7 +183,7 @@ plt.show()
 
 ## 4. Working with PACE Terrestrial Data
 
-Now that we have our surface reflectance data masked, we can start doing some analysis. A relatively simple but informative use of surface reflectance data is the calculation of vegetation indices (VIs). VIs use the well-known, idealized spectral shape of leaves and other materials to determine surface features contributing to a pixel. Vegetation health, relative water content, or even the presence of snow can be measured using VIs. These indices are particularly valuable when considering the limited number of bands in previous multispectral sensors, but they can of course be calculated with hyperspectral sensors like PACE.
+Now that we have our surface reflectance data masked, we can start doing some analyses. A relatively simple but informative use of surface reflectance data is the calculation of vegetation indices (VIs). VIs use the well-known, idealized spectral shape of leaves and other materials to determine surface features contributing to a pixel. Vegetation health, relative water content, or even the presence of snow can be measured using VIs. These indices are particularly valuable when considering the limited number of bands in previous multispectral sensors, but they can of course be calculated with hyperspectral sensors like PACE.
 
 ### Multispectral Vegetation Indices
 
@@ -289,7 +289,7 @@ plt.show()
 
 Comparing these two plots, we can see some similarities and differences. Generally, the patterns of high and low values fall in the same places - this is because NDVI is essentially measuring the amount of green vegetation, and CIRE is measuring the amount of green pigment in plants. However, CIRE also has a higher dynamic range than NDVI does. For one, NDVI saturates as vegetation density increases, so a wide range of ecosystems with varying amounts of green vegetation may have very similar NDVI values. On the other hand, CIRE is not as affected by the leaf area, and can instead hone in on the relative amount of chlorophyll pigment in a pixel rather than the amount of leaves. This is a major advantage of CIRE and other hyperspectral-enabled VIs like the Carotenoid Content Index (Car), enabling us to track specific biochemical shifts in plants that correspond to states of photosynthetic or photoprotective ability, and thus provide insight on plant physiological condition.
 
-If calculating these indices manually felt a little tedious, not to worry! PACE/OCI provides 10 VIs in its LANDVI products available in Level-2 (`short_name="PACE_OCI_L2_LANDVI"`) and Level-3 (`short_name="PACE_OCI_L3M_LANDVI"`). The suite includes 6 heritage indices and 4 narrowband pigment indices including CIRE. Read more about it in the [LANDVI ATBD](https://www.earthdata.nasa.gov/apt/documents/landvi/v1.0).
+If calculating these indices manually felt a little tedious, not to worry! PACE/OCI provides 10 VIs in its LANDVI products available in Level-2 (`short_name="PACE_OCI_L2_LANDVI"`) and Level-3M (`short_name="PACE_OCI_L3M_LANDVI"`). The suite includes 6 heritage indices and 4 narrowband pigment indices including CIRE. Read more about it in the [LANDVI ATBD](https://www.earthdata.nasa.gov/apt/documents/landvi/v1.0).
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
@@ -313,58 +313,115 @@ if not earthaccess.__store__.in_region:
     paths = earthaccess.download(results, "granules")
 ```
 
-The Level-3 data products come binned and gridded on a global projection at multiple temporal and spatial resolutions. The granule shown here is a monthly, 0.1 degree aggregate. We'll conclude by dropping in a nifty interactive visualization brought to you by the `hvplot` package.
+The Level-3M data products come binned and gridded on a global projection at multiple temporal and spatial resolutions. The granule shown here is a monthly, 0.1 degree aggregate. We'll conclude by dropping in a nifty interactive visualization brought to you by the `plotly` package. Since the original dataset is fairly large, we'll first coarsen it by a factor of 6 along each spatial dimension to reduce rendering time while retaining the overall spatial patterns.
 
 ```{code-cell} ipython3
 dataset = xr.open_dataset(paths[0])
-array = dataset.drop_vars("palette").to_array("Product")
-array.attrs["long_name"] = "Vegetation Index"
-array.hvplot(
-    x="lon",
-    y="lat",
-    cmap="magma",
-    aspect=2,
-    title="July 2024 Monthly Average",
-    rasterize=True,
-    widget_location='top',
+dataset_coarse = dataset.coarsen(lon=6, lat=6, boundary="trim").mean()
+dataset_coarse = dataset_coarse.drop_vars("palette")
+```
+
+```{code-cell} ipython3
+variables = list(dataset_coarse.data_vars)
+
+fig = go.Figure()
+
+for i, var in enumerate(variables):
+    da = dataset_coarse[var]
+
+    fig.add_trace(
+        go.Heatmap(
+            z=da.values,
+            x=da.lon.values,
+            y=da.lat.values,
+            colorscale="Magma",
+            colorbar=dict(title=var),
+            visible=(i == 0),
+            name=var,
+            hovertemplate=(
+                "Lon: %{x}<br>" "Lat: %{y}<br>" "Value: %{z}<extra></extra>"
+            ),
+        )
+    )
+
+buttons = []
+
+for i, var in enumerate(variables):
+    visibility = [j == i for j in range(len(variables))]
+
+    buttons.append(
+        dict(
+            label=var,
+            method="update",
+            args=[
+                {"visible": visibility},
+                {
+                    "title": {
+                        "text": f"July 2024 Monthly Average: {variables[i]}",
+                        "x": 0,
+                        "xanchor": "left",
+                    }
+                },
+            ],
+        )
+    )
+
+fig.update_layout(
+    title={"text": "July 2024 Monthly Average: ndvi", "x": 0, "xanchor": "left"},
+    width=700,
+    height=400,
+    updatemenus=[
+        dict(
+            buttons=buttons,
+            direction="down",
+            x=1.18,
+            xanchor="left",
+            y=0.5,
+            yanchor="middle",
+        )
+    ],
+    xaxis_title="Longitude",
+    yaxis_title="Latitude",
 )
+
+fig.show()
 ```
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook introducing terrestrial data products from OCI. We suggest looking at the notebook on "Satellite Data Visualization" for tips on making beautiful PACE/OCI images.
+You have completed the notebook introducing terrestrial data products from OCI. We suggest looking at the notebook on "PACE-OCI Part I" under Visualizations for tips on making beautiful PACE/OCI images.
 
 </div>
 
-::::{admonition} Test what you learned in this notebook
+::::{admonition} Test what you learned in this notebook!
 :class: note
 
 <details>
-<summary>Why does the notebook use <code>xr.merge</code> after opening the L2 file with <code>xr.open_datatree</code>?</summary>
+<summary>1. Why does the notebook use <code>xr.merge</code> after opening the L2 file with <code>xr.open_datatree</code>?</summary>
 
 L2 files store variables in separate groups (like `geophysical_data`, `navigation_data`, and `sensor_band_parameters`). `xr.merge` combines the variables you need from different groups into a single dataset, making them easier to work with together.
 </details>
 
 <details>
-<summary>How do you mask out clouds and water from the surface reflectance data?</summary>
+<summary>2. How do you mask out clouds and water from the surface reflectance data?</summary>
 
 Use the `l2_flags` variable with `cf_xarray`. The expression `(dataset["l2_flags"].cf == "LAND") & ~(dataset["l2_flags"].cf == "CLDICE")` keeps land pixels that are not clouds. Then apply it with `.where()`.
 </details>
 
 <details>
-<summary>Why average multiple PACE bands when calculating NDVI instead of using just one red and one NIR band?</summary>
+<summary>3. Why average multiple PACE bands when calculating NDVI instead of using just one red and one NIR band?</summary>
 
 PACE's bands are narrow (5 nm), so using just one would miss information from surrounding wavelengths. Averaging several bands simulates a multispectral sensor's broader bandwidth (like MODIS), making the NDVI more comparable to legacy datasets and incorporating more relevant information.
 </details>
 
 <details>
-<summary>What's the key difference between multispectral VIs (like NDVI) and hyperspectral-enabled VIs (like CIRE)?</summary>
+<summary>4. What's the key difference between multispectral VIs (like NDVI) and hyperspectral-enabled VIs (like CIRE)?</summary>
 
 Multispectral VIs use wide bands to capture general spectral features (e.g., "greenness"). Hyperspectral-enabled VIs use narrow bands to target minute spectral fluctuations, revealing detailed features like specific pigment concentrations. For hyperspectral VIs, you <i>don't</i> want to average bands because you'd dilute the signal.
 </details>
 
 <details>
-<summary>CIRE has a higher dynamic range than NDVI. Why is this an advantage?</summary>
+<summary>5. CIRE has a higher dynamic range than NDVI. Why is this an advantage?</summary>
 
 NDVI saturates as vegetation density increases, so different ecosystems may have similar NDVI values. CIRE is less affected by leaf area and instead measures relative chlorophyll content, enabling it to track specific biochemical shifts in plants that indicate photosynthetic or photoprotective ability.
 </details>
