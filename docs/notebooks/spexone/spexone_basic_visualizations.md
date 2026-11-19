@@ -31,7 +31,7 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 </div>
 
 [edl]: https://urs.earthdata.nasa.gov/
-[oci-data-access]: /notebooks/oci/oci_data_access
+[oci-data-access]: https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_access.html
 
 ## Summary
 
@@ -59,6 +59,8 @@ import numpy as np
 import xarray as xr
 ```
 
+Set your Earthdata Login credentials. You can add `persist=True` to save your credentials in plain text in a netrc file, allowing you to authenticate automatically in the future sessions without re-entering your Earthdata credentials.
+
 ```{code-cell} ipython3
 auth = earthaccess.login()
 ```
@@ -74,14 +76,6 @@ results = earthaccess.search_data(
 )
 paths = earthaccess.open(results[-1:])
 ```
-
-<div class="alert alert-danger" role="alert">
-
-If you see `HTTPFileSystem` in the output when you display `paths`, then `earthaccess` has determined that you do not have
-direct access to the NASA Earthdata Cloud.
-It may be [wrong](https://github.com/nsidc/earthaccess/issues/231).
-
-</div>
 
 ```{code-cell} ipython3
 :tags: [remove-cell]
@@ -390,7 +384,7 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook giving a first look at SPEXone data. More notebooks are coming soon!
+You have completed the notebook giving a first look at SPEXone data. We suggest viewing the SPEXone Aerosols notebooks under the Cloud and Atmosphere section. 
 
 </div>
 
@@ -398,34 +392,33 @@ You have completed the notebook giving a first look at SPEXone data. More notebo
 :class: note
 
 <details>
-<summary>SPEXone has 400 intensity bands and 50 polarization bands. Why are the dimensions different?</summary>
+<summary>1. SPEXone has 400 intensity bands and 50 polarization bands. Why are the dimensions different?</summary>
 
 SPEXone measures intensity across a wider spectral range (380–779 nm with 400 bands) than polarization (385–770 nm with 50 bands). This is why the I component has a different spectral dimension than Q and U, and why you need to select different wavelength indices when visualizing them together.
 </details>
 
 <details>
-<summary>What the spectral difference between SPEXone and HARP2?</summary>
+<summary>2. What the spectral difference between SPEXone and HARP2?</summary>
 
-SPEXone is **hyperspectral**, with 400 intensity bands covering 380–779 nm. HARP2 only has 4 spectral bands. This means SPEXone can capture detailed spectral signatures of aerosols and clouds that HARP2 cannot, though HARP2 has many more viewing angles (up to 60 vs. SPEXone's 5).
+SPEXone is hyperspectral, with 400 intensity bands covering 380–779 nm. HARP2 only has 4 spectral bands. This means SPEXone can capture detailed spectral signatures of aerosols and clouds that HARP2 cannot, though HARP2 has many more viewing angles (up to 60 vs. SPEXone's 5).
 </details>
 
 <details>
-<summary>Why doesn't SPEXone need to combine angles and wavelengths into one axis like HARP2 does?</summary>
+<summary>3. Why doesn't SPEXone need to combine angles and wavelengths into one axis like HARP2 does?</summary>
 
 HARP2's different spectral bands have different numbers of angles (60 for red, 10 for others), so they're combined into one 90-channel axis. SPEXone measures the <i>same</i> 5 viewing angles for all spectral bands, so angles and wavelengths can stay as separate dimensions, making the data easier to work with.
 </details>
 
 <details>
-<summary>The code selects wavelength indices <code>[60, 170, 285]</code> for RGB visualization. Why use indices instead of exact wavelengths?</summary>
+<summary>4. The code selects wavelength indices <code>[60, 170, 285]</code> for RGB visualization. Why use indices instead of exact wavelengths?</summary>
 
 SPEXone's 400 intensity bands are closely spaced (~1 nm apart), so you select the index closest to your target wavelength (e.g., index 285 is near 665 nm for red). Using `.sel(wavelength=665, method="nearest")` would also work, but indices are faster when you know the approximate position.
 </details>
 
 <details>
-<summary>SPEXone's swath is 100 km wide. How does this affect the viewing geometry compared to OCI's 2600 km swath?</summary>
+<summary>5. SPEXone's swath is 100 km wide. How does this affect the viewing geometry compared to OCI's 2600 km swath?</summary>
 
 A narrower swath means the sensor zenith angle stays closer to nadir (0°) across the entire swath. SPEXone's "nadir" view is relatively uniform, while OCI's wide swath means pixels at the edges are viewed at very high angles (up to ~60°).
 </details>
 
 ::::
-
