@@ -466,3 +466,39 @@ As mentioned previously, pixel level uncertainty can be evalated through error p
 
 - [**Validation**] Gao, M., Aryal, K., Zhai, P.-W., Knobelspiesse, K., Franz, B. A., Cairns, B., Cetinić, I., Fu, G., Hasekamp, O., Ibrahim, A., Sayer, A. M., and Werdell, P. J.: Where sky meets sea: Integrated aerosol and ocean color retrieval from PACE SPEXone multi-angle polarimetry, Remote Sens. Environ., 345, 115603, https://doi.org/10.1016/j.rse.2026.115603, 2026.
 - [**Algorithm**] Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, Atmos. Meas. Tech., 16, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023.
+
+::::{admonition} Test what you learned in this notebook
+:class: note
+
+<details>
+<summary>What does the FastMAPOL algorithm retrieve, and what makes it different from a typical aerosol retrieval?</summary>
+
+FastMAPOL is a **joint aerosol and surface retrieval** algorithm. Unlike typical aerosol algorithms that assume ocean properties, FastMAPOL simultaneously retrieves aerosol properties (AOD, SSA, size, etc.) <i>and</i> ocean properties (wind speed, chlorophyll-a, remote sensing reflectance) from HARP2's multi-angle polarimetric measurements.
+</details>
+
+<details>
+<summary>The notebook shows two aerosol events: smoke (high SSA, high FVF) and dust (low SSA, low FVF). What do SSA and FVF tell you about aerosols?</summary>
+
+**SSA (single scattering albedo)** measures absorption: high SSA means less absorbing (like dust), low SSA means more absorbing (like smoke). **FVF (fine mode volume fraction)** measures size: high FVF means small particles (like smoke), low FVF means large particles (like dust).
+</details>
+
+<details>
+<summary>Why filter out low AOD pixels when analyzing aerosol absorption and microphysics?</summary>
+
+Aerosol absorption (SSA) and microphysical properties (size, refractive index) have larger uncertainties when aerosol loading is low. Filtering out pixels with AOD below a threshold (e.g., 0.1) removes cases where the retrieval is less reliable.
+</details>
+
+<details>
+<summary>What do χ² (chi-squared), N<sub>ref</sub>, and N<sub>dolp</sub> tell you about retrieval quality?</summary>
+
+**χ²** measures how well the forward model fits the measurements (lower is better; ideal is ~1). **N<sub>ref</sub>** and **N<sub>dolp</sub>** count how many reflectance and DoLP measurements passed quality checks and were used in the retrieval (higher is better). Good retrievals have low χ² and high N values.
+</details>
+
+<details>
+<summary>HARP2 measures 90 angles across 4 bands (360 total measurements), but the average N<sub>ref</sub> is only 57 and N<sub>dolp</sub> is 41. Why?</summary>
+
+The FastMAPOL algorithm **adaptively screens** measurements during retrieval. If a measurement doesn't fit the forward model well (due to clouds, calibration issues, or model assumptions), it's removed. The adaptive data masks (`mask_ref` and `mask_dolp`) show which angles were excluded for each pixel.
+</details>
+
+::::
+
