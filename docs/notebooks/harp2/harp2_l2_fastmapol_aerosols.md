@@ -14,7 +14,7 @@ kernelspec:
 
 **Authors:** Meng Gao (NASA/SSAI), Sean Foley (NASA/MSU), Skye Caplan (NASA/SSAI)
 
-Last updated: November 19th, 2026
+Last updated: November 20th, 2026
 
 [edl]: https://urs.earthdata.nasa.gov/
 
@@ -322,7 +322,7 @@ In this example, we visualize the aerosol properties for a scene observed during
 First, let's take a look at the AOT:
 
 ```{code-cell} ipython3
-wavelength = 550
+wavelength = dataset['wavelength'].sel(wavelength=550, method='nearest').item()
 
 ellipses = [
     {"label": "Event 1", "xy": (-118.5, 31), "width": 3, "height": 8, "angle": 0, "edgecolor": (0.004, 0.451, 0.698)},
@@ -335,7 +335,7 @@ plot_l2_product(
     dataset["aot"].sel(wavelength=wavelength, method="nearest").values,
     plot_range=[-125, -95, 15, 36],
     label="AOT", 
-    title=f"Aerosol Optical Thickness (AOT): {wavelength} nm",
+    title=f"Aerosol Optical Thickness (AOT): {wavelength:.1f} nm",
     vmin=0, 
     vmax=0.3, 
     ellipses=ellipses, 
@@ -352,7 +352,7 @@ plot_l2_product(
     dataset["ssa"].sel(wavelength=wavelength, method="nearest").values,
     plot_range=[-125, -95, 15, 36],
     label="SSA", 
-    title=f"Single scattering albedo (SSA): {wavelength} nm",
+    title=f"Single scattering albedo (SSA): {wavelength:.1f} nm",
     vmin=0.7, 
     vmax=1.0, 
     ellipses=ellipses, 
@@ -412,7 +412,7 @@ plot_l2_product(
     filtered_ssa,
     plot_range=[-125, -95, 15, 36],
     label="SSA", 
-    title=f"Filtered SSA: {wavelength} nm, (AOT 550>{aot_min})",
+    title=f"Filtered SSA: {wavelength:.1f} nm, (AOT 550>{aot_min})",
     vmin=0.7, 
     vmax=1.0, 
     ellipses=ellipses, 
@@ -425,7 +425,7 @@ plot_l2_product(
     filtered_fvf,
     plot_range=[-125, -95, 15, 36],
     label="FVF", 
-    title=f"Filtered FVF: {wavelength} nm, (AOT 550>{aot_min})",
+    title=f"Filtered FVF: {wavelength:.1f} nm, (AOT 550>{aot_min})",
     vmin=0, 
     vmax=1.0, 
     ellipses=ellipses, 
@@ -527,7 +527,7 @@ cmap = plt.get_cmap('viridis', 2)
 plot_l2_product(
     dataset["longitude"], 
     dataset["latitude"], 
-    dataset["mask_ref"][:, :, angle_index, 0].values,
+    dataset["mask_ref"].isel(number_of_views=angle_index, intensity_bands_per_view=0).values,
     plot_range=[-125, -95, 15, 36],
     label="mask_ref", 
     title=f"Adaptive data mask on reflectance: angle index {angle_index}",
@@ -539,7 +539,7 @@ plot_l2_product(
 plot_l2_product(
     dataset["longitude"], 
     dataset["latitude"], 
-    dataset["mask_dolp"][:, :, angle_index, 0].values,
+    dataset["mask_dolp"].isel(number_of_views=angle_index, polarization_bands_per_view=0).values,
     plot_range=[-125, -95, 15, 36],
     label="mask_dolp", 
     title=f"Adaptive data mask on DoLP: angle index {angle_index}",
@@ -550,30 +550,6 @@ plot_l2_product(
 ```
 
 Pixel level uncertainty can also be evalated through error propagation, which propagates measurement uncertainty through the Jacobian of the forward model. The estimated uncertainties are discussed in (Gao et al., 2021) for HARP2 and AirHARP, but are currently not included in the HARP2 L2 products.
-
-+++
-
-## 8. References
-
-+++
-
-- [**FastMAPOL ATBD**](https://fastmapol.github.io/mapol-doc)
-- [**Validation**] Gao, M., Aryal, K., Zhai, P.-W., Knobelspiesse, K., Franz, B. A., Cairns, B., Cetinić, I., Fu, G., Hasekamp, O., Ibrahim, A., Sayer, A. M., and Werdell, P. J.: Where sky meets sea: Integrated aerosol and ocean color retrieval from PACE SPEXone multi-angle polarimetry, Remote Sens. Environ., 345, 115603, https://doi.org/10.1016/j.rse.2026.115603, 2026.
-- [**Algorithm**] Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, Atmos. Meas. Tech., 16, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023.
-
-### How to Cite
-
-If you use the PACE HARP2 MAPOL_LAND or MAPOL_OCEAN Version 4.0 data, please refer to the dataset information page for the latest citation and DOI:
-
-https://www.earthdata.nasa.gov/data/catalog/ob-cloud-pace-harp2-l2-mapol-land-4.0
-
-https://www.earthdata.nasa.gov/data/catalog/ob-cloud-pace-harp2-l2-mapol-ocean-4.0
-
-The datasets may be cited as:
-
-> NASA Ocean Biology Processing Group. (2026). *PACE HARP2 Level-2 Regional Aerosol Over LAND Optical Properties, FastMAPOL Algorithm, Version 4.0*. NASA Ocean Biology Distributed Active Archive Center (OB.DAAC). DOI: 10.5067/PACE/HARP2/L2/MAPOL_LAND/4.0. Accessed on: YYYY-MM-DD.
-
-> NASA Ocean Biology Processing Group. (2026). *PACE HARP2 Level-2 Regional Aerosol Over Ocean Optical Properties, FastMAPOL Algorithm, Version 4.0*. NASA Ocean Biology Distributed Active Archive Center (OB.DAAC). DOI: 10.5067/PACE/HARP2/L2/MAPOL_OCEAN/4.0. Accessed on: YYYY-MM-DD.
 
 +++
 
