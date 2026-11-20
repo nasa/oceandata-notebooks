@@ -425,3 +425,38 @@ You have completed the notebook on OCI data structure. We now suggest reviewing 
 [PACE OCI  visualizations]: https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_visualization_part2.html
 
 </div>
+
+::::{admonition} Test what you learned in this notebook!
+:class: note
+
+<details>
+<summary>1. You open an L1B file with <code>xr.open_dataset(paths[0])</code> and see only attributes, with no variables. Why, and what should you use instead?</summary>
+
+L1B files store their variables in groups (such as <code>observation_data</code> and <code>navigation_data</code>), and <code>xr.open_dataset</code> only reads the top level. Use <code>xr.open_datatree(paths[0])</code> to see every group and its variables. L3M files have no groups, so <code>xr.open_dataset</code> works for them.
+</details>
+
+<details>
+<summary>2. You want to plot Rrs at 440 nm, so you run <code>rrs.sel(wavelength=440)</code>, but it raises an error. What is wrong?</summary>
+
+No wavelength coordinate is exactly 440 nm, so an exact match fails. Add <code>method="nearest"</code>: <code>rrs.sel(wavelength=440, method="nearest")</code>. In the L3M example, the nearest wavelength is 439.8 nm.
+</details>
+
+<details>
+<summary>3. You try to subset L2 pixels with <code>rrs.sel(latitude=slice(26.0, 26.1))</code>, but it fails. Why, and what should you use instead?</summary>
+
+L2 data are in the original instrument swath, not on a regular grid. Latitude and longitude are two-dimensional coordinates, not indexes, so you cannot slice on them with <code>sel</code>. Use <code>rrs.where(...)</code> with logical tests on <code>rrs["latitude"]</code> and <code>rrs["longitude"]</code>.
+</details>
+
+<details>
+<summary>4. You subset L3M data with <code>lat=slice(bbox[1], bbox[3])</code> and get an empty result. Why?</summary>
+
+L3M latitude runs from north to south (89.98 down to -89.98), so the slice must go from the larger value to the smaller one: <code>lat=slice(bbox[3], bbox[1])</code>. Longitude runs west to east, so <code>lon=slice(bbox[0], bbox[2])</code> is correct as written.
+</details>
+
+<details>
+<summary>5. The single-day chlorophyll-a map has large gaps, but the 7-day average has far fewer. Why?</summary>
+
+The gaps are mostly missing values caused by clouds. The average ignores missing values, so a pixel only needs one clear day out of the seven to have a value in the composite.
+</details>
+
+::::
