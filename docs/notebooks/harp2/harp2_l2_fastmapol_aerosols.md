@@ -521,6 +521,7 @@ As mentioned previously, the FastMAPOL algorithm conducts internal adaptive data
 
 ```{code-cell} ipython3
 angle_index = 5
+view_angle = dataset["sensor_view_angle"].isel(number_of_views=angle_index).item()
 
 cmap = plt.get_cmap('viridis', 2)
 
@@ -530,7 +531,7 @@ plot_l2_product(
     dataset["mask_ref"].isel(number_of_views=angle_index, intensity_bands_per_view=0).values,
     plot_range=[-125, -95, 15, 36],
     label="mask_ref", 
-    title=f"Adaptive data mask on reflectance: angle index {angle_index}",
+    title=f"Adaptive data mask on reflectance: {view_angle:.1f}$^\circ$ sensor view angle",
     vmin=0, 
     vmax=1, 
     cmap=cmap
@@ -542,7 +543,7 @@ plot_l2_product(
     dataset["mask_dolp"].isel(number_of_views=angle_index, polarization_bands_per_view=0).values,
     plot_range=[-125, -95, 15, 36],
     label="mask_dolp", 
-    title=f"Adaptive data mask on DoLP: angle index {angle_index}",
+    title=f"Adaptive data mask on DoLP: {view_angle:.1f}$^\circ$ sensor view angle",
     vmin=0, 
     vmax=1, 
     cmap=cmap
