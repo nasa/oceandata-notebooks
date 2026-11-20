@@ -10,11 +10,11 @@ kernelspec:
   name: python3
 ---
 
-# Visualize HARP2 CLOUD GPC Product
+# Visualize HARP2 GPC Product
 
 **Author(s):** Chamara Rajapakshe (NASA, SSAI), Kirk Knobelspiesse (NASA), Andy Sayer (NASA, UMBC), Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU)
 
-Last updated: Sep 16, 2026
+Last updated: November 18, 2026
 
 <div class="alert alert-info" role="alert">
 
@@ -26,16 +26,17 @@ An [Earthdata Login][edl] account is required to access NASA's Earth science dat
 
 ## Summary
 
-This notebook summarizes how to access HARP2 GISS Polarimetric Cloud (GPC) products (CLOUD_GPC).
-Note that this notebook is based on an early preliminary version of the product and is therefore subject to future optimizations and changes.
+This notebook provides an introduction to accessing and working with the HARP2 GISS Polarimetric Cloud (GPC) Level-2 (L2) product (CLOUD_GPC). It covers data acquisition, product structure, and visualization of key variables.
+
+**Note:** This tutorial uses an early, preliminary version of the product. Product contents, variable definitions, and processing algorithms may be updated or optimized in future releases.
 
 ## Learning Objectives
 
-By the end of this notebook, you will understand:
+By the end of this notebook, you will be able to:
 
-- How to acquire HARP2 Level-2 data
-- Available variables in the product
-- How to visualize variables
+- Acquire HARP2 L2 GPC data
+- Identify and describe the variables available in the product
+- Visualize and explore key geophysical variables
 
 +++
 
@@ -43,7 +44,7 @@ By the end of this notebook, you will understand:
 
 +++
 
-Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting Started](/getting-started) page, then the imports will be successful.
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting Started](https://nasa.github.io/oceandata-notebooks/getting-started.html) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 import cartopy.crs as ccrs
@@ -58,7 +59,6 @@ import xarray as xr
 Global settings and variables used throughout the notebook.
 
 ```{code-cell} ipython3
-plt.style.use("seaborn-v0_8-notebook")
 pd.set_option("display.max_colwidth", 0)
 projection = ccrs.PlateCarree()
 ```
@@ -69,21 +69,22 @@ Set (and optionally `persist` to your home directory as a "netrc" file) your Ear
 auth = earthaccess.login()
 ```
 
-## 2. Get Level-2 Data
+## 2. Access L2 GPC Data
 
 +++
 
-You can use PACE_HARP2_L2_CLOUD_GPC as the short name to get the most recent version available for the CLOUD_GPC provisional product at Level-2 for the HARP2 instrument. Add the Near Real Time (NRT) suffix for the most recent observations (i.e. PACE_HARP2_L2_CLOUD_GPC_NRT).
+First, let's search for "CLOUD" in the short-names of HARP2 data.
 
 ```{code-cell} ipython3
 results = earthaccess.search_datasets(instrument="harp2")
+
 for item in results:
     short_name = item.summary["short-name"]
     if "CLOUD" in short_name:
         print(short_name)
 ```
 
-Search for available granules within a time range and geospatial area of interest. The order of values in a "bounding_box" is always West (longitude), South (latitude), East (longitude), North (latitude). If you know the actual granule name, you can use "granule_name" explicitly. You may get multiple versions if you include a `*` instead of an explicit version.
+We can also search for available granules within a time range and geospatial area of interest. The order of values in a "bounding_box" is always West (longitude), South (latitude), East (longitude), North (latitude). If you know the actual granule name, you can use "granule_name" explicitly. You may get multiple versions if you include a `*` instead of an explicit version. You can also add the Near Real Time (`NRT`) suffix to the short-name for the most recent observations (i.e., PACE_HARP2_L2_CLOUD_GPC_NRT).
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
@@ -104,11 +105,12 @@ Here we merge all the data groups together for convenience in data manipulations
 datatree = xr.open_datatree(paths[0])
 dataset = xr.merge(datatree.to_dict().values())
 dataset = dataset.set_coords(("latitude", "longitude"))
+dataset
 ```
 
-## 3. Understanding HARP2 L2.CLOUD_GPC Product Structure
+## 3. Understanding HARP2 L2 CLOUD_GPC Product Structure
 
-HARP2 CLOUD_GPC products provide descriptive metadata for the variables. However, given the early stage of the product, improvements and changes are expected in future versions.
+HARP2 CLOUD_GPC products provide descriptive metadata for the variables. However, given the early stage of the product, improvements and changes are expected in future versions. Let's define a function that will print a table of data from the `geophysical_data` group.
 
 ```{code-cell} ipython3
 def print_variable_description(datatree, variables, exclude=False):
@@ -145,7 +147,7 @@ def print_variable_description(datatree, variables, exclude=False):
 
 ### Cloud Bow Retrievals
 
-One of the main retrieval techniques implemented is the parametric cloud bow retrieval method (Bréon & Goloub, 1998; Alexandrov et al., 2012). The phrase "cloud_bow" is appended to variable names, their corresponding diagnostic variables, and additional variables derived by combining them with OCI Level 2 products. For example, "cloud_bow_droplet_number_concentration_adiabatic" and "cloud_bow_liquid_water_path" are derived using the retrieved droplet size distributions along with OCI L2.CLOUD properties. Additional descriptions can be found in the file attributes as follows:
+One of the primary retrieval techniques implemented in this product is the parametric cloud bow retrieval method (Bréon & Goloub, 1998; Alexandrov et al., 2012). The prefix "cloud_bow" is used in variable names to identify quantities retrieved using this method, their associated diagnostic variables, and additional variables derived by combining the retrieval results with OCI L2 products. For example, `cloud_bow_droplet_number_concentration_adiabatic` and `cloud_bow_liquid_water_path` are derived using the retrieved droplet size distributions in conjunction with OCI L2 CLOUD properties. Additional descriptions can be found in the file attributes as follows:
 
 ```{code-cell} ipython3
 print_variable_description(datatree, ["bow"])
@@ -153,20 +155,20 @@ print_variable_description(datatree, ["bow"])
 
 ### RFT Retrievals
 
-The second retrieval technique is the Rainbow Fourier Transform (RFT) method (Alexandrov et al., 2012). The prefix cloud_rft is appended to variable names, their associated diagnostic variables, and other outputs generated by this algorithm.
+The second retrieval technique is the Rainbow Fourier Transform (RFT) method (Alexandrov et al., 2012), which retrieves the full cloud droplet size distribution from the polarized reflectance signature of the cloudbow. The prefix "cloud_rft" is appended to variable names and their associated diagnostic variables. 
 
 ```{code-cell} ipython3
 print_variable_description(datatree, ["rft"])
 ```
 
 ### Cloud Liquid Index Retrievals
-Cloud Bow Liquid Index (CLI) retrievals provide a measure of the fraction of a cloud top composed of liquid vs ice.
+The cloud bow liquid index (CLI) retrievals provide a measure of the fraction of a cloud top composed of liquid vs ice.
 
 ```{code-cell} ipython3
 print_variable_description(datatree, ["index"], exclude=False)
 ```
 
-### Additional Variables From OCI L2.CLOUD Products
+### Additional Variables From OCI L2 CLOUD Products
 
 In addition to the main quantities retrieved by the algorithms, CLOUD_GPC also includes several commonly useful ancillary variables.
 
@@ -175,6 +177,8 @@ print_variable_description(datatree, ["index", "rft", "bow"], exclude=True)
 ```
 
 ## 4. Visulizing Variables
+
+We'll define a couple functions to filter and map data.
 
 ```{code-cell} ipython3
 def extremes_removed_limits(array):
@@ -220,7 +224,7 @@ def geo_axis_tags(ax, crs=ccrs.PlateCarree()):
     return
 ```
 
-Here we visualize the effective radius retrieved using the cloud-bow (parametric) technique. The colorbar limits are adjusted based on the range of observed effective radii, excluding extreme values. Retrievals are only possible in the central portion of the HARP2 granule, where the required angular sampling for the cloud-bow and supernumerary-bow scattering angles is available. Retrieval failure flags, provided in the variable cloud_bow_quality_retrieval_fail, indicate the reasons for unsuccessful retrievals.
+Here, we visualize the effective radius retrieved using the cloud-bow (parametric) technique (`cloud_bow_droplet_effective_radius`). The colorbar limits are adjusted to reflect the range of observed effective radii while excluding extreme values. Retrievals are limited to the central portion of the HARP2 granule, where the required angular sampling for the cloud-bow and supernumerary-bow scattering angles are available. Reasons for unsuccessful retrievals are documented in the `cloud_bow_quality_retrieval_fail` variable, which provides retrieval failure flags.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
@@ -241,7 +245,7 @@ geo_axis_tags(ax, projection)
 plt.show()
 ```
 
-Cloud Effective Variance is a key parameter uniquely provided by polarimetry, and together with Cloud Effective Radius, it fully characterizes the modified gamma distribution of cloud droplet sizes. A logarithmic color scale is used to display its detailed variability.
+Cloud effective variance (`cloud_bow_droplet_effective_variance`) is a key parameter uniquely accessible through polarimetric measurements. A logarithmic color scale is used to highlight the detailed spatial variability.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
@@ -262,13 +266,13 @@ geo_axis_tags(ax)
 plt.show()
 ```
 
-Cloud effective radius and variance in combination provide the full droplet size distribution in the form of a modified gamma distribution
+Cloud effective radius and variance can fully characterize the full droplet size distribution in the form of a normalized modified gamma distribution:
 
 ```{code-cell} ipython3
 def mod_gamma_norm(re, ve, r=np.arange(0, 30, 0.2)):
-    '''
+    """
     Normalized modified gamma distribution for effective radius and variance.
-    
+
     Parameters
     ----------
     re : float
@@ -277,38 +281,38 @@ def mod_gamma_norm(re, ve, r=np.arange(0, 30, 0.2)):
         Effective variance
     r : ndarray, optional
         Radius array in microns (default: 0 to 30 μm in 0.2 μm steps)
-    
+
     Returns
     -------
     ndarray
         Normalized distribution (Hansen and Travis, 1974)
-    '''
-    f = r**((1.0 - 3.0*ve)/ve) * np.exp(-r/(re*ve))
+    """
+    f = r ** ((1.0 - 3.0 * ve) / ve) * np.exp(-r / (re * ve))
     C = np.trapezoid(f, r)
     return f / C
 ```
 
-Apply the new `mod_gamma_norm` function to compute normalized modified gamma distribution.
+We'll apply this `mod_gamma_norm` function and map the output:
 
 ```{code-cell} ipython3
 radius = np.arange(0, 30, 0.2)  # droplet radius in μm
 n_d = mod_gamma_norm(
-    dataset['cloud_bow_droplet_effective_radius'][180, 250].values,
-    dataset['cloud_bow_droplet_effective_variance'][180, 250].values,
-    r=radius
+    dataset["cloud_bow_droplet_effective_radius"][180, 250].values,
+    dataset["cloud_bow_droplet_effective_variance"][180, 250].values,
+    r=radius,
 )
+```
+
+```{code-cell} ipython3
+plt.plot(radius, n_d)
+plt.xlabel(r"$r$ [$\mu$m]")
+plt.ylabel(r"$dN/dr$ [$\mathrm{cm}^{-3}$ $\mu\mathrm{m}^{-1}$]")
+plt.show()
 ```
 
 The plot of the distribution of the radius looks like a gamma distribution, as expected.
 
-```{code-cell} ipython3
-plt.plot(radius, n_d)
-plt.xlabel(r'$r$ [$\mu$m]')
-plt.ylabel(r'$dN/dr$ [$\mathrm{cm}^{-3}$ $\mu\mathrm{m}^{-1}$]')
-plt.show()
-```
-
-When the cloud effective radius is known, the cloud liquid water path can be derived by combining it with OCI’s cloud optical thickness retrievals. The GPC products include such derived cloud liquid water path fields based on the cloud-bow effective radius.
+When the cloud effective radius is known, the cloud liquid water path (`cloud_bow_liquid_water_path`) can be derived by combining it with OCI’s cloud optical thickness retrievals. The GPC products include such derived cloud liquid water path fields based on the cloud-bow effective radius.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
@@ -329,7 +333,7 @@ geo_axis_tags(ax)
 plt.show()
 ```
 
-## 5. Reference
+## 5. References
 
 +++
 
@@ -346,3 +350,40 @@ You have completed the notebook on HARP2 cloud products. May we suggest studying
 [aerosol over land]: https://nasa.github.io/oceandata-notebooks/notebooks/harp2/harp2_l2_fastmapol_aerosol_land_product.html
 
 </div>
+
+::::{admonition} Test what you learned in this notebook!
+:class: note
+
+<details>
+<summary>1. What are the three main retrieval techniques in the HARP2 CLOUD_GPC product, and what do they retrieve?</summary>
+
+**Cloud Bow (parametric):** Retrieves droplet effective radius and variance using the cloud bow feature in polarized reflectance. <br>
+**RFT (Rainbow Fourier Transform):** Retrieves bimodal droplet size distributions (two modes with separate radius, variance, and fraction). <br>
+**CLI (Cloud Liquid Index):** Measures the fraction of cloud top composed of liquid vs. ice (values &lt; 0.3 indicate glaciated cloud tops).
+</details>
+
+<details>
+<summary>2. Why do the effective radius and variance maps show data only in a narrow stripe down the center of the swath?</summary>
+
+Cloud bow retrievals require observing the rainbow scattering angles (around 140°), which only occurs when HARP2's multi-angle views span a wide enough range. This angular coverage is only available in the central portion of the swath. The `cloud_bow_quality_retrieval_fail` flag indicates where and why retrievals failed.
+</details>
+
+<details>
+<summary>3. What makes effective variance a "key parameter uniquely provided by polarimetry"?</summary>
+
+Effective variance describes the width of the cloud droplet size distribution. Traditional passive remote sensing (like OCI) can retrieve effective radius but not variance. Polarimetry is sensitive to the detailed shape of the droplet size distribution, enabling variance retrievals. Together, effective radius and variance fully characterize the modified gamma distribution of cloud droplet sizes.
+</details>
+
+<details>
+<summary>4. The GPC product includes cloud liquid water path (LWP) derived from HARP2 and OCI data. Which sensor provides which piece of information?</summary>
+
+HARP2 provides the cloud droplet **effective radius** from cloud bow retrievals. OCI provides the cloud **optical thickness**. LWP is calculated by combining these two: LWP is proportional to optical thickness × effective radius, assuming liquid water content increases linearly with height from cloud base.
+</details>
+
+<details>
+<summary>5. Cloud Bow retrieves a single effective radius, but RFT retrieves two modes. When would a bimodal distribution be more realistic?</summary>
+
+Bimodal distributions occur when clouds have two distinct droplet populations, such as: (1) drizzle formation, where large drops coexist with smaller cloud droplets; (2) mixing between cloud layers with different microphysics; or (3) aerosol effects creating separate nucleation modes. Single-mode retrievals would average these populations, missing important cloud processes.
+</details>
+
+::::
