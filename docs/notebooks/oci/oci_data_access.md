@@ -14,7 +14,7 @@ kernelspec:
 
 **Author(s):** Anna Windle (NASA, SSAI), Ian Carroll (NASA, UMBC), Carina Poulin (NASA, SSAI)
 
-Last updated: July 23, 2026
+Last updated: November 18, 2026
 
 <div class="alert alert-info" role="alert">
 
@@ -156,6 +156,48 @@ More likely, you want to open or download the granules by following the steps be
 results[0]
 ```
 
+::::{admonition} Knowledge check! Decode the filename: `PACE_OCI.20240601_20240608.L3m.8D.BGC.V3_2.4km.nc`
+:class: note
+
+<details>
+<summary>What time period does it cover?</summary>
+
+June 1 to June 8, 2024.
+</details>
+
+<details>
+<summary>What processing level is it?</summary>
+
+Level-3 mapped (`L3m`).
+</details>
+
+<details>
+<summary>What does `8D` mean?</summary>
+
+It's an 8-day composite. Other files in this notebook use `DAY` (daily) and `MO` (monthly).
+</details>
+
+<details>
+<summary>What is its spatial resolution?</summary>
+
+4 km.
+</details>
+
+<details>
+<summary>What might `V3_2` mean?</summary>
+
+It refers to the data processing version (3.2).
+</details>
+
+<details>
+<summary>Why does almost every product have an `_NRT` twin?</summary>
+
+NRT means near-real-time. These versions are released quickly for time-sensitive uses and are later replaced by refined standard products.
+</details>
+
+::::
+
+
 We can refine our search by passing more parameters that describe
 the spatiotemporal domain of our use case. Here, we use the
 `temporal` parameter to request a date range and the `bounding_box`
@@ -202,6 +244,7 @@ results = earthaccess.search_data(
     temporal=("2024-06-01", "2024-06-01"),
 )
 paths = earthaccess.open(results)
+paths
 ```
 
 The list of outputs, which we called `paths`, contains references to files on a remote filesystem. They're not
@@ -288,3 +331,37 @@ You have completed the notebook on accessing NASA Earthdata data. We now suggest
 [Intro to Product Levels]: https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_file_structure.html
 
 </div>
+
+::::{admonition} Test what you learned in this notebook!
+:class: note
+
+<details>
+<summary>1. You start a fresh session and run <code>earthaccess.open(results)</code>, but get an access error. What step did you skip?</summary>
+
+You skipped <code>earthaccess.login()</code>. You can search public collections without logging in, but accessing data always requires authentication. Use <code>earthaccess.login(persist=True)</code> to save your credentials for future sessions.
+</details>
+
+<details>
+<summary>2. You want to find a single granule of <code>PACE_OCI_L2_BGC</code>, so you run <code>earthaccess.search_datasets(short_name="PACE_OCI_L2_BGC", count=1)</code>. What is wrong?</summary>
+
+<code>search_datasets</code> finds collections, not granules. To find granules within a collection, use <code>earthaccess.search_data(short_name="PACE_OCI_L2_BGC", count=1)</code>.
+</details>
+
+<details>
+<summary>3. A search of <code>PACE_OCI_L3M_BGC</code> for a single day (June 1, 2024) returned 6 granules instead of 1. Why?</summary>
+
+The search returns every granule whose time range includes June 1. That includes daily, 8-day, and monthly composites, each at two resolutions (4 km and 0.1°), so 3 × 2 = 6. Check the filenames in Section 5 to see this.
+</details>
+
+<details>
+<summary>4. Why does <code>xr.open_dataset(results[0])</code> fail?</summary>
+<code>results</code> contains catalog entries, not files. First run <code>paths = earthaccess.open(results)</code> or <code>paths = earthaccess.download(results, local_path="granules")</code>, then use <code>xr.open_dataset(paths[0])</code>. 
+</details>
+
+<details>
+<summary>5. <code>earthaccess.open</code> is very slow on your laptop. Is something broken, and what should you do?</summary>
+
+Nothing is broken. Without direct access to the NASA Earthdata Cloud, reading these files remotely is slow because of the data format. Use <code>earthaccess.download</code> to save the granules locally, then open them with xarray.
+</details>
+
+::::
