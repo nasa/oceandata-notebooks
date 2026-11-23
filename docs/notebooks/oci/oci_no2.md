@@ -153,74 +153,10 @@ dataset["total_column_no2"].hvplot(
     clim=(3e15, 10e15),
     aspect=2,
     title="Total vertical column NO₂ April 2024",
-    widget_location="top",
     geo=True,
     coastline=True,
     tiles="EsriWorldStreetMap",
 )
-```
-
-```{code-cell} ipython3
-dataset_coarse = dataset.coarsen(
-    lat=4,
-    lon=4,
-    boundary="trim"
-).mean()
-dataset_coarse
-```
-
-```{code-cell} ipython3
-import cartopy.io.shapereader as shpreader
-import plotly.graph_objects as go
-
-da = dataset_coarse["total_column_no2"]
-
-plotly_cmap = [[i / 255, f"rgb{tuple(int(255 * c) for c in cmap(i / 255)[:3])}"]
-               for i in range(256)]
-
-coastlines = shpreader.natural_earth(
-    resolution="110m",
-    category="physical",
-    name="coastline"
-)
-
-fig = go.Figure(
-    go.Heatmap(
-        z=da.values,
-        x=da.lon.values,
-        y=da.lat.values,
-        colorscale=plotly_cmap,
-        zmin=3e15,
-        zmax=10e15,
-        colorbar=dict(title="NO₂"),
-        hovertemplate=(
-            "Lon: %{x:.2f}<br>"
-            "Lat: %{y:.2f}<br>"
-            "NO₂: %{z:.2e}<extra></extra>"
-        )
-    )
-)
-
-for geom in shpreader.Reader(coastlines).geometries():
-    x, y = geom.xy
-    fig.add_trace(go.Scatter(
-        x=list(x),
-        y=list(y),
-        mode="lines",
-        line=dict(color="black", width=0.6),
-        showlegend=False,
-        hoverinfo="skip"
-    ))
-
-fig.update_layout(
-    title="Total vertical column NO₂ April 2024",
-    width=900,
-    height=500,
-    xaxis_title="Longitude",
-    yaxis_title="Latitude",
-)
-
-fig.show()
 ```
 
 ## 5. Time Series
