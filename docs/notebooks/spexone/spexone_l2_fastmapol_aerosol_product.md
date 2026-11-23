@@ -12,7 +12,7 @@ kernelspec:
 
 # Visualize SPEXone L2 Aerosol Products (FastMAPOL + RemoTAP)
 
-**Authors:** Meng Gao (NASA/SSAI), Sean Foley (NASA/MSU), Kamal Aryal (NASA/UMBC)
+**Authors:** Meng Gao (NASA/SSAI), Kamal Aryal (NASA/UMBC), Anna Windle (NASA/SSAI)
 
 Last updated: November 20, 2026
 
@@ -152,6 +152,7 @@ def plot_l2_product(
     data,
     label,
     title="",
+    data_filter=None,
     plot_range=None,
     vmin=None,
     vmax=None,
@@ -166,6 +167,7 @@ def plot_l2_product(
     Args:
         lon, lat - 1D or 2D longitude and latitude arrays
         data - data variable to plot
+        data_filter - filter data for quality control
         label - color bar label
         title - title for the plot 
         plot_range - scene extent for the map in [W, E, S, N]
@@ -176,9 +178,12 @@ def plot_l2_product(
                     only positive values are used for autoscaling and histogram.
         land_color, ocean_color - matplotlib-acceptable colors for background land/ocean
     """
-
+    
     valid_geo = np.isfinite(data) & np.isfinite(lon) & np.isfinite(lat)
 
+    if(data_filter is not None):
+        valid_geo = valid_geo & data_filter
+        
     masked_data = data.where(valid_geo)
 
     valid = masked_data.where(masked_data > 0, drop=True) if log_scale else masked_data
@@ -255,15 +260,21 @@ def plot_l2_product(
 
 We'll use this function to compare aerosol properties retrieved by both algorithms for a scene acquired during the 2025 Los Angeles wildfires.
 
-First, let's map the aerosol optical thickness `aot` at approximately 550 nm for each product.
+Both FastMAPOL and RemoTAP provide quality flags for data quality control. For RemoTAP, only retrievals with `quality_flag = 0` are recommended. In contrast, FastMAPOL uses progressively increasing quality flag values to indicate decreasing retrieval quality. In general, FastMAPOL retrievals with `quality_flag = 0` or `1` can be used. More details on the quality flags are provided in a later section.
+
+Let's map the aerosol optical thickness `aot` at approximately 550 nm for each product.
 
 ```{code-cell} ipython3
+fastmapol_data_filter=(fastmapol_ds['quality_flag']<=1)
+remotap_data_filter=(remotap_ds['quality_flag']<=0)
+
 wavelength = 550
 
 plot_l2_product(
     fastmapol_ds["longitude"],
     fastmapol_ds["latitude"],
     fastmapol_ds["aot"].sel(wavelength=wavelength, method="nearest"),
+    data_filter=fastmapol_data_filter,
     label=f"FastMAPOL AOT: {fastmapol_ds['wavelength'].sel(wavelength=wavelength, method='nearest').item():.1f} nm",
     plot_range=[-112, -107, 20, 28],
     vmin=0,
@@ -275,6 +286,7 @@ plot_l2_product(
     remotap_ds["longitude"],
     remotap_ds["latitude"],
     remotap_ds["aot"].sel(wavelength3d=wavelength, method="nearest"),
+    data_filter=remotap_data_filter,
     label=f"RemoTAP AOT: {remotap_ds['wavelength3d'].sel(wavelength3d=wavelength, method='nearest').item():.1f} nm",
     plot_range=[-112, -107, 20, 28],
     vmin=0,
@@ -292,6 +304,7 @@ plot_l2_product(
     fastmapol_ds["longitude"],
     fastmapol_ds["latitude"],
     fastmapol_ds["ssa"].sel(wavelength=wavelength, method="nearest"),
+    data_filter=fastmapol_data_filter,
     label=f"FastMAPOL SSA: {fastmapol_ds['wavelength'].sel(wavelength=wavelength, method='nearest').item():.1f} nm",
     plot_range=[-112, -107, 20, 28],
     vmin=0.7,
@@ -303,6 +316,7 @@ plot_l2_product(
     remotap_ds["longitude"],
     remotap_ds["latitude"],
     remotap_ds["ssa"].sel(wavelength3d=wavelength, method="nearest"),
+    data_filter=remotap_data_filter,
     label=f"RemoTAP SSA: {remotap_ds['wavelength3d'].sel(wavelength3d=wavelength, method='nearest').item():.1f} nm",
     plot_range=[-112, -107, 20, 28],
     vmin=0.7,
@@ -316,6 +330,7 @@ plot_l2_product(
     fastmapol_ds["longitude"],
     fastmapol_ds["latitude"],
     fastmapol_ds["fvf"],
+    data_filter=fastmapol_data_filter,
     label="FastMAPOL FVF",
     plot_range=[-112, -107, 20, 28],
     vmin=0,
@@ -327,6 +342,7 @@ plot_l2_product(
     remotap_ds["longitude"],
     remotap_ds["latitude"],
     remotap_ds["fvf"],
+    data_filter=remotap_data_filter,
     label="RemoTAP FVF",
     plot_range=[-112, -107, 20, 28],
     vmin=0,
@@ -356,6 +372,7 @@ plot_l2_product(
     fastmapol_ds["longitude"],
     fastmapol_ds["latitude"],
     fastmapol_ds["ssa"].sel(wavelength=wavelength, method="nearest").where(fastmapol_ds["aot"].sel(wavelength=550, method="nearest") >= aot_min),
+    data_filter=fastmapol_data_filter,
     label=f"FastMAPOL SSA: {fastmapol_ds['wavelength'].sel(wavelength=wavelength, method='nearest').item():.1f} nm \n(AOT 550 ≥" + str(aot_min) + ")",
     plot_range=[-112, -107, 20, 28],
     vmin=0.7, vmax=1,
@@ -366,6 +383,7 @@ plot_l2_product(
     remotap_ds["longitude"],
     remotap_ds["latitude"],
     remotap_ds["ssa"].sel(wavelength3d=wavelength, method="nearest").where(remotap_ds["aot"].sel(wavelength3d=550, method="nearest") >= aot_min),
+    data_filter=remotap_data_filter,
     label=f"RemoTAP SSA: {remotap_ds['wavelength3d'].sel(wavelength3d=wavelength, method='nearest').item():.1f} nm\n(AOT 550 ≥" + str(aot_min) + ")",
     plot_range=[-112, -107, 20, 28],
     vmin=0.7, vmax=1,
@@ -378,6 +396,7 @@ plot_l2_product(
     fastmapol_ds["longitude"],
     fastmapol_ds["latitude"],
     fastmapol_ds["fvf"].where(fastmapol_ds["aot"].sel(wavelength=wavelength, method="nearest") >= aot_min),
+    data_filter=fastmapol_data_filter,
     label=f"FastMAPOL FVF: {fastmapol_ds['wavelength'].sel(wavelength=wavelength, method='nearest').item():.1f} nm \n(AOT 550 ≥" + str(aot_min) + ")",
     plot_range=[-112, -107, 20, 28],
     vmin=0, vmax=1,
@@ -388,6 +407,7 @@ plot_l2_product(
     remotap_ds["longitude"],
     remotap_ds["latitude"],
     remotap_ds["fvf"].where(remotap_ds["aot"].sel(wavelength3d=wavelength, method="nearest") >= aot_min),
+    data_filter=remotap_data_filter,
     label=f"RemoTAP FVF: {remotap_ds['wavelength3d'].sel(wavelength3d=wavelength, method='nearest').item():.1f} nm\n(AOT 550 ≥"+ str(aot_min) + ")",
     plot_range=[-112, -107, 20, 28],
     vmin=0, vmax=1,
@@ -435,11 +455,31 @@ plot_l2_product(
 )
 ```
 
-```{raw-cell}
-Anna note: Should we also plot N here since we are describing it in the text? Do we have a variable for N? 
-```
-
 The $\chi^2$  distributions are generally well behaved, with peaks between 0.5 and 1, indicating good agreement between measurements and the forward-model simulations for most pixels. However, some pixels exhibit substantially higher $\chi^2$ values, suggesting poorer retrieval performance. These pixels can be excluded from subsequent analyses to minimize the influence of lower-quality retrievals.
+
+FastMAPOL reports the number of valid reflectance ($N_{ref}$) and DoLP measurements ($N_{DoLP}$), which can be examined below. In contrast, RemoTAP uses all available measurements.
+
+```{code-cell} ipython3
+plot_l2_product(
+    fastmapol_ds["longitude"],
+    fastmapol_ds["latitude"],
+    fastmapol_ds["nv_ref"],
+    label="FastMAPOL Valid of Reflectance Measurements",
+    plot_range=[-112, -107, 20, 28],
+    vmin=0, vmax=170,
+    cmap="jet",
+)
+
+plot_l2_product(
+    fastmapol_ds["longitude"],
+    fastmapol_ds["latitude"],
+    fastmapol_ds["nv_dolp"],
+    label="FastMAPOL Valid of DoLP Measurements",
+    plot_range=[-112, -107, 20, 28],
+    vmin=0, vmax=170,
+    cmap="jet",
+)
+```
 
 Both algorithms provide a `quality_flag` variable to characterize retrieval quality. These flags are based primarily on $\chi^2$, the number of retained reflectance $N_{ref}$, and the number of retained degree-of-linear-polarization measurements $N_{DoLP}$. However, the flag definitions differ between the two algorithms:
 
@@ -498,11 +538,9 @@ plot_l2_product(
 )
 ```
 
-For FastMAPOL, most pixels have a `quality_flag` of 1, indicating good retrieval quality. However, some pixels have a `quality_flag` of 3, indicating lower quality. These pixels are primarily concentrated along the swath edges and in areas adjacent to clouds.
+For FastMAPOL, most pixels have a `quality_flag` of 0 and 1, indicating good retrieval quality. However, some pixels have a `quality_flag` of 3, indicating lower quality. These pixels are primarily concentrated along the swath edges and in areas adjacent to clouds.
 
 For RemoTAP, most pixels have a `quality_flag` of 0, indicating good retrieval quality. Higher quality flag values are primarily observed in cloud-adjacent regions.
-
-Anna note: should we include an example of how to remove pixels based on their quality flags (since we said we would in the text above?)
 
 +++
 
@@ -565,11 +603,11 @@ plot_l2_product(
 
 +++
 
-A more quantitative assessment of retrieval uncertainty can be obtained through error propagation [Gao et al., 2022](https://doi.org/10.5194/amt-15-4859-2022). This approach is currently implemented in the RemoTAP L2 products and is expected to be incorporated into future reprocessings of FastMAPOL L2 products.
+A more quantitative assessment of retrieval uncertainty can be obtained through error propagation [Gao et al., 2022](https://doi.org/10.5194/amt-15-4859-2022). The uncertainty variables are planned for the next version of L2 product. 
+
+The pixel level uncertainty is already implemented in the RemoTAP L2 products. 
 
 Let's examine the estimated AOT uncertainties provided in the RemoTAP product:
-
-Anna note: check if I included the right doi for this citation.
 
 ```{code-cell} ipython3
 plot_l2_product(
@@ -582,10 +620,6 @@ plot_l2_product(
     vmax=0.02,
     cmap="jet",
 )
-```
-
-```{raw-cell}
-TODO: Add text about these uncertainties. 
 ```
 
 <div class="alert alert-info" role="alert">
