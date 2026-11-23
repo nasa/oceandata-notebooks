@@ -419,7 +419,7 @@ print("Mean Nv_dolp: " + str(np.round(np.nanmean(dataset["nv_dolp"].values), 2))
 
 The $\chi^2$ distribution indicates generally reasonable agreement between the measured signals and forward-model simulations, although with some degree of underfitting, with a mean of approximately 1.6. The average number of measurements meeting the good-fit criteria is relatively low: 64 for reflectance and 49 for DoLP. This suggests a potential discrepancy between the forward model and measured observations, which may arise from forward model assumptions or measurement calibrations.
 
-Now that we understand the factors contributing to the quality flagging, let's see how that informs the overall quality flag variable. A quality flag of **0** represents the highest-quality retrievals and is generally associated with lower $\chi^2$ values and a larger number of valid measurements ($N$). Higher quality flag values indicate less stringent criteria, allowing for larger $\chi^2$ and fewer valid measurements. For details, please refer to the [FastMAPOL ATBD Quality Flag section](https://fastmapol.github.io/mapol-doc/chapters/fastmapol_product_quality.html).
+Now that we understand the factors contributing to the quality flagging, let's see how that informs the overall quality flag variable. A quality flag of 0 represents the highest-quality retrievals and is generally associated with lower $\chi^2$ values and a larger number of valid measurements ($N$). Higher quality flag values indicate less stringent criteria, allowing for larger $\chi^2$ and fewer valid measurements. For details, please refer to the [FastMAPOL ATBD Quality Flag section](https://fastmapol.github.io/mapol-doc/chapters/fastmapol_product_quality.html).
 
 ```{code-cell} ipython3
 cmap = plt.get_cmap("viridis", 5)
@@ -435,7 +435,7 @@ plot_l2_product(
 )
 ```
 
-The majority of pixels have a quality flag of 3, indicating that most retrievals meet the moderate-quality criteria. 
+The majority of pixels have a quality flag of 3, indicating that most retrievals meet the moderate-quality criteria.
 
 +++
 
@@ -481,3 +481,40 @@ A more quantitative assessment of retrieval uncertainty can be obtained through 
 You have completed the notebook on HARP2's FastMAPOL aerosol retrievals over land and the ocean. We suggest you take a look at the "Visualize SPEXone L2 Aerosol Products" notebook to see how these retrievals look from PACE's other polarimeter!
 
 </div>
+
++++
+
+::::{admonition} Test what you learned in this notebook!
+:class: note
+
+<details>
+<summary>1. What does the FastMAPOL algorithm retrieve, and what makes it different from a typical aerosol retrieval?</summary>
+
+FastMAPOL is a **joint aerosol and surface retrieval** algorithm. Unlike typical aerosol algorithms that assume ocean properties, FastMAPOL simultaneously retrieves aerosol properties (AOT, SSA, size, etc.) <i>and</i> ocean properties (wind speed, chlorophyll-a, remote sensing reflectance) from HARP2's multi-angle polarimetric measurements.
+</details>
+
+<details>
+<summary>2. The notebook shows two aerosol events: smoke (high SSA, high FVF) and dust (low SSA, low FVF). What do SSA and FVF tell you about aerosols?</summary>
+
+**SSA (single scattering albedo)** measures absorption: high SSA means less absorbing (like dust), low SSA means more absorbing (like smoke). **FVF (fine mode volume fraction)** measures size: high FVF means small particles (like smoke), low FVF means large particles (like dust).
+</details>
+
+<details>
+<summary>3. Why filter out low AOT pixels when analyzing aerosol absorption and microphysics?</summary>
+
+Aerosol absorption (SSA) and microphysical properties (size, refractive index) have larger uncertainties when aerosol loading is low. Filtering out pixels with AOT below a threshold (e.g., 0.1) removes cases where the retrieval is less reliable.
+</details>
+
+<details>
+<summary>4. What do χ² (chi-squared), N<sub>ref</sub>, and N<sub>dolp</sub> tell you about retrieval quality?</summary>
+
+**χ²** measures how well the forward model fits the measurements (lower is better; ideal is ~1). **N<sub>ref</sub>** and **N<sub>dolp</sub>** count how many reflectance and DoLP measurements passed quality checks and were used in the retrieval (higher is better). Good retrievals have low χ² and high N values.
+</details>
+
+<details>
+<summary>5. HARP2 measures 90 angles across 4 bands (360 total measurements), but the average N<sub>ref</sub> is only 57 and N<sub>dolp</sub> is 41. Why?</summary>
+
+The FastMAPOL algorithm adaptively screens measurements during retrieval. If a measurement doesn't fit the forward model well (due to clouds, calibration issues, or model assumptions), it's removed. The adaptive data masks (`mask_ref` and `mask_dolp`) show which angles were excluded for each pixel.
+</details>
+
+::::
