@@ -700,3 +700,9 @@ This scene is a great example of multi-layer clouds. You can use the parallax ef
 The [sunglint](https://en.wikipedia.org/wiki/Sunglint) is an obvious feature, but you can also make out the [opposition effect](https://en.wikipedia.org/wiki/Opposition_surge) on some of the clouds in the scene. These details would be far harder to identify without multiple angles!
 
 Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By default, `matplotlib` will not display an animation. To view the animation, we saved it as a file and displayed the result in the next cell. Alternatively, you could change the default by executing `%matplotlib widget`. The `widget` setting, which works in Jupyter Lab but not on a static website, you can use `plt.show()` as well as `an.pause()` and `an.resume()`.
+
+<div class="alert alert-info" role="alert">
+
+You have completed the notebook on PACE-OCI Visualizations Part I. We now suggest reviewing the notebook on [PACE-OCI Visualizations Part II]([https://nasa.github.io/oceandata-notebooks/notebooks/pace_pax.html](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_visualization_part2.html)). 
+
+</div>
