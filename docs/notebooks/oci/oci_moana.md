@@ -674,6 +674,6 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on the MOANA algorithm!
+You have completed the notebook on the MOANA algorithm! We now suggest reviewing the [Gaussian Pigments (Gpig)](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_gpig.html) or [Spectral Derivative Pigments (SDP)](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_sdp.html) Python algorithm tutorials. 
 
 </div>
