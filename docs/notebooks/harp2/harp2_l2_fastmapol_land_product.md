@@ -835,3 +835,9 @@ Examining these masks for individual viewing angles can help identify where angu
 * [FastMAPOL ATBD](https://fastmapol.github.io/mapol-doc/).
 
 * [**Algorithm**] Gao, M., Franz, B. A., Zhai, P.-W., Knobelspiesse, K., Sayer, A. M., Xu, X., Martins, J. V., Cairns, B., Castellanos, P., Fu, G., Hannadige, N., Hasekamp, O., Hu, Y., Ibrahim, A., Patt, F., Puthukkudy, A., and Werdell, P. J.: Simultaneous retrieval of aerosol and ocean properties from PACE HARP2 with uncertainty assessment using cascading neural network radiative transfer models, *Atmos. Meas. Tech.*, **16**, 5863–5881, https://doi.org/10.5194/amt-16-5863-2023, 2023.
+
+<div class="alert alert-info" role="alert">
+
+You have completed the notebook on HARP2 land products. We now suggest reviewing the notebook on [Land Surface from PACE-OCI](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_terrestrial_data.html)
+
+</div>
