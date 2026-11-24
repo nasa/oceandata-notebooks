@@ -250,6 +250,6 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on the SDP Python algorithm!
+You have completed the notebook on the SDP Python algorithm! We suggest reviewing the notebook on the [Gaussian Pigments (GPig) Python algorithm](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_gpig.html)
 
 </div>
