@@ -340,9 +340,6 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on HARP2 cloud products. May we suggest studying the notebooks on HARP2 [aerosol over ocean] and [aerosol over land] products?
-
-[aerosol over ocean]: https://nasa.github.io/oceandata-notebooks/notebooks/harp2/harp2_l2_fastmapol_aerosol_ocean_product.html
-[aerosol over land]: https://nasa.github.io/oceandata-notebooks/notebooks/harp2/harp2_l2_fastmapol_aerosol_land_product.html
+You have completed the notebook on HARP2 cloud products. We now suggest reviewing the notebook on Clouds from [PACE-OCI](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_l2_cloud_product.html)
 
 </div>
