@@ -14,7 +14,7 @@ kernelspec:
 
 **Author(s):** Chamara Rajapakshe (NASA, SSAI), Andy Sayer (NASA, UMBC), Kirk Knobelspiesse (NASA), Meng Gao (NASA, SSAI), Sean Foley (NASA, MSU)
 
-Last updated: Oct 15, 2026
+Last updated: November 24, 2026
 
 <div class="alert alert-info" role="alert">
 
@@ -26,15 +26,17 @@ An [Earthdata Login][edl] account is required to access data from the NASA Earth
 
 ## Summary
 
-This notebook summarizes how to access PACE-OCI cloud optical properties (CLOUD) in Level-2 (L2) granules. The CLOUD suite provides cloud optical and microphysical retrievals derived from multi-spectral observations. Note that this notebook is based on an early preliminary version of the product and is therefore subject to future optimizations and changes.
+This notebook summarizes how to access PACE-OCI cloud optical properties (CLOUD) in Level-2 (L2) granules. The CLOUD suite provides cloud optical and microphysical retrievals derived from multi-spectral observations. 
+
+**Note:** This tutorial uses an early, preliminary version of the product. Product contents, variable definitions, and processing algorithms may be updated or optimized in future releases.
 
 ## Learning Objectives
 
 By the end of this notebook, you will understand:
 
 - How to acquire PACE-OCI L2 CLOUD data
-- Available variables in the CLOUD suite
-- How to visualize cloud properties from PACE-OCI
+- Identify and describe the variables available in the product
+- Visualize and explore key variables
 
 +++
 
@@ -42,7 +44,7 @@ By the end of this notebook, you will understand:
 
 +++
 
-Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting Started](/getting-started) page, then the imports will be successful.
+Begin by importing all of the packages used in this notebook. If you followed the guidance on the [Getting Started](https://nasa.github.io/oceandata-notebooks/getting-started.html) page, then the imports will be successful.
 
 ```{code-cell} ipython3
 import re
@@ -60,13 +62,6 @@ Global settings and variables used throughout the notebook.
 
 ```{code-cell} ipython3
 pd.options.display.max_colwidth = None
-plt.style.use("seaborn-v0_8-notebook")
-plt.rcParams.update(
-    {
-        "xtick.labelsize": 12,
-        "ytick.labelsize": 12,
-    }
-)
 projection = ccrs.PlateCarree()
 ```
 
@@ -77,40 +72,41 @@ bbox = (-90, -13, -89, -12)
 tspan = ("2025-07-02", "2025-07-02")
 ```
 
-Set (and optionally `persist` to your home directory as a "netrc" file) your Earthdata Login credentials.
+Set your Earthdata Login credentials. You can add `persist=True` to save your credentials in a .netrc file, allowing you to authenticate automatically in the future sessions without re-entering your Earthdata credentials.
 
 ```{code-cell} ipython3
 auth = earthaccess.login()
 ```
 
-Define functions for some repeatable tasks performed in the tutorial.
+We'll define functions for some repeatable tasks performed in the tutorial.
 
 ```{code-cell} ipython3
-def print_variable_description(dataset, variables_pattern=None):
+def print_variable_description(datatree, variables, exclude=False):
     """
-    Print a table of variables, units, and descriptions from a dataset.
-
-    Long descriptions are wrapped to 100 characters; only the first line
-    prints the variable name and units.
+    Print a table of variables, units, and descriptions from the
+    `geophysical_data` group of a DataTree-like object.
 
     Parameters
     ----------
-    dataset : xarray.Dataset
-        Dataset containing variables whose metadata are stored in `attrs`
-        (e.g., `units` and `long_name`).
-    variables_pattern : str, optional
-        Pattern to filter variable names. If None, all variables are shown.
+    datatree : DataTree or dict-like
+        Object containing a `geophysical_data` group with variables
+        whose metadata are stored in `attrs` (e.g., `units` and `long_name`).
+    variables: list of str
+        Substrings used to filter variable names.
+    exclude : bool, default False
+        If False (default), only variables whose names contain any of the
+        substrings in `ret_type_list` are shown. If True, show all others.
 
-    Returns
+    Notes
     -----
-    pandas.DataFrame
-        Table describing variables in the dataset
+    Long descriptions are wrapped to 100 characters; only the first line
+    prints the variable name and units.
     """
-    import pandas as pd
-
     df = pd.DataFrame(columns=("Units", "Description"))
-    for key, value in dataset.data_vars.items():
-        if variables_pattern is None or variables_pattern in key:
+    for key, value in datatree["geophysical_data"].data_vars.items():
+        # select based on inclusion (or exclusion) logic
+        match = any(i in key for i in variables)
+        if (match and not exclude) or (not match and exclude):
             units = value.attrs.get("units", "")
             desc = value.attrs.get("long_name", "")
             df.loc[key, :] = [units, desc]
@@ -204,27 +200,24 @@ def plot_cloud_phase(dataset, name, ax):
     ax.set_title(name)
 ```
 
-## 2. Get Level-2 Data
+## 2. Access L2 CLOUD Data
 
 +++
 
-Search Earthdata collections with `earthaccess.search_datasets` to find likely candidates, based on a free-text search for "clouds", among the L2 products from the PACE-OCI instrument.
+First, let's search for "CLOUD" in the short-names of OCI data.
 
 ```{code-cell} ipython3
-results = earthaccess.search_datasets(
-    keyword="clouds",
-    platform="PACE",
-    instrument="OCI",
-    processing_level_id="2",
-)
+results = earthaccess.search_datasets(instrument="oci")
+
 for item in results:
-    title = item["umm"]["EntryTitle"].replace("PACE OCI Level-2 Regional", "")
-    print(f'{item.summary["short-name"]}: {title}')
+    short_name = item.summary["short-name"]
+    if "CLOUD" in short_name:
+        print(short_name)
 ```
 
-You can use the short name PACE_OCI_L2_CLOUD to get the most recent version available for the CLOUD product at Level-2 for the PACE-OCI instrument. Add the Near Real Time (NRT) suffix for the most recent observations (i.e. PACE_OCI_L2_CLOUD_NRT).
+You can use the short-name `PACE_OCI_L2_CLOUD` to get the most recent version available. Add the Near Real Time (NRT) suffix for the most recent observations (i.e., PACE_OCI_L2_CLOUD_NRT).
 
-Search for available granules within a time range and geospatial area of interest. The `sort_key` parameter can help when multiple versions are available; the `-revision_date` key will show the most recent versions first.
+We can also search for available granules within a time range and geospatial area of interest. The `sort_key` parameter can help when multiple versions are available; the `-revision_date` key will show the most recent versions first.
 
 ```{code-cell} ipython3
 results = earthaccess.search_data(
@@ -241,13 +234,12 @@ for item in results:
 paths = earthaccess.open(results)
 ```
 
-Extract the science variables from groups within the granule into an `xarray.Dataset` for convenience in data manipulations.
+Let's merge all the data groups together for convenience in data manipulations.
 
 ```{code-cell} ipython3
 datatree = xr.open_datatree(paths[0])
-dataset = datatree["geophysical_data"].to_dataset()
-for item in ("latitude", "longitude"):
-    dataset.coords[item] = datatree["navigation_data"][item]
+dataset = xr.merge(datatree.to_dict().values())
+dataset = dataset.set_coords(("latitude", "longitude"))
 dataset
 ```
 
@@ -267,14 +259,10 @@ help(print_variable_description)
 
 +++
 
-Cloud optical thickness and effective radius are fundamental properties retrieved from multi-spectral observations.
+Cloud optical thickness (cot) and cloud effective radius (cer) are fundamental properties retrieved from multispectral observations.
 
 ```{code-cell} ipython3
-print_variable_description(dataset, "cot")
-```
-
-```{code-cell} ipython3
-print_variable_description(dataset, "cer")
+print_variable_description(datatree, ["cot", "cer"])
 ```
 
 ### Cloud Phase and Other Properties
@@ -284,7 +272,7 @@ print_variable_description(dataset, "cer")
 Additional variables include cloud phase information and other cloud properties.
 
 ```{code-cell} ipython3
-print_variable_description(dataset)
+print_variable_description(datatree, ["cld_phase", "cloud"])
 ```
 
 ## 4. Visualizing Variables
@@ -305,7 +293,7 @@ help(extremes_removed_limits)
 
 +++
 
-Visualize the cloud effective radius retrieved from OCI observations. The colorbar limits are adjusted based on the range of observed effective radii, excluding extreme values.
+Let's visualize the cloud effective radius `cer_21`. The colorbar limits are adjusted based on the range of observed effective radii, excluding extreme values.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
@@ -330,7 +318,7 @@ plt.show()
 
 +++
 
-Cloud optical thickness provides information about the opacity of clouds to solar radiation.
+Cloud optical thickness (`cot_22`) provides information about the opacity of clouds to solar radiation.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(10, 6), subplot_kw={"projection": projection})
@@ -367,16 +355,9 @@ plot_cloud_phase(dataset, "cld_phase_21", ax)
 plt.show()
 ```
 
-## 5. Reference
-
-+++
-
-- Platnick, S., Meyer, K., King, M. D., Wind, G., Amarasinghe, N., Marchant, B., Arnold, G. T., Zhang, Z., Hubanks, P. A., Ridgway, B., & Riedi, J. (2017). The MODIS Cloud Optical and Microphysical Products: Collection 6 Updates and Examples From Terra and Aqua. IEEE Transactions on Geoscience and Remote Sensing, 55(1), 502–525. https://doi.org/10.1109/TGRS.2016.2610522
-- Sayer, A. M., Cairns, B., Knobelspiesse, K. D., Lelli, L., Rajapakshe, C., Giangrande, S. E., Thomas, G. E., and Zhang, D.: Evaluation of cloud height, optical thickness, and phase retrievals from the CHROMA algorithm applied to Sentinel-3 OLCI data, Atmos. Meas. Tech., 18, 6681–6703, https://doi.org/10.5194/amt-18-6681-2025, 2025.
-
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on OCI cloud products. May we suggest studying the notebook on [HARP2 cloud products]?
+You have completed the notebook on OCI cloud products. May we suggest reviewing the notebook on [HARP2 cloud products]?
 
 [HARP2 cloud products]: https://nasa.github.io/oceandata-notebooks/notebooks/harp2/harp2_l2_cloud_gpc_product.html
 
