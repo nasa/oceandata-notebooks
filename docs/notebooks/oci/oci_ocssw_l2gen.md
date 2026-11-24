@@ -611,6 +611,6 @@ You can see that disabling the BRDF does in fact change Rrs values.
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on "Running the Level-2 Generator (l2gen) OCSSW program on OCI data". We suggest looking at the notebook on "Running l2gen's Generalized Inherent Optical Property (GIOP) model on OCI data" tutorial to learn more about deriving IOP products from PACE OCI data.
+You have completed the notebook on "Running the Level-2 Generator (l2gen) OCSSW program on OCI data". We suggest looking at the notebook on [Run the GIOP Algorithm](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_ocssw_giop.html) tutorial to learn more about deriving IOP products from PACE OCI data.
 
 </div>
