@@ -186,6 +186,6 @@ install_ocssw --tag=$TAG --seadas --oci
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on installing OCCSW. Check out the notebook on Processing with OCSSW Tools.
+You have completed the notebook on installing OCSSW tools. Check out the notebook on [Basic Processing with OCSSW Tools](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_ocssw_processing_overview.html).
 
 </div>
