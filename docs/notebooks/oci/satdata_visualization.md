@@ -703,6 +703,6 @@ Notice the cell ends with `plt.close()` rather than the usual `plt.show()`. By d
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on PACE-OCI Visualizations Part I. We now suggest reviewing the notebook on [PACE-OCI Visualizations Part II]([https://nasa.github.io/oceandata-notebooks/notebooks/pace_pax.html](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_visualization_part2.html)). 
+You have completed the notebook on PACE-OCI Visualizations Part I. We now suggest reviewing the notebook on [PACE-OCI Visualizations Part II](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_data_visualization_part2.html). 
 
 </div>
