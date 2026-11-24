@@ -390,6 +390,6 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on using OCCSW to process PACE data! You can now explore more notebooks to learn more about OCSSW usage.
+You have completed the notebook on using OCSSW to process PACE data! We now suggest reviewing [Generate Level-2 Products using OCSSW](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_ocssw_l2gen.html)
 
 </div>
