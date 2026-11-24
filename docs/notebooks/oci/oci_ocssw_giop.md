@@ -10,7 +10,7 @@ kernelspec:
   name: python3
 ---
 
-# Run the Generalized IOP (GIOP) inversion model in the Level-2 Generator`l2gen` OCSSW program on OCI data
+# Run the Generalized IOP (GIOP) inversion model in the Level-2 Generator `l2gen` OCSSW program on OCI data
 
 **Author(s):** Anna Windle (NASA, SSAI), Jeremy Werdell (NASA)
 
@@ -566,3 +566,9 @@ ax.set_xlim(left=0)
 
 plt.show()
 ```
+
+<div class="alert alert-info" role="alert">
+
+You have completed the notebook on Running the GIOP Algorithm in l2gen. We now suggest reviewing the notebook on [OCSSW Basic Processing](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_ocssw_processing_overview.html)
+
+</div>
