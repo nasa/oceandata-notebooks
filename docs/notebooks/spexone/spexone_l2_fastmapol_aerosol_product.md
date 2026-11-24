@@ -389,7 +389,7 @@ plot_l2_product(
 )
 ```
 
-Anna note: add text about the differences we're seeing in RTAP v. MAPOL retrievals and why these are occurring (e.g., differences in cloud masking, differences in SSA/AOT/FVF values, etc.)
+In general, FastMAPOL and RemoTAP retrievals agree well with each other, and both have demonstrated good agreement with AERONET observations ([Fu et al., 2026](https://doi.org/10.1109/TGRS.2026.3685881); [Gao et al., 2026](https://doi.org/10.1016/j.rse.2026.115603)). However, differences are observed in this scene, particularly in aerosol absorption, warranting further validation and investigation. These differences are likely related to different approaches to data screening and may also arise from differences in aerosol representation, potentially leading to larger discrepancies in challenging aerosol cases.
 
 +++
 
@@ -524,7 +524,7 @@ plot_l2_product(
 )
 ```
 
-Anna note: Add more text describing what we're seeing. 
+Viewing angles close to clouds may be selectively removed, while the remaining angles still observe a clear-sky scene. As shown in the plot above, mask = 1 indicates excluded viewing angles, which are often associated with proximity to clouds. By comparing measurements across different viewing angles, we can effectively construct a multi-angle cloud mask, which can help improve aerosol retrievals near clouds and in other challenging scenarios.
 
 +++
 
@@ -560,12 +560,12 @@ plot_l2_product(
     label=f"RemoTAP AOT Uncertainty: {remotap_ds['wavelength3d'].sel(wavelength3d=wavelength, method='nearest').item():.1f} nm",
     plot_range=[-112, -107, 20, 28],
     vmin=0,
-    vmax=0.02,
+    vmax=0.04,
     cmap="jet",
 )
 ```
 
-Anna note: Add more text describing these uncertainities here
+Pixel-wise uncertainties provide an effective way to evaluate retrieval quality. As shown in the figure above, aerosol retrieval uncertainties exhibit spatial patterns, allowing users to develop customized data quality control criteria for their specific studies.
 
 +++
 

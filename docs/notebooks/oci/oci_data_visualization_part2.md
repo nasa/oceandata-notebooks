@@ -764,6 +764,7 @@ You have completed the notebook on PACE data visualization!
 </div>
 
 +++
+
 <b>Test what you learned in this notebook!</b>
 
 <details><summary>1. You made a quick plot with <code>.plot.imshow()</code> but can't see much. What's the fastest fix?</summary>Add <code>robust=True</code> to remove outliers automatically. For more control, use <code>.clip()</code> with the variable's <code>valid_min</code> and <code>valid_max</code> attributes.</details>
