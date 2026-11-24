@@ -422,6 +422,6 @@ ds.rio.to_raster(Path(l3_path[0]).with_suffix(".tif"), driver="COG")
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on gridding and format conversion of PACE OCI L2 data. We suggest looking at the notebook on "Machine Learning with Satellite Data" to explore some more advanced analysis methods.
+You have completed the notebook on projecting and exporting PACE OCI data. We now suggest reviewing the notebook on [Land Surface from PACE-OCI](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_terrestrial_data.html). 
 
 </div>
