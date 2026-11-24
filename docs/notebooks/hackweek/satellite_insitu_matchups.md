@@ -1574,3 +1574,8 @@ df_stats.set_index("wavelength", inplace=True)
 df_stats = df_stats.fillna(-999)
 df_stats
 ```
+<div class="alert alert-info" role="alert">
+
+You have completed the notebook on In Situ Matchups. We now suggest reviewing the notebook on [PACE-PAX Visualizations](https://nasa.github.io/oceandata-notebooks/notebooks/pace_pax.html). 
+
+</div>
