@@ -767,7 +767,7 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on PACE data visualization!
+You have completed the notebook on PACE data visualization part II! We now suggest reviewing the notebook on [Multi Ordination ANAlysis (MOANA)](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_moana.html).
 
 </div>
 
