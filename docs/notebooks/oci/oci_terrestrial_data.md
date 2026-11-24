@@ -339,6 +339,6 @@ panel.embed()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook introducing terrestrial data products from OCI. We suggest looking at the notebook on "Satellite Data Visualization" for tips on making beautiful PACE/OCI images.
+You have completed the notebook introducing terrestrial data products from OCI. We suggest looking at the notebook on [PACE-OCI Part I Visualizations](https://nasa.github.io/oceandata-notebooks/notebooks/oci/satdata_visualization.html) for tips on making beautiful PACE-OCI images.
 
 </div>
