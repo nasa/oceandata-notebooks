@@ -355,6 +355,6 @@ plt.show()
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on the GPig Python algorithm!
+You have completed the notebook on the GPig Python algorithm! We suggest reviewing the notebook on the [Spectral Derivative Pigments (SDP) Python algorithm](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_sdp.html)
 
 </div>
