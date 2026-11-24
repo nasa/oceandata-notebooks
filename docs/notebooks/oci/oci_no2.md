@@ -153,7 +153,6 @@ dataset["total_column_no2"].hvplot(
     clim=(3e15, 10e15),
     aspect=2,
     title="Total vertical column NO₂ April 2024",
-    widget_location="top",
     geo=True,
     coastline=True,
     tiles="EsriWorldStreetMap",

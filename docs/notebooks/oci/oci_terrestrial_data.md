@@ -319,15 +319,22 @@ The Level-3 data products come binned and gridded on a global projection at mult
 dataset = xr.open_dataset(paths[0])
 array = dataset.drop_vars("palette").to_array("Product")
 array.attrs["long_name"] = "Vegetation Index"
-array.hvplot(
+panel = array.hvplot(
     x="lon",
     y="lat",
     cmap="magma",
     aspect=2,
     title="July 2024 Monthly Average",
+    widget_location="top",
     rasterize=True,
-    widget_location='top',
 )
+panel
+```
+
+The `panel` will compute each visualization on-the-fly when run in a notebook attached to a kernel process, but does not display on a static website. For the next cell, however, the output displays nicely on a website due to two customizations. First, `panel.embed()` caches the view of each variable as data. Second, we have already set `rasterize=True` to reduce the volume of that data.
+
+```{code-cell} ipython3
+panel.embed()
 ```
 
 <div class="alert alert-info" role="alert">
