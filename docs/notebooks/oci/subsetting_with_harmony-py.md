@@ -496,6 +496,5 @@ print(f"Data Size % Change: {100 * (1 - sub_size / og_size):.2f} % reduction")
 
 <div class="alert alert-info" role="alert">
 
-You have completed the notebook on Subsetting PACE OCI data!
-
+You have completed the notebook on Subsetting PACE OCI data! We now suggest reviewing the notebook on [Projecting & GeoTIFFs](https://nasa.github.io/oceandata-notebooks/notebooks/oci/oci_grid_match.html)
 </div>
